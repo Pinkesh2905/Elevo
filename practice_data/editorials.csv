@@ -1,0 +1,241 @@
+"problem_number","approach","complexity_analysis","code_explanation","video_url"
+"1","This document outlines the primary approach to solving 'Two Sum'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Two Sum')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Two Sum')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-two-sum"
+"2","This document outlines the primary approach to solving 'Add Two Numbers'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Add Two Numbers')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Add Two Numbers')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-add-two-numbers"
+"3","This document outlines the primary approach to solving 'Longest Substring Without Repeating Characters'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Longest Substring Without Repeating Characters')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Longest Substring Without Repeating Characters')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-longest-substring-without-repeating-characters"
+"4","This document outlines the primary approach to solving 'Median of Two Sorted Arrays'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Median of Two Sorted Arrays')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Median of Two Sorted Arrays')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-median-of-two-sorted-arrays"
+"5","This document outlines the primary approach to solving 'Longest Palindromic Substring'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Longest Palindromic Substring')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Longest Palindromic Substring')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-longest-palindromic-substring"
+"6","This document outlines the primary approach to solving 'Zigzag Conversion'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Zigzag Conversion')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Zigzag Conversion')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-zigzag-conversion"
+"7","This document outlines the primary approach to solving 'Reverse Integer'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Reverse Integer')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Reverse Integer')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-reverse-integer"
+"8","This document outlines the primary approach to solving 'String to Integer (atoi)'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'String to Integer (atoi)')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'String to Integer (atoi)')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-string-to-integer-(atoi)"
+"9","This document outlines the primary approach to solving 'Palindrome Number'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Palindrome Number')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Palindrome Number')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-palindrome-number"
+"10","This document outlines the primary approach to solving 'Regular Expression Matching'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Regular Expression Matching')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Regular Expression Matching')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-regular-expression-matching"
+"11","This document outlines the primary approach to solving 'Container With Most Water'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Container With Most Water')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Container With Most Water')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-container-with-most-water"
+"12","This document outlines the primary approach to solving 'Integer to Roman'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Integer to Roman')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Integer to Roman')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-integer-to-roman"
+"13","This document outlines the primary approach to solving 'Roman to Integer'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Roman to Integer')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Roman to Integer')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-roman-to-integer"
+"14","This document outlines the primary approach to solving 'Longest Common Prefix'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Longest Common Prefix')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Longest Common Prefix')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-longest-common-prefix"
+"15","This document outlines the primary approach to solving '3Sum'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for '3Sum')
+
+**Space Complexity:** O(n) (Replace with actual complexity for '3Sum')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-3sum"
+"16","This document outlines the primary approach to solving '3Sum Closest'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for '3Sum Closest')
+
+**Space Complexity:** O(n) (Replace with actual complexity for '3Sum Closest')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-3sum-closest"
+"17","This document outlines the primary approach to solving 'Letter Combinations of a Phone Number'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Letter Combinations of a Phone Number')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Letter Combinations of a Phone Number')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-letter-combinations-of-a-phone-number"
+"18","This document outlines the primary approach to solving '4Sum'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for '4Sum')
+
+**Space Complexity:** O(n) (Replace with actual complexity for '4Sum')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-4sum"
+"19","This document outlines the primary approach to solving 'Remove Nth Node From End of List'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Remove Nth Node From End of List')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Remove Nth Node From End of List')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-remove-nth-node-from-end-of-list"
+"20","This document outlines the primary approach to solving 'Valid Parentheses'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Valid Parentheses')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Valid Parentheses')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-valid-parentheses"
+"21","This document outlines the primary approach to solving 'Merge Two Sorted Lists'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Merge Two Sorted Lists')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Merge Two Sorted Lists')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-merge-two-sorted-lists"
+"22","This document outlines the primary approach to solving 'Generate Parentheses'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Generate Parentheses')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Generate Parentheses')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-generate-parentheses"
+"23","This document outlines the primary approach to solving 'Merge k Sorted Lists'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Merge k Sorted Lists')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Merge k Sorted Lists')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-merge-k-sorted-lists"
+"24","This document outlines the primary approach to solving 'Swap Nodes in Pairs'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Swap Nodes in Pairs')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Swap Nodes in Pairs')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-swap-nodes-in-pairs"
+"25","This document outlines the primary approach to solving 'Reverse Nodes in k-Group'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Reverse Nodes in k-Group')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Reverse Nodes in k-Group')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-reverse-nodes-in-k-group"
+"26","This document outlines the primary approach to solving 'Remove Duplicates from Sorted Array'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Remove Duplicates from Sorted Array')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Remove Duplicates from Sorted Array')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-remove-duplicates-from-sorted-array"
+"27","This document outlines the primary approach to solving 'Remove Element'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Remove Element')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Remove Element')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-remove-element"
+"28","This document outlines the primary approach to solving 'Find the Index of the First Occurrence in a String'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Find the Index of the First Occurrence in a String')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Find the Index of the First Occurrence in a String')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https://www.youtube.com/watch?v=example-video-find-the-index-of-the-first-occurrence-in-a-string"
+"29","This document outlines the primary approach to solving 'Divide Two Integers'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Divide Two Integers')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Divide Two Integers')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https"
+"30","This document outlines the primary approach to solving 'Substring with Concatenation of All Words'. The core idea is to [Explain core logic, e.g., use a hash map, apply binary search, use dynamic programming]. We will iterate through the data and [Step 1], then [Step 2].","**Time Complexity:** O(n) (Replace with actual complexity for 'Substring with Concatenation of All Words')
+
+**Space Complexity:** O(n) (Replace with actual complexity for 'Substring with Concatenation of All Words')
+
+*Explanation:* We first visit each element, and our data structure (e.g., hash map) stores up to 'n' elements.","1. **Initialization:** Initialize variables or data structures (e.g., `seen = {}`).
+2. **Iteration:** Loop through the input array.
+3. **Logic:** Inside the loop, perform the main calculation or check.
+4. **Return:** Return the final result.","https'

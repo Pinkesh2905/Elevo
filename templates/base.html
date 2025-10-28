@@ -6,10 +6,10 @@
   <title>{% block title %}MockMate{% endblock %}</title>
   {% load static %}
 
-  <!-- Professional Modern Fonts: Space Grotesk, IBM Plex Sans, JetBrains Mono -->
+  <!-- Modern, Fun & Professional Fonts: Outfit, Plus Jakarta Sans, Fira Code -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <meta name="description" content="MockMate: Master coding interviews with practice problems, aptitude tests, and AI-powered mock interviews." />
   
@@ -40,7 +40,7 @@
     }
     
     body { 
-      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
       background: var(--coding-bg-primary);
       min-height: 100vh;
       color: var(--text-primary);
@@ -50,19 +50,19 @@
     }
     
     .brand-font { 
-      font-family: 'Space Grotesk', sans-serif; 
-      font-weight: 700;
-      letter-spacing: -0.025em;
+      font-family: 'Outfit', sans-serif; 
+      font-weight: 800;
+      letter-spacing: -0.03em;
     }
     
     h1, h2, h3, h4 { 
-      font-family: 'Space Grotesk', sans-serif; 
-      font-weight: 600; 
-      letter-spacing: -0.025em;
+      font-family: 'Outfit', sans-serif; 
+      font-weight: 700; 
+      letter-spacing: -0.02em;
     }
     
     .mono-font, code, pre {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Fira Code', monospace;
       font-feature-settings: "liga" 1, "calt" 1;
     }
     
@@ -88,7 +88,7 @@
     
     .floating-element {
       position: absolute;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Fira Code', monospace;
       font-size: 18px;
       font-weight: 500;
       opacity: 0.2;
@@ -192,10 +192,16 @@
       box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
     }
     
-    /* Professional dropdown animation */
+    /* Enhanced Professional dropdown - Reduced Transparency */
     .dropdown-menu {
       transform-origin: top right;
       animation: dropdownAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(26, 26, 46, 0.97) !important; /* Much less transparent */
+      backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(99, 102, 241, 0.2) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 
+                  0 0 0 1px rgba(99, 102, 241, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
     
     @keyframes dropdownAppear {
@@ -469,7 +475,7 @@
           <i class="ri-home-line mr-4 text-indigo-400 text-lg"></i> 
           <span class="font-medium">Home</span>
         </a>
-        <a href="{% url 'practice:problem_list' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+        <a href="{% url 'practice:problem-list' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
           <i class="ri-code-line mr-4 text-blue-400 text-lg"></i> 
           <span class="font-medium">Coding</span>
         </a>
@@ -571,14 +577,14 @@
               <i class="ri-dashboard-line mr-2"></i>Tutor Dashboard
             </a>
           {% elif user.is_superuser or user.profile.role == 'ADMIN' %}
-            <a href="{% url 'practice:admin_dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-full font-semibold hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
+            <a href="{% url 'users:admin_dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-full font-semibold hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
               <i class="ri-admin-line mr-2"></i>Admin Dashboard
             </a>
           {% else %}
             <a href="{% url 'home' %}" class="px-4 py-2 text-slate-300 hover:text-indigo-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Home
             </a>
-            <a href="{% url 'practice:problem_list' %}" class="px-4 py-2 text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
+            <a href="{% url 'practice:problem-list' %}" class="px-4 py-2 text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Coding
             </a>
             <a href="{% url 'aptitude:dashboard' %}" class="px-4 py-2 text-slate-300 hover:text-emerald-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
@@ -617,8 +623,8 @@
                 <img src="{% static 'default_avatar.png' %}" alt="Default avatar" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-400/50 shadow-md">
               {% endif %}
             </button>
-            <div id="dropdown" class="hidden absolute right-0 mt-3 w-56 dark-card rounded-2xl shadow-2xl z-50 overflow-hidden border border-slate-700/50 dropdown-menu">
-              <div class="px-5 py-4 text-sm border-b border-slate-700/50 bg-gradient-to-r from-indigo-500/10 to-purple-500/10">
+            <div id="dropdown" class="hidden absolute right-0 mt-3 w-56 rounded-2xl shadow-2xl z-50 overflow-hidden dropdown-menu">
+              <div class="px-5 py-4 text-sm border-b border-slate-700/50 bg-gradient-to-r from-indigo-500/20 to-purple-500/20">
                 <div class="font-semibold text-slate-100">{{ user.username }}</div>
                 <div class="text-slate-400 truncate text-xs mt-1 font-medium">{{ user.email }}</div>
               </div>
@@ -737,7 +743,7 @@
             <div class="absolute -bottom-2 left-0 w-16 h-0.5 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
           </h4>
           <ul class="space-y-4">
-            <li><a href="{% url 'practice:problem_list' %}" class="text-slate-400 hover:text-indigo-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+            <li><a href="{% url 'practice:problem-list' %}" class="text-slate-400 hover:text-indigo-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
               <i class="ri-code-line mr-3 text-indigo-400 group-hover:scale-110 transition-transform"></i> Coding Practice
             </a></li>
             <li><a href="{% url 'aptitude:dashboard' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
@@ -786,7 +792,7 @@
                 <i class="ri-user-line mr-3 text-indigo-400 group-hover:scale-110 transition-transform"></i> Profile
               </a></li>
               {% if user.is_superuser %}
-                <li><a href="{% url 'practice:admin_dashboard' %}" class="text-slate-400 hover:text-red-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+                <li><a href="{% url 'users:admin_dashboard' %}" class="text-slate-400 hover:text-red-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
                   <i class="ri-admin-line mr-3 text-red-400 group-hover:scale-110 transition-transform"></i> Admin Dashboard
                 </a></li>
               {% elif user.profile.role == 'TUTOR' %}

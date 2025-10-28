@@ -1,5 +1,7 @@
+# users/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.models import User
@@ -30,10 +32,11 @@ def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
 
-# --- Signup View ---
+# --- Signup View (Email Verification Removed) ---
 def signup(request):
     """
-    Handles user registration with email verification.
+    Handles user registration without email verification.
+    Users can login immediately after signup.
     """
     if request.user.is_authenticated:
         return redirect('dashboard_redirect')
@@ -42,9 +45,9 @@ def signup(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                # Create user but don't activate yet
+                # Create user and activate immediately
                 user = form.save(commit=False)
-                user.is_active = False  # Account inactive until email verified
+                user.is_active = True  # Account active immediately
                 user.save()
 
                 selected_role = form.cleaned_data.get('role', 'STUDENT')
@@ -52,26 +55,23 @@ def signup(request):
                 # Set up user profile
                 if hasattr(user, 'profile'):
                     user.profile.role = selected_role
+                    user.profile.is_email_verified = True  # Mark as verified
                     user.profile.save()
                 else:
-                    UserProfile.objects.create(user=user, role=selected_role)
+                    UserProfile.objects.create(
+                        user=user, 
+                        role=selected_role,
+                        is_email_verified=True  # Mark as verified
+                    )
 
-                # Create and send verification token
-                token = EmailVerificationToken.objects.create(user=user)
-                try:
-                    token.send_verification_email(request)
-                    messages.success(
-                        request, 
-                        f"Account created successfully! Please check your email ({user.email}) for verification instructions."
-                    )
-                    return redirect('users:verify_email_sent')
-                except Exception as e:
-                    # If email fails, still allow manual verification
-                    messages.warning(
-                        request, 
-                        "Account created but email verification could not be sent. Please contact support."
-                    )
-                    return redirect('users:verify_email_sent')
+                # Log the user in immediately
+                auth_login(request, user)
+                
+                messages.success(
+                    request, 
+                    f"Welcome to MockMate, {user.username}! Your account has been created successfully."
+                )
+                return redirect('dashboard_redirect')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
@@ -80,7 +80,7 @@ def signup(request):
     return render(request, 'users/signup.html', {'form': form})
 
 
-# --- Email Verification Views ---
+# --- Email Verification Views (Keep for manual verification if needed) ---
 def verify_email_sent(request):
     """Show confirmation that verification email was sent."""
     return render(request, 'users/verify_email_sent.html')
@@ -343,9 +343,9 @@ def verify_email_change(request, token):
         return redirect('users:profile')
 
 
-# --- Enhanced Login View ---
+# --- Enhanced Login View (Email Verification Check Removed) ---
 def custom_login(request):
-    """Custom login view with email verification check."""
+    """Custom login view without email verification check."""
     if request.user.is_authenticated:
         return redirect('dashboard_redirect')
     
@@ -354,14 +354,7 @@ def custom_login(request):
         if form.is_valid():
             user = form.get_user()
             
-            # Check if email is verified
-            if not user.profile.is_email_verified:
-                messages.warning(
-                    request, 
-                    "Please verify your email before logging in. Check your inbox or request a new verification email."
-                )
-                return redirect('users:resend_verification')
-            
+            # Login directly without email verification check
             auth_login(request, user)
             messages.success(request, f"Welcome back, {user.username}!")
             
@@ -533,3 +526,71 @@ def approve_tutor(request, user_id):
     messages.success(request, f"Tutor status {status} for {user_profile.user.username}.")
     
     return redirect('users:admin_users')
+
+
+# --- Admin Dashboard Views ---
+@staff_member_required
+def admin_dashboard(request):
+    """
+    Admin dashboard showing pending approvals for tutors, problems, and articles.
+    """
+    # Get pending tutors (tutors who registered but not yet approved)
+    pending_tutors = UserProfile.objects.filter(
+        role='TUTOR',
+        is_approved_tutor=False
+    ).select_related('user').order_by('-created_at')
+    
+    # Initialize empty lists for problems and articles
+    pending_problems = []
+    pending_articles = []
+    
+    # Try to import and get inactive problems from practice app
+    try:
+        from practice.models import Problem
+        pending_problems = Problem.objects.filter(
+            is_active=False
+        ).select_related('created_by').prefetch_related('topics', 'companies').order_by('-created_at')
+    except (ImportError, AttributeError) as e:
+        # Practice app or Problem model doesn't exist or doesn't have expected fields
+        pass
+    
+    # Try to import and get pending articles from articles app
+    try:
+        from articles.models import Article
+        # Check what field the Article model uses for status
+        if hasattr(Article, 'status'):
+            pending_articles = Article.objects.filter(status='PENDING').select_related('created_by').order_by('-created_at')
+        elif hasattr(Article, 'is_active'):
+            pending_articles = Article.objects.filter(is_active=False).select_related('created_by').order_by('-created_at')
+        elif hasattr(Article, 'is_published'):
+            pending_articles = Article.objects.filter(is_published=False).select_related('created_by').order_by('-created_at')
+        else:
+            # If no status field, show recent articles
+            pending_articles = Article.objects.all().select_related('created_by').order_by('-created_at')[:10]
+    except (ImportError, AttributeError) as e:
+        # Articles app doesn't exist or Article model doesn't have expected fields
+        pass
+    
+    context = {
+        'pending_tutors': pending_tutors,
+        'pending_problems': pending_problems,
+        'pending_articles': pending_articles,
+    }
+    
+    return render(request, 'users/admin_dashboard.html', context)
+
+
+@staff_member_required
+def admin_approve_tutor(request, user_id):
+    """
+    Approve a tutor account.
+    """
+    user = get_object_or_404(User, id=user_id)
+    user_profile = user.profile
+    
+    # Toggle approval status
+    user_profile.is_approved_tutor = True
+    user_profile.save()
+    
+    messages.success(request, f'Tutor {user.username} has been approved successfully!')
+    return redirect('users:admin_dashboard')

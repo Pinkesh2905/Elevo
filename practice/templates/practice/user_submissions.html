@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Submissions - MockMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">My Submissions</h1>
+            <p class="text-lg text-gray-600">Track your coding progress and submission history</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <div class="text-sm font-medium text-gray-500 mb-1">Total Submissions</div>
+                <div class="text-3xl font-bold text-gray-900">{{ page_obj.paginator.count }}</div>
+            </div>
+            
+            <div class="bg-green-50 rounded-lg shadow-sm p-6 border border-green-200">
+                <div class="text-sm font-medium text-green-700 mb-1">Accepted</div>
+                <div class="text-3xl font-bold text-green-600">
+                    {{ user.submissions.filter.count }}
+                </div>
+            </div>
+            
+            <div class="bg-red-50 rounded-lg shadow-sm p-6 border border-red-200">
+                <div class="text-sm font-medium text-red-700 mb-1">Wrong Answer</div>
+                <div class="text-3xl font-bold text-red-600">0</div>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg shadow-sm p-6 border border-blue-200">
+                <div class="text-sm font-medium text-blue-700 mb-1">Success Rate</div>
+                <div class="text-3xl font-bold text-blue-600">0%</div>
+            </div>
+        </div>
+
+        <!-- Submissions List -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            {% if page_obj %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Time
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Problem
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                Status
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                Language
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                Test Cases
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for submission in page_obj %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            
+                            <!-- Time -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ submission.created_at|date:"M d, Y" }}</div>
+                                <div class="text-xs text-gray-500">{{ submission.created_at|time:"g:i A" }}</div>
+                            </td>
+                            
+                            <!-- Problem -->
+                            <td class="px-6 py-4">
+                                <a href="{% url 'practice:problem_detail' submission.problem.slug %}" 
+                                   class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ submission.problem.problem_number }}. {{ submission.problem.title }}
+                                </a>
+                            </td>
+                            
+                            <!-- Status Badge -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if submission.status == 'accepted' %}
+                                    <span class="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Accepted
+                                    </span>
+                                {% elif submission.status == 'wrong_answer' %}
+                                    <span class="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Wrong Answer
+                                    </span>
+                                {% elif submission.status == 'runtime_error' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                        Runtime Error
+                                    </span>
+                                {% elif submission.status == 'time_limit_exceeded' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Time Limit
+                                    </span>
+                                {% elif submission.status == 'compilation_error' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        Compilation Error
+                                    </span>
+                                {% elif submission.status == 'pending' %}
+                                    <span class="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        <svg class="animate-spin w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Pending
+                                    </span>
+                                {% elif submission.status == 'running' %}
+                                    <span class="px-3 py-1 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <svg class="animate-spin w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Running
+                                    </span>
+                                {% else %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        {{ submission.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Language -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                                    {{ submission.language|upper }}
+                                </span>
+                            </td>
+                            
+                            <!-- Test Cases -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if submission.status == 'accepted' %}
+                                    <span class="text-green-600 font-medium">
+                                        {{ submission.passed_test_cases }}/{{ submission.total_test_cases }}
+                                    </span>
+                                {% elif submission.passed_test_cases > 0 %}
+                                    <span class="text-yellow-600 font-medium">
+                                        {{ submission.passed_test_cases }}/{{ submission.total_test_cases }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-red-600 font-medium">
+                                        {{ submission.passed_test_cases }}/{{ submission.total_test_cases }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <a href="{% url 'practice:submission_detail' submission.id %}" 
+                                   class="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        Showing 
+                        <span class="font-medium">{{ page_obj.start_index }}</span>
+                        to 
+                        <span class="font-medium">{{ page_obj.end_index }}</span>
+                        of 
+                        <span class="font-medium">{{ page_obj.paginator.count }}</span>
+                        submissions
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" 
+                               class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                First
+                            </a>
+                            <a href="?page={{ page_obj.previous_page_number }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Previous
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Next
+                            </a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" 
+                               class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Last
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- No Submissions Found -->
+            <div class="text-center py-16">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <h3 class="mt-4 text-xl font-medium text-gray-900">No submissions yet</h3>
+                <p class="mt-2 text-sm text-gray-500">Start solving problems to see your submission history here</p>
+                <div class="mt-8">
+                    <a href="{% url 'practice:problem-list' %}" 
+                       class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        Browse Problems
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Back to Problems -->
+        <div class="mt-8">
+            <a href="{% url 'practice:problem-list' %}" 
+               class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                </svg>
+                Back to Problems
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

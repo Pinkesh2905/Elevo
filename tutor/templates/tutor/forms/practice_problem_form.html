@@ -1,0 +1,465 @@
+<!-- templates/tutor/forms/practice_problem_form.html -->
+<div class="max-w-6xl">
+  <!-- Header -->
+  <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mr-4">
+          <i class="ri-code-box-line text-3xl text-cyan-400"></i>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 brand-font">
+            {% if edit_practice_problem_id %}Edit{% else %}Create{% endif %} Coding Problem
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">LeetCode-style coding challenge with test cases</p>
+        </div>
+      </div>
+      <a href="{% url 'tutor:dashboard' %}" class="w-10 h-10 glass rounded-lg flex items-center justify-center hover:bg-white/10 transition-all hover-lift group">
+        <i class="ri-close-line text-xl text-slate-400 group-hover:text-slate-200"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form method="POST" action="{% url 'tutor:create_update' %}" class="space-y-8">
+    {% csrf_token %}
+    <input type="hidden" name="content_type" value="practice_problem">
+    {% if edit_practice_problem_id %}
+      <input type="hidden" name="practice_problem_id" value="{{ edit_practice_problem_id }}">
+    {% endif %}
+
+    <!-- Basic Information -->
+    <div class="dark-card rounded-2xl p-8 hover-lift">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-slate-700/50 flex items-center brand-font">
+        <i class="ri-information-line text-blue-400 mr-2"></i>
+        Basic Information
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <!-- Problem Number -->
+        <div>
+          <label for="{{ problem_form.problem_number.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Problem # <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="ri-hashtag text-slate-400"></i>
+            </div>
+            {{ problem_form.problem_number }}
+          </div>
+          {% if problem_form.problem_number.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.problem_number.errors.0 }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Difficulty -->
+        <div>
+          <label for="{{ problem_form.difficulty.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Difficulty <span class="text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="ri-bar-chart-line text-slate-400"></i>
+            </div>
+            {{ problem_form.difficulty }}
+          </div>
+          {% if problem_form.difficulty.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.difficulty.errors.0 }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Active Status -->
+        <div>
+          <label for="{{ problem_form.is_active.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Status
+          </label>
+          <div class="flex items-center h-[54px] px-4 glass border border-slate-600/50 rounded-xl">
+            {{ problem_form.is_active }}
+            <label for="{{ problem_form.is_active.id_for_label }}" class="ml-3 text-sm text-slate-300 cursor-pointer">Active</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="mb-6">
+        <label for="{{ problem_form.title.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Problem Title <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="ri-text text-slate-400"></i>
+          </div>
+          {{ problem_form.title }}
+        </div>
+        {% if problem_form.title.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ problem_form.title.errors.0 }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Topics and Companies -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="{{ problem_form.topics.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Topics
+          </label>
+          <div class="relative">
+            {{ problem_form.topics }}
+          </div>
+          {% if problem_form.topics.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.topics.errors.0 }}</span>
+            </div>
+          {% endif %}
+          <p class="mt-2 text-xs text-slate-500 flex items-center">
+            <i class="ri-information-line mr-1"></i>
+            Hold Ctrl/Cmd to select multiple
+          </p>
+        </div>
+
+        <div>
+          <label for="{{ problem_form.companies.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Companies
+          </label>
+          <div class="relative">
+            {{ problem_form.companies }}
+          </div>
+          {% if problem_form.companies.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.companies.errors.0 }}</span>
+            </div>
+          {% endif %}
+          <p class="mt-2 text-xs text-slate-500 flex items-center">
+            <i class="ri-information-line mr-1"></i>
+            Companies that asked this question
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problem Description -->
+    <div class="dark-card rounded-2xl p-8 hover-lift">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-slate-700/50 flex items-center brand-font">
+        <i class="ri-file-text-line text-purple-400 mr-2"></i>
+        Problem Description
+      </h3>
+      
+      <div class="mb-6">
+        <label for="{{ problem_form.description.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Description <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+            <i class="ri-file-list-line text-slate-400"></i>
+          </div>
+          {{ problem_form.description }}
+        </div>
+        {% if problem_form.description.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ problem_form.description.errors.0 }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ problem_form.constraints.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Constraints
+        </label>
+        <div class="relative">
+          <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+            <i class="ri-shield-check-line text-slate-400"></i>
+          </div>
+          {{ problem_form.constraints }}
+        </div>
+        {% if problem_form.constraints.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ problem_form.constraints.errors.0 }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Examples -->
+    <div class="dark-card rounded-2xl p-8 hover-lift">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-slate-700/50 flex items-center brand-font">
+        <i class="ri-code-s-slash-line text-green-400 mr-2"></i>
+        Example
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label for="{{ problem_form.example_input.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Example Input
+          </label>
+          {{ problem_form.example_input }}
+          {% if problem_form.example_input.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.example_input.errors.0 }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div>
+          <label for="{{ problem_form.example_output.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Example Output
+          </label>
+          {{ problem_form.example_output }}
+          {% if problem_form.example_output.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.example_output.errors.0 }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <label for="{{ problem_form.example_explanation.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Example Explanation
+        </label>
+        <div class="relative">
+          <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+            <i class="ri-lightbulb-line text-slate-400"></i>
+          </div>
+          {{ problem_form.example_explanation }}
+        </div>
+        {% if problem_form.example_explanation.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ problem_form.example_explanation.errors.0 }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Hints and Complexity -->
+    <div class="dark-card rounded-2xl p-8 hover-lift">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-slate-700/50 flex items-center brand-font">
+        <i class="ri-lightbulb-flash-line text-yellow-400 mr-2"></i>
+        Hints & Complexity
+      </h3>
+      
+      <div class="mb-6">
+        <label for="{{ problem_form.hints.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Hints
+        </label>
+        <div class="relative">
+          <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+            <i class="ri-question-line text-slate-400"></i>
+          </div>
+          {{ problem_form.hints }}
+        </div>
+        {% if problem_form.hints.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ problem_form.hints.errors.0 }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label for="{{ problem_form.time_complexity.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Time Complexity
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="ri-time-line text-slate-400"></i>
+            </div>
+            {{ problem_form.time_complexity }}
+          </div>
+          {% if problem_form.time_complexity.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.time_complexity.errors.0 }}</span>
+            </div>
+          {% endif %}
+          <p class="mt-2 text-xs text-slate-500 flex items-center">
+            <i class="ri-information-line mr-1"></i>
+            e.g., O(n), O(n log n)
+          </p>
+        </div>
+
+        <div>
+          <label for="{{ problem_form.space_complexity.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+            Space Complexity
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="ri-database-2-line text-slate-400"></i>
+            </div>
+            {{ problem_form.space_complexity }}
+          </div>
+          {% if problem_form.space_complexity.errors %}
+            <div class="mt-2 flex items-center text-red-400 text-sm">
+              <i class="ri-error-warning-line mr-1"></i>
+              <span>{{ problem_form.space_complexity.errors.0 }}</span>
+            </div>
+          {% endif %}
+          <p class="mt-2 text-xs text-slate-500 flex items-center">
+            <i class="ri-information-line mr-1"></i>
+            e.g., O(1), O(n)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Cases -->
+    <div class="dark-card rounded-2xl p-8 hover-lift border-2 border-blue-500/20">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-blue-500/30 flex items-center brand-font">
+        <i class="ri-test-tube-line text-blue-400 mr-2"></i>
+        Test Cases
+      </h3>
+      
+      {{ testcase_formset.management_form }}
+      <div id="testcase-forms" class="space-y-4">
+        {% for form in testcase_formset %}
+        <div class="testcase-form glass rounded-xl p-5 border border-slate-700/50">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-semibold text-slate-100 flex items-center">
+              <span class="w-7 h-7 bg-blue-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-blue-400">{{ forloop.counter }}</span>
+              Test Case {{ forloop.counter }}
+            </h4>
+            {% if not forloop.first %}
+            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="this.closest('.testcase-form').remove()">
+              <i class="ri-delete-bin-line mr-1"></i>Remove
+            </button>
+            {% endif %}
+          </div>
+          
+          {{ form.id }}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Input</label>
+              {{ form.input_data }}
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Expected Output</label>
+              {{ form.expected_output }}
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Order</label>
+              {{ form.order }}
+            </div>
+            <div class="flex items-center h-[54px] px-4 glass border border-slate-600/50 rounded-xl">
+              {{ form.is_sample }}
+              <label class="ml-3 text-sm text-slate-300 cursor-pointer">Is Sample?</label>
+            </div>
+            <div class="flex items-center h-[54px] px-4 glass border border-slate-600/50 rounded-xl">
+              {{ form.DELETE }}
+              <label class="ml-3 text-sm text-slate-300 cursor-pointer">Delete?</label>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Explanation</label>
+            {{ form.explanation }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <button type="button" onclick="addTestCase()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all shadow-lg hover-lift">
+        <i class="ri-add-line mr-1"></i>Add Test Case
+      </button>
+    </div>
+
+    <!-- Code Templates -->
+    <div class="dark-card rounded-2xl p-8 hover-lift border-2 border-green-500/20">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-green-500/30 flex items-center brand-font">
+        <i class="ri-code-box-fill text-green-400 mr-2"></i>
+        Code Templates
+      </h3>
+      
+      {{ codetemplate_formset.management_form }}
+      <div id="template-forms" class="space-y-4">
+        {% for form in codetemplate_formset %}
+        <div class="template-form glass rounded-xl p-5 border border-slate-700/50">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-semibold text-slate-100 flex items-center">
+              <span class="w-7 h-7 bg-green-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-green-400">{{ forloop.counter }}</span>
+              Template {{ forloop.counter }}
+            </h4>
+            {% if not forloop.first %}
+            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="this.closest('.template-form').remove()">
+              <i class="ri-delete-bin-line mr-1"></i>Remove
+            </button>
+            {% endif %}
+          </div>
+          
+          {{ form.id }}
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Language</label>
+            {{ form.language }}
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Template Code</label>
+            {{ form.template_code }}
+            <p class="mt-2 text-xs text-slate-500 flex items-center">
+              <i class="ri-information-line mr-1"></i>
+              Starter code shown to users
+            </p>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Solution Code</label>
+            {{ form.solution_code }}
+            <p class="mt-2 text-xs text-slate-500 flex items-center">
+              <i class="ri-information-line mr-1"></i>
+              Your solution (hidden from users)
+            </p>
+          </div>
+          
+          <div class="flex items-center px-4 py-3 glass border border-slate-600/50 rounded-xl">
+            {{ form.DELETE }}
+            <label class="ml-3 text-sm text-slate-300 cursor-pointer">Delete?</label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <button type="button" onclick="addTemplate()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg hover-lift">
+        <i class="ri-add-line mr-1"></i>Add Template
+      </button>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex items-center gap-3 pt-4">
+      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+        <i class="ri-{% if edit_practice_problem_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
+        {% if edit_practice_problem_id %}Update{% else %}Create{% endif %} Coding Problem
+      </button>
+      <a href="{% url 'tutor:dashboard' %}" class="px-6 py-3 glass border border-slate-600 text-slate-300 font-medium rounded-xl hover:bg-white/10 transition-all hover-lift">
+        <i class="ri-close-line mr-2"></i>Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+// Dynamic form management would go here
+function addTestCase() {
+  alert('Test case addition requires JavaScript formset management');
+}
+
+function addTemplate() {
+  alert('Template addition requires JavaScript formset management');
+}
+</script>

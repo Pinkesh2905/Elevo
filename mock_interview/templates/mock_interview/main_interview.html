@@ -20,238 +20,366 @@
           },
           glass: 'rgba(255, 255, 255, 0.08)',
           'glass-border': 'rgba(255, 255, 255, 0.12)'
-        },
-        backdropBlur: {
-          'xs': '2px',
         }
       }
     }
   }
 </script>
 <style>
-  /* Custom animations and glass effects */
+  /* Enhanced animations */
   @keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-    70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+    70% { box-shadow: 0 0 0 25px rgba(59, 130, 246, 0); }
     100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
   }
   
   @keyframes listening-pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
+    50% { transform: scale(1.08); opacity: 0.85; }
   }
   
   @keyframes typing-bounce {
     0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-8px); }
+    30% { transform: translateY(-10px); }
   }
   
-  .pulse-ring { animation: pulse-ring 2s infinite; }
-  .listening-pulse { animation: listening-pulse 1.5s infinite; }
+  @keyframes slide-up {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  
+  .pulse-ring { animation: pulse-ring 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  .listening-pulse { animation: listening-pulse 1.8s ease-in-out infinite; }
   .typing-dot { animation: typing-bounce 1.4s ease-in-out infinite; }
   .typing-dot:nth-child(1) { animation-delay: 0s; }
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
   .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  .slide-up { animation: slide-up 0.4s ease-out; }
+  .fade-in { animation: fade-in 0.3s ease-out; }
   
   .glass-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    transition: all 0.3s ease;
+  }
+  
+  .glass-card:hover {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(148, 163, 184, 0.25);
   }
   
   .gradient-bg {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #334155 100%);
+    position: relative;
   }
   
-  /* Custom scrollbar */
-  .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); }
+  .gradient-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  /* Custom scrollbar with smoother design */
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(51, 65, 85, 0.3); border-radius: 3px; }
   .custom-scrollbar::-webkit-scrollbar-thumb { 
-    background: rgba(148, 163, 184, 0.4); 
-    border-radius: 4px; 
+    background: rgba(148, 163, 184, 0.5); 
+    border-radius: 3px;
+    transition: background 0.2s;
   }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
   
-  /* Volume slider custom styling */
+  /* Enhanced volume slider */
   .volume-slider {
     -webkit-appearance: none;
     appearance: none;
-    height: 6px;
-    background: rgba(148, 163, 184, 0.3);
-    border-radius: 3px;
+    height: 8px;
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.4) 100%);
+    border-radius: 4px;
     outline: none;
+    transition: all 0.2s;
   }
+  
+  .volume-slider:hover { background: linear-gradient(to right, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.5) 100%); }
   
   .volume-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #3b82f6;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.5);
     transition: all 0.2s ease;
   }
   
   .volume-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.6);
+    transform: scale(1.15);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.7);
   }
   
   .volume-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: #3b82f6;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border-radius: 50%;
     border: none;
     cursor: pointer;
+    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.5);
+  }
+  
+  /* Enhanced button styles */
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn-primary:hover::before { left: 100%; }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(59, 130, 246, 0.4);
+  }
+  
+  .btn-primary:active { transform: translateY(0); }
+  
+  /* Message animations */
+  .message-enter {
+    animation: slide-up 0.4s ease-out;
+  }
+  
+  /* Shimmer effect for loading states */
+  .shimmer {
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.1) 0%, rgba(148, 163, 184, 0.2) 50%, rgba(148, 163, 184, 0.1) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  button, a, input[type="range"] {
+    transition: all 0.2s ease;
+  }
+  
+  /* Enhanced status indicators */
+  .status-indicator {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .status-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite;
+  }
+  
+  /* Skill badge hover effect */
+  .skill-badge {
+    transition: all 0.2s ease;
+  }
+  
+  .skill-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="min-h-screen gradient-bg text-white">
-  <!-- Header Section -->
-  <div class="bg-black/20 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50">
+  <!-- Enhanced Header Section -->
+  <div class="bg-black/30 backdrop-blur-md border-b border-white/10 sticky top-0 z-50 shadow-lg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
-        <!-- Logo and Title -->
-        <div class="flex items-center space-x-4">
-          <div class="relative w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+      <div class="flex items-center justify-between h-20 gap-6">
+        <!-- Logo and Title with enhanced animation -->
+        <div class="flex items-center space-x-3 min-w-0 flex-shrink-0 fade-in">
+          <div class="relative w-12 h-12 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
             <i class="fas fa-user-graduate text-xl text-white"></i>
-            <div id="header-status" class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white pulse-ring"></div>
+            <div id="header-status" class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900 status-indicator"></div>
           </div>
-          <div>
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-purple-400 bg-clip-text text-transparent truncate">
               AI Mock Interview
             </h1>
-            <p class="text-sm text-gray-300">{{ job_role }}</p>
+            <p class="text-xs sm:text-sm text-slate-300 truncate font-medium">{{ job_role }}</p>
           </div>
         </div>
         
-        <!-- Progress Indicators -->
-        <div class="hidden md:flex items-center space-x-8">
-          <div class="text-center">
-            <div class="w-16 h-16 relative">
-              <svg class="w-full h-full transform -rotate-90">
-                <circle cx="32" cy="32" r="28" stroke="rgba(148, 163, 184, 0.2)" stroke-width="3" fill="none"/>
-                <circle id="question-progress" cx="32" cy="32" r="28" stroke="#3b82f6" stroke-width="3" 
-                        fill="none" stroke-dasharray="0 176" stroke-linecap="round" class="transition-all duration-500"/>
+        <!-- Enhanced Progress Indicators -->
+        <div class="hidden md:flex items-center gap-6 flex-shrink-0">
+          <div class="text-center group">
+            <div class="w-16 h-16 relative transition-transform group-hover:scale-105">
+              <svg class="w-full h-full transform -rotate-90 drop-shadow-lg">
+                <circle cx="32" cy="32" r="28" stroke="rgba(148, 163, 184, 0.15)" stroke-width="4" fill="none"/>
+                <circle id="question-progress" cx="32" cy="32" r="28" stroke="url(#gradient-blue)" stroke-width="4" 
+                        fill="none" stroke-dasharray="0 176" stroke-linecap="round" class="transition-all duration-700 ease-out"/>
               </svg>
+              <defs>
+                <linearGradient id="gradient-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                </linearGradient>
+              </defs>
               <div class="absolute inset-0 flex items-center justify-center">
-                <span id="question-counter" class="text-lg font-bold">1</span>
+                <span id="question-counter" class="text-lg font-bold text-blue-400">1</span>
               </div>
             </div>
-            <p class="text-xs text-gray-400 mt-2 font-medium">QUESTION</p>
+            <p class="text-xs text-slate-400 mt-2 font-semibold tracking-wide">QUESTION</p>
           </div>
           
-          <div class="text-center">
-            <div class="w-16 h-16 relative">
-              <svg class="w-full h-full transform -rotate-90">
-                <circle cx="32" cy="32" r="28" stroke="rgba(148, 163, 184, 0.2)" stroke-width="3" fill="none"/>
-                <circle id="time-progress" cx="32" cy="32" r="28" stroke="#10b981" stroke-width="3" 
-                        fill="none" stroke-dasharray="0 176" stroke-linecap="round" class="transition-all duration-500"/>
+          <div class="text-center group">
+            <div class="w-16 h-16 relative transition-transform group-hover:scale-105">
+              <svg class="w-full h-full transform -rotate-90 drop-shadow-lg">
+                <circle cx="32" cy="32" r="28" stroke="rgba(148, 163, 184, 0.15)" stroke-width="4" fill="none"/>
+                <circle id="time-progress" cx="32" cy="32" r="28" stroke="url(#gradient-green)" stroke-width="4" 
+                        fill="none" stroke-dasharray="0 176" stroke-linecap="round" class="transition-all duration-700 ease-out"/>
               </svg>
+              <defs>
+                <linearGradient id="gradient-green" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                </linearGradient>
+              </defs>
               <div class="absolute inset-0 flex items-center justify-center">
-                <span id="timer-display" class="text-sm font-bold">00:00</span>
+                <span id="timer-display" class="text-xs font-bold text-green-400">00:00</span>
               </div>
             </div>
-            <p class="text-xs text-gray-400 mt-2 font-medium">TIME</p>
+            <p class="text-xs text-slate-400 mt-2 font-semibold tracking-wide">TIME</p>
           </div>
         </div>
         
-        <!-- Interview Status -->
-        <div id="interview-status" class="glass-card px-4 py-2 rounded-full flex items-center space-x-2 text-sm font-medium">
-          <div class="w-3 h-3 bg-green-500 rounded-full pulse-ring"></div>
-          <span>Ready to Start</span>
+        <!-- Enhanced Interview Status Badge -->
+        <div id="interview-status" class="glass-card px-4 py-2.5 rounded-full flex items-center space-x-2.5 text-sm font-semibold flex-shrink-0 shadow-lg">
+          <div class="w-2.5 h-2.5 bg-green-500 rounded-full status-indicator"></div>
+          <span class="hidden sm:inline">Ready to Start</span>
+          <span class="sm:hidden">Ready</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Content -->
+  <!-- Main Content with enhanced spacing -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
       
       <!-- Left Column - Video & Controls -->
       <div class="xl:col-span-1 space-y-6">
         
-        <!-- Video Section -->
-        <div class="glass-card rounded-2xl overflow-hidden">
-          <div class="p-4 border-b border-white/10">
-            <h3 class="text-lg font-semibold flex items-center space-x-2">
-              <i class="fas fa-video text-blue-400"></i>
+        <!-- Enhanced Video Section -->
+        <div class="glass-card rounded-2xl overflow-hidden shadow-xl slide-up">
+          <div class="p-4 border-b border-slate-600/30 bg-slate-800/30">
+            <h3 class="text-lg font-semibold flex items-center space-x-2.5">
+              <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-video text-blue-400 text-sm"></i>
+              </div>
               <span>Your Camera</span>
             </h3>
           </div>
-          <div class="relative aspect-video bg-gray-900">
+          <div class="relative aspect-video bg-gradient-to-br from-slate-900 to-slate-800">
             <video id="user-video" autoplay playsinline muted class="w-full h-full object-cover"></video>
-            <div id="video-overlay" class="absolute inset-0 bg-gradient-to-br from-gray-900/90 to-blue-900/90 flex items-center justify-center">
-              <div class="text-center">
-                <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center mb-4 mx-auto backdrop-blur-sm">
-                  <i class="fas fa-camera text-3xl text-white"></i>
+            <div id="video-overlay" class="absolute inset-0 bg-gradient-to-br from-slate-900/95 to-blue-900/95 flex items-center justify-center backdrop-blur-sm">
+              <div class="text-center p-6">
+                <div class="w-20 h-20 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-5 mx-auto backdrop-blur-sm border border-blue-500/30 shadow-lg">
+                  <i class="fas fa-camera text-3xl text-blue-400"></i>
                 </div>
                 <h4 class="text-xl font-bold mb-2">Camera Setup</h4>
-                <p class="text-gray-300 max-w-xs">Allow camera and microphone access to begin your professional interview</p>
+                <p class="text-slate-300 max-w-xs leading-relaxed">Allow camera and microphone access to begin your professional interview</p>
               </div>
             </div>
-            <div id="recording-indicator" class="absolute top-4 right-4 bg-red-500 text-white px-3 py-2 rounded-full text-sm font-bold flex items-center space-x-2 hidden">
+            <div id="recording-indicator" class="absolute top-4 right-4 bg-red-500 text-white px-3 py-2 rounded-full text-xs font-bold flex items-center space-x-2 hidden shadow-lg">
               <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span>REC</span>
+              <span>RECORDING</span>
             </div>
           </div>
         </div>
         
-        <!-- AI Interviewer -->
-        <div class="glass-card rounded-2xl overflow-hidden">
-          <div class="p-4 border-b border-white/10">
-            <h3 class="text-lg font-semibold flex items-center space-x-2">
-              <div class="relative">
-                <i class="fas fa-robot text-purple-400"></i>
-                <div id="ai-status-dot" class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
+        <!-- Enhanced AI Interviewer -->
+        <div class="glass-card rounded-2xl overflow-hidden shadow-xl slide-up" style="animation-delay: 0.1s;">
+          <div class="p-4 border-b border-slate-600/30 bg-slate-800/30">
+            <h3 class="text-lg font-semibold flex items-center space-x-2.5">
+              <div class="relative w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-robot text-purple-400 text-sm"></i>
+                <div id="ai-status-dot" class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-slate-900 status-indicator"></div>
               </div>
               <span>Sarah - AI Interviewer</span>
             </h3>
           </div>
-          <div class="relative aspect-video bg-gradient-to-br from-gray-900 to-purple-900">
-            <canvas id="ai-visualizer-canvas" class="absolute inset-0 w-full h-full"></canvas>
+          <div class="relative aspect-video bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900">
+            <canvas id="ai-visualizer-canvas" class="absolute inset-0 w-full h-full opacity-60"></canvas>
             <div class="absolute inset-0 flex items-center justify-center">
-              <div id="ai-avatar" class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30 transition-all duration-300">
-                <i class="fas fa-user-tie text-3xl text-white"></i>
+              <div id="ai-avatar" class="w-28 h-28 bg-purple-500/20 rounded-full flex items-center justify-center backdrop-blur-md border-2 border-purple-400/30 transition-all duration-500 shadow-2xl">
+                <i class="fas fa-user-tie text-4xl text-purple-300"></i>
               </div>
             </div>
-            <div id="ai-status-text" class="absolute top-4 left-4 bg-black/40 text-white px-3 py-2 rounded-lg text-sm backdrop-blur-sm">
-              <i class="fas fa-brain mr-2"></i>
+            <div id="ai-status-text" class="absolute top-4 left-4 bg-slate-900/60 text-white px-4 py-2.5 rounded-xl text-sm backdrop-blur-md border border-slate-700/50 font-medium">
+              <i class="fas fa-brain mr-2 text-purple-400"></i>
               <span>Ready to Interview</span>
             </div>
-            <button id="hints-btn" class="absolute top-4 right-4 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-3 py-2 rounded-lg text-sm font-medium backdrop-blur-sm border border-yellow-400/30 transition-all duration-200 hidden">
+            <button id="hints-btn" class="absolute top-4 right-4 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 px-4 py-2.5 rounded-xl text-sm font-semibold backdrop-blur-md border border-yellow-400/30 transition-all duration-200 hover:scale-105 hidden shadow-lg">
               <i class="fas fa-lightbulb mr-2"></i>
               <span>Get Hints</span>
             </button>
           </div>
         </div>
         
-        <!-- Session Info -->
-        <div class="glass-card rounded-2xl p-6">
-          <h3 class="text-lg font-semibold mb-4 flex items-center space-x-2">
-            <i class="fas fa-clipboard-list text-green-400"></i>
+        <!-- Enhanced Session Info -->
+        <div class="glass-card rounded-2xl p-6 shadow-xl slide-up" style="animation-delay: 0.2s;">
+          <h3 class="text-lg font-semibold mb-5 flex items-center space-x-2.5">
+            <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <i class="fas fa-clipboard-list text-green-400 text-sm"></i>
+            </div>
             <span>Session Details</span>
           </h3>
-          <div class="space-y-3">
-            <div class="flex justify-between">
-              <span class="text-gray-400">Role:</span>
-              <span class="font-semibold">{{ job_role }}</span>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-3 bg-slate-800/40 rounded-lg">
+              <span class="text-slate-400 font-medium">Role:</span>
+              <span class="font-semibold text-blue-300">{{ job_role }}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="text-gray-400">Duration:</span>
-              <span class="font-semibold">20-25 min</span>
+            <div class="flex justify-between items-center p-3 bg-slate-800/40 rounded-lg">
+              <span class="text-slate-400 font-medium">Duration:</span>
+              <span class="font-semibold text-green-300">20-25 min</span>
             </div>
-            <div class="border-t border-white/10 pt-3">
-              <p class="text-gray-400 text-sm mb-2">Key Skills:</p>
+            <div class="border-t border-slate-600/30 pt-4">
+              <p class="text-slate-400 text-sm mb-3 font-medium">Key Skills:</p>
               <div class="flex flex-wrap gap-2">
                 {% for skill in key_skills|split:"," %}
-                  <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm border border-blue-400/30">
+                  <span class="skill-badge bg-blue-500/20 text-blue-300 px-3 py-1.5 rounded-lg text-xs border border-blue-400/30 font-medium">
                     {{ skill|trim_whitespace }}
                   </span>
                 {% endfor %}
@@ -259,123 +387,132 @@
             </div>
           </div>
           
-          <!-- Volume Control -->
-          <div class="mt-6 pt-4 border-t border-white/10">
-            <div class="flex items-center space-x-3 mb-3">
-              <i class="fas fa-volume-up text-gray-400"></i>
+          <!-- Enhanced Volume Control -->
+          <div class="mt-6 pt-5 border-t border-slate-600/30">
+            <label class="flex items-center space-x-3 mb-4">
+              <i class="fas fa-volume-up text-slate-400 text-lg"></i>
+              <span class="text-sm font-semibold text-slate-300">Audio Volume</span>
+            </label>
+            <div class="flex items-center space-x-3 mb-4">
               <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.8" 
                      class="flex-1 volume-slider cursor-pointer">
-              <span id="volume-display" class="text-sm font-medium w-12">80%</span>
+              <span id="volume-display" class="text-sm font-bold w-12 text-blue-400">80%</span>
             </div>
-            <button id="test-audio-btn" class="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
-              <i class="fas fa-volume-up mr-2"></i>Test Audio
+            <button id="test-audio-btn" class="w-full bg-slate-700/50 hover:bg-slate-700 text-white py-2.5 px-4 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] border border-slate-600/30">
+              <i class="fas fa-volume-up mr-2"></i>Test Audio System
             </button>
           </div>
         </div>
       </div>
       
-      <!-- Center Column - Chat -->
+      <!-- Center Column - Chat with enhanced design -->
       <div class="xl:col-span-1">
-        <div class="glass-card rounded-2xl h-[700px] flex flex-col">
-          <div class="p-4 border-b border-white/10 flex items-center justify-between">
-            <h3 class="text-lg font-semibold flex items-center space-x-2">
-              <i class="fas fa-comments text-blue-400"></i>
+        <div class="glass-card rounded-2xl h-full flex flex-col shadow-xl slide-up" style="animation-delay: 0.15s;">
+          <div class="p-4 border-b border-slate-600/30 bg-slate-800/30 flex items-center justify-between">
+            <h3 class="text-lg font-semibold flex items-center space-x-2.5">
+              <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-comments text-blue-400 text-sm"></i>
+              </div>
               <span>Interview Conversation</span>
             </h3>
             <div id="chat-progress" class="hidden flex items-center space-x-4 text-sm">
               <div class="text-center">
                 <div id="response-count" class="text-xl font-bold text-blue-400">0</div>
-                <div class="text-xs text-gray-400">Responses</div>
+                <div class="text-xs text-slate-400 font-medium">Responses</div>
               </div>
               <div class="text-center">
                 <div id="avg-length" class="text-xl font-bold text-green-400">0</div>
-                <div class="text-xs text-gray-400">Avg Words</div>
+                <div class="text-xs text-slate-400 font-medium">Avg Words</div>
               </div>
             </div>
           </div>
           
-          <div id="chat-messages" class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+          <div id="chat-messages" class="flex-1 p-5 overflow-y-auto custom-scrollbar bg-slate-900/20">
             <div id="chat-empty" class="h-full flex flex-col items-center justify-center text-center">
-              <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
-                <i class="fas fa-comment-dots text-2xl text-blue-400"></i>
+              <div class="w-20 h-20 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-5 border border-blue-500/30 shadow-lg">
+                <i class="fas fa-comment-dots text-3xl text-blue-400"></i>
               </div>
-              <h4 class="text-xl font-bold mb-2">Ready to Begin</h4>
-              <p class="text-gray-400 max-w-sm">Your conversation with Sarah will appear here once you start the interview</p>
+              <h4 class="text-xl font-bold mb-3">Ready to Begin</h4>
+              <p class="text-slate-400 max-w-sm leading-relaxed">Your conversation with Sarah will appear here once you start the interview</p>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Right Column - Controls -->
-      <div class="xl:col-span-1 space-y-6">
+      <!-- Right Column - Controls with enhanced styling -->
+      <div class="xl:col-span-1 space-y-6 flex flex-col">
         
-        <!-- Interview Controls -->
-        <div class="glass-card rounded-2xl p-6">
-          <h3 class="text-lg font-semibold mb-6 flex items-center space-x-2">
-            <i class="fas fa-gamepad text-green-400"></i>
+        <!-- Enhanced Interview Controls -->
+        <div class="glass-card rounded-2xl p-6 shadow-xl slide-up" style="animation-delay: 0.2s;">
+          <h3 class="text-lg font-semibold mb-6 flex items-center space-x-2.5">
+            <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+              <i class="fas fa-gamepad text-green-400 text-sm"></i>
+            </div>
             <span>Interview Controls</span>
           </h3>
           
           <div class="space-y-4">
-            <button id="start-interview-btn" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-4 px-6 rounded-xl text-lg font-bold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl">
+            <button id="start-interview-btn" class="w-full btn-primary text-white py-4 px-6 rounded-xl text-base font-bold shadow-xl">
               <i class="fas fa-play mr-2"></i>
               <span>Start Interview</span>
             </button>
             
             <div class="grid grid-cols-2 gap-3">
-              <button id="pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors hidden">
+              <button id="pause-btn" class="bg-yellow-500/90 hover:bg-yellow-500 text-white py-3 px-4 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg hidden">
                 <i class="fas fa-pause mr-2"></i>Pause
               </button>
-              <button id="end-interview-btn" class="bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors">
+              <button id="end-interview-btn" class="bg-red-500/90 hover:bg-red-500 text-white py-3 px-4 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg">
                 <i class="fas fa-stop mr-2"></i>End
               </button>
             </div>
           </div>
         </div>
         
-        <!-- Speech Controls -->
-        <div class="glass-card rounded-2xl p-6">
-          <h3 class="text-lg font-semibold mb-6 flex items-center space-x-2">
-            <i class="fas fa-microphone text-purple-400"></i>
+        <!-- Enhanced Speech Controls -->
+        <div class="glass-card rounded-2xl p-6 flex-grow shadow-xl slide-up" style="animation-delay: 0.25s;">
+          <h3 class="text-lg font-semibold mb-6 flex items-center space-x-2.5">
+            <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+              <i class="fas fa-microphone text-purple-400 text-sm"></i>
+            </div>
             <span>Voice Response</span>
           </h3>
           
           <div class="space-y-4">
-            <button id="speak-button" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-4 px-6 rounded-xl text-lg font-bold transition-all duration-200 transform hover:scale-105 shadow-lg relative overflow-hidden" disabled>
+            <button id="speak-button" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-xl text-base font-bold transition-all shadow-xl relative overflow-hidden opacity-50 cursor-not-allowed" disabled>
               <i class="fas fa-microphone mr-2"></i>
               <span id="speak-button-text">Press to Speak</span>
-              <div id="listening-animation" class="hidden absolute inset-0 flex items-center justify-center">
-                <div class="flex space-x-1">
-                  <div class="w-2 h-2 bg-white rounded-full typing-dot"></div>
-                  <div class="w-2 h-2 bg-white rounded-full typing-dot"></div>
-                  <div class="w-2 h-2 bg-white rounded-full typing-dot"></div>
+              <div id="listening-animation" class="hidden absolute inset-0 flex items-center justify-center bg-purple-600/20 backdrop-blur-sm">
+                <div class="flex space-x-1.5">
+                  <div class="w-2.5 h-2.5 bg-white rounded-full typing-dot"></div>
+                  <div class="w-2.5 h-2.5 bg-white rounded-full typing-dot"></div>
+                  <div class="w-2.5 h-2.5 bg-white rounded-full typing-dot"></div>
                 </div>
               </div>
             </button>
             
             <div class="grid grid-cols-2 gap-3">
-              <button id="stop-speaking-btn" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition-colors hidden">
+              <button id="stop-speaking-btn" class="bg-slate-700/50 hover:bg-slate-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all hover:scale-105 border border-slate-600/30 hidden">
                 <i class="fas fa-stop mr-2"></i>Stop
               </button>
-              <button id="skip-question-btn" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition-colors hidden">
+              <button id="skip-question-btn" class="bg-slate-700/50 hover:bg-slate-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all hover:scale-105 border border-slate-600/30 hidden">
                 <i class="fas fa-forward mr-2"></i>Skip
               </button>
             </div>
             
-            <!-- Status Display -->
-            <div id="stt-status" class="glass-card p-4 rounded-lg flex items-center space-x-3 text-sm">
+            <!-- Enhanced Status Display -->
+            <div id="stt-status" class="glass-card p-4 rounded-xl flex items-center space-x-3 text-sm border border-slate-600/30">
               <i class="fas fa-info-circle text-blue-400"></i>
-              <span>Click "Start Interview" to begin your session</span>
+              <span class="text-slate-300 font-medium">Click "Start Interview" to begin your session</span>
             </div>
             
-            <!-- Confidence Meter -->
-            <div id="confidence-meter" class="hidden glass-card p-4 rounded-lg">
+            <!-- Enhanced Confidence Meter -->
+            <div id="confidence-meter" class="hidden glass-card p-4 rounded-xl border border-slate-600/30">
               <div class="flex justify-between items-center mb-3">
-                <span class="text-sm font-medium">Speech Clarity</span>
+                <span class="text-sm font-semibold text-slate-300">Speech Clarity</span>
                 <span id="confidence-percentage" class="text-sm font-bold text-green-400">0%</span>
               </div>
-              <div class="w-full bg-gray-700 rounded-full h-2">
-                <div id="confidence-bar" class="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              <div class="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                <div id="confidence-bar" class="bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 h-3 rounded-full transition-all duration-500 shadow-inner" style="width: 0%"></div>
               </div>
             </div>
           </div>
@@ -385,26 +522,26 @@
   </div>
 </div>
 
-<!-- Hints Modal -->
+<!-- Enhanced Hints Modal -->
 <div id="hints-modal" class="fixed inset-0 z-50 hidden">
-  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" onclick="hideHintsModal()"></div>
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300" onclick="hideHintsModal()"></div>
   <div class="fixed inset-0 flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto custom-scrollbar transform scale-95 opacity-0 transition-all duration-300" id="hints-modal-content">
-      <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="fas fa-lightbulb text-2xl text-yellow-400"></i>
+    <div class="glass-card rounded-2xl p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto custom-scrollbar transform scale-95 opacity-0 transition-all duration-300 shadow-2xl border-slate-600/50" id="hints-modal-content">
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-yellow-500/30 shadow-lg">
+          <i class="fas fa-lightbulb text-3xl text-yellow-400"></i>
         </div>
-        <h3 class="text-2xl font-bold mb-2">Interview Guidance</h3>
-        <p class="text-gray-400">Strategic tips to help you excel with the current question</p>
+        <h3 class="text-3xl font-bold mb-3 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">Interview Guidance</h3>
+        <p class="text-slate-400 leading-relaxed">Strategic tips to help you excel with the current question</p>
       </div>
       <div id="hints-content" class="space-y-4 mb-8">
         <!-- Hints will be loaded here -->
       </div>
       <div class="flex justify-center space-x-4">
-        <button onclick="hideHintsModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+        <button onclick="hideHintsModal()" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-all hover:scale-105 shadow-lg">
           <i class="fas fa-check mr-2"></i>Got It, Thanks!
         </button>
-        <button onclick="hideHintsModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+        <button onclick="hideHintsModal()" class="bg-slate-700/50 hover:bg-slate-700 text-white px-8 py-3 rounded-xl font-semibold transition-all hover:scale-105 border border-slate-600/30">
           <i class="fas fa-times mr-2"></i>Close
         </button>
       </div>
@@ -412,16 +549,20 @@
   </div>
 </div>
 
-<!-- Loading Overlay -->
-<div id="loading-overlay" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center hidden">
+<!-- Enhanced Loading Overlay -->
+<div id="loading-overlay" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-lg flex items-center justify-center hidden">
   <div class="text-center">
-    <div class="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-    <div id="loading-text" class="text-xl font-semibold text-white">Initializing AI Interview...</div>
+    <div class="relative w-20 h-20 mb-6">
+      <div class="absolute inset-0 border-4 border-blue-500/30 rounded-full"></div>
+      <div class="absolute inset-0 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+    </div>
+    <div id="loading-text" class="text-xl font-semibold text-white mb-2">Initializing AI Interview...</div>
+    <div class="text-sm text-slate-400">Please wait a moment</div>
   </div>
 </div>
 
-<!-- Notification Container -->
-<div id="notification-container" class="fixed top-4 right-4 z-50 space-y-4 max-w-sm"></div>
+<!-- Enhanced Notification Container -->
+<div id="notification-container" class="fixed top-6 right-6 z-50 space-y-3 max-w-sm"></div>
 
 <!-- Hidden Audio Element -->
 <audio id="ai-audio-element" preload="auto" crossorigin="anonymous" class="hidden"></audio>
@@ -435,21 +576,18 @@ const INTERVIEW_PROGRESS = JSON.parse('{{ interview_progress|escapejs }}');
 
 // Enhanced DOM Elements
 const elements = {
-  // Chat and messaging
   chatMessages: document.getElementById('chat-messages'),
   chatEmpty: document.getElementById('chat-empty'),
   chatProgress: document.getElementById('chat-progress'),
   responseCount: document.getElementById('response-count'),
   avgLength: document.getElementById('avg-length'),
   
-  // Status indicators
   interviewStatus: document.getElementById('interview-status'),
   sttStatus: document.getElementById('stt-status'),
   headerStatus: document.getElementById('header-status'),
   aiStatusDot: document.getElementById('ai-status-dot'),
   aiStatusText: document.getElementById('ai-status-text'),
   
-  // Control buttons
   startBtn: document.getElementById('start-interview-btn'),
   endBtn: document.getElementById('end-interview-btn'),
   pauseBtn: document.getElementById('pause-btn'),
@@ -460,7 +598,6 @@ const elements = {
   hintsBtn: document.getElementById('hints-btn'),
   testAudioBtn: document.getElementById('test-audio-btn'),
   
-  // Video and audio
   userVideo: document.getElementById('user-video'),
   videoOverlay: document.getElementById('video-overlay'),
   recordingIndicator: document.getElementById('recording-indicator'),
@@ -468,22 +605,18 @@ const elements = {
   volumeSlider: document.getElementById('volume-slider'),
   volumeDisplay: document.getElementById('volume-display'),
   
-  // Visualizer and avatar
   visualizerCanvas: document.getElementById('ai-visualizer-canvas'),
   aiAvatar: document.getElementById('ai-avatar'),
   
-  // Progress indicators
   questionCounter: document.getElementById('question-counter'),
   timerDisplay: document.getElementById('timer-display'),
   questionProgress: document.getElementById('question-progress'),
   timeProgress: document.getElementById('time-progress'),
   
-  // Confidence meter
   confidenceMeter: document.getElementById('confidence-meter'),
   confidenceBar: document.getElementById('confidence-bar'),
   confidencePercentage: document.getElementById('confidence-percentage'),
   
-  // Modals and overlays
   hintsModal: document.getElementById('hints-modal'),
   hintsModalContent: document.getElementById('hints-modal-content'),
   hintsContent: document.getElementById('hints-content'),
@@ -491,7 +624,6 @@ const elements = {
   loadingText: document.getElementById('loading-text'),
   notificationContainer: document.getElementById('notification-container'),
   
-  // Animations
   listeningAnimation: document.getElementById('listening-animation')
 };
 
@@ -578,15 +710,15 @@ function updateCircularProgress(circle, percentage) {
   circle.style.strokeDashoffset = offset;
 }
 
-// Notification System
+// Enhanced Notification System
 function showNotification(message, type = 'info', duration = 5000) {
   const notification = document.createElement('div');
   
   const bgColors = {
-    success: 'bg-green-500/20 border-green-400/30 text-green-300',
-    error: 'bg-red-500/20 border-red-400/30 text-red-300',
-    warning: 'bg-yellow-500/20 border-yellow-400/30 text-yellow-300',
-    info: 'bg-blue-500/20 border-blue-400/30 text-blue-300'
+    success: 'bg-green-500/20 border-green-400/40 text-green-300',
+    error: 'bg-red-500/20 border-red-400/40 text-red-300',
+    warning: 'bg-yellow-500/20 border-yellow-400/40 text-yellow-300',
+    info: 'bg-blue-500/20 border-blue-400/40 text-blue-300'
   };
   
   const icons = {
@@ -596,12 +728,12 @@ function showNotification(message, type = 'info', duration = 5000) {
     info: 'fas fa-info-circle'
   };
   
-  notification.className = `glass-card ${bgColors[type]} border rounded-lg p-4 flex items-start space-x-3 transform translate-x-full transition-transform duration-300`;
+  notification.className = `glass-card ${bgColors[type]} border-2 rounded-xl p-4 flex items-start space-x-3 transform translate-x-full transition-all duration-300 shadow-xl`;
   
   notification.innerHTML = `
     <i class="${icons[type]} text-lg mt-0.5"></i>
-    <div class="flex-1 font-medium">${message}</div>
-    <button onclick="this.closest('div').remove()" class="text-current opacity-70 hover:opacity-100">
+    <div class="flex-1 font-medium text-sm leading-relaxed">${message}</div>
+    <button onclick="this.closest('div').remove()" class="text-current opacity-70 hover:opacity-100 transition-opacity">
       <i class="fas fa-times"></i>
     </button>
   `;
@@ -626,7 +758,7 @@ function showNotification(message, type = 'info', duration = 5000) {
 function updateInterviewStatus(status, statusClass = 'bg-green-500') {
   const statusElement = elements.interviewStatus;
   statusElement.innerHTML = `
-    <div class="w-3 h-3 ${statusClass} rounded-full pulse-ring"></div>
+    <div class="w-2.5 h-2.5 ${statusClass} rounded-full status-indicator"></div>
     <span>${status}</span>
   `;
 }
@@ -648,7 +780,7 @@ function updateSpeechStatus(message, type = 'info') {
   
   elements.sttStatus.innerHTML = `
     <i class="${icons[type]} ${typeClasses[type]}"></i>
-    <span>${message}</span>
+    <span class="text-slate-300 font-medium">${message}</span>
   `;
 }
 
@@ -676,14 +808,14 @@ async function testAudio() {
     hideLoadingOverlay();
     
     if (healthData.text_generation && healthData.tts_functional) {
-      showNotification('Audio system is working perfectly!', 'success');
+      showNotification('✓ Audio system is working perfectly!', 'success');
     } else {
-      showNotification('Audio system has limited functionality. Some features may not work optimally.', 'warning', 8000);
+      showNotification('⚠ Audio system has limited functionality. Some features may not work optimally.', 'warning', 8000);
     }
   } catch (error) {
     hideLoadingOverlay();
     console.error('Audio test failed:', error);
-    showNotification('Audio test failed. Please check your connection and try again.', 'error');
+    showNotification('✗ Audio test failed. Please check your connection and try again.', 'error');
   }
 }
 
@@ -725,14 +857,14 @@ async function setupMediaDevices() {
     }
     
     hideLoadingOverlay();
-    showNotification('Camera and microphone setup completed successfully!', 'success');
+    showNotification('✓ Camera and microphone setup completed successfully!', 'success');
     return true;
     
   } catch (error) {
     hideLoadingOverlay();
     console.error('Media setup failed:', error);
     
-    let errorMessage = 'Failed to access camera and microphone. ';
+    let errorMessage = '✗ Failed to access camera and microphone. ';
     if (error.name === 'NotAllowedError') {
       errorMessage += 'Please allow camera and microphone access and refresh the page.';
     } else if (error.name === 'NotFoundError') {
@@ -756,10 +888,10 @@ function setupSpeechRecognitionHandlers() {
   
   state.recognition.onstart = () => {
     state.isListening = true;
-    elements.speakBtn.classList.add('listening-pulse');
+    elements.speakBtn.classList.add('listening-pulse', 'scale-105');
     elements.listeningAnimation.classList.remove('hidden');
     elements.speakBtnText.classList.add('hidden');
-    updateSpeechStatus('Listening for your response...', 'info');
+    updateSpeechStatus('🎤 Listening for your response...', 'info');
     updateInterviewStatus('Listening', 'bg-red-500');
   };
   
@@ -797,18 +929,18 @@ function setupSpeechRecognitionHandlers() {
     
     const currentText = speechBuffer + interimTranscript;
     if (currentText.trim()) {
-      updateSpeechStatus(`Recording: "${currentText.trim()}"`, 'info');
+      updateSpeechStatus(`📝 Recording: "${currentText.trim()}"`, 'info');
     }
   };
   
   state.recognition.onerror = (event) => {
     console.error('Speech recognition error:', event.error);
     state.isListening = false;
-    elements.speakBtn.classList.remove('listening-pulse');
+    elements.speakBtn.classList.remove('listening-pulse', 'scale-105');
     elements.listeningAnimation.classList.add('hidden');
     elements.speakBtnText.classList.remove('hidden');
     
-    let errorMessage = 'Speech recognition error: ';
+    let errorMessage = '✗ Speech recognition error: ';
     switch(event.error) {
       case 'no-speech':
         errorMessage += 'No speech detected. Please try again.';
@@ -829,7 +961,7 @@ function setupSpeechRecognitionHandlers() {
   
   state.recognition.onend = () => {
     state.isListening = false;
-    elements.speakBtn.classList.remove('listening-pulse');
+    elements.speakBtn.classList.remove('listening-pulse', 'scale-105');
     elements.listeningAnimation.classList.add('hidden');
     elements.speakBtnText.classList.remove('hidden');
     
@@ -861,7 +993,7 @@ async function submitUserResponse(userInput) {
   try {
     showLoadingOverlay('Processing your response...');
     updateInterviewStatus('Processing', 'bg-yellow-500');
-    updateSpeechStatus('Processing your response...', 'info');
+    updateSpeechStatus('⚙️ Processing your response...', 'info');
     
     addMessageToChat('user', userInput);
     
@@ -922,20 +1054,22 @@ async function submitUserResponse(userInput) {
   }
 }
 
-// Chat Functions
+// Enhanced Chat Functions
 function addMessageToChat(role, message, autoScroll = true) {
   if (elements.chatEmpty && !elements.chatEmpty.classList.contains('hidden')) {
     elements.chatEmpty.classList.add('hidden');
   }
   
   const messageElement = document.createElement('div');
-  messageElement.className = `mb-4 animate-pulse`;
+  messageElement.className = `mb-4 message-enter`;
   
   if (role === 'user') {
     messageElement.innerHTML = `
       <div class="flex justify-end">
         <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl rounded-br-md px-4 py-3 max-w-xs lg:max-w-sm shadow-lg">
-          <div class="font-medium mb-1 text-sm opacity-80">You</div>
+          <div class="font-semibold mb-1 text-xs opacity-80 flex items-center">
+            <i class="fas fa-user mr-1.5"></i>You
+          </div>
           <div class="text-sm leading-relaxed">${message}</div>
         </div>
       </div>
@@ -943,9 +1077,9 @@ function addMessageToChat(role, message, autoScroll = true) {
   } else {
     messageElement.innerHTML = `
       <div class="flex justify-start">
-        <div class="glass-card text-white rounded-2xl rounded-bl-md px-4 py-3 max-w-xs lg:max-w-sm border border-white/20">
-          <div class="font-medium mb-1 text-sm text-purple-300 flex items-center">
-            <i class="fas fa-robot mr-2"></i>Sarah
+        <div class="glass-card text-white rounded-2xl rounded-bl-md px-4 py-3 max-w-xs lg:max-w-sm border border-slate-600/30 shadow-lg">
+          <div class="font-semibold mb-1 text-xs text-purple-300 flex items-center">
+            <i class="fas fa-robot mr-1.5"></i>Sarah
           </div>
           <div class="text-sm leading-relaxed">${message}</div>
         </div>
@@ -953,7 +1087,6 @@ function addMessageToChat(role, message, autoScroll = true) {
     `;
   }
   
-  // Add to chat history
   state.chatHistory.push({ role: role === 'user' ? 'user' : 'assistant', content: message });
   
   elements.chatMessages.appendChild(messageElement);
@@ -961,17 +1094,14 @@ function addMessageToChat(role, message, autoScroll = true) {
   if (autoScroll) {
     elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
   }
-  
-  // Remove animation after it completes
-  setTimeout(() => messageElement.classList.remove('animate-pulse'), 400);
 }
 
 // Audio Playback
 async function playAIResponse(text, audioUrl) {
   try {
     updateInterviewStatus('AI Speaking', 'bg-blue-500');
-    elements.aiAvatar.classList.add('pulse-ring');
-    elements.aiStatusText.innerHTML = '<i class="fas fa-volume-up mr-2"></i><span>Speaking...</span>';
+    elements.aiAvatar.classList.add('pulse-ring', 'scale-110');
+    elements.aiStatusText.innerHTML = '<i class="fas fa-volume-up mr-2 text-purple-400"></i><span>Speaking...</span>';
     
     state.isPlaying = true;
     elements.aiAudioElement.src = audioUrl;
@@ -981,18 +1111,18 @@ async function playAIResponse(text, audioUrl) {
     
     elements.aiAudioElement.onended = () => {
       state.isPlaying = false;
-      elements.aiAvatar.classList.remove('pulse-ring');
-      elements.aiStatusText.innerHTML = '<i class="fas fa-brain mr-2"></i><span>Ready to Interview</span>';
+      elements.aiAvatar.classList.remove('pulse-ring', 'scale-110');
+      elements.aiStatusText.innerHTML = '<i class="fas fa-brain mr-2 text-purple-400"></i><span>Ready to Interview</span>';
       updateInterviewStatus('Interview Active', 'bg-green-500');
     };
     
   } catch (error) {
     console.error('Audio playback failed:', error);
     state.isPlaying = false;
-    elements.aiAvatar.classList.remove('pulse-ring');
-    elements.aiStatusText.innerHTML = '<i class="fas fa-brain mr-2"></i><span>Ready to Interview</span>';
+    elements.aiAvatar.classList.remove('pulse-ring', 'scale-110');
+    elements.aiStatusText.innerHTML = '<i class="fas fa-brain mr-2 text-purple-400"></i><span>Ready to Interview</span>';
     updateInterviewStatus('Interview Active', 'bg-green-500');
-    showNotification('Audio playback failed. Check your connection.', 'warning');
+    showNotification('⚠ Audio playback failed. Check your connection.', 'warning');
   }
 }
 
@@ -1034,6 +1164,8 @@ async function startInterview() {
       elements.startBtn.classList.add('hidden');
       elements.pauseBtn.classList.remove('hidden');
       elements.speakBtn.disabled = false;
+      elements.speakBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      elements.speakBtn.classList.add('hover:scale-105');
       elements.recordingIndicator.classList.remove('hidden');
       elements.confidenceMeter.classList.remove('hidden');
       
@@ -1048,7 +1180,7 @@ async function startInterview() {
       }
       
       hideLoadingOverlay();
-      showNotification('Interview started successfully! Good luck!', 'success');
+      showNotification('🎉 Interview started successfully! Good luck!', 'success');
       
       elements.hintsBtn.classList.remove('hidden');
       
@@ -1062,7 +1194,7 @@ async function startInterview() {
     console.error('Failed to start interview:', error);
     hideLoadingOverlay();
     elements.startBtn.disabled = false;
-    showNotification(`Failed to start interview: ${error.message}`, 'error', 8000);
+    showNotification(`✗ Failed to start interview: ${error.message}`, 'error', 8000);
     updateInterviewStatus('Ready to Start', 'bg-green-500');
   }
 }
@@ -1096,12 +1228,11 @@ async function endInterview() {
       }
     }
     
-    // Fallback if API call fails
     handleInterviewCompletion();
     
   } catch (error) {
     console.error('Failed to end interview properly:', error);
-    handleInterviewCompletion(); // Still end the interview
+    handleInterviewCompletion();
   } finally {
     hideLoadingOverlay();
   }
@@ -1117,14 +1248,18 @@ function pauseInterview() {
     
     elements.pauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Resume';
     elements.speakBtn.disabled = true;
+    elements.speakBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    elements.speakBtn.classList.remove('hover:scale-105');
     updateInterviewStatus('Paused', 'bg-yellow-500');
-    showNotification('Interview paused', 'info', 3000);
+    showNotification('⏸ Interview paused', 'info', 3000);
   } else {
     state.progressTimer = setInterval(updateProgress, 1000);
     elements.pauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pause';
     elements.speakBtn.disabled = false;
+    elements.speakBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    elements.speakBtn.classList.add('hover:scale-105');
     updateInterviewStatus('Interview Active', 'bg-green-500');
-    showNotification('Interview resumed', 'info', 3000);
+    showNotification('▶️ Interview resumed', 'info', 3000);
   }
 }
 
@@ -1170,23 +1305,32 @@ function stopListening() {
 }
 
 function resetSpeechButton() {
-  elements.speakBtn.classList.remove('listening-pulse');
+  elements.speakBtn.classList.remove('listening-pulse', 'scale-105');
   elements.listeningAnimation.classList.add('hidden');
   elements.speakBtnText.classList.remove('hidden');
   elements.speakBtn.disabled = !state.interviewActive || state.isPaused;
+  
+  if (elements.speakBtn.disabled) {
+    elements.speakBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    elements.speakBtn.classList.remove('hover:scale-105');
+  } else {
+    elements.speakBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    elements.speakBtn.classList.add('hover:scale-105');
+  }
+  
   elements.stopSpeakBtn.classList.add('hidden');
   elements.skipBtn.classList.add('hidden');
   
   updateInterviewStatus(state.interviewActive ? 'Interview Active' : 'Ready to Start', 'bg-green-500');
 }
 
-// Hints System
+// Enhanced Hints System
 async function loadInterviewHints() {
   try {
     elements.hintsContent.innerHTML = `
-      <div class="glass-card p-4 rounded-lg border border-yellow-400/30">
+      <div class="glass-card p-6 rounded-xl border border-yellow-400/30 shimmer">
         <div class="text-lg font-bold text-yellow-400 mb-2">Loading personalized hints...</div>
-        <div class="text-gray-300">Analyzing your current question context for strategic guidance.</div>
+        <div class="text-slate-300">Analyzing your current question context for strategic guidance.</div>
       </div>
     `;
     
@@ -1223,10 +1367,18 @@ function displayHints(hints) {
   
   hints.forEach((hint, index) => {
     const hintElement = document.createElement('div');
-    hintElement.className = 'glass-card p-4 rounded-lg border border-yellow-400/30 mb-4 last:mb-0';
+    hintElement.className = 'glass-card p-5 rounded-xl border border-yellow-400/30 mb-4 last:mb-0 hover:border-yellow-400/50 transition-all slide-up';
+    hintElement.style.animationDelay = `${index * 0.1}s`;
     hintElement.innerHTML = `
-      <div class="text-lg font-bold text-yellow-400 mb-2">${hint.title}</div>
-      <div class="text-gray-300 leading-relaxed">${hint.description}</div>
+      <div class="flex items-start space-x-3">
+        <div class="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+          <i class="fas fa-lightbulb text-yellow-400 text-sm"></i>
+        </div>
+        <div class="flex-1">
+          <div class="text-lg font-bold text-yellow-400 mb-2">${hint.title}</div>
+          <div class="text-slate-300 leading-relaxed">${hint.description}</div>
+        </div>
+      </div>
     `;
     elements.hintsContent.appendChild(hintElement);
   });
@@ -1287,12 +1439,12 @@ function handleInteractionError(error) {
   console.error('Interaction error:', error);
   
   if (state.consecutiveErrors < state.maxRetries) {
-    showNotification(`Error occurred. Retrying... (${state.consecutiveErrors}/${state.maxRetries})`, 'warning', 5000);
+    showNotification(`⚠ Error occurred. Retrying... (${state.consecutiveErrors}/${state.maxRetries})`, 'warning', 5000);
     setTimeout(() => {
       resetSpeechButton();
     }, 2000);
   } else {
-    showNotification('Multiple errors occurred. Please refresh the page or try again later.', 'error', 10000);
+    showNotification('✗ Multiple errors occurred. Please refresh the page or try again later.', 'error', 10000);
     updateSpeechStatus('Multiple errors detected. Please refresh the page.', 'error');
   }
 }
@@ -1309,6 +1461,8 @@ function handleInterviewCompletion() {
   
   updateInterviewStatus('Completed', 'bg-blue-500');
   elements.speakBtn.disabled = true;
+  elements.speakBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  elements.speakBtn.classList.remove('hover:scale-105');
   elements.hintsBtn.classList.add('hidden');
   elements.recordingIndicator.classList.add('hidden');
   
@@ -1316,7 +1470,7 @@ function handleInterviewCompletion() {
     window.location.href = `/mock-interview/${state.sessionId}/review/`;
   }, 2000);
   
-  showNotification('Interview completed! Redirecting to review page...', 'success', 3000);
+  showNotification('🎉 Interview completed! Redirecting to review page...', 'success', 3000);
 }
 
 // Event Listeners Setup
@@ -1359,7 +1513,7 @@ function setupEventListeners() {
   });
 }
 
-// Initialize Visualizer
+// Enhanced Visualizer
 function initializeVisualizer() {
   const canvas = elements.visualizerCanvas;
   if (!canvas) return;
@@ -1369,14 +1523,14 @@ function initializeVisualizer() {
   canvas.height = canvas.offsetHeight;
   
   const particles = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 40; i++) {
     particles.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 2 + 1,
-      opacity: Math.random() * 0.5 + 0.1
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      size: Math.random() * 2.5 + 1,
+      opacity: Math.random() * 0.6 + 0.1
     });
   }
   
@@ -1392,8 +1546,24 @@ function initializeVisualizer() {
       
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(147, 51, 234, ${particle.opacity})`;
+      ctx.fillStyle = `rgba(168, 85, 247, ${particle.opacity})`;
       ctx.fill();
+      
+      // Draw connections
+      particles.forEach(otherParticle => {
+        const dx = particle.x - otherParticle.x;
+        const dy = particle.y - otherParticle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < 100) {
+          ctx.beginPath();
+          ctx.moveTo(particle.x, particle.y);
+          ctx.lineTo(otherParticle.x, otherParticle.y);
+          ctx.strokeStyle = `rgba(168, 85, 247, ${0.15 * (1 - distance / 100)})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      });
     });
     
     state.visualizerAnimationId = requestAnimationFrame(animate);
@@ -1405,12 +1575,10 @@ function initializeVisualizer() {
 // Main Initialization Function
 async function initializeInterface() {
   try {
-    console.log('Initializing MockMate Professional Interview System...');
+    console.log('🚀 Initializing MockMate Professional Interview System...');
     
     setupEventListeners();
     updateVolume();
-    
-    
     updateProgress();
     initializeVisualizer();
     
@@ -1444,24 +1612,24 @@ async function initializeInterface() {
     });
     
     state.isInitialized = true;
-    console.log('MockMate Professional Interview System initialized successfully');
+    console.log('✓ MockMate Professional Interview System initialized successfully');
     
     updateInterviewStatus('Ready to Start', 'bg-green-500');
     updateSpeechStatus('Click "Start Interview" to begin your session', 'info');
     
-    // Show initial notification
+    // Show initial notification with enhanced message
     setTimeout(() => {
-      showNotification('MockMate Interview System ready! Click "Start Interview" when you\'re prepared.', 'info', 4000);
+      showNotification('🎯 MockMate Interview System ready! Click "Start Interview" when you\'re prepared.', 'info', 5000);
     }, 1000);
     
   } catch (error) {
     console.error('Interface initialization failed:', error);
-    showNotification('Failed to initialize interview system. Some features may not work properly.', 'error', 10000);
+    showNotification('✗ Failed to initialize interview system. Some features may not work properly.', 'error', 10000);
     state.isInitialized = true;
   }
 }
 
-// Cleanup function for when page is unloaded
+// Cleanup function
 function cleanup() {
   if (state.progressTimer) {
     clearInterval(state.progressTimer);
@@ -1484,83 +1652,15 @@ function cleanup() {
   }
 }
 
-// Additional utility functions
-function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function generateSessionReport() {
-  const duration = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
-  const avgConfidence = state.metrics?.confidenceScores?.length > 0 ? 
-    state.metrics.confidenceScores.reduce((a, b) => a + b) / state.metrics.confidenceScores.length : 0;
-  
-  return {
-    sessionId: state.sessionId,
-    duration: formatTime(duration),
-    questionsAsked: state.currentQuestion,
-    totalResponses: state.totalResponses,
-    averageWordsPerResponse: state.totalResponses > 0 ? Math.round(state.totalWords / state.totalResponses) : 0,
-    averageConfidence: Math.round(avgConfidence),
-    chatHistory: state.chatHistory,
-    timestamp: new Date().toISOString()
-  };
-}
-
-// Enhanced error recovery
-function attemptRecovery() {
-  console.log('Attempting system recovery...');
-  
-  // Reset error counter
-  state.consecutiveErrors = 0;
-  
-  // Reset UI elements
-  resetSpeechButton();
-  updateInterviewStatus(state.interviewActive ? 'Interview Active' : 'Ready to Start', 'bg-green-500');
-  
-  // Re-enable controls
-  if (state.interviewActive) {
-    elements.speakBtn.disabled = false;
-    elements.hintsBtn.classList.remove('hidden');
-  }
-  
-  showNotification('System recovered successfully. You can continue your interview.', 'success', 3000);
-}
-
-// Performance monitoring
-function logPerformanceMetrics() {
-  if (typeof performance !== 'undefined' && performance.mark) {
-    performance.mark('interview-system-ready');
-    
-    const entries = performance.getEntriesByType('measure');
-    if (entries.length > 0) {
-      console.log('Performance metrics:', entries.map(entry => ({
-        name: entry.name,
-        duration: Math.round(entry.duration) + 'ms'
-      })));
-    }
-  }
-}
-
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Initializing MockMate Professional Interview System...');
-  
-  // Mark start time for performance monitoring
-  if (typeof performance !== 'undefined' && performance.mark) {
-    performance.mark('interview-init-start');
-  }
+  console.log('🎬 Initializing MockMate Professional Interview System...');
   
   try {
     initializeInterface();
-    logPerformanceMetrics();
   } catch (error) {
     console.error('Failed to initialize interface:', error);
-    showNotification('Failed to initialize interview interface. Please refresh the page.', 'error');
+    showNotification('✗ Failed to initialize interview interface. Please refresh the page.', 'error');
   }
 });
 
@@ -1575,7 +1675,7 @@ window.addEventListener('beforeunload', (event) => {
   }
 });
 
-// Global functions for modal control (called from HTML)
+// Global functions for modal control
 window.hideHintsModal = hideHintsModal;
 window.showHintsModal = showHintsModal;
 
@@ -1583,9 +1683,6 @@ window.showHintsModal = showHintsModal;
 if (typeof window !== 'undefined') {
   window.MockMateDebug = {
     state,
-    generateSessionReport,
-    attemptRecovery,
-    logPerformanceMetrics,
     resetSystem: () => {
       cleanup();
       location.reload();
@@ -1593,14 +1690,7 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// Service Worker registration for PWA capabilities (optional)
-if ('serviceWorker' in navigator && 'production' === '{{ settings.ENVIRONMENT }}') {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => console.log('SW registered:', registration))
-      .catch(registrationError => console.log('SW registration failed:', registrationError));
-  });
-}
+console.log('✓ MockMate Interview System loaded successfully');
 
 </script>
 {% endblock %}

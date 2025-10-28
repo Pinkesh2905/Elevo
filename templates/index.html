@@ -3,30 +3,12 @@
 {% block title %}MockMate - Master Your Tech Career{% endblock %}
 
 {% block content %}
-<!-- Hero Section with Coding Animation -->
+<!-- Hero Section -->
 <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-  <!-- Dynamic coding background -->
-  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/60 via-indigo-900/40 to-purple-900/50"></div>
-  
-  <!-- Animated code snippets -->
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="coding-rain">
-      <div class="code-snippet" style="left: 10%; animation-delay: 0s;">function solve() {</div>
-      <div class="code-snippet" style="left: 30%; animation-delay: 2s;">const result = [];</div>
-      <div class="code-snippet" style="left: 60%; animation-delay: 4s;">return answer;</div>
-      <div class="code-snippet" style="left: 80%; animation-delay: 6s;">}</div>
-      <div class="code-snippet" style="left: 45%; animation-delay: 8s;">if (condition) {</div>
-      <div class="code-snippet" style="left: 25%; animation-delay: 10s;">console.log('success');</div>
-    </div>
-  </div>
+  <!-- Dynamic background overlay -->
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-indigo-900/30 to-purple-900/40"></div>
   
   <div class="relative z-10 text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Enhanced status badge with typing animation -->
-    <div class="inline-flex items-center px-8 py-4 rounded-2xl glass border border-emerald-400/30 mb-10 hover-lift">
-      <div class="w-3 h-3 bg-emerald-400 rounded-full mr-4 pulse-dot"></div>
-      <span class="text-slate-200 font-semibold text-lg typing-text">Leading Placement Preparation Platform</span>
-    </div>
-    
     <!-- Main headline with gradient animation -->
     <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-10 leading-tight">
       Master Your
@@ -35,23 +17,22 @@
       </span>
     </h1>
     
-    <!-- Enhanced subtitle with typewriter effect -->
-    <div class="text-2xl md:text-3xl text-slate-300 mb-16 max-w-4xl mx-auto leading-relaxed">
-      <span class="typewriter">Code. Learn. Succeed. Land your dream job.</span>
+    <!-- Enhanced subtitle -->
+    <div class="text-2xl md:text-3xl text-slate-300 mb-16 max-w-4xl mx-auto leading-relaxed font-medium">
+      Code. Learn. Succeed. Land your dream job.
     </div>
     
-    <!-- Enhanced CTA buttons with ripple effect -->
-    <div class="flex flex-col sm:flex-row gap-8 justify-center mb-20">
+    <!-- Simplified CTA buttons -->
+    <div class="flex flex-col sm:flex-row gap-6 justify-center mb-20">
       {% if not user.is_authenticated %}
-        <a href="{% url 'users:signup' %}" class="group relative overflow-hidden px-12 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-2xl font-bold text-xl shadow-2xl btn-glow hover-lift ripple-btn">
-          <div class="absolute inset-0 bg-gradient-to-r from-cyan-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <span class="relative flex items-center justify-center">
+        <a href="{% url 'users:signup' %}" class="group px-10 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <span class="flex items-center justify-center">
             <i class="ri-rocket-line mr-3"></i>
             Launch Career
-            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-2 transition-transform duration-300"></i>
+            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
           </span>
         </a>
-        <a href="#features" class="group px-12 py-5 glass border-2 border-white/40 text-white rounded-2xl hover:bg-white/20 hover:border-indigo-400/60 transition-all duration-400 font-bold text-xl hover-lift">
+        <a href="#features" class="group px-10 py-4 glass border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-indigo-400/50 transition-all duration-300 font-bold text-lg hover:-translate-y-1">
           <span class="flex items-center justify-center">
             <i class="ri-code-view mr-3"></i>
             Explore Platform
@@ -59,14 +40,14 @@
           </span>
         </a>
       {% else %}
-        <a href="{% url 'practice:problem_list' %}" class="group relative overflow-hidden px-12 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-2xl font-bold text-xl shadow-2xl btn-glow hover-lift ripple-btn">
-          <span class="relative flex items-center justify-center">
+        <a href="{% url 'practice:problem-list' %}" class="group px-10 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <span class="flex items-center justify-center">
             <i class="ri-code-s-slash-line mr-3"></i>
             Continue Coding
-            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-2 transition-transform duration-300"></i>
+            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
           </span>
         </a>
-        <a href="{% url 'mock_interview:interview_setup' %}" class="group px-12 py-5 glass border-2 border-white/40 text-white rounded-2xl hover:bg-white/20 hover:border-cyan-400/60 transition-all duration-400 font-bold text-xl hover-lift">
+        <a href="{% url 'mock_interview:interview_setup' %}" class="group px-10 py-4 glass border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-cyan-400/50 transition-all duration-300 font-bold text-lg hover:-translate-y-1">
           <span class="flex items-center justify-center">
             <i class="ri-robot-line mr-3"></i>
             AI Interview
@@ -75,32 +56,27 @@
       {% endif %}
     </div>
     
-    <!-- Enhanced trust indicators with floating animation -->
-    <div class="flex flex-wrap items-center justify-center gap-10 text-slate-300">
-      <div class="flex items-center glass px-8 py-4 rounded-2xl border border-amber-400/30 floating-badge">
-        <i class="ri-star-fill text-amber-400 mr-3 text-lg"></i>
-        <span class="font-bold">4.9★ Rating</span>
+    <!-- Trust indicators -->
+    <div class="flex flex-wrap items-center justify-center gap-8 text-slate-300">
+      <div class="flex items-center glass px-6 py-3 rounded-xl border border-amber-400/20 hover:border-amber-400/40 transition-all duration-300">
+        <i class="ri-star-fill text-amber-400 mr-2 text-lg"></i>
+        <span class="font-semibold">4.9★ Rating</span>
       </div>
-      <div class="flex items-center glass px-8 py-4 rounded-2xl border border-indigo-400/30 floating-badge" style="animation-delay: 0.5s;">
-        <i class="ri-group-line mr-3 text-indigo-400 text-lg"></i>
-        <span class="font-bold">25K+ Coders</span>
+      <div class="flex items-center glass px-6 py-3 rounded-xl border border-indigo-400/20 hover:border-indigo-400/40 transition-all duration-300">
+        <i class="ri-group-line mr-2 text-indigo-400 text-lg"></i>
+        <span class="font-semibold">25K+ Coders</span>
       </div>
-      <div class="flex items-center glass px-8 py-4 rounded-2xl border border-emerald-400/30 floating-badge" style="animation-delay: 1s;">
-        <i class="ri-trophy-line mr-3 text-emerald-400 text-lg"></i>
-        <span class="font-bold">95% Success</span>
+      <div class="flex items-center glass px-6 py-3 rounded-xl border border-emerald-400/20 hover:border-emerald-400/40 transition-all duration-300">
+        <i class="ri-trophy-line mr-2 text-emerald-400 text-lg"></i>
+        <span class="font-semibold">95% Success</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Features Section with Code-themed Animations -->
+<!-- Features Section -->
 <section id="features" class="py-24 relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 to-indigo-900/40"></div>
-  
-  <!-- Binary background pattern -->
-  <div class="absolute inset-0 opacity-10">
-    <div class="binary-grid"></div>
-  </div>
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/60 to-indigo-900/30"></div>
   
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
     <div class="text-center mb-20">
@@ -117,157 +93,165 @@
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       <!-- Coding Problems -->
-      <div class="feature-card group relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div class="relative p-8">
-          <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 icon-float">
-            <i class="ri-code-s-slash-line text-white text-3xl"></i>
+      <div class="feature-card group">
+        <div class="feature-card-inner">
+          <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+          <div class="relative p-8">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i class="ri-code-s-slash-line text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-indigo-400 transition-colors duration-300">
+              Coding Problems
+            </h3>
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              Master algorithms and data structures with 1200+ curated problems from top tech companies.
+            </p>
+            
+            <div class="space-y-3 mb-6">
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Company-specific questions
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Multiple language support
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Detailed explanations
+              </div>
+            </div>
+            
+            <a href="{% url 'practice:problem-list' %}" class="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 group-hover:translate-x-1">
+              Start Coding
+              <i class="ri-arrow-right-line ml-2"></i>
+            </a>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-6 brand-font group-hover:text-indigo-400 transition-colors">
-            Coding Problems
-          </h3>
-          <p class="text-slate-300 mb-8 leading-relaxed text-lg">
-            Master algorithms and data structures with 1200+ curated problems from top tech companies.
-          </p>
-          
-          <div class="space-y-4 mb-8">
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Company-specific questions
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Multiple language support
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Detailed explanations
-            </div>
-          </div>
-          
-          <a href="{% url 'practice:problem_list' %}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors group-hover:translate-x-1 duration-300">
-            Start Coding
-            <i class="ri-arrow-right-line ml-2"></i>
-          </a>
         </div>
       </div>
 
       <!-- Aptitude Tests -->
-      <div class="feature-card group relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div class="relative p-8">
-          <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 icon-float" style="animation-delay: 0.2s;">
-            <i class="ri-brain-line text-white text-3xl"></i>
+      <div class="feature-card group">
+        <div class="feature-card-inner">
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+          <div class="relative p-8">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i class="ri-brain-line text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-purple-400 transition-colors duration-300">
+              Aptitude Tests
+            </h3>
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              Sharpen logical reasoning, quantitative skills, and verbal ability with targeted assessments.
+            </p>
+            
+            <div class="space-y-3 mb-6">
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Logical reasoning puzzles
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Quantitative analysis
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Verbal comprehension
+              </div>
+            </div>
+            
+            <a href="{% url 'aptitude:dashboard' %}" class="inline-flex items-center px-5 py-2.5 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 group-hover:translate-x-1">
+              Take Tests
+              <i class="ri-arrow-right-line ml-2"></i>
+            </a>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-6 brand-font group-hover:text-purple-400 transition-colors">
-            Aptitude Tests
-          </h3>
-          <p class="text-slate-300 mb-8 leading-relaxed text-lg">
-            Sharpen logical reasoning, quantitative skills, and verbal ability with targeted assessments.
-          </p>
-          
-          <div class="space-y-4 mb-8">
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Logical reasoning puzzles
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Quantitative analysis
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Verbal comprehension
-            </div>
-          </div>
-          
-          <a href="{% url 'aptitude:dashboard' %}" class="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors group-hover:translate-x-1 duration-300">
-            Take Tests
-            <i class="ri-arrow-right-line ml-2"></i>
-          </a>
         </div>
       </div>
 
       <!-- Community Hub -->
-      <div class="feature-card group relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div class="relative p-8">
-          <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 icon-float" style="animation-delay: 0.4s;">
-            <i class="ri-team-line text-white text-3xl"></i>
+      <div class="feature-card group">
+        <div class="feature-card-inner">
+          <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+          <div class="relative p-8">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i class="ri-team-line text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-emerald-400 transition-colors duration-300">
+              Community Hub
+            </h3>
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              Connect with mentors, peers, and successful candidates in our thriving tech community.
+            </p>
+            
+            <div class="space-y-3 mb-6">
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Expert mentorship
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Industry insights
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Peer networking
+              </div>
+            </div>
+            
+            <a href="{% url 'posts:feed' %}" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-all duration-300 group-hover:translate-x-1">
+              Join Community
+              <i class="ri-arrow-right-line ml-2"></i>
+            </a>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-6 brand-font group-hover:text-emerald-400 transition-colors">
-            Community Hub
-          </h3>
-          <p class="text-slate-300 mb-8 leading-relaxed text-lg">
-            Connect with mentors, peers, and successful candidates in our thriving tech community.
-          </p>
-          
-          <div class="space-y-4 mb-8">
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Expert mentorship
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Industry insights
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Peer networking
-            </div>
-          </div>
-          
-          <a href="{% url 'posts:feed' %}" class="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors group-hover:translate-x-1 duration-300">
-            Join Community
-            <i class="ri-arrow-right-line ml-2"></i>
-          </a>
         </div>
       </div>
 
       <!-- AI Mock Interviews -->
-      <div class="feature-card group relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <div class="relative p-8">
-          <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300 icon-float" style="animation-delay: 0.6s;">
-            <i class="ri-robot-2-line text-white text-3xl"></i>
+      <div class="feature-card group">
+        <div class="feature-card-inner">
+          <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+          <div class="relative p-8">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i class="ri-robot-2-line text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-cyan-400 transition-colors duration-300">
+              AI Interviews
+            </h3>
+            <p class="text-slate-300 mb-6 leading-relaxed">
+              Practice with realistic AI-powered interviews and receive detailed performance feedback.
+            </p>
+            
+            <div class="space-y-3 mb-6">
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Real-time AI feedback
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Company scenarios
+              </div>
+              <div class="flex items-center text-emerald-400 text-sm font-medium">
+                <i class="ri-check-line mr-2"></i>
+                Performance analytics
+              </div>
+            </div>
+            
+            <a href="{% url 'mock_interview:interview_setup' %}" class="inline-flex items-center px-5 py-2.5 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-all duration-300 group-hover:translate-x-1">
+              Book Session
+              <i class="ri-arrow-right-line ml-2"></i>
+            </a>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-6 brand-font group-hover:text-cyan-400 transition-colors">
-            AI Interviews
-          </h3>
-          <p class="text-slate-300 mb-8 leading-relaxed text-lg">
-            Practice with realistic AI-powered interviews and receive detailed performance feedback.
-          </p>
-          
-          <div class="space-y-4 mb-8">
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Real-time AI feedback
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Company scenarios
-            </div>
-            <div class="flex items-center text-emerald-400 font-medium">
-              <i class="ri-check-double-line mr-3"></i>
-              Performance analytics
-            </div>
-          </div>
-          
-          <a href="{% url 'mock_interview:interview_setup' %}" class="inline-flex items-center px-6 py-3 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-700 transition-colors group-hover:translate-x-1 duration-300">
-            Book Session
-            <i class="ri-arrow-right-line ml-2"></i>
-          </a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Stats Section with Counter Animation -->
+<!-- Stats Section -->
 <section class="py-24 relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/50 to-purple-900/50"></div>
+  <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-purple-900/40"></div>
   
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
     <div class="text-center mb-20">
@@ -277,23 +261,23 @@
       <p class="text-2xl text-slate-300">Numbers that speak for themselves</p>
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
       <div class="text-center stats-card">
         <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="1200">0</div>
         <div class="text-xl text-indigo-400 font-semibold">Coding Problems</div>
         <div class="text-slate-400 mt-2">Curated challenges</div>
       </div>
-      <div class="text-center stats-card" style="animation-delay: 0.2s;">
+      <div class="text-center stats-card">
         <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="500">0</div>
         <div class="text-xl text-purple-400 font-semibold">Aptitude Tests</div>
         <div class="text-slate-400 mt-2">Practice assessments</div>
       </div>
-      <div class="text-center stats-card" style="animation-delay: 0.4s;">
+      <div class="text-center stats-card">
         <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="25000">0</div>
         <div class="text-xl text-emerald-400 font-semibold">Active Students</div>
         <div class="text-slate-400 mt-2">Learning community</div>
       </div>
-      <div class="text-center stats-card" style="animation-delay: 0.6s;">
+      <div class="text-center stats-card">
         <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="95">0</div>
         <div class="text-xl text-amber-400 font-semibold">Success Rate %</div>
         <div class="text-slate-400 mt-2">Job placements</div>
@@ -302,7 +286,7 @@
   </div>
 </section>
 
-<!-- Success Stories with Card Flip Animation -->
+<!-- Success Stories -->
 <section class="py-24 relative">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-20">
@@ -312,113 +296,82 @@
       <p class="text-2xl text-slate-300">Real achievements from our community</p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- Testimonial 1 -->
       <div class="testimonial-card group">
-        <div class="glass-elevated rounded-3xl p-8 border border-white/10 hover-lift">
-          <div class="flex items-center mb-8">
-            <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+        <div class="glass-elevated rounded-2xl p-8 border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-indigo-400/30">
+          <div class="flex items-center mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
               A
             </div>
-            <div class="ml-6">
-              <h4 class="font-bold text-white text-xl">Arjun Patel</h4>
-              <p class="text-indigo-400 font-semibold">Software Engineer @ Google</p>
+            <div class="ml-4">
+              <h4 class="font-bold text-white text-lg">Arjun Patel</h4>
+              <p class="text-indigo-400 font-medium text-sm">Software Engineer @ Google</p>
             </div>
           </div>
-          <div class="flex text-amber-400 mb-6 text-xl">
+          <div class="flex text-amber-400 mb-4">
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
           </div>
-          <p class="text-slate-300 leading-relaxed text-lg">"MockMate's structured coding approach and comprehensive problem set were instrumental in my Google interview success."</p>
+          <p class="text-slate-300 leading-relaxed">"MockMate's structured coding approach and comprehensive problem set were instrumental in my Google interview success."</p>
         </div>
       </div>
       
       <!-- Testimonial 2 -->
       <div class="testimonial-card group">
-        <div class="glass-elevated rounded-3xl p-8 border border-white/10 hover-lift">
-          <div class="flex items-center mb-8">
-            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+        <div class="glass-elevated rounded-2xl p-8 border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-purple-400/30">
+          <div class="flex items-center mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
               P
             </div>
-            <div class="ml-6">
-              <h4 class="font-bold text-white text-xl">Priya Sharma</h4>
-              <p class="text-purple-400 font-semibold">Product Manager @ Microsoft</p>
+            <div class="ml-4">
+              <h4 class="font-bold text-white text-lg">Priya Sharma</h4>
+              <p class="text-purple-400 font-medium text-sm">Product Manager @ Microsoft</p>
             </div>
           </div>
-          <div class="flex text-amber-400 mb-6 text-xl">
+          <div class="flex text-amber-400 mb-4">
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
           </div>
-          <p class="text-slate-300 leading-relaxed text-lg">"The community mentorship and AI interviews gave me the confidence and insights needed for my Microsoft PM role."</p>
+          <p class="text-slate-300 leading-relaxed">"The community mentorship and AI interviews gave me the confidence and insights needed for my Microsoft PM role."</p>
         </div>
       </div>
       
       <!-- Testimonial 3 -->
       <div class="testimonial-card group">
-        <div class="glass-elevated rounded-3xl p-8 border border-white/10 hover-lift">
-          <div class="flex items-center mb-8">
-            <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+        <div class="glass-elevated rounded-2xl p-8 border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-emerald-400/30">
+          <div class="flex items-center mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
               R
             </div>
-            <div class="ml-6">
-              <h4 class="font-bold text-white text-xl">Rahul Singh</h4>
-              <p class="text-emerald-400 font-semibold">SDE @ Amazon</p>
+            <div class="ml-4">
+              <h4 class="font-bold text-white text-lg">Rahul Singh</h4>
+              <p class="text-emerald-400 font-medium text-sm">SDE @ Amazon</p>
             </div>
           </div>
-          <div class="flex text-amber-400 mb-6 text-xl">
+          <div class="flex text-amber-400 mb-4">
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
             <i class="ri-star-fill"></i>
           </div>
-          <p class="text-slate-300 leading-relaxed text-lg">"From campus coding contests to Amazon SDE - MockMate's mock interviews were absolute game-changers."</p>
+          <p class="text-slate-300 leading-relaxed">"From campus coding contests to Amazon SDE - MockMate's mock interviews were absolute game-changers."</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Companies Section with Scroll Animation -->
-<section class="py-20 relative">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-16">
-      <p class="text-slate-400 font-bold text-2xl mb-12">Our alumni work at</p>
-    </div>
-    
-    <div class="companies-scroll">
-      <div class="companies-track">
-        <div class="company-badge">Google</div>
-        <div class="company-badge">Microsoft</div>
-        <div class="company-badge">Meta</div>
-        <div class="company-badge">Amazon</div>
-        <div class="company-badge">Netflix</div>
-        <div class="company-badge">Apple</div>
-        <div class="company-badge">Tesla</div>
-        <div class="company-badge">Uber</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Final CTA with Particle Background -->
+<!-- Final CTA -->
 <section class="py-24 relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-indigo-900/60 to-purple-900/80"></div>
-  
-  <!-- Particle system -->
-  <div class="particles">
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-  </div>
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-indigo-900/50 to-purple-900/70"></div>
   
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
     <h2 class="text-5xl md:text-6xl font-bold text-white mb-8">
@@ -432,28 +385,27 @@
       Join the community of successful developers and start your journey today
     </p>
     
-    <div class="flex flex-col sm:flex-row gap-8 justify-center">
+    <div class="flex flex-col sm:flex-row gap-6 justify-center">
       {% if not user.is_authenticated %}
-        <a href="{% url 'users:signup' %}" class="group relative overflow-hidden px-16 py-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-2xl font-bold text-2xl shadow-2xl btn-glow hover-lift ripple-btn">
-          <div class="absolute inset-0 bg-gradient-to-r from-cyan-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <span class="relative flex items-center justify-center">
-            <i class="ri-code-line mr-4"></i>
+        <a href="{% url 'users:signup' %}" class="group px-12 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <span class="flex items-center justify-center">
+            <i class="ri-code-line mr-3"></i>
             Start Coding Now
-            <i class="ri-arrow-right-line ml-4 group-hover:translate-x-2 transition-transform duration-300"></i>
+            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
           </span>
         </a>
-        <a href="{% url 'login' %}" class="group px-16 py-6 glass border-2 border-white/40 text-white rounded-2xl hover:bg-white/20 hover:border-indigo-400/60 font-bold text-2xl hover-lift">
+        <a href="{% url 'login' %}" class="group px-12 py-5 glass border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-indigo-400/50 font-bold text-xl transition-all duration-300 hover:-translate-y-1">
           <span class="flex items-center justify-center">
-            <i class="ri-login-box-line mr-4"></i>
+            <i class="ri-login-box-line mr-3"></i>
             Sign In
           </span>
         </a>
       {% else %}
-        <a href="{% url 'practice:problem_list' %}" class="group relative overflow-hidden px-16 py-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-2xl font-bold text-2xl shadow-2xl btn-glow hover-lift">
-          <span class="relative flex items-center justify-center">
-            <i class="ri-code-s-slash-line mr-4"></i>
+        <a href="{% url 'practice:problem-list' %}" class="group px-12 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <span class="flex items-center justify-center">
+            <i class="ri-code-s-slash-line mr-3"></i>
             Continue Coding
-            <i class="ri-arrow-right-line ml-4 group-hover:translate-x-2 transition-transform duration-300"></i>
+            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
           </span>
         </a>
       {% endif %}
@@ -462,49 +414,6 @@
 </section>
 
 <style>
-/* Enhanced Coding-themed Animations */
-@keyframes codeRain {
-  0% {
-    transform: translateY(-100vh);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
-
-.code-snippet {
-  position: absolute;
-  font-family: 'JetBrains Mono', monospace;
-  color: #22d3ee;
-  font-size: 16px;
-  font-weight: 500;
-  animation: codeRain 15s linear infinite;
-  text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
-}
-
-.code-snippet:nth-child(2n) {
-  color: #a78bfa;
-  text-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
-}
-
-.code-snippet:nth-child(3n) {
-  color: #22c55e;
-  text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-}
-
-.code-snippet:nth-child(4n) {
-  color: #fbbf24;
-  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
-}
-
 /* Animated Gradient Text */
 @keyframes gradientShift {
   0%, 100% {
@@ -523,136 +432,51 @@
   background-clip: text;
 }
 
-/* Pulse Dot Animation */
-@keyframes pulseDot {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.8;
-  }
-}
-
-.pulse-dot {
-  animation: pulseDot 2s ease-in-out infinite;
-}
-
-/* Typewriter Effect */
-@keyframes typewriter {
-  from { width: 0; }
-  to { width: 100%; }
-}
-
-.typewriter {
-  overflow: hidden;
-  border-right: 2px solid #6366f1;
-  white-space: nowrap;
-  animation: typewriter 4s steps(40, end), blink 0.75s step-end infinite;
-  display: inline-block;
-}
-
-@keyframes blink {
-  from, to { border-color: transparent; }
-  50% { border-color: #6366f1; }
-}
-
-/* Floating Badge Animation */
-@keyframes floatBadge {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.floating-badge {
-  animation: floatBadge 3s ease-in-out infinite;
-}
-
-/* Binary Grid Background */
-.binary-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(90deg, rgba(34, 211, 238, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(167, 139, 250, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: gridMove 20s linear infinite;
-}
-
-@keyframes gridMove {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(40px, 40px); }
-}
-
-/* Feature Cards Enhanced */
+/* Feature Cards - Enhanced Styling */
 .feature-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  position: relative;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-  border-color: rgba(99, 102, 241, 0.3);
-}
-
-/* Icon Float Animation */
-@keyframes iconFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-5px) rotate(5deg);
-  }
-}
-
-.icon-float {
-  animation: iconFloat 4s ease-in-out infinite;
-}
-
-/* Button Glow Effect */
-.btn-glow {
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
-  transition: all 0.3s ease;
-}
-
-.btn-glow:hover {
-  box-shadow: 0 0 50px rgba(99, 102, 241, 0.6);
-}
-
-/* Ripple Button Effect */
-.ripple-btn {
+.feature-card-inner {
   position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
   overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  height: 100%;
 }
 
-.ripple-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
-  transform: translate(-50%, -50%);
+.feature-card:hover .feature-card-inner {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.ripple-btn:hover::before {
-  width: 300px;
-  height: 300px;
+/* Subtle entrance animation for cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+.feature-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0.1s; }
+.feature-card:nth-child(2) { animation-delay: 0.2s; }
+.feature-card:nth-child(3) { animation-delay: 0.3s; }
+.feature-card:nth-child(4) { animation-delay: 0.4s; }
 
 /* Counter Animation */
 .counter {
@@ -677,121 +501,26 @@
   opacity: 0;
 }
 
-/* Testimonial Card Hover */
-.testimonial-card:hover .glass-elevated {
-  transform: translateY(-5px) rotateY(5deg);
-  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+.stats-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-card:nth-child(2) { animation-delay: 0.2s; }
+.stats-card:nth-child(3) { animation-delay: 0.3s; }
+.stats-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Testimonial Cards */
+.testimonial-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
 }
 
-/* Companies Scroll Animation */
-.companies-scroll {
-  overflow: hidden;
-  white-space: nowrap;
-  position: relative;
-}
+.testimonial-card:nth-child(1) { animation-delay: 0.1s; }
+.testimonial-card:nth-child(2) { animation-delay: 0.2s; }
+.testimonial-card:nth-child(3) { animation-delay: 0.3s; }
 
-.companies-track {
-  display: inline-block;
-  animation: scroll 30s linear infinite;
-}
-
-@keyframes scroll {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-.company-badge {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 16px 32px;
-  margin: 0 20px;
-  border-radius: 16px;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  transition: all 0.3s ease;
-}
-
-.company-badge:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: scale(1.05);
-}
-
-/* Particle System */
-.particles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: #6366f1;
-  border-radius: 50%;
-  animation: particleFloat 15s ease-in-out infinite;
-}
-
-.particle:nth-child(1) {
-  left: 20%;
-  animation-delay: 0s;
-  background: #8b5cf6;
-}
-
-.particle:nth-child(2) {
-  left: 40%;
-  animation-delay: 3s;
-  background: #06b6d4;
-}
-
-.particle:nth-child(3) {
-  left: 60%;
-  animation-delay: 6s;
-  background: #10b981;
-}
-
-.particle:nth-child(4) {
-  left: 80%;
-  animation-delay: 9s;
-  background: #f59e0b;
-}
-
-.particle:nth-child(5) {
-  left: 10%;
-  animation-delay: 12s;
-  background: #ef4444;
-}
-
-@keyframes particleFloat {
-  0%, 100% {
-    transform: translateY(100vh) translateX(0px);
-    opacity: 0;
-  }
-  10%, 90% {
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(0vh) translateX(50px);
-  }
-}
-
-/* Hover Lift Effect */
-.hover-lift {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-6px);
+/* Glass Effect Enhancement */
+.glass-elevated {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Responsive Design */
@@ -799,54 +528,16 @@
   .text-6xl { font-size: 3rem !important; }
   .text-7xl { font-size: 3.5rem !important; }
   .text-8xl { font-size: 4rem !important; }
-  
-  .code-snippet {
-    font-size: 14px;
-  }
-  
-  .companies-track {
-    animation-duration: 20s;
-  }
-  
-  .feature-card {
-    margin-bottom: 2rem;
-  }
-  
-  .particle {
-    display: none;
-  }
-  
-  .typewriter {
-    animation-duration: 2s;
-  }
 }
 
 @media (max-width: 640px) {
-  .px-12 { padding-left: 2rem; padding-right: 2rem; }
-  .px-16 { padding-left: 2.5rem; padding-right: 2.5rem; }
-  .py-5 { padding-top: 1rem; padding-bottom: 1rem; }
-  .py-6 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+  .px-10 { padding-left: 2rem; padding-right: 2rem; }
+  .px-12 { padding-left: 2.5rem; padding-right: 2.5rem; }
+  .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+  .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
   
+  .text-xl { font-size: 1.125rem !important; }
   .text-2xl { font-size: 1.25rem !important; }
-  .text-3xl { font-size: 1.5rem !important; }
-}
-
-/* Performance Optimizations */
-.will-change-transform {
-  will-change: transform;
-}
-
-/* Glass Effect Enhancement */
-.glass-elevated {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: all 0.3s ease;
-}
-
-.glass-elevated:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Accessibility */
@@ -901,23 +592,19 @@ document.addEventListener('DOMContentLoaded', function() {
           const counter = entry.target.querySelector('.counter');
           if (counter && !counter.dataset.animated) {
             counter.dataset.animated = 'true';
-            setTimeout(() => animateCounter(counter), 
-              parseFloat(entry.target.style.animationDelay || 0) * 1000);
+            setTimeout(() => animateCounter(counter), 200);
           }
         }
-        
-        // General animation trigger
-        entry.target.style.animationPlayState = 'running';
       }
     });
   }, observerOptions);
 
   // Observe elements
-  document.querySelectorAll('.stats-card, .feature-card, .testimonial-card').forEach(el => {
+  document.querySelectorAll('.stats-card').forEach(el => {
     observer.observe(el);
   });
 
-  // Smooth scrolling
+  // Smooth scrolling for anchor links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       e.preventDefault();
@@ -930,60 +617,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
-
-  // Typing animation restart
-  const typewriterElement = document.querySelector('.typewriter');
-  if (typewriterElement) {
-    setInterval(() => {
-      typewriterElement.style.animation = 'none';
-      setTimeout(() => {
-        typewriterElement.style.animation = 'typewriter 4s steps(40, end), blink 0.75s step-end infinite';
-      }, 100);
-    }, 8000);
-  }
-
-  // Ripple effect for buttons
-  document.querySelectorAll('.ripple-btn').forEach(button => {
-    button.addEventListener('click', function(e) {
-      const ripple = document.createElement('span');
-      const rect = this.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-      
-      ripple.style.cssText = `
-        position: absolute;
-        width: ${size}px;
-        height: ${size}px;
-        left: ${x}px;
-        top: ${y}px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        transform: scale(0);
-        animation: rippleEffect 0.6s linear;
-        pointer-events: none;
-        z-index: 1;
-      `;
-      
-      this.appendChild(ripple);
-      
-      setTimeout(() => {
-        ripple.remove();
-      }, 600);
-    });
-  });
-
-  // Add ripple keyframes
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes rippleEffect {
-      to {
-        transform: scale(2);
-        opacity: 0;
-      }
-    }
-  `;
-  document.head.appendChild(style);
 
   // Pause animations on reduced motion preference
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

@@ -1,632 +1,498 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}Interview Review | MockMate{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50: '#eff6ff',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8',
+            900: '#1e3a8a'
+          }
+        }
+      }
+    }
+  }
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   
-  :root {
-    --primary-blue: #0f172a;
-    --secondary-blue: #1e40af;
-    --accent-blue: #3b82f6;
-    --success-green: #059669;
-    --warning-amber: #d97706;
-    --danger-red: #dc2626;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-600: #4b5563;
-    --gray-800: #1f2937;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
-  }
-  
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--gray-50);
-    color: var(--text-primary);
-    line-height: 1.6;
   }
   
-  .review-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
   }
   
-  .page-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid var(--border-color);
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
-  .page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   
-  .session-id {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    background: var(--gray-100);
-    padding: 0.375rem 0.75rem;
-    border-radius: 6px;
-    display: inline-block;
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
   
-  .card {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    margin-bottom: 2rem;
+  @keyframes rotateIn {
+    from {
+      opacity: 0;
+      transform: rotate(-180deg) scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(0deg) scale(1);
+    }
   }
   
-  .card-header {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, var(--gray-50), white);
-    border-bottom: 1px solid var(--border-color);
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
-  .card-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
   }
   
-  .card-body {
-    padding: 1.5rem;
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
   }
   
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
   }
   
-  .summary-item {
-    background: var(--gray-50);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1.25rem;
-    text-align: center;
+  .animate-rotate-in {
+    animation: rotateIn 0.6s ease-out;
   }
   
-  .summary-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
   
-  .summary-value {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
+  .gradient-bg {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   }
   
-  .score-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3rem;
-    padding: 2rem;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    border: 1px solid #bfdbfe;
-    border-radius: 12px;
-    margin-bottom: 2rem;
-  }
-  
-  .score-circle {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
+  /* Score circle animation */
   .score-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
     transform: rotate(-90deg);
-  }
-  
-  .score-ring circle {
-    fill: none;
-    stroke-width: 8;
-    stroke-linecap: round;
-  }
-  
-  .score-background {
-    stroke: #e5e7eb;
+    transform-origin: center;
   }
   
   .score-progress {
-    stroke: var(--accent-blue);
     stroke-dasharray: 314;
     stroke-dashoffset: 314;
-    transition: stroke-dashoffset 2s ease-in-out;
+    transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .score-progress.excellent {
-    stroke: var(--success-green);
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); }
+  .custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: rgba(148, 163, 184, 0.4); 
+    border-radius: 4px; 
   }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
   
-  .score-progress.good {
-    stroke: var(--accent-blue);
-  }
-  
-  .score-progress.needs-improvement {
-    stroke: var(--warning-amber);
-  }
-  
-  .score-progress.poor {
-    stroke: var(--danger-red);
-  }
-  
-  .score-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    z-index: 1;
-  }
-  
-  .score-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-top: 0.5rem;
-    text-align: center;
-  }
-  
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-  
-  .status-passed {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-  }
-  
-  .status-needs-improvement {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
-  }
-  
-  .feedback-content {
-    background: var(--gray-50);
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--accent-blue);
-    border-radius: 0 8px 8px 0;
-    padding: 1.5rem;
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: var(--text-primary);
-  }
-  
-  .transcript-container {
-    background: var(--gray-50);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    max-height: 600px;
-    overflow-y: auto;
-  }
-  
-  .transcript-message {
-    padding: 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-  
-  .transcript-message:last-child {
-    border-bottom: none;
-  }
-  
-  .message-user {
-    background: #f0f9ff;
-    border-left: 4px solid var(--accent-blue);
-  }
-  
-  .message-ai {
-    background: white;
-    border-left: 4px solid #8b5cf6;
-  }
-  
-  .message-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 0.875rem;
-    color: white;
-    font-weight: 500;
-  }
-  
-  .avatar-user {
-    background: var(--accent-blue);
-  }
-  
-  .avatar-ai {
-    background: #8b5cf6;
-  }
-  
-  .message-content {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .message-header {
-    display: flex;
-    justify-content: between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    gap: 0.75rem;
-  }
-  
-  .message-author {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.875rem;
-  }
-  
-  .message-time {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-  }
-  
-  .message-text {
-    color: var(--text-primary);
-    line-height: 1.6;
-  }
-  
-  .audio-player {
-    margin-top: 0.75rem;
-    width: 100%;
-    height: 2rem;
-  }
-  
-  .action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 2px solid var(--border-color);
-    flex-wrap: wrap;
-  }
-  
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    min-width: fit-content;
-  }
-  
-  .btn-primary {
-    background: var(--accent-blue);
-    color: white;
-  }
-  
-  .btn-primary:hover {
-    background: var(--secondary-blue);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  }
-  
-  .btn-secondary {
-    background: white;
-    color: var(--gray-600);
-    border: 1px solid var(--border-color);
-  }
-  
-  .btn-secondary:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-600);
-  }
-  
-  .btn-success {
-    background: var(--success-green);
-    color: white;
-  }
-  
-  .btn-success:hover {
-    background: #047857;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-  }
-  
-  .skills-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-  
-  .skill-tag {
-    background: #eff6ff;
-    color: var(--secondary-blue);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border: 1px solid #dbeafe;
-  }
-  
-  .empty-transcript {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-secondary);
-  }
-  
-  .empty-icon {
-    width: 3rem;
-    height: 3rem;
-    background: var(--gray-100);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    color: var(--gray-600);
-    font-size: 1.25rem;
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .review-container {
-      padding: 1rem;
+  /* Print styles */
+  @media print {
+    body { background: white !important; }
+    .glass-card { 
+      background: white !important;
+      border: 1px solid #e5e7eb !important;
+      box-shadow: none !important;
     }
-    
-    .page-title {
-      font-size: 2rem;
-    }
-    
-    .summary-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-    
-    .score-section {
-      flex-direction: column;
-      gap: 1.5rem;
-      padding: 1.5rem;
-    }
-    
-    .card-header,
-    .card-body {
-      padding: 1rem;
-    }
-    
-    .transcript-message {
-      padding: 1rem;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    
-    .message-header {
-      flex-direction: row;
-      align-items: center;
-    }
-    
-    .action-buttons {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .btn {
-      justify-content: center;
-    }
+    .gradient-bg { background: white !important; }
+    .no-print { display: none !important; }
+    .transcript-container { max-height: none !important; }
   }
 </style>
+{% endblock %}
 
-<div class="review-container">
-  <!-- Page Header -->
-  <header class="page-header">
-    <h1 class="page-title">Interview Performance Review</h1>
-    <div class="session-id">Session ID: {{ session.id }}</div>
-  </header>
-
-  <!-- Summary Section -->
-  <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">
-        <i class="fas fa-chart-bar text-blue-600"></i>
-        Session Overview
-      </h2>
-    </div>
-    <div class="card-body">
-      <div class="summary-grid">
-        <div class="summary-item">
-          <div class="summary-label">Position</div>
-          <div class="summary-value">{{ session.job_role }}</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Date</div>
-          <div class="summary-value">{{ session.created_at|date:"M j, Y" }}</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Duration</div>
-          <div class="summary-value">{{ session.duration_display|default:"N/A" }}</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Questions</div>
-          <div class="summary-value">{{ transcript|length|floatformat:0 }}</div>
-        </div>
-      </div>
-      
-      {% if session.key_skills %}
-        <div class="mb-4">
-          <div class="summary-label mb-2">Target Skills</div>
-          <div class="skills-list">
-            {% for skill in session.key_skills|split:"," %}
-              <span class="skill-tag">{{ skill|trim_whitespace }}</span>
-            {% endfor %}
+{% block content %}
+<div class="min-h-screen text-white">
+  <!-- Header Section -->
+  <div class="bg-black/20 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo and Title -->
+        <div class="flex items-center space-x-4">
+          <div class="relative w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center animate-rotate-in">
+            <i class="fas fa-file-alt text-xl text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Interview Review
+            </h1>
+            <p class="text-sm text-gray-400">Session #{{ session.id }}</p>
           </div>
         </div>
-      {% endif %}
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3">
+          <button onclick="window.print()" 
+                  class="glass-card px-4 py-2.5 rounded-xl font-medium text-blue-300 border border-blue-400/30 hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-2">
+            <i class="fas fa-print"></i>
+            <span class="hidden sm:inline">Print</span>
+          </button>
+          <a href="{% url 'mock_interview:my_mock_interviews' %}" 
+             class="glass-card px-4 py-2.5 rounded-xl font-medium text-gray-300 border border-white/20 hover:bg-white/10 transition-all duration-200 flex items-center space-x-2">
+            <i class="fas fa-arrow-left"></i>
+            <span class="hidden sm:inline">Back</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Score and Status Section -->
-  {% if session.score %}
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <i class="fas fa-trophy text-yellow-600"></i>
-          Performance Score
-        </h2>
-      </div>
-      <div class="card-body">
-        <div class="score-section">
-          <div class="text-center">
-            <div class="score-circle">
-              <svg class="score-ring" width="120" height="120">
-                <circle class="score-background" cx="60" cy="60" r="50"></circle>
-                <circle id="score-progress" class="score-progress" cx="60" cy="60" r="50"></circle>
-              </svg>
-              <div class="score-number">{{ session.score }}%</div>
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Session Overview Card -->
+    <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up">
+      <div class="p-6 bg-gradient-to-r from-slate-900/50 to-blue-900/20 border-b border-white/10">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center space-x-3">
+              <i class="fas fa-briefcase text-blue-400"></i>
+              <span>{{ session.job_role }} Interview</span>
+            </h2>
+            <div class="flex items-center space-x-2 text-sm text-gray-400">
+              <i class="fas fa-calendar-alt text-blue-400"></i>
+              <time>{{ session.start_time|date:"F j, Y \a\t g:i A" }}</time>
             </div>
-            <div class="score-label">Overall Score</div>
           </div>
           
-          <div class="text-center">
-            {% if session.is_passed %}
-              <div class="status-badge status-passed">
+          <div class="flex items-center gap-3 flex-wrap">
+            <!-- Status Badge -->
+            {% if session.status == 'COMPLETED' or session.status == 'REVIEWED' %}
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-semibold uppercase tracking-wide">
                 <i class="fas fa-check-circle"></i>
-                <span>Interview Passed</span>
+                <span>Completed</span>
+              </span>
+            {% endif %}
+            
+            <!-- Score Display -->
+            {% if session.score %}
+              <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-400/30 rounded-xl">
+                <i class="fas fa-chart-line text-blue-400"></i>
+                <span class="text-lg font-bold text-blue-300">{{ session.score }}%</span>
               </div>
-              <div class="score-label mt-2">Strong Performance</div>
-            {% else %}
-              <div class="status-badge status-needs-improvement">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Needs Improvement</span>
-              </div>
-              <div class="score-label mt-2">Room for Growth</div>
             {% endif %}
           </div>
         </div>
       </div>
-    </div>
-  {% endif %}
 
-  <!-- AI Feedback Section -->
-  {% if session.ai_feedback %}
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <i class="fas fa-robot text-purple-600"></i>
-          AI Analysis & Recommendations
-        </h2>
-      </div>
-      <div class="card-body">
-        <div class="feedback-content">
-          {{ session.ai_feedback|linebreaks }}
-        </div>
-      </div>
-    </div>
-  {% endif %}
-
-  <!-- Interview Transcript -->
-  <div class="card">
-    <div class="card-header">
-      <h2 class="card-title">
-        <i class="fas fa-comments text-green-600"></i>
-        Interview Transcript
-      </h2>
-    </div>
-    <div class="card-body p-0">
-      <div class="transcript-container">
-        {% for turn in transcript %}
-          <div class="transcript-message {% if turn.role == 'user' %}message-user{% else %}message-ai{% endif %}">
-            <div class="message-avatar {% if turn.role == 'user' %}avatar-user{% else %}avatar-ai{% endif %}">
-              {% if turn.role == 'user' %}
-                <i class="fas fa-user"></i>
-              {% else %}
-                <i class="fas fa-robot"></i>
-              {% endif %}
+      <!-- Session Stats -->
+      <div class="p-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="glass-card rounded-xl p-4 border border-white/10">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+              <i class="fas fa-clock text-blue-400 mr-2"></i>Duration
             </div>
-            <div class="message-content">
-              <div class="message-header">
-                <div class="message-author">
-                  {% if turn.role == 'user' %}You{% else %}AI Interviewer{% endif %}
-                </div>
-                <div class="message-time">
-                  {{ turn.timestamp|default:"" }}
+            <div class="text-lg font-bold text-white">
+              {{ interview_metrics.duration_minutes|default:"N/A" }}
+              {% if interview_metrics.duration_minutes %}min{% endif %}
+            </div>
+          </div>
+          
+          <div class="glass-card rounded-xl p-4 border border-white/10">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+              <i class="fas fa-question-circle text-indigo-400 mr-2"></i>Questions
+            </div>
+            <div class="text-lg font-bold text-white">
+              {{ interview_metrics.total_questions|default:"0" }}
+            </div>
+          </div>
+          
+          <div class="glass-card rounded-xl p-4 border border-white/10">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+              <i class="fas fa-comment text-purple-400 mr-2"></i>Responses
+            </div>
+            <div class="text-lg font-bold text-white">
+              {{ interview_metrics.total_words|default:"0" }} words
+            </div>
+          </div>
+          
+          <div class="glass-card rounded-xl p-4 border border-white/10">
+            <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+              <i class="fas fa-chart-bar text-emerald-400 mr-2"></i>Avg Length
+            </div>
+            <div class="text-lg font-bold text-white">
+              {{ interview_metrics.avg_response_length|default:"0" }} words
+            </div>
+          </div>
+        </div>
+        
+        <!-- Key Skills -->
+        {% if session.key_skills %}
+          <div class="flex items-start gap-3 pb-4 border-b border-white/10">
+            <div class="flex-shrink-0 w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-400/30">
+              <i class="fas fa-code text-indigo-400"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                Target Skills
+              </div>
+              <div class="flex flex-wrap gap-2">
+                {% for skill in session.key_skills|split:"," %}
+                  <span class="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 rounded-lg text-xs font-medium">
+                    {{ skill|trim_whitespace }}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- Performance Score Section -->
+    {% if ai_feedback %}
+      <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up" style="animation-delay: 0.1s;">
+        <div class="p-6 bg-gradient-to-r from-slate-900/50 to-purple-900/20 border-b border-white/10">
+          <h2 class="text-xl font-bold text-white flex items-center space-x-3">
+            <i class="fas fa-trophy text-yellow-400"></i>
+            <span>Performance Analysis</span>
+          </h2>
+        </div>
+        
+        <div class="p-6">
+          <!-- Score Circle -->
+          <div class="flex flex-col md:flex-row items-center justify-center gap-8 mb-8">
+            <div class="relative">
+              <svg class="score-ring w-40 h-40" viewBox="0 0 120 120">
+                <circle class="stroke-white/10" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="round"></circle>
+                <circle id="score-progress" class="score-progress stroke-blue-500" cx="60" cy="60" r="50" fill="none" stroke-width="8" stroke-linecap="round"></circle>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center">
+                  <div class="text-4xl font-bold text-white">{{ ai_feedback.overall_score|default:session.score|default:"N/A" }}</div>
+                  <div class="text-xs text-gray-400 uppercase tracking-wide">Overall</div>
                 </div>
               </div>
-              <div class="message-text">{{ turn.text }}</div>
-              {% if turn.audio_url %}
-                <audio controls class="audio-player">
-                  <source src="{{ turn.audio_url }}" type="audio/mpeg">
-                  Your browser does not support the audio element.
-                </audio>
-              {% endif %}
+            </div>
+            
+            <!-- Additional Scores -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="glass-card rounded-xl p-4 border border-white/10 text-center">
+                <div class="text-2xl font-bold text-blue-300 mb-1">
+                  {{ ai_feedback.communication_score|default:interview_metrics.confidence_score|default:"N/A" }}
+                </div>
+                <div class="text-xs text-gray-400 uppercase tracking-wide">Communication</div>
+              </div>
+              
+              <div class="glass-card rounded-xl p-4 border border-white/10 text-center">
+                <div class="text-2xl font-bold text-purple-300 mb-1">
+                  {{ interview_metrics.engagement_score|default:"N/A" }}
+                </div>
+                <div class="text-xs text-gray-400 uppercase tracking-wide">Engagement</div>
+              </div>
+              
+              <div class="glass-card rounded-xl p-4 border border-white/10 text-center col-span-2">
+                <div class="text-lg font-bold text-emerald-300 mb-1">
+                  {{ ai_feedback.confidence_level|default:"Good" }}
+                </div>
+                <div class="text-xs text-gray-400 uppercase tracking-wide">Confidence Level</div>
+              </div>
             </div>
           </div>
-        {% empty %}
-          <div class="empty-transcript">
-            <div class="empty-icon">
-              <i class="fas fa-comment-slash"></i>
+          
+          <!-- Strengths -->
+          {% if ai_feedback.strengths %}
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <i class="fas fa-check-circle text-emerald-400"></i>
+                Strengths
+              </h3>
+              <div class="space-y-2">
+                {% for strength in ai_feedback.strengths %}
+                  <div class="glass-card rounded-lg p-3 border border-emerald-400/30 bg-emerald-500/10">
+                    <p class="text-sm text-gray-300">{{ strength }}</p>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No Transcript Available</h3>
-            <p class="text-gray-600">The interview transcript could not be loaded or is not available for this session.</p>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
+          {% endif %}
+          
+          <!-- Areas for Improvement -->
+          {% if ai_feedback.areas_for_improvement %}
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <i class="fas fa-arrow-up text-blue-400"></i>
+                Areas for Improvement
+              </h3>
+              <div class="space-y-2">
+                {% for area in ai_feedback.areas_for_improvement %}
+                  <div class="glass-card rounded-lg p-3 border border-blue-400/30 bg-blue-500/10">
+                    <p class="text-sm text-gray-300">{{ area }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <!-- Recommendations -->
+          {% if ai_feedback.recommendations %}
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <i class="fas fa-lightbulb text-yellow-400"></i>
+                Recommendations
+              </h3>
+              <div class="space-y-2">
+                {% for recommendation in ai_feedback.recommendations %}
+                  <div class="glass-card rounded-lg p-3 border border-yellow-400/30 bg-yellow-500/10">
+                    <p class="text-sm text-gray-300">{{ recommendation }}</p>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          
+          <!-- Technical Assessment -->
+          {% if ai_feedback.technical_assessment %}
+            <div class="glass-card rounded-xl p-4 border border-purple-400/30 bg-purple-500/10">
+              <h3 class="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-2">
+                <i class="fas fa-code text-purple-400"></i>
+                Technical Assessment
+              </h3>
+              <p class="text-sm text-gray-300">{{ ai_feedback.technical_assessment }}</p>
+            </div>
+          {% endif %}
+          
+          <!-- Encouragement Note -->
+          {% if ai_feedback.encouragement_note %}
+            <div class="mt-6 glass-card rounded-xl p-4 border border-blue-400/30 bg-gradient-to-r from-blue-500/10 to-indigo-500/10">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-heart text-white text-sm"></i>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-white text-sm mb-1">Final Thoughts</h4>
+                  <p class="text-sm text-gray-300">{{ ai_feedback.encouragement_note }}</p>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    {% endif %}
 
-  <!-- Action Buttons -->
-  <div class="action-buttons">
-    <a href="{% url 'mock_interview:my_mock_interviews' %}" class="btn btn-secondary">
-      <i class="fas fa-arrow-left"></i>
-      Back to Interviews
-    </a>
-    <a href="{% url 'mock_interview:interview_setup' %}" class="btn btn-success">
-      <i class="fas fa-redo-alt"></i>
-      Practice Again
-    </a>
-    <button onclick="window.print()" class="btn btn-primary">
-      <i class="fas fa-print"></i>
-      Print Report
-    </button>
+    <!-- Interview Transcript -->
+    <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up" style="animation-delay: 0.2s;">
+      <div class="p-6 bg-gradient-to-r from-slate-900/50 to-green-900/20 border-b border-white/10">
+        <h2 class="text-xl font-bold text-white flex items-center space-x-3">
+          <i class="fas fa-comments text-green-400"></i>
+          <span>Interview Transcript</span>
+        </h2>
+      </div>
+      
+      <div class="p-0">
+        <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+          {% for turn in turns %}
+            {% if turn.ai_question %}
+              <div class="border-b border-white/10 p-4 bg-purple-500/5 hover:bg-purple-500/10 transition-colors">
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-400/30">
+                      <i class="fas fa-robot text-purple-400"></i>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm font-semibold text-purple-300">Sarah (AI Interviewer)</span>
+                      <span class="text-xs text-gray-500">Q{{ turn.turn_number }}</span>
+                    </div>
+                    <p class="text-sm text-gray-300 leading-relaxed">{{ turn.ai_question }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            
+            {% if turn.user_answer %}
+              <div class="border-b border-white/10 p-4 bg-blue-500/5 hover:bg-blue-500/10 transition-colors">
+                <div class="flex gap-4">
+                  <div class="flex-shrink-0">
+                    <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-400/30">
+                      <i class="fas fa-user text-blue-400"></i>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-sm font-semibold text-blue-300">You</span>
+                      <span class="text-xs text-gray-500">
+                        {{ turn.user_answer|wordcount }} words
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-300 leading-relaxed">{{ turn.user_answer }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% empty %}
+            <div class="text-center py-12 px-4">
+              <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-comment-slash text-gray-400 text-2xl"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-white mb-2">No Transcript Available</h3>
+              <p class="text-gray-400">The interview transcript could not be loaded.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </article>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center no-print animate-fade-in">
+      <a href="{% url 'mock_interview:my_mock_interviews' %}" 
+         class="inline-flex items-center justify-center gap-2 px-6 py-3 glass-card text-gray-300 hover:text-white rounded-xl font-medium hover:bg-white/10 transition-all duration-200 min-w-[200px]">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Interviews</span>
+      </a>
+      
+      <a href="{% url 'mock_interview:interview_setup' %}" 
+         class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[200px]">
+        <i class="fas fa-redo-alt"></i>
+        <span>Practice Again</span>
+      </a>
+      
+      <button onclick="window.print()" 
+              class="inline-flex items-center justify-center gap-2 px-6 py-3 glass-card text-blue-300 border border-blue-400/30 hover:bg-blue-500/20 rounded-xl font-medium transition-all duration-200 min-w-[200px]">
+        <i class="fas fa-print"></i>
+        <span>Print Report</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -635,23 +501,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // Animate the score circle
   const scoreProgress = document.getElementById('score-progress');
   if (scoreProgress) {
-    const score = {{ session.score|default:0 }};
+    const score = {{ ai_feedback.overall_score|default:session.score|default:0 }};
     const circumference = 314; // 2 * π * 50
     const offset = circumference - (score / 100) * circumference;
     
     // Determine color based on score
-    let colorClass = 'good';
     if (score >= 85) {
-      colorClass = 'excellent';
+      scoreProgress.classList.add('stroke-emerald-500');
     } else if (score >= 70) {
-      colorClass = 'good';
+      scoreProgress.classList.add('stroke-blue-500');
     } else if (score >= 50) {
-      colorClass = 'needs-improvement';
+      scoreProgress.classList.add('stroke-yellow-500');
     } else {
-      colorClass = 'poor';
+      scoreProgress.classList.add('stroke-red-500');
     }
-    
-    scoreProgress.classList.add(colorClass);
     
     // Animate the circle
     setTimeout(() => {
@@ -659,42 +522,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
   }
   
-  // Auto-scroll transcript to bottom for long conversations
-  const transcript = document.querySelector('.transcript-container');
-  if (transcript && transcript.children.length > 5) {
-    transcript.scrollTop = transcript.scrollHeight;
-  }
-  
-  // Add print styles
-  const printStyles = document.createElement('style');
-  printStyles.textContent = `
-    @media print {
-      .action-buttons { display: none !important; }
-      .card { break-inside: avoid; margin-bottom: 1rem; }
-      .page-header { margin-bottom: 1rem; }
-      .transcript-container { max-height: none; }
-      body { background: white !important; }
-      .card { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
-    }
-  `;
-  document.head.appendChild(printStyles);
-});
-
-// Add smooth scrolling for any internal links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
+  // Stagger animations
+  const cards = document.querySelectorAll('.animate-slide-up');
+  cards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.1}s`;
   });
+  
+  console.log('MockMate Interview Review initialized');
 });
 </script>
-
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

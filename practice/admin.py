@@ -1,230 +1,268 @@
 from django.contrib import admin
-from django.db import models
-from django.forms import Textarea
 from django.utils.html import format_html
-from django.urls import reverse
 from .models import (
-    Category, Tag, PracticeProblem, TestCase, 
-    PracticeSubmission, UserProblemStats, Discussion, DiscussionVote,
-    Badge, UserBadge, ProblemVideoSolution, CodeTemplate
+    Topic, Company, Problem, TestCase, CodeTemplate, 
+    Editorial, Submission, UserProblemProgress
 )
 
-# --- Admin Actions ---
-@admin.action(description='Mark selected problems as Published')
-def make_published(modeladmin, request, queryset):
-    queryset.update(status='PUBLISHED')
 
-@admin.action(description='Mark selected problems as Draft')
-def make_draft(modeladmin, request, queryset):
-    queryset.update(status='DRAFT')
-
-@admin.action(description='Archive selected problems')
-def archive_problems(modeladmin, request, queryset):
-    queryset.update(status='ARCHIVED')
-
-# --- Model Admin Registrations ---
-
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'color_preview', 'problem_count')
-    search_fields = ('name', 'description')
-    prepopulated_fields = {'slug': ('name',)}
-    
-    def color_preview(self, obj):
-        return format_html(
-            '<span style="background-color: {}; padding: 4px 8px; border-radius: 4px; color: white;">{}</span>',
-            obj.color_code, obj.color_code
-        )
-    color_preview.short_description = 'Color'
-    
-    def problem_count(self, obj):
-        count = obj.problems.filter(status='PUBLISHED').count()
-        url = (
-            reverse('admin:practice_practiceproblem_changelist')
-            + f'?category__id__exact={obj.id}'
-        )
-        return format_html('<a href="{}">{}</a>', url, count)
-    problem_count.short_description = 'Problems'
-
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'problem_count')
-    search_fields = ('name',)
+@admin.register(Topic)
+class TopicAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'problem_count']
+    search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
     
     def problem_count(self, obj):
-        count = obj.problems.filter(status='PUBLISHED').count()
-        url = (
-            reverse('admin:practice_practiceproblem_changelist')
-            + f'?tags__id__exact={obj.id}'
-        )
-        return format_html('<a href="{}">{}</a>', url, count)
+        count = obj.problems.count()
+        return f"{count} problem{'s' if count != 1 else ''}"
     problem_count.short_description = 'Problems'
 
-# --- Inlines for Problem Admin ---
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'website_link', 'problem_count']
+    search_fields = ['name', 'website']
+    prepopulated_fields = {'slug': ('name',)}
+    
+    def website_link(self, obj):
+        if obj.website:
+            return format_html('<a href="{}" target="_blank">Visit</a>', obj.website)
+        return '-'
+    website_link.short_description = 'Website'
+    
+    def problem_count(self, obj):
+        count = obj.problems.count()
+        return f"{count} problem{'s' if count != 1 else ''}"
+    problem_count.short_description = 'Problems'
+
 
 class TestCaseInline(admin.TabularInline):
     model = TestCase
     extra = 1
-    fields = ['input_data', 'expected_output', 'is_sample', 'is_hidden', 'order']
-    formfield_overrides = {
-        models.TextField: {'widget': Textarea(attrs={'rows': 3, 'cols': 40})},
-    }
+    fields = ['input_data', 'expected_output', 'is_sample', 'order']
     ordering = ['order']
 
-class ProblemVideoSolutionInline(admin.TabularInline):
-    model = ProblemVideoSolution
-    extra = 1
-    fields = ['title', 'url', 'user']
 
-class CodeTemplateInline(admin.TabularInline):
+class CodeTemplateInline(admin.StackedInline):
     model = CodeTemplate
     extra = 1
-    fields = ('language', 'starter_code', 'is_default')
+    fields = ['language', 'template_code', 'solution_code']
 
-@admin.register(PracticeProblem)
-class PracticeProblemAdmin(admin.ModelAdmin):
-    actions = [make_published, make_draft, archive_problems]
-    list_display = (
-        'title', 'difficulty_badge', 'category', 'status_badge', 'acceptance_rate', 
-        'total_submissions', 'test_case_count', 'created_by', 'created_at'
-    )
-    list_filter = ('difficulty', 'status', 'category', 'created_at', 'tags', 'created_by')
-    search_fields = ('title', 'statement')
+
+class EditorialInline(admin.StackedInline):
+    model = Editorial
+    can_delete = False
+    fields = ['approach', 'complexity_analysis', 'code_explanation', 'video_url']
+
+
+@admin.register(Problem)
+class ProblemAdmin(admin.ModelAdmin):
+    list_display = [
+        'problem_number', 'title', 'difficulty_badge', 
+        'is_active', 'acceptance_rate_display', 
+        'topic_list', 'created_by', 'created_at'
+    ]
+    list_filter = ['difficulty', 'is_active', 'topics', 'companies', 'created_at']
+    search_fields = ['problem_number', 'title', 'description']
     prepopulated_fields = {'slug': ('title',)}
-    filter_horizontal = ('tags',)
-    readonly_fields = ('acceptance_rate', 'total_submissions', 'accepted_submissions', 'created_at', 'updated_at')
+    filter_horizontal = ['topics', 'companies']
+    readonly_fields = ['created_at', 'updated_at', 'acceptance_rate_display', 'slug']
+    
+    inlines = [TestCaseInline, CodeTemplateInline, EditorialInline]
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'slug', 'difficulty', 'category', 'tags')
+            'fields': ('problem_number', 'title', 'slug', 'difficulty', 'is_active')
         }),
         ('Problem Content', {
-            'fields': ('statement', 'constraints', 'hints', 'approach')
+            'fields': ('description', 'constraints')
         }),
-        ('Problem Settings', {
-            'fields': ('time_limit', 'memory_limit')
+        ('Examples', {
+            'fields': ('example_input', 'example_output', 'example_explanation')
         }),
-        ('Administrative', {
-            'fields': ('status', 'created_by')
+        ('Additional Information', {
+            'fields': ('hints', 'time_complexity', 'space_complexity'),
+            'classes': ('collapse',)
+        }),
+        ('Categorization', {
+            'fields': ('topics', 'companies')
         }),
         ('Statistics', {
-            'fields': ('acceptance_rate', 'total_submissions', 'accepted_submissions'),
+            'fields': ('total_submissions', 'total_accepted', 'acceptance_rate_display'),
             'classes': ('collapse',)
         }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'updated_at'),
             'classes': ('collapse',)
-        })
+        }),
     )
     
-    inlines = [TestCaseInline, ProblemVideoSolutionInline, CodeTemplateInline]
-    
-    formfield_overrides = {
-        models.TextField: {'widget': Textarea(attrs={'rows': 6, 'cols': 80})},
-    }
-
     def difficulty_badge(self, obj):
-        colors = {'EASY': '#10B981', 'MEDIUM': '#F59E0B', 'HARD': '#EF4444'}
+        colors = {
+            'easy': '#00b8a3',
+            'medium': '#ffc01e',
+            'hard': '#ef4743'
+        }
+        color = colors.get(obj.difficulty, '#666')
         return format_html(
-            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{}</span>',
-            colors.get(obj.difficulty, '#6B7280'), obj.get_difficulty_display()
+            '<span style="background-color: {}; color: white; padding: 3px 8px; '
+            'border-radius: 3px; font-weight: bold;">{}</span>',
+            color, obj.get_difficulty_display()
         )
     difficulty_badge.short_description = 'Difficulty'
     
-    def status_badge(self, obj):
-        colors = {'PUBLISHED': '#10B981', 'PENDING_APPROVAL': '#F59E0B', 'DRAFT': '#6B7280', 'ARCHIVED': '#EF4444', 'PRIVATE': '#8B5CF6'}
+    def acceptance_rate_display(self, obj):
+        rate = obj.acceptance_rate
+        if rate == 0:
+            return '-'
+        
+        # Color based on acceptance rate
+        if rate >= 50:
+            color = '#00b8a3'
+        elif rate >= 30:
+            color = '#ffc01e'
+        else:
+            color = '#ef4743'
+        
         return format_html(
-            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{}</span>',
-            colors.get(obj.status, '#6B7280'), obj.get_status_display()
+            '<span style="color: {}; font-weight: bold;">{:.1f}%</span>',
+            color, rate
         )
-    status_badge.short_description = 'Status'
+    acceptance_rate_display.short_description = 'Acceptance Rate'
     
-    def test_case_count(self, obj):
-        return obj.test_cases.count()
-    test_case_count.short_description = 'Test Cases'
+    def topic_list(self, obj):
+        topics = obj.topics.all()[:3]
+        if not topics:
+            return '-'
+        topic_names = ', '.join([t.name for t in topics])
+        if obj.topics.count() > 3:
+            topic_names += f' +{obj.topics.count() - 3}'
+        return topic_names
+    topic_list.short_description = 'Topics'
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # Creating new object
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
-@admin.register(PracticeSubmission)
-class PracticeSubmissionAdmin(admin.ModelAdmin):
-    list_display = (
-        'user', 'problem_title', 'language_badge', 'status_badge', 
-        'passed_cases', 'total_cases', 'submitted_at'
-    )
-    list_filter = ('status', 'language', 'submitted_at', 'problem__difficulty')
-    search_fields = ('user__username', 'problem__title')
-    date_hierarchy = 'submitted_at'
+
+@admin.register(TestCase)
+class TestCaseAdmin(admin.ModelAdmin):
+    list_display = ['problem', 'order', 'is_sample', 'input_preview', 'output_preview']
+    list_filter = ['is_sample', 'problem']
+    search_fields = ['problem__title', 'input_data', 'expected_output']
+    ordering = ['problem', 'order']
     
-    readonly_fields = [f.name for f in PracticeSubmission._meta.fields]
+    def input_preview(self, obj):
+        return obj.input_data[:50] + '...' if len(obj.input_data) > 50 else obj.input_data
+    input_preview.short_description = 'Input'
+    
+    def output_preview(self, obj):
+        return obj.expected_output[:50] + '...' if len(obj.expected_output) > 50 else obj.expected_output
+    output_preview.short_description = 'Output'
+
+
+@admin.register(CodeTemplate)
+class CodeTemplateAdmin(admin.ModelAdmin):
+    list_display = ['problem', 'language', 'has_solution']
+    list_filter = ['language', 'problem']
+    search_fields = ['problem__title']
+    
+    def has_solution(self, obj):
+        return bool(obj.solution_code)
+    has_solution.boolean = True
+    has_solution.short_description = 'Has Solution'
+
+
+@admin.register(Editorial)
+class EditorialAdmin(admin.ModelAdmin):
+    list_display = ['problem', 'has_video', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = ['problem__title', 'approach']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    def has_video(self, obj):
+        return bool(obj.video_url)
+    has_video.boolean = True
+    has_video.short_description = 'Video Available'
+
+
+@admin.register(Submission)
+class SubmissionAdmin(admin.ModelAdmin):
+    list_display = [
+        'id', 'user', 'problem', 'language', 
+        'status_badge', 'test_results', 'created_at'
+    ]
+    list_filter = ['status', 'language', 'created_at', 'problem']
+    search_fields = ['user__username', 'problem__title']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'created_at'
     
     fieldsets = (
         ('Submission Info', {
-            'fields': ('id', 'user', 'problem', 'language', 'submitted_at')
+            'fields': ('user', 'problem', 'language', 'code')
         }),
-        ('Code', {
-            'fields': ('code',), 'classes': ('collapse',)
+        ('Results', {
+            'fields': ('status', 'passed_test_cases', 'total_test_cases', 
+                      'error_message', 'execution_time', 'memory_used')
         }),
-        ('Evaluation Results', {
-            'fields': ('status', 'passed_cases', 'total_cases', 'execution_time', 'memory_used', 'results')
+        ('Metadata', {
+            'fields': ('created_at',)
         }),
     )
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-    
-    def problem_title(self, obj):
-        return obj.problem.title
-    problem_title.short_description = 'Problem'
-    
-    def language_badge(self, obj):
-        return format_html(
-            '<span style="background-color: #3B82F6; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px;">{}</span>',
-            obj.get_language_display()
-        )
-    language_badge.short_description = 'Language'
     
     def status_badge(self, obj):
         colors = {
-            'ACCEPTED': '#10B981', 'WRONG_ANSWER': '#EF4444', 'TIME_LIMIT_EXCEEDED': '#F97316',
-            'RUNTIME_ERROR': '#EF4444', 'COMPILATION_ERROR': '#DC2626', 'PENDING': '#F59E0B', 'RUNNING': '#3B82F6'
+            'accepted': '#00b8a3',
+            'wrong_answer': '#ef4743',
+            'runtime_error': '#ff6b6b',
+            'time_limit_exceeded': '#ffc01e',
+            'compilation_error': '#ff8c00',
+            'pending': '#999',
+            'running': '#007bff',
         }
+        color = colors.get(obj.status, '#666')
         return format_html(
-            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{}</span>',
-            colors.get(obj.status, '#6B7280'), obj.get_status_display()
+            '<span style="background-color: {}; color: white; padding: 3px 8px; '
+            'border-radius: 3px; font-size: 11px;">{}</span>',
+            color, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+    
+    def test_results(self, obj):
+        if obj.total_test_cases == 0:
+            return '-'
+        return f"{obj.passed_test_cases}/{obj.total_test_cases}"
+    test_results.short_description = 'Test Cases'
+
+
+@admin.register(UserProblemProgress)
+class UserProblemProgressAdmin(admin.ModelAdmin):
+    list_display = [
+        'user', 'problem', 'status_badge', 
+        'attempts', 'last_attempted', 'first_solved'
+    ]
+    list_filter = ['status', 'last_attempted']
+    search_fields = ['user__username', 'problem__title']
+    readonly_fields = ['last_attempted']
+    date_hierarchy = 'last_attempted'
+    
+    def status_badge(self, obj):
+        colors = {
+            'solved': '#00b8a3',
+            'attempted': '#ffc01e',
+            'not_attempted': '#999',
+        }
+        color = colors.get(obj.status, '#666')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 8px; '
+            'border-radius: 3px; font-size: 11px;">{}</span>',
+            color, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
 
-@admin.register(UserProblemStats)
-class UserProblemStatsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'problem_title', 'status_badges', 'total_attempts', 'first_solved_at')
-    list_filter = ('is_solved', 'problem__difficulty')
-    search_fields = ('user__username', 'problem__title')
-    readonly_fields = ('user', 'problem', 'is_solved', 'first_solved_at', 'total_attempts', 'created_at', 'updated_at')
-    
-    def problem_title(self, obj):
-        return obj.problem.title
-    problem_title.short_description = 'Problem'
-    
-    def status_badges(self, obj):
-        badges = []
-        if obj.is_solved:
-            badges.append('<span style="background-color: #10B981; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px;">Solved</span>')
-        elif obj.total_attempts > 0:
-            badges.append('<span style="background-color: #F59E0B; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px;">Attempted</span>')
-        return format_html(' '.join(badges)) if badges else '-'
-    status_badges.short_description = 'Status'
 
-# --- Register remaining models with default or simple admin views ---
-admin.site.register(TestCase)
-admin.site.register(Discussion)
-admin.site.register(DiscussionVote)
-admin.site.register(Badge)
-admin.site.register(UserBadge)
-admin.site.register(ProblemVideoSolution)
-
-# --- Customize admin site header and titles ---
-admin.site.site_header = "MockMate Practice Administration"
-admin.site.site_title = "MockMate Practice Admin"
-admin.site.index_title = "Welcome to MockMate Practice Administration"
+# Customize admin site header
+admin.site.site_header = "MockMate Practice Admin"
+admin.site.site_title = "Practice Admin"
+admin.site.index_title = "Welcome to Practice Management"

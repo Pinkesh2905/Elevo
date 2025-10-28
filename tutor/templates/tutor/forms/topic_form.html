@@ -1,0 +1,186 @@
+<!-- templates/tutor/forms/topic_form.html -->
+<div class="max-w-3xl">
+  <!-- Header -->
+  <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="w-14 h-14 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+          <i class="ri-price-tag-3-line text-3xl text-green-400"></i>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400 brand-font">
+            {% if edit_topic_id %}Edit{% else %}Create{% endif %} Aptitude Topic
+          </h2>
+          <p class="text-sm text-slate-400 mt-1">Topics are specific areas within a category</p>
+        </div>
+      </div>
+      <a href="{% url 'tutor:dashboard' %}" class="w-10 h-10 glass rounded-lg flex items-center justify-center hover:bg-white/10 transition-all hover-lift group">
+        <i class="ri-close-line text-xl text-slate-400 group-hover:text-slate-200"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
+    <form method="POST" action="{% url 'tutor:create_update' %}" class="space-y-6">
+      {% csrf_token %}
+      <input type="hidden" name="content_type" value="topic">
+      {% if edit_topic_id %}
+        <input type="hidden" name="topic_id" value="{{ edit_topic_id }}">
+      {% endif %}
+
+      <!-- Category Selection -->
+      <div>
+        <label for="{{ topic_form.category.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Category <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="ri-folder-line text-slate-400"></i>
+          </div>
+          {{ topic_form.category }}
+        </div>
+        {% if topic_form.category.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ topic_form.category.errors.0 }}</span>
+          </div>
+        {% endif %}
+        <p class="mt-2 text-xs text-slate-500 flex items-center">
+          <i class="ri-information-line mr-1"></i>
+          Select the parent category for this topic
+        </p>
+      </div>
+
+      <!-- Topic Name -->
+      <div>
+        <label for="{{ topic_form.name.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Topic Name <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <i class="ri-price-tag-3-line text-slate-400"></i>
+          </div>
+          {{ topic_form.name }}
+        </div>
+        {% if topic_form.name.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ topic_form.name.errors.0 }}</span>
+          </div>
+        {% endif %}
+        <p class="mt-2 text-xs text-slate-500 flex items-center">
+          <i class="ri-information-line mr-1"></i>
+          e.g., Percentages, Profit & Loss, Time & Work
+        </p>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label for="{{ topic_form.description.id_for_label }}" class="block text-sm font-semibold text-slate-200 mb-3">
+          Description
+        </label>
+        <div class="relative">
+          <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+            <i class="ri-file-text-line text-slate-400"></i>
+          </div>
+          {{ topic_form.description }}
+        </div>
+        {% if topic_form.description.errors %}
+          <div class="mt-2 flex items-center text-red-400 text-sm">
+            <i class="ri-error-warning-line mr-1"></i>
+            <span>{{ topic_form.description.errors.0 }}</span>
+          </div>
+        {% endif %}
+        <p class="mt-2 text-xs text-slate-500 flex items-center">
+          <i class="ri-information-line mr-1"></i>
+          Brief description of this topic
+        </p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex items-center gap-3 pt-6">
+        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+          <i class="ri-{% if edit_topic_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
+          {% if edit_topic_id %}Update{% else %}Create{% endif %} Topic
+        </button>
+        <a href="{% url 'tutor:dashboard' %}" class="px-6 py-3 glass border border-slate-600 text-slate-300 font-medium rounded-xl hover:bg-white/10 transition-all hover-lift">
+          <i class="ri-close-line mr-2"></i>Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Existing Topics -->
+  {% if topics %}
+  <div class="dark-card rounded-2xl p-8 hover-lift">
+    <div class="flex items-center mb-6">
+      <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mr-4">
+        <i class="ri-list-check text-2xl text-purple-400"></i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-bold text-slate-100 brand-font">Existing Topics</h3>
+        <p class="text-sm text-slate-400">{{ topics|length }} topic{{ topics|length|pluralize }}</p>
+      </div>
+    </div>
+    
+    <div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+      {% for topic in topics %}
+      <div class="glass rounded-xl p-5 hover:bg-white/10 transition-all duration-200 border border-slate-700/50 group">
+        <div class="flex items-start justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center mb-2">
+              <div class="w-8 h-8 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="ri-price-tag-3-line text-green-400"></i>
+              </div>
+              <p class="font-semibold text-slate-100 text-lg group-hover:text-green-400 transition-colors">{{ topic.name }}</p>
+            </div>
+            <p class="text-sm text-slate-400 ml-11 mb-1">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <i class="ri-folder-line mr-1 text-xs"></i>
+                {{ topic.category.name }}
+              </span>
+            </p>
+            {% if topic.description %}
+              <p class="text-sm text-slate-500 ml-11 line-clamp-2 mt-2">{{ topic.description|truncatechars:100 }}</p>
+            {% endif %}
+          </div>
+          <a href="?edit_topic={{ topic.id }}" class="ml-4 px-4 py-2 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium hover-lift whitespace-nowrap">
+            <i class="ri-edit-line mr-1"></i>Edit
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #4f46e5, #7c3aed);
+  }
+
+  /* Line clamp utility */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

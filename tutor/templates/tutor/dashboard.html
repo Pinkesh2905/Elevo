@@ -1,655 +1,379 @@
 {% extends "base.html" %}
 {% load static %}
-{% load form_filters %} 
 
-{% block title %}Tutor Dashboard - MockMate{% endblock %}
+{% block title %}Tutor Dashboard | MockMate{% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-6">
-  <!-- Header Section -->
-  <div class="glass border-b border-slate-700/50 mb-8">
-    <div class="max-w-7xl mx-auto py-8 px-6">
+<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header Section -->
+    <div class="mb-12">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 brand-font">
-            Welcome back, Tutor!
+          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 brand-font mb-3">
+            Tutor Dashboard
           </h1>
-          <p class="text-slate-400 mt-2 font-medium">Create and manage aptitude problems, coding challenges, and practice sets</p>
-          <!-- Code snippet decoration -->
-          <div class="mt-2 mono-font text-xs text-slate-600/50">
-            // Empowering the next generation of developers
+          <p class="text-slate-400 text-lg font-medium">Create and manage aptitude problems, coding challenges, and practice sets</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-8 space-y-3">
+      {% for message in messages %}
+      <div class="glass rounded-xl p-4 border {% if message.tags == 'success' %}border-green-500/30 bg-green-500/10{% elif message.tags == 'error' %}border-red-500/30 bg-red-500/10{% else %}border-blue-500/30 bg-blue-500/10{% endif %} backdrop-blur-sm animate-slide-in">
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if message.tags == 'success' %}bg-green-500/20{% elif message.tags == 'error' %}bg-red-500/20{% else %}bg-blue-500/20{% endif %}">
+            {% if message.tags == 'success' %}
+            <i class="ri-checkbox-circle-line text-xl text-green-400"></i>
+            {% elif message.tags == 'error' %}
+            <i class="ri-error-warning-line text-xl text-red-400"></i>
+            {% else %}
+            <i class="ri-information-line text-xl text-blue-400"></i>
+            {% endif %}
+          </div>
+          <p class="{% if message.tags == 'success' %}text-green-300{% elif message.tags == 'error' %}text-red-300{% else %}text-blue-300{% endif %} font-medium">{{ message }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <!-- Aptitude Stats -->
+      <div class="dark-card rounded-2xl p-6 hover-lift">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Aptitude Problems</p>
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+              {{ aptitude_stats.total_problems }}
+            </p>
+            <p class="text-xs text-slate-500 mt-2">{{ aptitude_stats.total_categories }} categories</p>
+          </div>
+          <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-questionnaire-line text-3xl text-blue-400"></i>
           </div>
         </div>
-        <div class="hidden md:flex items-center space-x-4">
-          <div class="glass bg-gradient-to-br from-indigo-500/20 to-purple-500/20 p-4 rounded-xl border border-indigo-500/30">
-            <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-            </svg>
+      </div>
+
+      <!-- Coding Problems Stats -->
+      <div class="dark-card rounded-2xl p-6 hover-lift">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Coding Problems</p>
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+              {{ practice_stats.total_problems }}
+            </p>
+            <p class="text-xs text-slate-500 mt-2">{{ practice_stats.active_problems }} active</p>
+          </div>
+          <div class="w-16 h-16 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-code-s-slash-line text-3xl text-green-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topics Stats -->
+      <div class="dark-card rounded-2xl p-6 hover-lift">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Coding Topics</p>
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+              {{ practice_stats.total_topics }}
+            </p>
+            <p class="text-xs text-slate-500 mt-2">Algorithm categories</p>
+          </div>
+          <div class="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-stack-line text-3xl text-purple-400"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Companies Stats -->
+      <div class="dark-card rounded-2xl p-6 hover-lift">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Companies</p>
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">
+              {{ practice_stats.total_companies }}
+            </p>
+            <p class="text-xs text-slate-500 mt-2">Tech companies</p>
+          </div>
+          <div class="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-building-line text-3xl text-orange-400"></i>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="max-w-7xl mx-auto py-10 px-6">
-    <!-- Success/Error Messages -->
-    {% if messages %}
-      <div class="mb-6 space-y-4">
-        {% for message in messages %}
-          <div class="glass rounded-xl p-4 animate-bounce-in border
-            {% if message.tags == 'success' %}border-emerald-500/30 bg-emerald-500/10
-            {% elif message.tags == 'error' %}border-red-500/30 bg-red-500/10
-            {% else %}border-indigo-500/30 bg-indigo-500/10{% endif %}">
-            <div class="flex items-center gap-3">
-              <i class="ri-{% if message.tags == 'success' %}check{% elif message.tags == 'error' %}error{% else %}info{% endif %}-line text-{% if message.tags == 'success' %}emerald{% elif message.tags == 'error' %}red{% else %}indigo{% endif %}-400 text-xl"></i>
-              <p class="text-{% if message.tags == 'success' %}emerald{% elif message.tags == 'error' %}red{% else %}indigo{% endif %}-200 font-medium">{{ message }}</p>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
 
     <!-- Quick Actions -->
     <div class="mb-12">
-      <h2 class="text-2xl font-semibold text-slate-200 mb-6 flex items-center brand-font">
-        <span class="glass bg-indigo-500/20 p-2 rounded-lg mr-3 border border-indigo-500/30">
-          <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-        </span>
-        Quick Actions
-        <span class="mono-font text-xs text-slate-600/50 ml-4">// Create content</span>
-      </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6">
-        <a href="?show=category" class="group relative glass rounded-xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-slate-700/50 hover:border-indigo-500/50">
-          <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="p-6 text-center relative z-10">
-            <div class="bg-indigo-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-500/30 transition-colors duration-300 border border-indigo-500/30">
-              <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-slate-200 mb-2">Add Category</h3>
-            <p class="text-sm text-slate-400">Create aptitude categories</p>
-          </div>
-        </a>
-
-        <a href="?show=topic" class="group relative glass rounded-xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-slate-700/50 hover:border-emerald-500/50">
-          <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="p-6 text-center relative z-10">
-            <div class="bg-emerald-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-500/30 transition-colors duration-300 border border-emerald-500/30">
-              <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-slate-200 mb-2">Add Topic</h3>
-            <p class="text-sm text-slate-400">Create topics within categories</p>
-          </div>
-        </a>
-
-        <a href="?show=problem" class="group relative glass rounded-xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-slate-700/50 hover:border-purple-500/50">
-          <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="p-6 text-center relative z-10">
-            <div class="bg-purple-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors duration-300 border border-purple-500/30">
-              <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-slate-200 mb-2">Add Aptitude Problem</h3>
-            <p class="text-sm text-slate-400">Create aptitude problems</p>
-          </div>
-        </a>
-
-        <!-- NEW: Coding Problem -->
-        <a href="?show=practice_problem" class="group relative glass rounded-xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-slate-700/50 hover:border-cyan-500/50">
-          <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="p-6 text-center relative z-10">
-            <div class="bg-cyan-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-cyan-500/30 transition-colors duration-300 border border-cyan-500/30">
-              <i class="ri-code-s-slash-line text-cyan-400 text-3xl"></i>
-            </div>
-            <h3 class="font-semibold text-slate-200 mb-2">Add Coding Problem</h3>
-            <p class="text-sm text-slate-400">Create LeetCode-style problems</p>
-          </div>
-        </a>
-
-        <a href="?show=practice_set" class="group relative glass rounded-xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-slate-700/50 hover:border-amber-500/50">
-          <div class="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          <div class="p-6 text-center relative z-10">
-            <div class="bg-amber-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-500/30 transition-colors duration-300 border border-amber-500/30">
-              <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-              </svg>
-            </div>
-            <h3 class="font-semibold text-slate-200 mb-2">Add Practice Set</h3>
-            <p class="text-sm text-slate-400">Create practice sets</p>
-          </div>
-        </a>
-
+      <h2 class="text-3xl font-bold text-slate-100 mb-6 brand-font">Quick Actions</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         
+        <!-- Aptitude Category -->
+        <a href="?show=category" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-folder-add-line text-2xl text-blue-400"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-200">Add Category</span>
+            <span class="text-xs text-slate-500 mt-1">Aptitude</span>
+          </div>
+        </a>
+
+        <!-- Aptitude Topic -->
+        <a href="?show=topic" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-price-tag-3-line text-2xl text-green-400"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-200">Add Topic</span>
+            <span class="text-xs text-slate-500 mt-1">Aptitude</span>
+          </div>
+        </a>
+
+        <!-- Aptitude Problem -->
+        <a href="?show=problem" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-question-answer-line text-2xl text-purple-400"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-200">Aptitude Problem</span>
+            <span class="text-xs text-slate-500 mt-1">Create new</span>
+          </div>
+        </a>
+
+        <!-- Coding Problem -->
+        <a href="?show=practice_problem" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-code-box-line text-2xl text-cyan-400"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-200">Coding Problem</span>
+            <span class="text-xs text-slate-500 mt-1">Create new</span>
+          </div>
+        </a>
+
+        <!-- Coding Topic -->
+        <a href="?show=coding_topic" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-stack-line text-2xl text-indigo-400"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-200">Coding Topic</span>
+            <span class="text-xs text-slate-500 mt-1">Algorithm</span>
+          </div>
+        </a>
+
+        <!-- Company -->
+        <a href="?show=coding_company" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-building-line text-2xl text-orange-400"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-200">Add Company</span>
+            <span class="text-xs text-slate-500 mt-1">Tech firms</span>
+          </div>
+        </a>
       </div>
     </div>
 
-    <!-- Add/Edit Forms Section -->
-    {% if show == 'category' or edit_category_id %}
-      <!-- Category Form (existing code) -->
-      <!-- ... keep existing category form ... -->
-
-    {% elif show == 'topic' or edit_topic_id %}
-      <!-- Topic Form (existing code) -->
-      <!-- ... keep existing topic form ... -->
-
-    {% elif show == 'problem' or edit_problem_id %}
-      <!-- Aptitude Problem Form (existing code) -->
-      <!-- ... keep existing aptitude problem form ... -->
-
-    {% elif show == 'practice_problem' or edit_practice_problem_id %}
-      <!-- NEW: Comprehensive Coding Problem Form -->
-      <div class="relative mb-12">
-        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-2xl transform rotate-1"></div>
-        <div class="relative glass-elevated rounded-2xl border border-slate-700/50 overflow-hidden transform hover:shadow-2xl transition-shadow duration-300">
-          <div class="relative bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 p-8 text-white overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 animate-pulse"></div>
-            <div class="relative flex items-center justify-between">
-              <div class="flex items-center">
-                <div class="glass bg-white/20 p-3 rounded-xl mr-4">
-                  <i class="ri-code-s-slash-line text-3xl"></i>
-                </div>
-                <div>
-                  <h2 class="text-3xl font-bold mb-1 brand-font">{{ edit_practice_problem_id|yesno:"Edit Coding Problem,Create New Coding Problem" }}</h2>
-                  <p class="text-cyan-100">{{ edit_practice_problem_id|yesno:"Update your coding problem,Create a comprehensive LeetCode-style problem" }}</p>
-                  <div class="mono-font text-xs text-cyan-200/70 mt-1">
-                    // codingProblem.build()
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="p-10 bg-slate-900/50">
-            <form method="POST" action="{% url 'tutor:create_update' %}" class="space-y-8" id="practice-problem-form">
-              {% csrf_token %}
-              <input type="hidden" name="content_type" value="practice_problem">
-              {% if edit_practice_problem_id %}<input type="hidden" name="practice_problem_id" value="{{ edit_practice_problem_id }}">{% endif %}
-              
-              <!-- Problem Basic Info Section -->
-              <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700/30">
-                <h3 class="text-xl font-semibold text-slate-200 mb-4 flex items-center">
-                  <i class="ri-information-line text-cyan-400 mr-2"></i>
-                  Problem Information
-                </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {% for field in problem_form %}
-                    {% if field.name in "title,slug,difficulty,category,companies,time_limit,memory_limit,is_premium,is_private" %}
-                      <div class="{% if field.name in 'title,slug,companies' %}md:col-span-2{% endif %}">
-                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ field.label }}</label>
-                        {{ field|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                        {% if field.help_text %}<p class="text-xs text-slate-400 mt-1">{{ field.help_text }}</p>{% endif %}
-                        {% for error in field.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-
-                <!-- Tags Section -->
-                <div class="mt-6">
-                  <label for="{{ problem_form.tags.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.tags.label }}</label>
-                  <div class="bg-slate-800/80 border-2 border-slate-700 rounded-xl p-4">
-                    {{ problem_form.tags }}
-                  </div>
-                  {% for error in problem_form.tags.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                </div>
-              </div>
-
-              <!-- Problem Content Section -->
-              <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700/30">
-                <h3 class="text-xl font-semibold text-slate-200 mb-4 flex items-center">
-                  <i class="ri-file-text-line text-green-400 mr-2"></i>
-                  Problem Content
-                </h3>
-                
-                <div class="space-y-6">
-                  <!-- Problem Statement -->
-                  <div>
-                    <label for="{{ problem_form.statement.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.statement.label }}</label>
-                    {{ problem_form.statement|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                    {% for error in problem_form.statement.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                  </div>
-
-                  <!-- Constraints and Hints -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label for="{{ problem_form.constraints.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.constraints.label }}</label>
-                      {{ problem_form.constraints|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.constraints.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                    <div>
-                      <label for="{{ problem_form.hints.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.hints.label }}</label>
-                      {{ problem_form.hints|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.hints.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                  </div>
-
-                  <!-- Approach and Complexity -->
-                  <div>
-                    <label for="{{ problem_form.approach.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.approach.label }}</label>
-                    {{ problem_form.approach|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                    {% for error in problem_form.approach.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                  </div>
-
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label for="{{ problem_form.time_complexity.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.time_complexity.label }}</label>
-                      {{ problem_form.time_complexity|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.time_complexity.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                    <div>
-                      <label for="{{ problem_form.space_complexity.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.space_complexity.label }}</label>
-                      {{ problem_form.space_complexity|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.space_complexity.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                  </div>
-
-                  <!-- External URLs -->
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <label for="{{ problem_form.leetcode_url.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.leetcode_url.label }}</label>
-                      {{ problem_form.leetcode_url|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.leetcode_url.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                    <div>
-                      <label for="{{ problem_form.hackerrank_url.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.hackerrank_url.label }}</label>
-                      {{ problem_form.hackerrank_url|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.hackerrank_url.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                    <div>
-                      <label for="{{ problem_form.external_url.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">{{ problem_form.external_url.label }}</label>
-                      {{ problem_form.external_url|add_class:"w-full px-4 py-3 border-2 border-slate-700 bg-slate-800/80 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-500/50 transition-all duration-200 hover:bg-slate-800 text-slate-200 font-medium placeholder:text-slate-500" }}
-                      {% for error in problem_form.external_url.errors %}<p class="text-red-400 text-sm mt-1">{{ error }}</p>{% endfor %}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Test Cases Section -->
-              <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700/30">
-                <h3 class="text-xl font-semibold text-slate-200 mb-4 flex items-center">
-                  <i class="ri-test-tube-line text-amber-400 mr-2"></i>
-                  Test Cases
-                  <span class="text-sm text-slate-400 ml-2 font-normal">(At least 1 required)</span>
-                </h3>
-                
-                {{ testcase_formset.management_form }}
-                <div id="test-cases-container">
-                  {% for form in testcase_formset %}
-                    <div class="test-case-form bg-slate-700/30 rounded-lg p-4 mb-4 border border-slate-600/50" data-form-idx="{{ forloop.counter0 }}">
-                      <div class="flex items-center justify-between mb-4">
-                        <h4 class="font-semibold text-slate-200">Test Case {{ forloop.counter }}</h4>
-                        {% if not forloop.first %}
-                          <button type="button" class="remove-test-case text-red-400 hover:text-red-300 text-sm font-medium">
-                            <i class="ri-delete-bin-line mr-1"></i>Remove
-                          </button>
-                        {% endif %}
-                      </div>
-                      
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label class="block text-sm font-semibold text-slate-300 mb-2">Input Data</label>
-                          {{ form.input_data }}
-                        </div>
-                        <div>
-                          <label class="block text-sm font-semibold text-slate-300 mb-2">Expected Output</label>
-                          {{ form.expected_output }}
-                        </div>
-                      </div>
-                      
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label class="block text-sm font-semibold text-slate-300 mb-2">Description</label>
-                          {{ form.description }}
-                        </div>
-                        <div>
-                          <label class="block text-sm font-semibold text-slate-300 mb-2">Difficulty Weight (1-10)</label>
-                          {{ form.difficulty_weight }}
-                        </div>
-                      </div>
-                      
-                      <div class="mb-4">
-                        <label class="block text-sm font-semibold text-slate-300 mb-2">Explanation</label>
-                        {{ form.explanation }}
-                      </div>
-                      
-                      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="flex items-center">
-                          {{ form.is_sample }}
-                          <label class="ml-2 text-sm text-slate-300">Sample Case</label>
-                        </div>
-                        <div class="flex items-center">
-                          {{ form.is_hidden }}
-                          <label class="ml-2 text-sm text-slate-300">Hidden Case</label>
-                        </div>
-                        <div>
-                          <label class="block text-sm text-slate-300 mb-1">Order</label>
-                          {{ form.order }}
-                        </div>
-                        <div>
-                          {{ form.DELETE }}
-                          {% if form.DELETE %}<label class="ml-2 text-sm text-red-400">Delete</label>{% endif %}
-                        </div>
-                      </div>
-                      
-                      {% for error in form.non_field_errors %}
-                        <p class="text-red-400 text-sm mt-2">{{ error }}</p>
-                      {% endfor %}
-                    </div>
-                  {% endfor %}
-                </div>
-                
-                <button type="button" id="add-test-case" class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors duration-200">
-                  <i class="ri-add-line mr-2"></i>
-                  Add Test Case
-                </button>
-              </div>
-
-              <!-- Code Templates Section -->
-              <div class="bg-slate-800/50 rounded-xl p-6 border border-slate-700/30">
-                <h3 class="text-xl font-semibold text-slate-200 mb-4 flex items-center">
-                  <i class="ri-code-line text-purple-400 mr-2"></i>
-                  Code Templates
-                  <span class="text-sm text-slate-400 ml-2 font-normal">(At least 1 required)</span>
-                </h3>
-                
-                {{ codetemplate_formset.management_form }}
-                <div id="code-templates-container">
-                  {% for form in codetemplate_formset %}
-                    <div class="code-template-form bg-slate-700/30 rounded-lg p-4 mb-4 border border-slate-600/50" data-form-idx="{{ forloop.counter0 }}">
-                      <div class="flex items-center justify-between mb-4">
-                        <h4 class="font-semibold text-slate-200">Code Template {{ forloop.counter }}</h4>
-                        {% if not forloop.first %}
-                          <button type="button" class="remove-code-template text-red-400 hover:text-red-300 text-sm font-medium">
-                            <i class="ri-delete-bin-line mr-1"></i>Remove
-                          </button>
-                        {% endif %}
-                      </div>
-                      
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <label class="block text-sm font-semibold text-slate-300 mb-2">Programming Language</label>
-                          {{ form.language }}
-                        </div>
-                        <div class="flex items-center">
-                          {{ form.is_default }}
-                          <label class="ml-2 text-sm text-slate-300">Default Template</label>
-                        </div>
-                      </div>
-                      
-                      <div class="mb-4">
-                        <label class="block text-sm font-semibold text-slate-300 mb-2">Starter Code</label>
-                        {{ form.starter_code }}
-                      </div>
-                      
-                      <div class="mb-4">
-                        <label class="block text-sm font-semibold text-slate-300 mb-2">Solution Code (Optional)</label>
-                        {{ form.solution_code }}
-                      </div>
-                      
-                      <div>
-                        {{ form.DELETE }}
-                        {% if form.DELETE %}<label class="ml-2 text-sm text-red-400">Delete</label>{% endif %}
-                      </div>
-                      
-                      {% for error in form.non_field_errors %}
-                        <p class="text-red-400 text-sm mt-2">{{ error }}</p>
-                      {% endfor %}
-                    </div>
-                  {% endfor %}
-                </div>
-                
-                <button type="button" id="add-code-template" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
-                  <i class="ri-add-line mr-2"></i>
-                  Add Code Template
-                </button>
-              </div>
-              
-              <!-- Submit Button -->
-              <div class="flex items-center justify-between pt-6 border-t border-slate-700/50">
-                <div class="text-sm text-slate-400">
-                  <span class="inline-flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Add test cases and code templates
-                  </span>
-                </div>
-                <button type="submit" class="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-cyan-500/50 overflow-hidden btn-professional">
-                  <span class="absolute inset-0 bg-gradient-to-r from-cyan-700 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
-                  <svg class="w-5 h-5 mr-2 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span class="relative z-10">{{ edit_practice_problem_id|yesno:"Update Coding Problem,Create Coding Problem" }}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-    {% elif show == 'practice_set' or edit_practice_set_id %}
-      <!-- Practice Set Form (existing code) -->
-      <!-- ... keep existing practice set form ... -->
+    <!-- Form Sections (conditionally shown based on 'show' parameter) -->
+    {% if show %}
+    <div class="mb-12 dark-theme-forms">
+      {% include 'tutor/forms/content_forms.html' %}
+    </div>
     {% endif %}
 
-    <!-- Content Grid (Lists of existing content) -->
+    <!-- Content Lists -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Categories List (existing) -->
-      <!-- ... keep existing categories list ... -->
-
-      <!-- Topics List (existing) -->
-      <!-- ... keep existing topics list ... -->
-
-      <!-- Aptitude Problems List (existing) -->
-      <!-- ... keep existing problems list ... -->
-
-      <!-- NEW: Coding Problems List -->
-      <div class="glass-elevated rounded-2xl border border-slate-700/50 overflow-hidden">
-        <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-6 text-white">
-          <h2 class="text-xl font-bold flex items-center brand-font">
-            <i class="ri-code-s-slash-line text-2xl mr-3"></i>
-            Coding Problems
-            <span class="mono-font text-xs text-cyan-200/70 ml-2">// algorithms</span>
-          </h2>
+      
+      <!-- Aptitude Problems List -->
+      <div class="dark-card rounded-2xl p-8 hover-lift">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="ri-questionnaire-line text-2xl text-blue-400"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-slate-100 brand-font">Aptitude Problems</h3>
+              <p class="text-sm text-slate-400">Recent submissions</p>
+            </div>
+          </div>
         </div>
-        <div class="p-6 bg-slate-900/50">
-          {% if practice_problems %}
-            <div class="space-y-3">
-              {% for problem in practice_problems %}
-                <div class="flex items-center justify-between p-4 glass rounded-lg border border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/10 transition-colors duration-200">
-                  <div>
-                    <span class="font-medium text-slate-200">{{ problem.title|truncatechars:40 }}</span>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="px-2 py-1 text-xs rounded-full {{ problem.get_difficulty_bg_color }}">{{ problem.difficulty }}</span>
-                      {% if problem.category %}<span class="text-xs text-slate-400">{{ problem.category.name }}</span>{% endif %}
-                    </div>
+
+        {% if aptitude_problems %}
+          <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+            {% for problem in aptitude_problems %}
+            <div class="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-200 border border-slate-700/50 group">
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-200 truncate mb-2 group-hover:text-blue-400 transition-colors">
+                    {{ problem.question_text|truncatechars:60 }}
+                  </p>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg
+                      {% if problem.difficulty == 'Easy' %}bg-green-500/20 text-green-400 border border-green-500/30
+                      {% elif problem.difficulty == 'Medium' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                      {% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
+                      {{ problem.difficulty }}
+                    </span>
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      {{ problem.topic.name }}
+                    </span>
                   </div>
-                  <a href="?edit_practice_problem={{ problem.id }}" class="text-cyan-400 hover:text-cyan-300 text-sm font-medium hover:underline transition-colors duration-200">
-                    Edit
-                  </a>
                 </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="text-center py-8">
-              <div class="bg-slate-800/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700/50">
-                <i class="ri-code-s-slash-line text-slate-500 text-2xl"></i>
+                <a href="?edit_problem={{ problem.id }}" class="ml-4 px-4 py-2 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium hover-lift whitespace-nowrap">
+                  <i class="ri-edit-line mr-1"></i>Edit
+                </a>
               </div>
-              <p class="text-slate-400">No coding problems added yet.</p>
-              <p class="text-xs text-slate-500 mt-1 mono-font">// Create algorithmic challenges</p>
             </div>
-          {% endif %}
-        </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="ri-questionnaire-line text-5xl text-blue-400/50"></i>
+            </div>
+            <p class="text-slate-400 font-medium">No aptitude problems yet</p>
+            <p class="text-sm text-slate-500 mt-2">Create your first aptitude problem</p>
+          </div>
+        {% endif %}
       </div>
 
-      <!-- Practice Sets List (existing) -->
-      <!-- ... keep existing practice sets list ... -->
+      <!-- Coding Problems List -->
+      <div class="dark-card rounded-2xl p-8 hover-lift">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="ri-code-s-slash-line text-2xl text-green-400"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold text-slate-100 brand-font">Coding Problems</h3>
+              <p class="text-sm text-slate-400">Recent submissions</p>
+            </div>
+          </div>
+        </div>
+
+        {% if practice_problems %}
+          <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+            {% for problem in practice_problems %}
+            <div class="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-200 border border-slate-700/50 group">
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-200 mb-2 group-hover:text-green-400 transition-colors">
+                    <span class="text-slate-500">{{ problem.problem_number }}.</span> {{ problem.title }}
+                  </p>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg
+                      {% if problem.difficulty == 'easy' %}bg-green-500/20 text-green-400 border border-green-500/30
+                      {% elif problem.difficulty == 'medium' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                      {% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
+                      {{ problem.get_difficulty_display }}
+                    </span>
+                    {% if not problem.is_active %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-700/50 text-slate-400 border border-slate-600/50">
+                      <i class="ri-eye-off-line mr-1"></i>Inactive
+                    </span>
+                    {% else %}
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <i class="ri-eye-line mr-1"></i>Active
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="?edit_practice_problem={{ problem.id }}" class="flex-1 px-4 py-2 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium text-center hover-lift">
+                  <i class="ri-edit-line mr-1"></i>Edit
+                </a>
+                <button onclick="toggleStatus({{ problem.id }})" class="px-4 py-2 {% if problem.is_active %}bg-orange-500/20 text-orange-400 hover:bg-orange-500/30{% else %}bg-green-500/20 text-green-400 hover:bg-green-500/30{% endif %} rounded-lg transition-all text-sm font-medium hover-lift border {% if problem.is_active %}border-orange-500/30{% else %}border-green-500/30{% endif %}">
+                  <i class="{% if problem.is_active %}ri-eye-off-line{% else %}ri-eye-line{% endif %} mr-1"></i>
+                  {{ problem.is_active|yesno:"Deactivate,Activate" }}
+                </button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="ri-code-s-slash-line text-5xl text-green-400/50"></i>
+            </div>
+            <p class="text-slate-400 font-medium">No coding problems yet</p>
+            <p class="text-sm text-slate-500 mt-2">Create your first coding challenge</p>
+          </div>
+        {% endif %}
+      </div>
+
     </div>
+
   </div>
 </div>
 
-<!-- JavaScript for Dynamic Forms -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Test Cases Dynamic Forms
-    let testCaseIndex = {{ testcase_formset.total_form_count }};
-    
-    document.getElementById('add-test-case')?.addEventListener('click', function() {
-        const container = document.getElementById('test-cases-container');
-        const totalForms = document.querySelector('#id_testcase_set-TOTAL_FORMS');
-        
-        const newForm = document.querySelector('.test-case-form').cloneNode(true);
-        
-        // Update form index
-        newForm.setAttribute('data-form-idx', testCaseIndex);
-        newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, testCaseIndex);
-        newForm.innerHTML = newForm.innerHTML.replace(/Test Case \d+/, `Test Case ${testCaseIndex + 1}`);
-        
-        // Clear form values
-        const inputs = newForm.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            if (input.type === 'checkbox') {
-                input.checked = false;
-            } else {
-                input.value = '';
-            }
-        });
-        
-        // Add remove button functionality
-        const removeBtn = newForm.querySelector('.remove-test-case');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', function() {
-                newForm.remove();
-                updateFormCounts();
-            });
-        }
-        
-        container.appendChild(newForm);
-        testCaseIndex++;
-        totalForms.value = testCaseIndex;
-    });
-    
-    // Code Templates Dynamic Forms
-    let codeTemplateIndex = {{ codetemplate_formset.total_form_count }};
-    
-    document.getElementById('add-code-template')?.addEventListener('click', function() {
-        const container = document.getElementById('code-templates-container');
-        const totalForms = document.querySelector('#id_codetemplate_set-TOTAL_FORMS');
-        
-        const newForm = document.querySelector('.code-template-form').cloneNode(true);
-        
-        // Update form index
-        newForm.setAttribute('data-form-idx', codeTemplateIndex);
-        newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, codeTemplateIndex);
-        newForm.innerHTML = newForm.innerHTML.replace(/Code Template \d+/, `Code Template ${codeTemplateIndex + 1}`);
-        
-        // Clear form values
-        const inputs = newForm.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            if (input.type === 'checkbox') {
-                input.checked = false;
-            } else {
-                input.value = '';
-            }
-        });
-        
-        // Add remove button functionality
-        const removeBtn = newForm.querySelector('.remove-code-template');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', function() {
-                newForm.remove();
-                updateFormCounts();
-            });
-        }
-        
-        container.appendChild(newForm);
-        codeTemplateIndex++;
-        totalForms.value = codeTemplateIndex;
-    });
-    
-    // Remove button functionality for existing forms
-    document.querySelectorAll('.remove-test-case').forEach(btn => {
-        btn.addEventListener('click', function() {
-            btn.closest('.test-case-form').remove();
-            updateFormCounts();
-        });
-    });
-    
-    document.querySelectorAll('.remove-code-template').forEach(btn => {
-        btn.addEventListener('click', function() {
-            btn.closest('.code-template-form').remove();
-            updateFormCounts();
-        });
-    });
-    
-    function updateFormCounts() {
-        // Update test case form counts
-        const testCaseForms = document.querySelectorAll('.test-case-form');
-        document.querySelector('#id_testcase_set-TOTAL_FORMS').value = testCaseForms.length;
-        
-        // Update code template form counts
-        const codeForms = document.querySelectorAll('.code-template-form');
-        document.querySelector('#id_codetemplate_set-TOTAL_FORMS').value = codeForms.length;
+<style>
+  /* Custom scrollbar for the overflow sections */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #4f46e5, #7c3aed);
+  }
+
+  /* Slide in animation for messages */
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
     }
-});
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+</style>
+
+<script>
+function toggleStatus(problemId) {
+  if (!confirm('Are you sure you want to toggle this problem status?')) return;
+  
+  fetch(`/tutor/practice-problem/${problemId}/toggle-status/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + data.error);
+    }
+  })
+  .catch(error => {
+    alert('Error: ' + error);
+  });
+}
 </script>
 
-{% endblock %}
-
-{% block extra_css %}
-<!-- Keep existing CSS and add new styles for coding problems -->
-<style>
-/* Existing form styling... */
-
-/* New styles for formsets */
-.test-case-form, .code-template-form {
-    border-left: 4px solid transparent;
-    transition: border-color 0.3s ease;
-}
-
-.test-case-form:hover {
-    border-left-color: #f59e0b;
-}
-
-.code-template-form:hover {
-    border-left-color: #8b5cf6;
-}
-
-/* Monaco editor styling */
-.monaco-editor {
-    border-radius: 0.75rem;
-    overflow: hidden;
-}
-
-/* Form field styling for formsets */
-.test-case-form input, .test-case-form textarea,
-.code-template-form input, .code-template-form textarea,
-.code-template-form select {
-    @apply w-full px-3 py-2 border-2 border-slate-700 bg-slate-800/80 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-500/50 transition-all duration-200 text-slate-200 font-medium placeholder:text-slate-500;
-}
-
-.code-template-form input, .code-template-form textarea, .code-template-form select {
-    @apply focus:border-purple-500 focus:ring-purple-500/50;
-}
-
-/* Responsive grid adjustments */
-@media (max-width: 768px) {
-    .grid.lg\\:grid-cols-6 {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 640px) {
-    .grid.lg\\:grid-cols-6 {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 {% endblock %}

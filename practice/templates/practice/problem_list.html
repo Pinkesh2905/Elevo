@@ -1,621 +1,448 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
-{% load custom_filters %}
 
 {% block title %}Practice Problems - MockMate{% endblock %}
 
-{% block extra_css %}
-<style>
-.glass-card {
-    background: rgba(17, 24, 39, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(75, 85, 99, 0.3);
-}
-
-.glass-card-light {
-    background: rgba(31, 41, 55, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(75, 85, 99, 0.2);
-}
-
-.difficulty-easy { @apply bg-green-500/20 text-green-300 border-green-500/30; }
-.difficulty-medium { @apply bg-yellow-500/20 text-yellow-300 border-yellow-500/30; }
-.difficulty-hard { @apply bg-red-500/20 text-red-300 border-red-500/30; }
-
-.status-solved { @apply bg-green-500/10 border-l-4 border-green-500; }
-.status-attempted { @apply bg-yellow-500/10 border-l-4 border-yellow-500; }
-.status-not-attempted { @apply bg-gray-500/10 border-l-4 border-gray-500; }
-
-.filter-form select, .filter-form input {
-    @apply w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm;
-    @apply focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none;
-}
-
-.filter-form select:focus, .filter-form input:focus {
-    @apply border-blue-500 ring-1 ring-blue-500;
-}
-
-.sort-button {
-    @apply px-3 py-2 text-sm rounded-lg transition-colors duration-200;
-}
-
-.sort-button.active {
-    @apply bg-blue-600 text-white;
-}
-
-.sort-button.inactive {
-    @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-}
-
-.problem-card {
-    @apply hover:shadow-2xl transition-all duration-300 cursor-pointer;
-}
-
-.problem-card:hover {
-    transform: translateY(-2px);
-}
-
-.tag-chip {
-    @apply px-2 py-1 text-xs rounded-md transition-colors duration-200;
-}
-
-.company-chip {
-    @apply px-2 py-1 text-xs bg-gray-700/50 text-gray-300 rounded-md;
-}
-
-.pagination-button {
-    @apply px-3 py-2 text-sm transition-colors duration-200 rounded-lg;
-}
-
-.pagination-button.active {
-    @apply bg-blue-600 text-white;
-}
-
-.pagination-button.inactive {
-    @apply text-gray-300 hover:text-white hover:bg-gray-700/50;
-}
-
-@media (max-width: 768px) {
-    .mobile-stack > * {
-        @apply mb-4;
-    }
-}
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="min-h-screen bg-transparent">
-    <!-- Header Section -->
-    <div class="glass-card rounded-2xl p-6 mb-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div class="mb-4 md:mb-0">
-                <h1 class="text-3xl font-bold text-white mb-2">Practice Problems</h1>
-                <p class="text-gray-300">Sharpen your coding skills with our curated problem set</p>
-            </div>
-            <div class="text-center md:text-right">
-                <div class="text-2xl font-bold text-blue-400">{{ stats.total_problems|default:0 }}</div>
-                <div class="text-sm text-gray-300">Total Problems</div>
-            </div>
-        </div>
-    </div>
+<div class="min-h-screen relative overflow-hidden py-12">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-indigo-900/10 to-purple-900/20 pointer-events-none"></div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <!-- Sidebar -->
-        <div class="lg:col-span-1 mobile-stack">
-            <!-- User Stats -->
-            <div class="glass-card rounded-2xl p-6 mb-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Your Progress</h3>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">Solved</span>
-                        <span class="text-green-400 font-semibold">{{ user_stats.problems_solved|default:0 }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">Attempted</span>
-                        <span class="text-yellow-400 font-semibold">{{ user_stats.problems_attempted|default:0 }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-300">Current Streak</span>
-                        <span class="text-blue-400 font-semibold">{{ user_stats.current_streak|default:0 }}</span>
-                    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <div class="mb-8 animate-slideInUp">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                    </svg>
                 </div>
-            </div>
-
-            <!-- Filter Form -->
-            <div class="glass-card rounded-2xl p-6 mb-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Filters</h3>
-                <form method="GET" class="filter-form space-y-4" id="filter-form">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Difficulty</label>
-                        {{ filter_form.difficulty }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                        {{ filter_form.category }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                        {{ filter_form.status }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Search</label>
-                        {{ filter_form.search }}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Company</label>
-                        {{ filter_form.company }}
-                    </div>
-                    
-                    <!-- Hidden fields to preserve sort -->
-                    {% if request.GET.sort %}
-                    <input type="hidden" name="sort" value="{{ request.GET.sort }}">
-                    {% endif %}
-                    
-                    <div class="flex space-x-2">
-                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                            Apply
-                        </button>
-                        <button type="button" id="clear-filters" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                            Clear
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Difficulty Stats -->
-            <div class="glass-card rounded-2xl p-6">
-                <h3 class="text-lg font-semibold text-white mb-4">By Difficulty</h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-green-300">Easy</span>
-                        <span class="text-gray-300">{{ stats.easy_problems|default:0 }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-yellow-300">Medium</span>
-                        <span class="text-gray-300">{{ stats.medium_problems|default:0 }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-red-300">Hard</span>
-                        <span class="text-gray-300">{{ stats.hard_problems|default:0 }}</span>
-                    </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Practice Problems</h1>
+                    <p class="text-slate-400 text-sm">Solve coding problems and improve your skills</p>
                 </div>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="lg:col-span-3">
-            <!-- Sort Options -->
-            <div class="glass-card-light rounded-xl p-4 mb-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-                    <div class="text-gray-300">
-                        {% if page_obj.paginator.count > 0 %}
-                            Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} problems
-                        {% else %}
-                            No problems found
-                        {% endif %}
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <a href="?sort=newest{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}" 
-                           class="sort-button {% if sort_by == 'newest' or not sort_by %}active{% else %}inactive{% endif %}">
-                            Newest
-                        </a>
-                        <a href="?sort=title{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}" 
-                           class="sort-button {% if sort_by == 'title' %}active{% else %}inactive{% endif %}">
-                            Title
-                        </a>
-                        <a href="?sort=difficulty{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}" 
-                           class="sort-button {% if sort_by == 'difficulty' %}active{% else %}inactive{% endif %}">
-                            Difficulty
-                        </a>
-                        <a href="?sort=acceptance{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}" 
-                           class="sort-button {% if sort_by == 'acceptance' %}active{% else %}inactive{% endif %}">
-                            Acceptance
-                        </a>
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card group">
+                <div class="glass rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-slate-500/5 to-gray-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <dt class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Problems</dt>
+                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <dd class="text-3xl font-bold text-white">{{ total_problems }}</dd>
                     </div>
                 </div>
             </div>
-
-            <!-- Problems List -->
-            <div class="space-y-4">
-                {% for problem in page_obj %}
-                <div class="problem-card glass-card rounded-2xl p-6 transition-all duration-300
-                    {% if problem.user_status and problem.user_status.is_solved %}status-solved{% elif problem.user_status and problem.user_status.is_attempted %}status-attempted{% else %}status-not-attempted{% endif %}"
-                     onclick="location.href='{% url 'practice:problem_detail' problem.slug %}'">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                        <div class="flex-1 mb-4 md:mb-0">
-                            <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-3 mb-3">
-                                <h3 class="text-xl font-semibold text-white hover:text-blue-400 transition-colors">
-                                    {{ problem.title }}
-                                </h3>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="px-3 py-1 text-xs font-medium rounded-full border
-                                        {% if problem.difficulty == 'EASY' %}difficulty-easy
-                                        {% elif problem.difficulty == 'MEDIUM' %}difficulty-medium
-                                        {% else %}difficulty-hard{% endif %}">
-                                        {{ problem.get_difficulty_display }}
-                                    </span>
-                                    {% if problem.is_premium %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 rounded-full">
-                                        Premium
-                                    </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
-                            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-3">
-                                {% if problem.category %}
-                                <span class="flex items-center">
-                                    <div class="w-2 h-2 rounded-full mr-2" style="background-color: {{ problem.category.color_code }}"></div>
-                                    {{ problem.category.name }}
-                                </span>
-                                {% endif %}
-                                <span>{{ problem.acceptance_rate|floatformat:1 }}% acceptance</span>
-                                <span>{{ problem.total_submissions }} submissions</span>
-                            </div>
-
-                            {% if problem.companies %}
-                            <div class="flex flex-wrap gap-2 mb-3">
-                                {% for company in problem.companies|split:"," %}
-                                {% if forloop.counter <= 3 %}
-                                <span class="company-chip">
-                                    {{ company|trim }}
-                                </span>
-                                {% elif forloop.counter == 4 %}
-                                <span class="company-chip">
-                                    +{{ problem.companies|split:","|length|add:"-3" }} more
-                                </span>
-                                {% endif %}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-
-                            {% if problem.tags.all %}
-                            <div class="flex flex-wrap gap-2">
-                                {% for tag in problem.tags.all %}
-                                {% if forloop.counter <= 4 %}
-                                <span class="tag-chip bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                                    {{ tag.name }}
-                                </span>
-                                {% elif forloop.counter == 5 %}
-                                <span class="tag-chip bg-gray-500/20 text-gray-300 border border-gray-500/30">
-                                    +{{ problem.tags.all|length|add:"-4" }} more
-                                </span>
-                                {% endif %}
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="flex flex-col items-start md:items-end space-y-2">
-                            {% if problem.user_status and problem.user_status.is_solved %}
-                            <div class="flex items-center text-green-400 text-sm">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            
+            {% if user.is_authenticated %}
+            <div class="stat-card group">
+                <div class="glass rounded-xl p-5 border border-emerald-400/20 hover:border-emerald-400/40 transition-all duration-300 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <dt class="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Solved</dt>
+                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                Solved
                             </div>
-                            {% elif problem.user_status and problem.user_status.is_attempted %}
-                            <div class="flex items-center text-yellow-400 text-sm">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                </svg>
-                                Attempted
-                            </div>
-                            {% endif %}
-                            
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                                    onclick="event.stopPropagation(); location.href='{% url 'practice:problem_detail' problem.slug %}'">
-                                Solve
-                            </button>
                         </div>
+                        <dd class="text-3xl font-bold text-white">{{ user.problem_progress.filter.count }}</dd>
                     </div>
                 </div>
-                {% empty %}
-                <div class="glass-card rounded-2xl p-12 text-center">
-                    <div class="text-gray-400 mb-4">
-                        <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold text-white mb-2">No problems found</h3>
-                    <p class="text-gray-400 mb-4">Try adjusting your filters or search criteria.</p>
-                    <button id="reset-all-filters" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        Clear All Filters
-                    </button>
-                </div>
-                {% endfor %}
             </div>
-
-            <!-- Pagination -->
-            {% if page_obj.has_other_pages %}
-            <div class="glass-card-light rounded-xl p-4 mt-8">
-                <div class="flex justify-center">
-                    <nav class="flex flex-wrap gap-2 justify-center">
-                        {% if page_obj.has_previous %}
-                        <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                           class="pagination-button inactive">
-                            First
-                        </a>
-                        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                           class="pagination-button inactive">
-                            Previous
-                        </a>
-                        {% endif %}
-
-                        <span class="pagination-button active">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                        </span>
-
-                        {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                           class="pagination-button inactive">
-                            Next
-                        </a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-                           class="pagination-button inactive">
-                            Last
-                        </a>
-                        {% endif %}
-                    </nav>
+            
+            <div class="stat-card group">
+                <div class="glass rounded-xl p-5 border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <dt class="text-xs font-semibold text-yellow-300 uppercase tracking-wider">Attempted</dt>
+                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <dd class="text-3xl font-bold text-white">0</dd>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card group">
+                <div class="glass rounded-xl p-5 border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <dt class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Success Rate</dt>
+                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <dd class="text-3xl font-bold text-white">0%</dd>
+                    </div>
                 </div>
             </div>
             {% endif %}
         </div>
+
+        <!-- Filters Section -->
+        <div class="glass-elevated rounded-2xl border border-white/10 p-6 mb-6 animate-slideInUp" style="animation-delay: 100ms;">
+            <form method="get" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    
+                    <!-- Search -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Search</label>
+                        {{ filter_form.search }}
+                    </div>
+                    
+                    <!-- Difficulty -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Difficulty</label>
+                        {{ filter_form.difficulty }}
+                    </div>
+                    
+                    <!-- Topic -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Topic</label>
+                        {{ filter_form.topic }}
+                    </div>
+                    
+                    <!-- Company -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Company</label>
+                        {{ filter_form.company }}
+                    </div>
+                </div>
+                
+                {% if user.is_authenticated %}
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Status</label>
+                        {{ filter_form.status }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Filter Buttons -->
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 border border-white/10">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        Apply Filters
+                    </button>
+                    <a href="{% url 'practice:problem-list' %}" 
+                       class="inline-flex items-center px-6 py-2.5 glass border border-white/10 hover:border-white/20 text-slate-300 hover:text-white rounded-lg font-semibold transition-all duration-300">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Problems Table -->
+        <div class="glass-elevated rounded-2xl border border-white/10 overflow-hidden animate-slideInUp" style="animation-delay: 200ms;">
+            {% if page_obj %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-white/10">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-cyan-600/10">
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-16">
+                                Status
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-24">
+                                #
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Title
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-32">
+                                Difficulty
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                                Topics
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-32">
+                                Acceptance
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/10">
+                        {% for problem in page_obj %}
+                        <tr class="hover:bg-white/5 transition-all duration-200 cursor-pointer group" 
+                            onclick="window.location='{% url 'practice:problem_detail' problem.slug %}'">
+                            
+                            <!-- Status Icon -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if user.is_authenticated %}
+                                    {% if problem.user_status == 'solved' %}
+                                        <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                    {% elif problem.user_status == 'attempted' %}
+                                        <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg">
+                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                    {% else %}
+                                        <div class="w-6 h-6 rounded-lg glass border border-slate-500/30"></div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="w-6 h-6 rounded-lg glass border border-slate-500/20"></div>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Problem Number -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-400">
+                                {{ problem.problem_number }}
+                            </td>
+                            
+                            <!-- Title -->
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-medium text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 transition-all duration-300">
+                                    {{ problem.title }}
+                                </div>
+                            </td>
+                            
+                            <!-- Difficulty Badge -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if problem.difficulty == 'easy' %}
+                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                        Easy
+                                    </span>
+                                {% elif problem.difficulty == 'medium' %}
+                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
+                                        Medium
+                                    </span>
+                                {% else %}
+                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-lg bg-red-500/20 text-red-300 border border-red-400/30">
+                                        Hard
+                                    </span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Topics -->
+                            <td class="px-6 py-4">
+                                <div class="flex flex-wrap gap-1">
+                                    {% for topic in problem.topics.all|slice:":3" %}
+                                        <span class="px-2 py-1 text-xs font-medium glass text-slate-300 rounded border border-white/10">
+                                            {{ topic.name }}
+                                        </span>
+                                    {% endfor %}
+                                    {% if problem.topics.count > 3 %}
+                                        <span class="px-2 py-1 text-xs font-medium glass text-slate-400 rounded border border-white/10">
+                                            +{{ problem.topics.count|add:"-3" }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            
+                            <!-- Acceptance Rate -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-300">
+                                {% if problem.acceptance_rate > 0 %}
+                                    {{ problem.acceptance_rate }}%
+                                {% else %}
+                                    <span class="text-slate-500">N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="bg-gradient-to-r from-indigo-600/5 via-purple-600/5 to-cyan-600/5 px-6 py-4 border-t border-white/10">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-slate-400">
+                        Showing 
+                        <span class="font-semibold text-white">{{ page_obj.start_index }}</span>
+                        to 
+                        <span class="font-semibold text-white">{{ page_obj.end_index }}</span>
+                        of 
+                        <span class="font-semibold text-white">{{ page_obj.paginator.count }}</span>
+                        results
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
+                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
+                                First
+                            </a>
+                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
+                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
+                                Previous
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600/20 border border-indigo-400/30 rounded-lg">
+                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                        </span>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
+                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
+                                Next
+                            </a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
+                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
+                                Last
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- No Problems Found -->
+            <div class="text-center py-12">
+                <div class="w-16 h-16 mx-auto glass rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">No problems found</h3>
+                <p class="text-slate-400 mb-6">Try adjusting your filters or search query</p>
+                <a href="{% url 'practice:problem-list' %}" 
+                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 border border-white/10">
+                    Clear all filters
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Links -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 animate-slideInUp" style="animation-delay: 300ms;">
+            <a href="{% url 'practice:topic_list' %}" 
+               class="group glass-elevated rounded-2xl border border-white/10 hover:border-white/20 p-6 transition-all duration-300 hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-cyan-400 transition-all duration-300">Browse by Topics</h3>
+                        <p class="text-sm text-slate-400">Explore problems by algorithm categories</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{% url 'practice:company_list' %}" 
+               class="group glass-elevated rounded-2xl border border-white/10 hover:border-white/20 p-6 transition-all duration-300 hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Browse by Companies</h3>
+                        <p class="text-sm text-slate-400">Practice problems asked by top companies</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Clear filters functionality
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    const resetAllFiltersBtn = document.getElementById('reset-all-filters');
+<style>
+    /* Style form inputs */
+    input[type="text"], 
+    input[type="search"],
+    select {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.5rem;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
     
-    function clearAllFilters() {
-        // Clear form inputs
-        const form = document.getElementById('filter-form');
-        if (form) {
-            const inputs = form.querySelectorAll('select, input[type="text"], input[type="search"]');
-            inputs.forEach(input => {
-                if (input.type === 'select-one') {
-                    input.selectedIndex = 0;
-                } else {
-                    input.value = '';
-                }
-            });
+    input[type="text"]:focus,
+    input[type="search"]:focus,
+    select:focus {
+        outline: none;
+        border-color: rgba(99, 102, 241, 0.5);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    input::placeholder {
+        color: #64748b;
+    }
+    
+    select option {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    /* Entrance Animation */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
         }
-        
-        // Navigate to clean URL
-        window.location.href = '{% url "practice:problem_list" %}';
-    }
-    
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            clearAllFilters();
-        });
-    }
-    
-    if (resetAllFiltersBtn) {
-        resetAllFiltersBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            clearAllFilters();
-        });
-    }
-    
-    // Auto-submit form when filters change (optional)
-    const autoSubmitElements = document.querySelectorAll('#filter-form select');
-    autoSubmitElements.forEach(element => {
-        element.addEventListener('change', function() {
-            // Optional: Auto-submit form when select changes
-            // Uncomment the line below if you want auto-submit
-            // document.getElementById('filter-form').submit();
-        });
-    });
-    
-    // Search input with debounce
-    const searchInput = document.querySelector('#filter-form input[type="text"], #filter-form input[type="search"]');
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            // Optional: Auto-submit after typing stops for 500ms
-            // Uncomment below for auto-search
-            /*
-            searchTimeout = setTimeout(() => {
-                document.getElementById('filter-form').submit();
-            }, 500);
-            */
-        });
-    }
-    
-    // Handle Enter key in search
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('filter-form').submit();
-            }
-        });
-    }
-    
-    // Prevent card click when clicking buttons
-    document.querySelectorAll('.problem-card button').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-    
-    // Smooth scrolling for pagination
-    const paginationLinks = document.querySelectorAll('.pagination-button');
-    paginationLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            // Show loading state
-            const button = this;
-            const originalText = button.textContent;
-            button.textContent = 'Loading...';
-            button.style.pointerEvents = 'none';
-            
-            // Reset after a delay (in case navigation fails)
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.style.pointerEvents = 'auto';
-            }, 3000);
-        });
-    });
-    
-    // Add loading states to sort buttons
-    document.querySelectorAll('.sort-button').forEach(button => {
-        button.addEventListener('click', function() {
-            // Add loading state
-            const originalText = this.textContent;
-            this.textContent = 'Loading...';
-            this.style.pointerEvents = 'none';
-            
-            // Reset after delay
-            setTimeout(() => {
-                this.textContent = originalText;
-                this.style.pointerEvents = 'auto';
-            }, 3000);
-        });
-    });
-    
-    // Highlight current filters
-    function highlightActiveFilters() {
-        const form = document.getElementById('filter-form');
-        if (!form) return;
-        
-        const inputs = form.querySelectorAll('select, input[type="text"], input[type="search"]');
-        inputs.forEach(input => {
-            const hasValue = input.type === 'select-one' ? 
-                input.selectedIndex > 0 : 
-                input.value.trim() !== '';
-                
-            if (hasValue) {
-                input.style.borderColor = '#3B82F6';
-                input.style.boxShadow = '0 0 0 1px #3B82F6';
-            }
-        });
-    }
-    
-    // Call highlight function on load
-    highlightActiveFilters();
-    
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + K to focus search
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            if (searchInput) {
-                searchInput.focus();
-                searchInput.select();
-            }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        // Escape to clear search
-        if (e.key === 'Escape') {
-            if (searchInput && document.activeElement === searchInput) {
-                searchInput.value = '';
-                searchInput.blur();
-            }
-        }
-    });
-    
-    // Toast notification for actions
-    function showToast(message, type = 'info') {
-        // Create toast element
-        const toast = document.createElement('div');
-        toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg text-white font-medium transform transition-all duration-300 translate-x-full`;
-        
-        // Set background color based on type
-        switch(type) {
-            case 'success':
-                toast.classList.add('bg-green-600');
-                break;
-            case 'error':
-                toast.classList.add('bg-red-600');
-                break;
-            case 'warning':
-                toast.classList.add('bg-yellow-600');
-                break;
-            default:
-                toast.classList.add('bg-blue-600');
-        }
-        
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        
-        // Animate in
-        setTimeout(() => {
-            toast.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Animate out and remove
-        setTimeout(() => {
-            toast.classList.add('translate-x-full');
-            setTimeout(() => {
-                document.body.removeChild(toast);
-            }, 300);
-        }, 3000);
     }
-    
-    // Show toast for URL parameters (indicating active filters)
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasFilters = Array.from(urlParams.entries()).some(([key, value]) => 
-        key !== 'page' && key !== 'sort' && value.trim() !== ''
-    );
-    
-    if (hasFilters) {
-        showToast('Filters applied', 'info');
+
+    .animate-slideInUp {
+        animation: slideInUp 0.6s ease-out forwards;
+        opacity: 0;
     }
-    
-    // Add ripple effect to buttons
-    function addRippleEffect(button) {
-        button.addEventListener('click', function(e) {
-            const ripple = document.createElement('span');
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.cssText = `
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.3);
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                width: ${size}px;
-                height: ${size}px;
-                left: ${x}px;
-                top: ${y}px;
-                pointer-events: none;
-            `;
-            
-            button.style.position = 'relative';
-            button.style.overflow = 'hidden';
-            button.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
+
+    .stat-card {
+        animation: slideInUp 0.6s ease-out forwards;
+        opacity: 0;
     }
-    
-    // Add ripple to all buttons
-    document.querySelectorAll('button, .sort-button, .pagination-button').forEach(addRippleEffect);
-    
-    // Add CSS for ripple animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
+
+    .stat-card:nth-child(1) { animation-delay: 0s; }
+    .stat-card:nth-child(2) { animation-delay: 0.05s; }
+    .stat-card:nth-child(3) { animation-delay: 0.1s; }
+    .stat-card:nth-child(4) { animation-delay: 0.15s; }
+
+    /* Responsive Design */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
         }
-    `;
-    document.head.appendChild(style);
-});
-</script>
+    }
+</style>
 {% endblock %}

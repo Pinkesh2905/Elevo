@@ -410,22 +410,31 @@
       </div>
     </div>
 
-    <!-- Messages -->
+    <!-- Messages - Only show setup-related messages -->
     {% if messages %}
       <div class="mb-6">
         {% for message in messages %}
-          <div class="message-alert {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
-            <div class="flex-shrink-0 mr-3">
-              {% if message.tags == 'error' %}
-                <i class="fas fa-exclamation-circle"></i>
-              {% elif message.tags == 'success' %}
-                <i class="fas fa-check-circle"></i>
-              {% else %}
-                <i class="fas fa-info-circle"></i>
-              {% endif %}
+          {% comment %}
+          Only show messages that are relevant to interview setup:
+          - Resume parsing errors
+          - Form validation errors
+          - Setup success messages
+          Filter out messages about deletions, reviews, etc.
+          {% endcomment %}
+          {% if 'resume' in message.message|lower or 'created' in message.message|lower or 'setup' in message.message|lower or 'invalid' in message.message|lower or 'required' in message.message|lower or 'error' in message.message|lower and 'delete' not in message.message|lower and 'review' not in message.message|lower and 'cleared' not in message.message|lower %}
+            <div class="message-alert {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
+              <div class="flex-shrink-0 mr-3">
+                {% if message.tags == 'error' %}
+                  <i class="fas fa-exclamation-circle"></i>
+                {% elif message.tags == 'success' %}
+                  <i class="fas fa-check-circle"></i>
+                {% else %}
+                  <i class="fas fa-info-circle"></i>
+                {% endif %}
+              </div>
+              <div>{{ message }}</div>
             </div>
-            <div>{{ message }}</div>
-          </div>
+          {% endif %}
         {% endfor %}
       </div>
     {% endif %}

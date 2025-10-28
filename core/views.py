@@ -7,7 +7,6 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 
 from users.models import UserProfile
-from courses.models import Course
 from posts.models import Post
 
 # --- Role Helper Functions ---

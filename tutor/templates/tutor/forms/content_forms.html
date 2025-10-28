@@ -1,0 +1,35 @@
+<!-- templates/tutor/forms/content_forms.html -->
+<div class="dark-card rounded-2xl p-8 hover-lift">
+  {% if show == 'category' %}
+    {% include 'tutor/forms/category_form.html' %}
+  
+  {% elif show == 'topic' %}
+    {% include 'tutor/forms/topic_form.html' %}
+  
+  {% elif show == 'problem' %}
+    {% include 'tutor/forms/problem_form.html' %}
+  
+  {% elif show == 'practice_set' %}
+    {% include 'tutor/forms/practice_set_form.html' %}
+  
+  {% elif show == 'practice_problem' %}
+    {% include 'tutor/forms/practice_problem_form.html' %}
+  
+  {% elif show == 'coding_topic' %}
+    {% include 'tutor/forms/coding_topic_form.html' %}
+  
+  {% elif show == 'coding_company' %}
+    {% include 'tutor/forms/coding_company_form.html' %}
+  
+  {% else %}
+    <div class="text-center py-12">
+      <div class="w-24 h-24 bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="ri-error-warning-line text-5xl text-red-400/50"></i>
+      </div>
+      <p class="text-slate-400 font-medium">Invalid form type: {{ show }}</p>
+      <a href="{% url 'tutor:dashboard' %}" class="inline-flex items-center px-6 py-3 mt-4 glass border border-slate-600 text-slate-300 rounded-xl hover:bg-white/10 transition-all hover-lift">
+        <i class="ri-arrow-left-line mr-2"></i>Back to Dashboard
+      </a>
+    </div>
+  {% endif %}
+</div>

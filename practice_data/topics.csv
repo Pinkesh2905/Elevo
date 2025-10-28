@@ -1,0 +1,65 @@
+name,slug,description
+Array,array,Problems involving array data structures and manipulations
+String,string,String manipulation and pattern matching problems
+Hash Table,hash-table,Problems using hash maps and hash sets for efficient lookups
+Dynamic Programming,dynamic-programming,Problems that can be solved using memoization and optimal substructure
+Math,math,Mathematical and number theory problems
+Sorting,sorting,Problems involving sorting algorithms and techniques
+Greedy,greedy,Problems solved by making locally optimal choices
+Depth-First Search,depth-first-search,Graph and tree traversal using DFS technique
+Breadth-First Search,breadth-first-search,Graph and tree traversal using BFS technique
+Binary Search,binary-search,Problems using binary search algorithm
+Tree,tree,Binary tree and general tree problems
+Two Pointers,two-pointers,Problems solved using two pointer technique
+Stack,stack,Problems using stack data structure
+Linked List,linked-list,Singly and doubly linked list problems
+Heap (Priority Queue),heap-priority-queue,Problems using heap or priority queue
+Graph,graph,Graph theory and graph traversal problems
+Backtracking,backtracking,Problems using backtracking and recursive exploration
+Design,design,System design and data structure design problems
+Bit Manipulation,bit-manipulation,Problems involving bitwise operations
+Sliding Window,sliding-window,Problems using sliding window technique
+Queue,queue,Problems using queue data structure
+Recursion,recursion,Problems solved using recursive approaches
+Divide and Conquer,divide-and-conquer,Problems using divide and conquer strategy
+Trie,trie,Problems using trie (prefix tree) data structure
+Union Find,union-find,Disjoint set union and find operations
+Binary Search Tree,binary-search-tree,Binary search tree specific problems
+Segment Tree,segment-tree,Problems using segment tree for range queries
+Binary Indexed Tree,binary-indexed-tree,Problems using Fenwick tree
+Matrix,matrix,2D array and matrix manipulation problems
+Monotonic Stack,monotonic-stack,Problems using monotonic stack technique
+Prefix Sum,prefix-sum,Problems using prefix sum array technique
+Simulation,simulation,Problems requiring step-by-step simulation
+Counting,counting,Problems involving counting and frequency analysis
+Game Theory,game-theory,Game theory and minimax problems
+Combinatorics,combinatorics,Permutation and combination problems
+Geometry,geometry,Computational geometry problems
+Topological Sort,topological-sort,Directed acyclic graph ordering problems
+Shortest Path,shortest-path,Graph shortest path algorithms
+Minimum Spanning Tree,minimum-spanning-tree,MST problems using Kruskal or Prim's algorithm
+Rolling Hash,rolling-hash,String hashing technique problems
+Enumeration,enumeration,Problems requiring enumeration of possibilities
+Merge Sort,merge-sort,Problems specifically using merge sort
+Quickselect,quickselect,Selection algorithm problems
+Reservoir Sampling,reservoir-sampling,Random sampling from stream problems
+Memoization,memoization,Top-down dynamic programming with caching
+Bitmask,bitmask,Problems using bitmask for state representation
+Line Sweep,line-sweep,Computational geometry sweep line problems
+Monotonic Queue,monotonic-queue,Problems using monotonic queue technique
+Suffix Array,suffix-array,String problems using suffix array
+Binary Tree,binary-tree,General binary tree problems
+N-ary Tree,n-ary-tree,Trees with arbitrary number of children
+Doubly-Linked List,doubly-linked-list,Doubly linked list specific problems
+Brainteaser,brainteaser,Logic puzzles and brainteasers
+Probability and Statistics,probability-and-statistics,Statistical and probability problems
+Randomized,randomized,Problems using randomized algorithms
+Iterator,iterator,Iterator design and implementation problems
+Concurrency,concurrency,Multi-threading and synchronization problems
+Data Stream,data-stream,Problems involving data streams
+Ordered Set,ordered-set,Problems using ordered set data structure
+Number Theory,number-theory,Prime numbers and modular arithmetic
+String Matching,string-matching,Pattern matching algorithms like KMP
+Eulerian Circuit,eulerian-circuit,Eulerian path and circuit problems
+Strongly Connected Component,strongly-connected-component,SCC decomposition in directed graphs
+Biconnected Component,biconnected-component,Finding articulation points and bridges

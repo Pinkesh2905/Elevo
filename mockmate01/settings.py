@@ -22,6 +22,7 @@ env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False)
 )
+# This line reads the .env file from your project's root directory
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
@@ -53,6 +54,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
+    'corsheaders',
+    # 'practice.apps.CodingPracticeConfig',
+    'django.contrib.humanize',
 
     # Third-party apps
     'crispy_forms',
@@ -63,11 +69,8 @@ INSTALLED_APPS = [
     'users',
     'practice',
     'aptitude',
-    'articles',
-    'courses',
     'mock_interview',
     'posts',
-    'quizzes',
     'tutor',
 ]
 
@@ -84,9 +87,48 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
+# REST FRAMEWORK CONFIGURATION
+# ============================================
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',  # If using JWT
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+}
+
 ROOT_URLCONF = 'mockmate01.urls'
+
+# 4. CORS SETTINGS (if using separate frontend)
+# ============================================
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React/Next.js
+    "http://localhost:8080",  # Vue
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8080",
+]
+
+# For development, you can use:
+# CORS_ALLOW_ALL_ORIGINS = True  # Only for development!
+
+CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
     {
@@ -175,5 +217,28 @@ if os.path.exists(NLTK_DATA_DIR):
 # API Credentials
 JDOODLE_CLIENT_ID = env('JDOODLE_CLIENT_ID', default='')
 JDOODLE_CLIENT_SECRET = env('JDOODLE_CLIENT_SECRET', default='')
-OPENAI_API_KEY = env('OPENAI_API_KEY', default='')
 
+# === AI PROVIDER SETTINGS (NEW) ===
+# This tells your views.py which provider to use ("gemini" or "openai")
+AI_PROVIDER = env('AI_PROVIDER', default='gemini') 
+# This reads the keys from your .env file
+OPENAI_API_KEY = env('OPENAI_API_KEY', default='')
+GEMINI_API_KEY = env('GEMINI_API_KEY', default='')
+# ====================================
+
+USE_MOCK_EXECUTOR = os.environ.get('USE_MOCK_EXECUTOR', 'False') == 'True'
+
+# ============================================
+# CACHING CONFIGURATION (Optional but recommended)
+# ============================================
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Redirect URLs
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home' 

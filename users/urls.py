@@ -30,7 +30,8 @@ urlpatterns = [
     path('delete-account/', views.delete_account, name='delete_account'),
     
     # Admin URLs
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin/users/', views.admin_users, name='admin_users'),
     path('admin/toggle-status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
-    path('admin/approve-tutor/<int:user_id>/', views.approve_tutor, name='approve_tutor'),
+    path('admin/approve-tutor/<int:user_id>/', views.admin_approve_tutor, name='approve_tutor'),
 ]

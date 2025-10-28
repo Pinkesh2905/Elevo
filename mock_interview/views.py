@@ -28,17 +28,35 @@ import docx2txt
 import openai
 import google.generativeai as genai
 from google.genai import types
+from google.generativeai.types import HarmCategory # <-- ADDED THIS IMPORT
 
-# TTS libraries
-from gtts import gTTS
+logger = logging.getLogger(__name__)
+
 try:
     import edge_tts
     EDGE_TTS_AVAILABLE = True
+    logger.info("✓ edge-tts library imported successfully")
 except ImportError:
     EDGE_TTS_AVAILABLE = False
-    logging.warning("edge-tts not available. Install with: pip install edge-tts")
+    logger.warning("⚠ edge-tts not available, will use gTTS fallback")
 
-logger = logging.getLogger(__name__)
+try:
+    from gtts import gTTS
+    GTTS_AVAILABLE = True
+    logger.info("✓ gTTS library imported successfully")
+except ImportError:
+    GTTS_AVAILABLE = False
+    logger.error("✗ gTTS not available - TTS will be disabled")
+
+# ADD DEBUG CODE HERE - RIGHT AFTER logger definition
+logger.info(f"=== AI CONFIGURATION DEBUG ===")
+logger.info(f"AI_PROVIDER from settings: {getattr(settings, 'AI_PROVIDER', 'NOT SET')}")
+logger.info(f"GEMINI_API_KEY present: {bool(getattr(settings, 'GEMINI_API_KEY', ''))}")
+logger.info(f"GEMINI_API_KEY length: {len(getattr(settings, 'GEMINI_API_KEY', ''))}")
+logger.info(f"OPENAI_API_KEY present: {bool(getattr(settings, 'OPENAI_API_KEY', ''))}")
+logger.info(f"Environment AI_PROVIDER: {os.getenv('AI_PROVIDER', 'NOT SET')}")
+logger.info(f"Environment GEMINI_API_KEY present: {bool(os.getenv('GEMINI_API_KEY', ''))}")
+logger.info(f"================================")
 
 from .models import MockInterviewSession, InterviewTurn
 from .forms import InterviewSetupForm
@@ -62,42 +80,94 @@ AI_PROVIDER = getattr(settings, "AI_PROVIDER", "gemini").lower()
 GEMINI_API_KEY = getattr(settings, "GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
 OPENAI_API_KEY = getattr(settings, "OPENAI_API_KEY", os.getenv("OPENAI_API_KEY", ""))
 
+GEMINI_MODEL_NAME = None  # Will be auto-detected
+
+def detect_available_gemini_model():
+    """Detect which Gemini model is available in the current API version."""
+    global GEMINI_MODEL_NAME
+    
+    if not GEMINI_API_KEY:
+        logger.error("No Gemini API key configured")
+        return None
+    
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        
+        # List all available models
+        available_models = []
+        for model in genai.list_models():
+            if 'generateContent' in model.supported_generation_methods:
+                available_models.append(model.name)
+        
+        logger.info(f"Available Gemini models: {available_models}")
+        
+        # Prioritize flash models - they have MUCH higher rate limits
+        preferred_models = [
+            'models/gemini-1.5-flash-8b',    # Fastest, highest limits
+            'models/gemini-1.5-flash',        # Fast with good limits
+            'models/gemini-1.5-flash-latest',
+            'models/gemini-1.5-pro',          # Slower, lower limits
+            'models/gemini-2.0-flash-exp',    # Experimental
+        ]
+        
+        # Find first available preferred model
+        for preferred in preferred_models:
+            for available in available_models:
+                if preferred in available:
+                    GEMINI_MODEL_NAME = available
+                    logger.info(f"✓ Using Gemini model: {GEMINI_MODEL_NAME}")
+                    return GEMINI_MODEL_NAME
+        
+        # If no preferred model found, use first available
+        if available_models:
+            GEMINI_MODEL_NAME = available_models[0]
+            logger.info(f"✓ Using first available Gemini model: {GEMINI_MODEL_NAME}")
+            return GEMINI_MODEL_NAME
+        
+        logger.error("No compatible Gemini models found")
+        return None
+        
+    except Exception as e:
+        logger.error(f"Failed to detect Gemini models: {e}")
+        return None
+
 # Initialize AI providers with better error handling
 def initialize_ai_providers():
     """Initialize AI providers with proper error handling and validation"""
-    global AI_PROVIDER, GEMINI_API_KEY, OPENAI_API_KEY
+    global AI_PROVIDER, GEMINI_API_KEY, OPENAI_API_KEY, GEMINI_MODEL_NAME
     
     providers_initialized = []
     
     if AI_PROVIDER == "openai" and OPENAI_API_KEY:
         try:
             openai.api_key = OPENAI_API_KEY
-            # Test the API key with a simple request
-            test_response = openai.models.list()
-            providers_initialized.append("OpenAI")
-            logger.info("OpenAI API initialized successfully")
+            if OPENAI_API_KEY.startswith('sk-') and len(OPENAI_API_KEY) > 20:
+                providers_initialized.append("OpenAI")
+                logger.info("OpenAI API initialized successfully")
+            else:
+                logger.error("OpenAI API key appears to be invalid format")
         except Exception as e:
             logger.error(f"OpenAI initialization failed: {e}")
-            if "invalid_api_key" in str(e).lower():
-                logger.error("OpenAI API key appears to be invalid or expired")
                 
     elif AI_PROVIDER == "gemini" and GEMINI_API_KEY:
         try:
-            genai.configure(api_key=GEMINI_API_KEY)
-            # Test the API key
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            test_response = model.generate_content("Hello", generation_config={'max_output_tokens': 10})
-            providers_initialized.append("Gemini")
-            logger.info("Gemini API initialized successfully")
+            # Detect and set the correct model
+            model_name = detect_available_gemini_model()
+            
+            if model_name:
+                providers_initialized.append("Gemini")
+                logger.info(f"Gemini API initialized successfully with model: {model_name}")
+            else:
+                logger.error("Failed to find compatible Gemini model")
+                
         except Exception as e:
             logger.error(f"Gemini initialization failed: {e}")
-            if "api_key" in str(e).lower() or "invalid" in str(e).lower():
-                logger.error("Gemini API key appears to be invalid or expired")
     
     if not providers_initialized:
-        logger.warning("No valid AI provider configured. Check your API keys.")
+        logger.warning(f"No valid AI provider configured. AI_PROVIDER={AI_PROVIDER}")
         return False
     
+    logger.info(f"AI providers initialized: {', '.join(providers_initialized)}")
     return True
 
 # Initialize on module load
@@ -250,7 +320,7 @@ def run_edge_tts_sync(text, filename):
 # -------------------------
 # Enhanced AI Call Function with Better Error Handling
 # -------------------------
-def call_ai_model(prompt, model_type="text", max_tokens=150, temperature=0.7):
+def call_ai_model(prompt, model_type="text", max_tokens=150, temperature=0.7, safety_settings=None): # <-- ADDED safety_settings
     """
     Enhanced AI model calling with better error handling and fallbacks.
     """
@@ -260,9 +330,9 @@ def call_ai_model(prompt, model_type="text", max_tokens=150, temperature=0.7):
 
     try:
         if AI_PROVIDER == "gemini":
-            return _call_gemini_model(prompt, model_type, max_tokens, temperature)
+            return _call_gemini_model(prompt, model_type, max_tokens, temperature, safety_settings) # <-- PASSED safety_settings
         elif AI_PROVIDER == "openai":
-            return _call_openai_model(prompt, model_type, max_tokens, temperature)
+            return _call_openai_model(prompt, model_type, max_tokens, temperature) # No change needed here
         else:
             raise ValueError(f"Unknown AI provider: {AI_PROVIDER}")
 
@@ -275,35 +345,22 @@ def call_ai_model(prompt, model_type="text", max_tokens=150, temperature=0.7):
         
         return _get_fallback_response(model_type)
 
-def _call_gemini_model(prompt, model_type, max_tokens, temperature):
+def _call_gemini_model(prompt, model_type, max_tokens, temperature, safety_settings=None): # <-- ADDED safety_settings
     """Call Gemini model with enhanced error handling."""
+    global GEMINI_MODEL_NAME
+    
+    # Make sure we have a model name
+    if not GEMINI_MODEL_NAME:
+        logger.error("No Gemini model name set. Re-detecting...")
+        GEMINI_MODEL_NAME = detect_available_gemini_model()
+        if not GEMINI_MODEL_NAME:
+            logger.error("Could not find any Gemini model. Aborting call.")
+            return "" # Return empty string on failure
+    
     if model_type == "tts":
-        try:
-            model = genai.GenerativeModel("gemini-2.0-flash-exp")
-            content_parts = [{'text': prompt}]
-            generation_config = {
-                "response_modalities": ["AUDIO"],
-                "speech_config": {
-                    "voice_config": {
-                        "prebuilt_voice_config": {
-                            "voice_name": "Aoede"
-                        }
-                    }
-                }
-            }
-            response = model.generate_content(content_parts, generation_config=generation_config)
-            
-            if response.candidates and len(response.candidates) > 0:
-                part = response.candidates[0].content.parts[0]
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    audio_base64 = part.inline_data.data
-                    mime = part.inline_data.mime_type
-                    return {"audio_base64": audio_base64, "mime": mime or "audio/wav"}
-            return {"audio_base64": "", "mime": ""}
-            
-        except Exception as e:
-            logger.error(f"Gemini TTS failed: {e}")
-            return {"audio_base64": "", "mime": ""}
+        # Gemini native TTS not available in older versions
+        logger.info("Gemini native TTS not available, will use edge-tts/gTTS fallback")
+        return {"audio_base64": "", "mime": ""}
 
     elif model_type in ["edge_tts", "gtts"]:
         # Handle external TTS
@@ -331,41 +388,65 @@ def _call_gemini_model(prompt, model_type, max_tokens, temperature):
             return {"audio_url": None, "mime": "", "method": f"{model_type}_failed"}
 
     else:
-        # Text generation
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        generation_config = {
-            'temperature': temperature,
-            'top_p': 0.9,
-            'top_k': 40,
-            'max_output_tokens': max_tokens,
-        }
+        # Text generation - USE THE DETECTED MODEL NAME
         
-        # Add retry logic
-        for attempt in range(3):
-            try:
-                response = model.generate_content(
-                    prompt, 
-                    generation_config=generation_config,
-                    safety_settings={
-                        'HATE': 'BLOCK_NONE',
-                        'HARASSMENT': 'BLOCK_NONE',
-                        'SEXUAL': 'BLOCK_NONE',
-                        'DANGEROUS': 'BLOCK_NONE'
-                    }
-                )
-                
-                if response.text:
-                    return response.text.strip()
-                else:
-                    logger.warning(f"Empty response from Gemini on attempt {attempt + 1}")
+        try:
+            # --- OPTIMIZATION ---
+            # We now force GEMINI_MODEL_NAME to be 'gemini-1.5-flash' (or similar)
+            # from the detection function, ensuring a fast and cheap model is used.
+            model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+            
+            generation_config = {
+                'temperature': temperature,
+                'top_p': 0.9,
+                'top_k': 40,
+                'max_output_tokens': max_tokens,
+            }
+            
+            # Add retry logic
+            for attempt in range(3):
+                try:
+                    response = model.generate_content(
+                        prompt, 
+                        generation_config=generation_config,
+                        safety_settings=safety_settings # <-- PASSED safety_settings
+                    )
                     
-            except Exception as e:
-                logger.warning(f"Gemini attempt {attempt + 1} failed: {e}")
-                if attempt == 2:  # Last attempt
-                    raise e
-                time.sleep(1)  # Wait before retry
-        
-        return ""
+                    if response.text:
+                        return response.text.strip()
+                    else:
+                        # This handles the safety block: response.text is empty
+                        # Check for safety finish_reason
+                        try:
+                            if response.candidates[0].finish_reason.name == "SAFETY":
+                                logger.error(f"Gemini attempt {attempt + 1} blocked for SAFETY reasons.")
+                                raise Exception("Content blocked by safety settings.")
+                        except Exception:
+                            # Fallback for other empty responses
+                            logger.warning(f"Empty response from Gemini on attempt {attempt + 1}")
+                        
+                except Exception as e:
+                    error_message = str(e)
+                    logger.warning(f"Gemini attempt {attempt + 1} failed: {error_message}")
+                    
+                    # Do not retry on quota errors, it will just fail again
+                    if "429" in error_message or "quota" in error_message.lower():
+                        logger.error("Quota exceeded. Aborting retries.")
+                        raise e # Re-raise the quota error
+                        
+                    if "SAFETY" in error_message.upper():
+                        logger.error("Safety block detected. Aborting retries.")
+                        raise e # Re-raise the safety error
+
+                    if attempt == 2:  # Last attempt
+                        raise e
+                    time.sleep(1)  # Wait before retry
+            
+            return ""
+            
+        except Exception as e:
+            logger.error(f"Gemini API call failed: {e}")
+            return ""
 
 def _call_openai_model(prompt, model_type, max_tokens, temperature):
     """Call OpenAI model with enhanced error handling."""
@@ -416,7 +497,7 @@ def _call_openai_model(prompt, model_type, max_tokens, temperature):
         for attempt in range(3):
             try:
                 resp = openai.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gpt-4o-mini", # Using the cost-effective 4o-mini
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=max_tokens,
                     temperature=temperature,
@@ -429,7 +510,14 @@ def _call_openai_model(prompt, model_type, max_tokens, temperature):
                     logger.warning(f"Empty response from OpenAI on attempt {attempt + 1}")
                     
             except Exception as e:
-                logger.warning(f"OpenAI attempt {attempt + 1} failed: {e}")
+                error_message = str(e)
+                logger.warning(f"OpenAI attempt {attempt + 1} failed: {error_message}")
+                
+                # Do not retry on quota errors
+                if "429" in error_message or "quota" in error_message.lower():
+                    logger.error("Quota exceeded. Aborting retries.")
+                    raise e
+                    
                 if attempt == 2:  # Last attempt
                     raise e
                 time.sleep(1)  # Wait before retry
@@ -498,6 +586,8 @@ Your personality traits:
 - Speaks at a comfortable, measured pace
 - Shows authentic enthusiasm for good answers
 
+IMPORTANT: You are the INTERVIEWER. You ask questions. You do NOT answer questions on behalf of the candidate.
+
 Start the interview with this exact opening:
 "{opening_line}"
 
@@ -505,6 +595,7 @@ Then immediately continue with:
 "{conversation_starter}"
 
 Keep your response concise and under 100 words, warm and engaging.
+DO NOT include any simulated candidate responses.
 """
     
     # Progressive interview stages with better logic
@@ -513,12 +604,15 @@ Keep your response concise and under 100 words, warm and engaging.
         Focus: Building rapport and understanding their background (Questions 1-2)
         Sarah's approach: Show genuine interest in their journey and experiences
         
-        Ask open-ended questions about:
+        The candidate just said: "{user_response}"
+        
+        Acknowledge their response briefly and naturally, then ask ONE clear follow-up question about:
         - Their career journey or key learning moments
         - What drives their interest in {session.job_role}
         - Their professional background and motivation
         
-        Keep responses brief and under 60 words, and ask ONE clear question.
+        Keep your response brief (under 60 words) and ask ONLY ONE question.
+        DO NOT answer the question for them or simulate their response.
         """
     elif turn_count <= 5:
         stage_guidance = f"""
@@ -527,51 +621,63 @@ Keep your response concise and under 100 words, warm and engaging.
         
         Skills to explore: {session.key_skills}
         
-        Ask about specific technical experiences:
+        The candidate just said: "{user_response}"
+        
+        Acknowledge their response briefly, then ask ONE clear question about their technical experience:
         - Their experience with relevant skills/technologies
         - Problem-solving approaches
         - Specific project examples
         
-        Keep responses brief and under 60 words, and ask ONE clear question.
+        Keep your response brief (under 60 words) and ask ONLY ONE question.
+        DO NOT answer the question for them or simulate their response.
         """
     elif turn_count <= 8:
-        stage_guidance = """
+        stage_guidance = f"""
         Focus: Behavioral situations and teamwork (Questions 6-8)
         Sarah's approach: Explore workplace scenarios and collaboration
         
-        Ask behavioral questions about:
+        The candidate just said: "{user_response}"
+        
+        Acknowledge their response briefly, then ask ONE behavioral question about:
         - Challenging situations they've navigated
         - Collaboration and teamwork experiences
         - How they handle priorities and deadlines
         - Leadership or initiative examples
         
-        Keep responses brief and under 60 words, and ask ONE clear question.
+        Keep your response brief (under 60 words) and ask ONLY ONE question.
+        DO NOT answer the question for them or simulate their response.
         """
     elif turn_count <= 10:
         stage_guidance = f"""
         Focus: Cultural fit and future goals (Questions 9-10)
         Sarah's approach: Understand their values and aspirations
         
-        Explore:
+        The candidate just said: "{user_response}"
+        
+        Acknowledge their response briefly, then ask ONE question about:
         - What motivates them professionally
         - Their work style and preferences
         - Goals for the {session.job_role} role
         - Questions about the company/role
         
-        Keep responses brief and under 60 words, and ask ONE clear question.
+        Keep your response brief (under 60 words) and ask ONLY ONE question.
+        DO NOT answer the question for them or simulate their response.
         """
     else:
-        stage_guidance = """
+        stage_guidance = f"""
         Focus: Graceful conclusion (Question 11+)
         Sarah's approach: Wrap up warmly and professionally
         
-        Start with "INTERVIEW_COMPLETE" then provide a warm, encouraging closing that:
+        The candidate just said: "{user_response}"
+        
+        Start your response with "INTERVIEW_COMPLETE" then provide a warm, encouraging closing that:
         - Thanks them for their time
         - Mentions something positive from the conversation
         - Explains next steps
         - Gives them a final opportunity to add anything
         
         Keep the closing under 150 words and very encouraging.
+        DO NOT simulate their final response.
         """
     
     return f"""
@@ -582,21 +688,20 @@ Current question number: {turn_count + 1}
 
 {stage_guidance}
 
-Recent conversation:
+Recent conversation history:
 {conversation_context[-1000:] if conversation_context else "This is the start of the conversation"}
 
-Candidate's most recent response: "{user_response}"
-
-Sarah's communication style:
-- Be concise and direct.
-- Acknowledge their response specifically
-- Ask one clear, thoughtful question
+CRITICAL INSTRUCTIONS:
+- You are the INTERVIEWER asking questions
+- Acknowledge the candidate's response naturally
+- Ask ONE clear, thoughtful question
+- DO NOT answer your own questions
+- DO NOT simulate or imagine the candidate's responses
 - Keep responses conversational and brief
 - Show genuine professional interest
 - Use encouraging but not excessive language
-- Maintain natural flow
 
-Generate Sarah's next response (brief and under 60 words unless closing):
+Generate ONLY Sarah's next response (brief and under 60 words unless closing):
 """
 
 def analyze_interview_performance(session):
@@ -734,8 +839,22 @@ def extract_structured_from_resume_text(resume_text):
         f"Resume text:\n{resume_text[:20000]}"
     )
     
+    ai_output = "" # Initialize ai_output
     try:
-        ai_output = call_ai_model(prompt, model_type="text", max_tokens=800)
+        # --- MODIFICATION: ADDED LENIENT SAFETY SETTINGS ---
+        lenient_safety_settings = [
+            {'category': HarmCategory.HARM_CATEGORY_HARASSMENT, 'threshold': 'BLOCK_NONE'},
+            {'category': HarmCategory.HARM_CATEGORY_HATE_SPEECH, 'threshold': 'BLOCK_NONE'},
+            {'category': HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, 'threshold': 'BLOCK_NONE'},
+            {'category': HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, 'threshold': 'BLOCK_NONE'},
+        ]
+        
+        ai_output = call_ai_model(
+            prompt, 
+            model_type="text", 
+            max_tokens=800, 
+            safety_settings=lenient_safety_settings # <-- PASSED SETTINGS
+        )
         
         if not ai_output:
             raise Exception("No AI response received")
@@ -765,6 +884,9 @@ def extract_structured_from_resume_text(resume_text):
                     }
                 except json.JSONDecodeError:
                     continue
+        
+        # If no JSON block is found, log a warning but still return a fallback
+        logger.warning(f"Failed to parse JSON from AI resume analysis. Response: {ai_output}")
                     
     except Exception as e:
         logger.warning(f"Failed to parse AI resume analysis: {e}")
@@ -773,7 +895,7 @@ def extract_structured_from_resume_text(resume_text):
     return {
         "job_role": "", "skills": [], "experience_years": 0, 
         "education": "", "summary": "", "key_achievements": [], 
-        "industries": [], "raw": ai_output if 'ai_output' in locals() else ""
+        "industries": [], "raw": ai_output
     }
 
 # -------------------------
@@ -799,8 +921,9 @@ def extract_json_from_response(response_text):
     # Try to find JSON array in the response
     json_patterns = [
         r'\[[\s\S]*\]',  # Direct array
-        r'```json\s*(\[[\s\S]*?\])\s*```',  # Code block
-        r'```\s*(\[[\s\S]*?\])\s*```',  # Generic code block
+        r'\{[\s\S]*\}',  # Direct object (for practice questions)
+        r'```json\s*([\s\S]*?)\s*```',  # Code block
+        r'```\s*([\s\S]*?)\s*```',  # Generic code block
     ]
     
     for pattern in json_patterns:
@@ -809,10 +932,16 @@ def extract_json_from_response(response_text):
             json_str = match.group(1) if len(match.groups()) > 0 else match.group(0)
             try:
                 parsed_data = json.loads(json_str)
+                
+                # Validation for hints (list of dicts)
                 if isinstance(parsed_data, list) and len(parsed_data) > 0:
-                    # Validate structure
                     if all('title' in hint and 'description' in hint for hint in parsed_data):
                         return parsed_data
+                
+                # Validation for practice questions (dict with 'questions' list)
+                if isinstance(parsed_data, dict) and 'questions' in parsed_data and isinstance(parsed_data['questions'], list):
+                     return parsed_data
+                     
             except json.JSONDecodeError:
                 continue
     
@@ -1065,6 +1194,10 @@ def interview_setup(request):
         form = InterviewSetupForm(request.POST, request.FILES)
         resume_file = request.FILES.get('resume_file')
         
+        # Clear any old analysis from the session
+        if 'resume_analysis' in request.session:
+            del request.session['resume_analysis']
+        
         if resume_file:
             try:
                 resume_text = parse_resume_file(resume_file, filename=resume_file.name)
@@ -1074,7 +1207,8 @@ def interview_setup(request):
                         'job_role': parsed.get('job_role', ''),
                         'key_skills': ", ".join(parsed.get('skills', [])),
                     })
-                    request.session['resume_analysis'] = parsed
+                    # Store analysis in session to add to model AFTER form validation
+                    request.session['resume_analysis'] = parsed 
                 else:
                     messages.warning(request, "Could not extract text from resume.")
             except Exception as e:
@@ -1095,13 +1229,25 @@ def interview_setup(request):
                 session.status = 'STARTED'
                 session.start_time = timezone.now()
                 
-                # Add resume analysis data
+                # Add resume analysis data from session
                 resume_data = request.session.get('resume_analysis', {})
                 if resume_data:
-                    session.additional_data = json.dumps(resume_data)
+                    # Storing as JSONField (if model has it) or TextField
+                    if hasattr(session, 'parsed_resume_data'):
+                         session.parsed_resume_data = resume_data
+                    if hasattr(session, 'additional_data'):
+                         session.additional_data = json.dumps(resume_data)
+
+                # Save the resume file if it exists
+                if resume_file:
+                    session.resume_file = resume_file
                 
                 session.save()
-                form.save_m2m()
+                # form.save_m2m() # No m2m fields in this form
+                
+                # Clean up session
+                if 'resume_analysis' in request.session:
+                    del request.session['resume_analysis']
                 
                 messages.success(request, "Interview session created successfully!")
                 return redirect('mock_interview:main_interview', session_id=session.id)
@@ -1122,6 +1268,8 @@ def main_interview(request, session_id):
     session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
     
     if request.method == 'POST':
+        # This POST is triggered by the "Start Interview" button on the main_interview.html page
+        # It's responsible for generating the *first* AI question.
         try:
             if session.status != 'STARTED':
                 session.status = 'STARTED'
@@ -1154,11 +1302,12 @@ def main_interview(request, session_id):
                     "current_question": 1
                 })
             else:
+                # This handles case where user refreshes page and clicks "Start" again
                 last_turn = session.turns.order_by('-turn_number').first()
                 return JsonResponse({
                     "success": True,
                     "ai_response_text": last_turn.ai_question,
-                    "ai_audio_url": None,
+                    "ai_audio_url": None, # Don't re-generate audio
                     "current_question": last_turn.turn_number
                 })
         except Exception as e:
@@ -1209,7 +1358,13 @@ def main_interview(request, session_id):
 
 @csrf_exempt
 def interact_with_ai(request, interview_id):
-    """Enhanced AI interaction endpoint with better error handling."""
+    """
+    Legacy AI interaction endpoint. 
+    NOTE: This view is NOT session-aware and is likely deprecated. 
+    The main logic is in ai_interaction_api.
+    """
+    logger.warning(f"Legacy interact_with_ai endpoint hit for interview_id {interview_id}. This may be deprecated.")
+    
     if request.method != "POST":
         return JsonResponse({"success": False, "error": "POST required"}, status=400)
     
@@ -1284,7 +1439,7 @@ def interact_with_ai(request, interview_id):
             "debug_info": {
                 "audio_generated": bool(ai_audio_url),
                 "text_length": len(ai_text),
-                "tts_method": tts_method,
+                "tts_method": tts_method, # <-- Corrected variable name
                 "edge_tts_available": EDGE_TTS_AVAILABLE,
                 "ai_initialized": AI_INITIALIZED
             }
@@ -1328,10 +1483,25 @@ def ai_interaction_api(request, session_id):
         except json.JSONDecodeError as e:
             return JsonResponse({'error': 'Invalid JSON payload.'}, status=400)
 
+        # IMPORTANT: Only process if we have a user response
+        if not user_response_text:
+            return JsonResponse({'error': 'No user response provided.'}, status=400)
+
         current_turn_count = session.turns.count()
         interview_duration = 0
         if session.start_time:
             interview_duration = (timezone.now() - session.start_time).total_seconds() / 60
+        
+        # Save the user's response to the CURRENT (last) turn first
+        if current_turn_count > 0:
+            try:
+                last_turn = session.turns.order_by('-turn_number').first()
+                if last_turn and not last_turn.user_answer:  # Only update if empty
+                    last_turn.user_answer = user_response_text
+                    last_turn.save(update_fields=['user_answer'])
+                    logger.info(f"Saved user response to turn {last_turn.turn_number}")
+            except Exception as e:
+                logger.error(f"Error saving user answer: {e}")
         
         # Build conversation context for better continuity
         conversation_context = []
@@ -1343,10 +1513,10 @@ def ai_interaction_api(request, session_id):
         
         context_str = "\n".join(conversation_context)
         
-        # Generate enhanced interview prompt
+        # Generate enhanced interview prompt for Sarah's NEXT question
         ai_prompt = generate_enhanced_interview_prompt(
             session, 
-            current_turn_count, 
+            current_turn_count,  # This is the count of existing turns
             context_str, 
             user_response_text
         )
@@ -1355,7 +1525,7 @@ def ai_interaction_api(request, session_id):
         ai_prompt += f"""
         
         Interview Flow Context:
-        - This is question {current_turn_count + 1}
+        - This will be question {current_turn_count + 1}
         - Interview duration: {interview_duration:.1f} minutes
         - Target total duration: 18-22 minutes
         
@@ -1365,10 +1535,13 @@ def ai_interaction_api(request, session_id):
         
         When ending, begin response with "INTERVIEW_COMPLETE" then provide a warm, personalized closing.
         
+        CRITICAL: You are Sarah the interviewer. Your job is to ASK the next question, NOT to answer it yourself.
+        Generate ONLY Sarah's next question or comment. Do not include any candidate responses.
+        
         Remember: You're Sarah - genuinely interested, encouraging, and professionally warm.
         """
 
-        # Call AI model for response
+        # Call AI model for Sarah's response (next question)
         ai_response_text = call_ai_model(
             ai_prompt, 
             model_type="text", 
@@ -1436,13 +1609,13 @@ def ai_interaction_api(request, session_id):
                         logger.warning(f"gTTS fallback failed: {gtts_error}")
                         tts_method = "all_failed"
 
-        # Save interaction to database
+        # Create a NEW turn for Sarah's next question
         try:
-            InterviewTurn.objects.create(
+            new_turn = InterviewTurn.objects.create(
                 session=session,
                 turn_number=current_turn_count + 1,
                 ai_question=ai_response_text,
-                user_answer=user_response_text,
+                user_answer=None,  # User hasn't answered this question yet
                 ai_internal_analysis=json.dumps({
                     "turn": current_turn_count + 1,
                     "duration_minutes": round(interview_duration, 1),
@@ -1455,9 +1628,13 @@ def ai_interaction_api(request, session_id):
                     "timestamp": timezone.now().isoformat()
                 })
             )
+            logger.info(f"Created new turn {new_turn.turn_number} with Sarah's question")
         except Exception as e:
-            logger.error(f"Failed to save interview turn: {e}")
-            # Don't fail the request, just log the error
+            logger.error(f"Failed to create new interview turn: {e}")
+            return JsonResponse({
+                'error': 'Failed to save interview progress.',
+                'debug_info': {'exception': str(e)}
+            }, status=500)
 
         # Complete interview if needed
         if is_complete:
@@ -1466,7 +1643,12 @@ def ai_interaction_api(request, session_id):
             
             try:
                 performance_analysis = analyze_interview_performance(session)
-                session.ai_feedback = performance_analysis
+                # Check if model has ai_feedback field
+                if hasattr(session, 'ai_feedback'):
+                    session.ai_feedback = performance_analysis
+                else:
+                    # Fallback to saving in overall_feedback
+                    session.overall_feedback = performance_analysis
                 logger.info(f"Generated performance analysis for session {session.id}")
             except Exception as e:
                 logger.warning(f"Failed to generate performance analysis: {e}")
@@ -1515,19 +1697,25 @@ def my_mock_interviews(request):
         
         # Add performance metrics to each session
         for session in sessions:
+            feedback_data = None
+            feedback_source = None
+            
             if hasattr(session, 'ai_feedback') and session.ai_feedback:
+                feedback_source = session.ai_feedback
+            elif hasattr(session, 'overall_feedback') and session.overall_feedback:
+                feedback_source = session.overall_feedback
+
+            if feedback_source:
                 try:
-                    feedback_data = json.loads(session.ai_feedback)
-                    session.performance_score = feedback_data.get('overall_score', 'N/A')
-                    session.confidence_level = feedback_data.get('confidence_level', 'N/A')
-                    session.communication_score = feedback_data.get('communication_score', 'N/A')
-                    session.authenticity_score = feedback_data.get('authenticity_score', 'N/A')
-                except Exception as e:
+                    feedback_data = json.loads(feedback_source)
+                except (json.JSONDecodeError, TypeError) as e:
                     logger.warning(f"Failed to parse feedback for session {session.id}: {e}")
-                    session.performance_score = 'N/A'
-                    session.confidence_level = 'N/A'
-                    session.communication_score = 'N/A'
-                    session.authenticity_score = 'N/A'
+            
+            if feedback_data:
+                session.performance_score = feedback_data.get('overall_score', 'N/A')
+                session.confidence_level = feedback_data.get('confidence_level', 'N/A')
+                session.communication_score = feedback_data.get('communication_score', 'N/A')
+                session.authenticity_score = feedback_data.get('authenticity_score', 'N/A')
             else:
                 session.performance_score = 'Pending'
                 session.confidence_level = 'Pending'
@@ -1537,12 +1725,48 @@ def my_mock_interviews(request):
             # Calculate interview duration
             if session.start_time and session.end_time:
                 duration = session.end_time - session.start_time
-                session.duration_minutes = round(duration.total_seconds() / 60, 1)
+                duration_minutes = duration.total_seconds() / 60
+                
+                # Format duration nicely
+                if duration_minutes < 1:
+                    session.duration_display = f"{int(duration.total_seconds())} seconds"
+                elif duration_minutes < 60:
+                    session.duration_display = f"{int(duration_minutes)} min"
+                else:
+                    hours = int(duration_minutes // 60)
+                    minutes = int(duration_minutes % 60)
+                    session.duration_display = f"{hours}h {minutes}min"
+                    
+                session.duration_minutes = round(duration_minutes, 1)
             else:
-                session.duration_minutes = 'N/A'
+                # Try to calculate from last turn if end_time is missing
+                last_turn = session.turns.order_by('-timestamp').first()
+                if last_turn and session.start_time:
+                    duration = last_turn.timestamp - session.start_time
+                    duration_minutes = duration.total_seconds() / 60
+                    
+                    if duration_minutes < 1:
+                        session.duration_display = f"{int(duration.total_seconds())} seconds"
+                    elif duration_minutes < 60:
+                        session.duration_display = f"{int(duration_minutes)} min"
+                    else:
+                        hours = int(duration_minutes // 60)
+                        minutes = int(duration_minutes % 60)
+                        session.duration_display = f"{hours}h {minutes}min"
+                        
+                    session.duration_minutes = round(duration_minutes, 1)
+                else:
+                    session.duration_display = None
+                    session.duration_minutes = 'N/A'
                 
             # Add turn count
             session.total_questions = session.turns.count()
+            
+            # Pre-process key_skills as a list
+            if session.key_skills:
+                session.skills_list = [skill.strip() for skill in session.key_skills.split(',')]
+            else:
+                session.skills_list = []
         
         return render(request, 'mock_interview/my_mock_interviews.html', {'sessions': sessions})
         
@@ -1559,20 +1783,70 @@ def review_interview(request, session_id):
         session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
         turns = session.turns.all().order_by('turn_number')
         
-        if session.status not in ['COMPLETED', 'REVIEWED']:
-            messages.info(request, "This interview is not yet completed.")
+        # Allow viewing the review even if status is STARTED (in case completion didn't update status)
+        # Only redirect if there are no turns at all (interview never actually started)
+        if turns.count() == 0:
+            messages.info(request, "This interview hasn't been started yet.")
             return redirect('mock_interview:main_interview', session_id=session.id)
         
+        # If interview has turns but status is still STARTED, update it to COMPLETED
+        if session.status == 'STARTED' and turns.count() > 0:
+            # Check if this looks like a completed interview (has user answers)
+            completed_turns = turns.filter(user_answer__isnull=False).count()
+            if completed_turns >= 3:  # At least 3 answered questions
+                logger.info(f"Auto-updating session {session.id} status from STARTED to COMPLETED")
+                session.status = 'COMPLETED'
+                if not session.end_time:
+                    session.end_time = timezone.now()
+                
+                # Generate feedback if not already present
+                if not hasattr(session, 'ai_feedback') or not session.ai_feedback:
+                    if not session.overall_feedback or session.overall_feedback.strip() == '':
+                        try:
+                            logger.info(f"Generating missing performance analysis for session {session.id}")
+                            performance_analysis = analyze_interview_performance(session)
+                            if hasattr(session, 'ai_feedback'):
+                                session.ai_feedback = performance_analysis
+                            else:
+                                session.overall_feedback = performance_analysis
+                        except Exception as e:
+                            logger.warning(f"Failed to generate performance analysis: {e}")
+                
+                session.save()
+        
         # Calculate score degree for progress circle
-        score_deg = (session.score * 3.6) if session.score is not None else 0
+        score_deg = 0
         
         # Parse AI feedback
         ai_feedback = None
+        feedback_source = None
+        
         if hasattr(session, 'ai_feedback') and session.ai_feedback:
+            feedback_source = session.ai_feedback
+        elif hasattr(session, 'overall_feedback') and session.overall_feedback:
+            feedback_source = session.overall_feedback
+
+        if feedback_source:
             try:
-                ai_feedback = json.loads(session.ai_feedback)
-            except Exception as e:
+                ai_feedback = json.loads(feedback_source)
+                score = ai_feedback.get('overall_score')
+                if isinstance(score, (int, float)):
+                    session.score = score  # Save score to session model if not already set
+                    score_deg = (score * 3.6)
+            except (json.JSONDecodeError, TypeError) as e:
                 logger.warning(f"Failed to parse AI feedback: {e}")
+                # If feedback_source is not JSON, try to use it as plain text
+                ai_feedback = {
+                    'overall_score': 75,
+                    'strengths': ['Completed the interview'],
+                    'areas_for_improvement': ['Continue practicing'],
+                    'technical_assessment': 'Review in progress',
+                    'communication_score': 75,
+                    'confidence_level': 'Good',
+                    'recommendations': ['Keep practicing'],
+                    'encouragement_note': feedback_source if isinstance(feedback_source, str) else 'Good effort!'
+                }
+                score_deg = 75 * 3.6
         
         # Calculate interview metrics
         interview_duration = None
@@ -1583,6 +1857,12 @@ def review_interview(request, session_id):
         if session.start_time and session.end_time:
             duration = session.end_time - session.start_time
             interview_duration = duration.total_seconds() / 60
+        elif session.start_time:
+            # If no end_time, calculate from last turn timestamp
+            last_turn = turns.order_by('-timestamp').first()
+            if last_turn:
+                duration = last_turn.timestamp - session.start_time
+                interview_duration = duration.total_seconds() / 60
         
         for turn in turns:
             if turn.user_answer:
@@ -1704,7 +1984,6 @@ def get_interview_hints_api(request, session_id):
         - Key Skills: {session.key_skills}
         - Current Question Number: {current_question}
         - User's Progress: {session_context.get('total_responses', 0)} responses given
-        - Average Confidence: {session_context.get('average_confidence', 0):.1f}%
         
         Current AI Question: "{current_ai_question}"
         
@@ -1731,6 +2010,7 @@ def get_interview_hints_api(request, session_id):
         Make hints specific to the current question context, not generic interview advice.
         """
         
+        hints_response = "" # Initialize
         try:
             # Generate contextual hints using AI
             hints_response = call_ai_model(
@@ -1748,6 +2028,7 @@ def get_interview_hints_api(request, session_id):
             
             if not hints_data:
                 # Fallback to default hints based on question number
+                logger.warning("Failed to parse AI hints JSON, using fallback.")
                 hints_data = get_default_hints_for_stage(current_question)
                 
         except Exception as e:
@@ -1760,7 +2041,7 @@ def get_interview_hints_api(request, session_id):
             'context': {
                 'question_number': current_question,
                 'interview_stage': get_interview_stage(current_question),
-                'generated_method': 'ai' if hints_response else 'fallback'
+                'generated_method': 'ai' if hints_response and hints_data else 'fallback'
             }
         })
         
@@ -1832,6 +2113,7 @@ def practice_question_api(request, session_id):
         Make questions realistic and relevant to the specific role and skills.
         """
         
+        questions_response = "" # Initialize
         try:
             # Generate practice questions using AI
             questions_response = call_ai_model(
@@ -1849,6 +2131,7 @@ def practice_question_api(request, session_id):
             
             if not questions_data or 'questions' not in questions_data:
                 # Fallback to default questions
+                logger.warning("Failed to parse AI practice questions, using fallback.")
                 questions_data = get_default_practice_questions(session.job_role, session.key_skills)
                 
         except Exception as e:
@@ -1861,7 +2144,7 @@ def practice_question_api(request, session_id):
             'metadata': {
                 'session_id': session_id,
                 'job_role': session.job_role,
-                'generated_method': 'ai' if questions_response else 'fallback'
+                'generated_method': 'ai' if questions_response and questions_data else 'fallback'
             }
         })
         

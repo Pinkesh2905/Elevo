@@ -1,475 +1,362 @@
 from django import forms
 from django.forms import inlineformset_factory
-from django.core.exceptions import ValidationError
-from .models import (
-    PracticeProblem, TestCase, Category, Tag,
-    Discussion, DIFFICULTY_CHOICES, PROGRAMMING_LANGUAGES,
-    ProblemVideoSolution, Badge
+from .models import Problem, TestCase, CodeTemplate, Editorial, Topic, Company
+
+# Dark glassmorphic theme CSS classes
+INPUT_CLASS = "w-full pl-11 pr-4 py-3.5 bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl text-white text-[15px] placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-slate-800/70 focus:ring-2 focus:ring-blue-500/30 transition-all"
+
+TEXTAREA_CLASS = "w-full pl-11 pr-4 py-3.5 bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl text-white text-[15px] placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-slate-800/70 focus:ring-2 focus:ring-blue-500/30 transition-all resize-y leading-relaxed min-h-[120px]"
+
+TEXTAREA_CODE_CLASS = "w-full px-4 py-3.5 bg-slate-900/70 backdrop-blur-sm border border-slate-600/50 rounded-xl text-slate-100 text-[14px] placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:bg-slate-900/90 focus:ring-2 focus:ring-cyan-500/30 transition-all resize-y font-mono leading-relaxed min-h-[200px]"
+
+SELECT_CLASS = "w-full pl-11 pr-10 py-3.5 bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl text-white text-[15px] focus:outline-none focus:border-blue-400 focus:bg-slate-800/70 focus:ring-2 focus:ring-blue-500/30 transition-all cursor-pointer"
+
+MULTI_SELECT_CLASS = "w-full px-4 py-3 bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl text-white text-sm focus:outline-none focus:border-blue-400 focus:bg-slate-800/70 focus:ring-2 focus:ring-blue-500/30 transition-all"
+
+NUMBER_INPUT_CLASS = "w-full pl-11 pr-4 py-3.5 bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl text-white text-[15px] placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-slate-800/70 focus:ring-2 focus:ring-blue-500/30 transition-all"
+
+CHECKBOX_CLASS = "w-5 h-5 bg-slate-800/50 border-2 border-slate-600/50 rounded-md text-blue-500 focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-0 cursor-pointer transition-all hover:border-blue-400"
+
+FILE_INPUT_CLASS = "block w-full text-sm text-slate-300 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500/20 file:text-blue-400 hover:file:bg-blue-500/30 file:transition-all file:cursor-pointer cursor-pointer"
+
+
+class TopicForm(forms.ModelForm):
+    """Form for creating/editing topics"""
+    class Meta:
+        model = Topic
+        fields = ['name', 'slug', 'description']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., Dynamic Programming, Arrays, Trees',
+                'style': 'color-scheme: dark;'
+            }),
+            'slug': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., dynamic-programming (auto-generated from name)',
+                'style': 'color-scheme: dark;'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 4,
+                'placeholder': 'Brief description of this topic...',
+                'style': 'color-scheme: dark;'
+            }),
+        }
+
+
+class CompanyForm(forms.ModelForm):
+    """Form for creating/editing companies"""
+    class Meta:
+        model = Company
+        fields = ['name', 'slug', 'logo', 'website']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., Google, Amazon, Microsoft',
+                'style': 'color-scheme: dark;'
+            }),
+            'slug': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., google (auto-generated from name)',
+                'style': 'color-scheme: dark;'
+            }),
+            'website': forms.URLInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'https://www.company.com/careers',
+                'style': 'color-scheme: dark;'
+            }),
+            'logo': forms.FileInput(attrs={
+                'class': FILE_INPUT_CLASS
+            }),
+        }
+
+
+class ProblemForm(forms.ModelForm):
+    """Main form for creating/editing problems"""
+    class Meta:
+        model = Problem
+        fields = [
+            'problem_number', 'title', 'difficulty', 'description',
+            'constraints', 'example_input', 'example_output', 
+            'example_explanation', 'hints', 'time_complexity',
+            'space_complexity', 'topics', 'companies', 'is_active'
+        ]
+        widgets = {
+            'problem_number': forms.NumberInput(attrs={
+                'class': NUMBER_INPUT_CLASS,
+                'placeholder': 'e.g., 1',
+                'min': '1',
+                'style': 'color-scheme: dark;'
+            }),
+            'title': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., Two Sum, Valid Parentheses',
+                'style': 'color-scheme: dark;'
+            }),
+            'difficulty': forms.Select(attrs={
+                'class': SELECT_CLASS,
+                'style': 'color-scheme: dark;'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 8,
+                'placeholder': 'Problem description (supports HTML/Markdown)...',
+                'style': 'color-scheme: dark;'
+            }),
+            'constraints': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 4,
+                'placeholder': 'e.g.,\n• 1 <= nums.length <= 10^4\n• -10^9 <= nums[i] <= 10^9',
+                'style': 'color-scheme: dark;'
+            }),
+            'example_input': forms.Textarea(attrs={
+                'class': TEXTAREA_CODE_CLASS,
+                'rows': 3,
+                'placeholder': 'nums = [2,7,11,15], target = 9',
+                'style': 'color-scheme: dark;'
+            }),
+            'example_output': forms.Textarea(attrs={
+                'class': TEXTAREA_CODE_CLASS,
+                'rows': 3,
+                'placeholder': '[0,1]',
+                'style': 'color-scheme: dark;'
+            }),
+            'example_explanation': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 3,
+                'placeholder': 'Because nums[0] + nums[1] == 9, we return [0, 1].',
+                'style': 'color-scheme: dark;'
+            }),
+            'hints': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 4,
+                'placeholder': 'One hint per line:\n• Try using a hash map\n• Think about the time complexity',
+                'style': 'color-scheme: dark;'
+            }),
+            'time_complexity': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., O(n), O(n log n), O(n²)',
+                'style': 'color-scheme: dark;'
+            }),
+            'space_complexity': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'e.g., O(1), O(n), O(log n)',
+                'style': 'color-scheme: dark;'
+            }),
+            'topics': forms.SelectMultiple(attrs={
+                'class': MULTI_SELECT_CLASS,
+                'size': '6',
+                'style': 'color-scheme: dark;'
+            }),
+            'companies': forms.SelectMultiple(attrs={
+                'class': MULTI_SELECT_CLASS,
+                'size': '6',
+                'style': 'color-scheme: dark;'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': CHECKBOX_CLASS
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make topics and companies easier to select
+        self.fields['topics'].queryset = Topic.objects.all().order_by('name')
+        self.fields['companies'].queryset = Company.objects.all().order_by('name')
+        
+        # Optional fields help text
+        self.fields['hints'].help_text = "Enter hints, one per line or in JSON format"
+        self.fields['is_active'].help_text = "Uncheck to hide this problem from students"
+        self.fields['topics'].help_text = "Hold Ctrl/Cmd to select multiple"
+        self.fields['companies'].help_text = "Hold Ctrl/Cmd to select multiple"
+
+
+class TestCaseForm(forms.ModelForm):
+    """Form for individual test cases"""
+    class Meta:
+        model = TestCase
+        fields = ['input_data', 'expected_output', 'is_sample', 'explanation', 'order']
+        widgets = {
+            'input_data': forms.Textarea(attrs={
+                'class': TEXTAREA_CODE_CLASS,
+                'rows': 3,
+                'placeholder': 'Input for this test case',
+                'style': 'color-scheme: dark;'
+            }),
+            'expected_output': forms.Textarea(attrs={
+                'class': TEXTAREA_CODE_CLASS,
+                'rows': 3,
+                'placeholder': 'Expected output',
+                'style': 'color-scheme: dark;'
+            }),
+            'is_sample': forms.CheckboxInput(attrs={
+                'class': CHECKBOX_CLASS
+            }),
+            'explanation': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 2,
+                'placeholder': 'Optional explanation for this test case',
+                'style': 'color-scheme: dark;'
+            }),
+            'order': forms.NumberInput(attrs={
+                'class': NUMBER_INPUT_CLASS,
+                'min': '0',
+                'value': '0',
+                'style': 'color-scheme: dark;'
+            }),
+        }
+
+
+# Formset for managing multiple test cases
+TestCaseFormSet = inlineformset_factory(
+    Problem,
+    TestCase,
+    form=TestCaseForm,
+    extra=3,  # Show 3 empty forms by default
+    can_delete=True,
+    min_num=1,  # Require at least 1 test case
+    validate_min=True,
 )
-import json
-import csv
-import io
+
+
+class CodeTemplateForm(forms.ModelForm):
+    """Form for code templates"""
+    class Meta:
+        model = CodeTemplate
+        fields = ['language', 'template_code', 'solution_code']
+        widgets = {
+            'language': forms.Select(attrs={
+                'class': SELECT_CLASS,
+                'style': 'color-scheme: dark;'
+            }),
+            'template_code': forms.Textarea(attrs={
+                'class': TEXTAREA_CODE_CLASS,
+                'rows': 12,
+                'placeholder': 'def twoSum(nums, target):\n    # Write your code here\n    pass',
+                'style': 'color-scheme: dark;'
+            }),
+            'solution_code': forms.Textarea(attrs={
+                'class': TEXTAREA_CODE_CLASS,
+                'rows': 12,
+                'placeholder': 'def twoSum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        ...',
+                'style': 'color-scheme: dark;'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['solution_code'].help_text = "Reference solution (hidden from students)"
+
+
+# Formset for managing multiple code templates (one per language)
+CodeTemplateFormSet = inlineformset_factory(
+    Problem,
+    CodeTemplate,
+    form=CodeTemplateForm,
+    extra=2,  # Show 2 empty forms by default
+    can_delete=True,
+    min_num=1,  # Require at least 1 template
+    validate_min=True,
+)
+
+
+class EditorialForm(forms.ModelForm):
+    """Form for problem editorials/solutions"""
+    class Meta:
+        model = Editorial
+        fields = ['approach', 'complexity_analysis', 'code_explanation', 'video_url']
+        widgets = {
+            'approach': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 8,
+                'placeholder': 'Explain the solution approach step by step...',
+                'style': 'color-scheme: dark;'
+            }),
+            'complexity_analysis': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 4,
+                'placeholder': 'Time Complexity: O(n)\nSpace Complexity: O(n)\nExplanation: ...',
+                'style': 'color-scheme: dark;'
+            }),
+            'code_explanation': forms.Textarea(attrs={
+                'class': TEXTAREA_CLASS,
+                'rows': 6,
+                'placeholder': 'Line-by-line explanation of the solution code...',
+                'style': 'color-scheme: dark;'
+            }),
+            'video_url': forms.URLInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'https://youtube.com/watch?v=...',
+                'style': 'color-scheme: dark;'
+            }),
+        }
+
 
 class ProblemFilterForm(forms.Form):
-    """Form for filtering problems in the problem list"""
+    """Form for filtering problems in problem list"""
     difficulty = forms.ChoiceField(
-        choices=[('', 'All Difficulties')] + list(DIFFICULTY_CHOICES),
+        choices=[('', 'All Difficulties')] + Problem.DIFFICULTY_CHOICES,
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select rounded-lg border-gray-300'})
-    )
-    category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
-        required=False,
-        empty_label="All Categories",
-        widget=forms.Select(attrs={'class': 'form-select rounded-lg border-gray-300'})
-    )
-    tags = forms.ModelMultipleChoiceField(
-        queryset=Tag.objects.all(),
-        required=False,
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-checkbox'})
-    )
-    search = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-input rounded-lg border-gray-300',
-            'placeholder': 'Search problems...'
+        widget=forms.Select(attrs={
+            'class': SELECT_CLASS,
+            'style': 'color-scheme: dark;'
         })
     )
-    company = forms.CharField(
+    topic = forms.ModelChoiceField(
+        queryset=Topic.objects.all(),
         required=False,
-        widget=forms.TextInput(attrs={
-            'class': 'form-input rounded-lg border-gray-300',
-            'placeholder': 'Company name...'
+        empty_label="All Topics",
+        widget=forms.Select(attrs={
+            'class': SELECT_CLASS,
+            'style': 'color-scheme: dark;'
+        })
+    )
+    company = forms.ModelChoiceField(
+        queryset=Company.objects.all(),
+        required=False,
+        empty_label="All Companies",
+        widget=forms.Select(attrs={
+            'class': SELECT_CLASS,
+            'style': 'color-scheme: dark;'
         })
     )
     status = forms.ChoiceField(
         choices=[
-            ('', 'All Problems'),
+            ('', 'All Status'),
             ('solved', 'Solved'),
             ('attempted', 'Attempted'),
-            ('not_attempted', 'Not Attempted')
+            ('not_attempted', 'Not Attempted'),
         ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select rounded-lg border-gray-300'})
+        widget=forms.Select(attrs={
+            'class': SELECT_CLASS,
+            'style': 'color-scheme: dark;'
+        })
+    )
+    search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': INPUT_CLASS,
+            'placeholder': 'Search problems by title or number...',
+            'style': 'color-scheme: dark;'
+        })
     )
 
-class ProblemForm(forms.ModelForm):
-    """Enhanced form for creating/editing problems"""
-    
-    class Meta:
-        model = PracticeProblem
-        fields = [
-            'title', 'difficulty', 'category', 'tags', 'companies',
-            'statement', 'constraints', 'hints', 'approach',
-            'time_complexity', 'space_complexity', 'time_limit', 'memory_limit',
-            'leetcode_url', 'hackerrank_url', 'external_url', 'is_premium', 'is_private'
-        ]
-        
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Enter problem title'
-            }),
-            'difficulty': forms.Select(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-            }),
-            'category': forms.Select(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-            }),
-            'tags': forms.CheckboxSelectMultiple(attrs={
-                'class': 'grid grid-cols-2 md:grid-cols-3 gap-2'
-            }),
-            'companies': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Comma-separated companies (e.g., Google, Amazon, Microsoft)'
-            }),
-            'statement': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 12,
-                'placeholder': 'Enter detailed problem description with examples'
-            }),
-            'constraints': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 4,
-                'placeholder': 'Enter problem constraints (e.g., 1 ≤ n ≤ 10^5)'
-            }),
-            'hints': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 4,
-                'placeholder': 'Enter hints as JSON array: ["Hint 1", "Hint 2"]'
-            }),
-            'approach': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 6,
-                'placeholder': 'Describe the approach to solve this problem'
-            }),
-            'time_complexity': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'e.g., O(n log n)'
-            }),
-            'space_complexity': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'e.g., O(n)'
-            }),
-            'time_limit': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'min': '1',
-                'max': '10'
-            }),
-            'memory_limit': forms.NumberInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'min': '32',
-                'max': '512'
-            }),
-            'leetcode_url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'https://leetcode.com/problems/...'
-            }),
-            'hackerrank_url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'https://hackerrank.com/challenges/...'
-            }),
-            'external_url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Any other external URL'
-            }),
-            'is_premium': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            }),
-            'is_private': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            }),
-        }
-        
-        labels = {
-            'time_complexity': 'Time Complexity',
-            'space_complexity': 'Space Complexity',
-            'time_limit': 'Time Limit (seconds)',
-            'memory_limit': 'Memory Limit (MB)',
-            'leetcode_url': 'LeetCode URL',
-            'hackerrank_url': 'HackerRank URL',
-            'external_url': 'External URL',
-            'is_premium': 'Premium Problem',
-            'is_private': 'Private Problem (only visible to owner)',
-        }
-
-    def clean_hints(self):
-        hints = self.cleaned_data.get('hints')
-        if hints:
-            try:
-                if isinstance(hints, str):
-                    parsed_hints = json.loads(hints)
-                else:
-                    parsed_hints = hints
-                    
-                if not isinstance(parsed_hints, list):
-                    raise ValidationError("Hints must be a JSON array of strings.")
-                return parsed_hints
-            except json.JSONDecodeError:
-                return [hints] if hints else []
-        return []
-
-    def clean_companies(self):
-        companies = self.cleaned_data.get('companies', '')
-        if companies:
-            # Clean and normalize company names
-            company_list = [company.strip() for company in companies.split(',') if company.strip()]
-            return ', '.join(company_list)
-        return ''
-
-class TestCaseUploadForm(forms.Form):
-    """Form for uploading test cases via CSV"""
-    csv_file = forms.FileField(
-        widget=forms.FileInput(attrs={
-            'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-            'accept': '.csv'
-        }),
-        help_text="Upload CSV file with columns: input_data, expected_output, is_sample, is_hidden, description, difficulty_weight, order"
-    )
-
-    def clean_csv_file(self):
-        csv_file = self.cleaned_data['csv_file']
-        
-        if not csv_file.name.endswith('.csv'):
-            raise ValidationError("File must be a CSV file.")
-        
-        if csv_file.size > 5 * 1024 * 1024:  # 5MB limit
-            raise ValidationError("File size must be less than 5MB.")
-        
-        # Validate CSV structure
-        try:
-            csv_file.seek(0)
-            content = csv_file.read().decode('utf-8')
-            csv_file.seek(0)
-            
-            reader = csv.DictReader(io.StringIO(content))
-            required_fields = ['input_data', 'expected_output']
-            
-            if not all(field in reader.fieldnames for field in required_fields):
-                raise ValidationError(f"CSV must contain columns: {', '.join(required_fields)}")
-            
-            # Validate first few rows
-            row_count = 0
-            for row in reader:
-                if row_count >= 3:  # Check first 3 rows
-                    break
-                if not row['input_data'] or not row['expected_output']:
-                    raise ValidationError("Input data and expected output cannot be empty.")
-                row_count += 1
-                
-        except Exception as e:
-            raise ValidationError(f"Invalid CSV file: {str(e)}")
-        
-        return csv_file
-
-class TestCaseForm(forms.ModelForm):
-    """Form for individual test cases"""
-    
-    class Meta:
-        model = TestCase
-        fields = [
-            'input_data', 'expected_output', 'is_sample', 'is_hidden',
-            'description', 'explanation', 'difficulty_weight', 'order'
-        ]
-        widgets = {
-            'input_data': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono',
-                'rows': 4,
-                'placeholder': 'Enter input data'
-            }),
-            'expected_output': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono',
-                'rows': 4,
-                'placeholder': 'Enter expected output'
-            }),
-            'description': forms.TextInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Brief description of this test case'
-            }),
-            'explanation': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 3,
-                'placeholder': 'Explanation of this test case (for sample cases)'
-            }),
-            'difficulty_weight': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'min': '1',
-                'max': '10'
-            }),
-            'order': forms.NumberInput(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'min': '0'
-            }),
-            'is_sample': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            }),
-            'is_hidden': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            })
-        }
-
-# Formsets for inline editing
-TestCaseFormSet = inlineformset_factory(
-    PracticeProblem,
-    TestCase,
-    form=TestCaseForm,
-    extra=2,
-    can_delete=True,
-    min_num=1,
-    validate_min=True
-)
-
-class DiscussionForm(forms.ModelForm):
-    """Form for creating discussions"""
-    
-    class Meta:
-        model = Discussion
-        fields = ['title', 'content', 'is_solution']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Enter discussion title'
-            }),
-            'content': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 8,
-                'placeholder': 'Share your thoughts, solution, or ask questions...'
-            }),
-            'is_solution': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            })
-        }
-        
-        labels = {
-            'is_solution': 'This is a solution discussion'
-        }
 
 class CodeSubmissionForm(forms.Form):
-    """Form for code submission"""
-    language = forms.ChoiceField(
-        choices=PROGRAMMING_LANGUAGES,
-        widget=forms.Select(attrs={
-            'class': 'px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-            'onchange': 'changeLanguage(this.value)'
-        })
-    )
+    """Form for submitting code"""
     code = forms.CharField(
         widget=forms.Textarea(attrs={
-            'id': 'code-editor',
-            'class': 'hidden'  # Hidden because we'll use Monaco editor
+            'class': TEXTAREA_CODE_CLASS,
+            'rows': 20,
+            'style': 'color-scheme: dark;'
         })
     )
-    
-class CustomTestForm(forms.Form):
-    """Form for running custom test cases"""
-    language = forms.ChoiceField(choices=PROGRAMMING_LANGUAGES)
-    code = forms.CharField(widget=forms.Textarea)
-    input_data = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'rows': 4,
-            'placeholder': 'Enter your test input here...',
-            'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono'
-        }),
-        required=False
+    language = forms.ChoiceField(
+        choices=CodeTemplate.LANGUAGE_CHOICES,
+        widget=forms.Select(attrs={
+            'class': SELECT_CLASS,
+            'style': 'color-scheme: dark;'
+        })
     )
-
-class CategoryForm(forms.ModelForm):
-    """Form for creating/editing categories"""
-    
-    class Meta:
-        model = Category
-        fields = ['name', 'description', 'color_code']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Category name'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 4,
-                'placeholder': 'Category description'
-            }),
-            'color_code': forms.TextInput(attrs={
-                'type': 'color',
-                'class': 'w-20 h-10 border border-gray-300 rounded-lg'
-            })
-        }
-
-class TagForm(forms.ModelForm):
-    """Form for creating/editing tags"""
-    
-    class Meta:
-        model = Tag
-        fields = ['name']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Tag name'
-            })
-        }
-
-class ProblemVideoSolutionForm(forms.ModelForm):
-    """Form for adding a video solution to a problem"""
-    
-    class Meta:
-        model = ProblemVideoSolution
-        fields = ['title', 'url', 'is_premium']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Video title (e.g., "Python Solution Explained")'
-            }),
-            'url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'https://www.youtube.com/watch?v=...'
-            }),
-            'is_premium': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            })
-        }
-
-class BadgeForm(forms.ModelForm):
-    """Form for creating/editing badges"""
-    
-    class Meta:
-        model = Badge
-        fields = ['name', 'description', 'image_url']
-        widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'Badge name (e.g., "First Accepted Submission")'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'rows': 4,
-                'placeholder': 'Description of the achievement'
-            }),
-            'image_url': forms.URLInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-                'placeholder': 'URL to an image for the badge'
-            }),
-        }
-
-class BulkProblemUploadForm(forms.Form):
-    """Form for bulk uploading problems from CSV"""
-    csv_file = forms.FileField(
-        widget=forms.FileInput(attrs={
-            'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
-            'accept': '.csv'
-        }),
-        help_text="Upload CSV file with problem data"
-    )
-    
-    def clean_csv_file(self):
-        csv_file = self.cleaned_data['csv_file']
-        
-        if not csv_file.name.endswith('.csv'):
-            raise ValidationError("File must be a CSV file.")
-        
-        if csv_file.size > 10 * 1024 * 1024:  # 10MB limit
-            raise ValidationError("File size must be less than 10MB.")
-        
-        return csv_file
-    
-# Add this import at the top with other model imports
-from .models import (
-    PracticeProblem, TestCase, Category, Tag, CodeTemplate,  # Add CodeTemplate here
-    Discussion, DIFFICULTY_CHOICES, PROGRAMMING_LANGUAGES,
-    ProblemVideoSolution, Badge
-)
-
-class CodeTemplateForm(forms.ModelForm):
-    """Form for individual code templates"""
-    
-    class Meta:
-        model = CodeTemplate
-        fields = ['language', 'starter_code', 'solution_code', 'is_default']
-        widgets = {
-            'language': forms.Select(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-            }),
-            'starter_code': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono',
-                'rows': 10,
-                'placeholder': 'Enter starter code template...'
-            }),
-            'solution_code': forms.Textarea(attrs={
-                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono',
-                'rows': 10,
-                'placeholder': 'Enter solution code (optional)...'
-            }),
-            'is_default': forms.CheckboxInput(attrs={
-                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded'
-            })
-        }
-
-# Add this formset after TestCaseFormSet
-CodeTemplateFormSet = inlineformset_factory(
-    PracticeProblem,
-    CodeTemplate,
-    form=CodeTemplateForm,
-    extra=1,
-    can_delete=True,
-    min_num=1,
-    validate_min=True
-)

@@ -1,0 +1,157 @@
+problem_number,title,difficulty,description,constraints,example_input,example_output,example_explanation,hints,time_complexity,space_complexity,topics,companies,is_active
+1,Two Sum,easy,"Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.","• 2 <= nums.length <= 10^4
+• -10^9 <= nums[i] <= 10^9
+• -10^9 <= target <= 10^9
+• Only one valid answer exists","nums = [2,7,11,15]
+target = 9","[0,1]","Because nums[0] + nums[1] == 9, we return [0, 1].","• Try using a hash map to store values you've seen
+• For each number, check if target - number exists in the hash map
+• The time complexity should be O(n)",O(n),O(n),"Array,Hash Table","Google,Amazon,Apple,Facebook,Microsoft,Adobe,Uber,Airbnb",true
+2,Add Two Numbers,medium,"You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list. You may assume the two numbers do not contain any leading zero, except the number 0 itself.","• The number of nodes in each linked list is in the range [1, 100]
+• 0 <= Node.val <= 9
+• It is guaranteed that the list represents a number that does not have leading zeros","l1 = [2,4,3]
+l2 = [5,6,4]","[7,0,8]","The number 342 + 465 = 807, represented in reverse order as [7,0,8].","• Handle the carry carefully
+• Don't forget to add a new node if there's a carry at the end
+• Process both lists simultaneously",O(max(m,n)),O(max(m,n)),"Linked List,Math,Recursion","Amazon,Microsoft,Facebook,Apple,Google,Bloomberg",true
+3,Longest Substring Without Repeating Characters,medium,"Given a string s, find the length of the longest substring without repeating characters.","• 0 <= s.length <= 5 * 10^4
+• s consists of English letters, digits, symbols and spaces","s = ""abcabcbb""","3","The answer is ""abc"", with the length of 3.","• Use sliding window technique
+• Use a hash set to track characters in current window
+• Move the left pointer when you encounter a duplicate",O(n),O(min(m,n)),"Hash Table,String,Sliding Window","Amazon,Google,Facebook,Microsoft,Adobe,Bloomberg",true
+4,Median of Two Sorted Arrays,hard,"Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).","• nums1.length == m
+• nums2.length == n
+• 0 <= m <= 1000
+• 0 <= n <= 1000
+• 1 <= m + n <= 2000
+• -10^6 <= nums1[i], nums2[i] <= 10^6","nums1 = [1,3]
+nums2 = [2]","2.0","The merged array is [1,2,3] and median is 2.","• Use binary search on the smaller array
+• Partition both arrays such that left half elements <= right half
+• The median is found at the partition point",O(log(min(m,n))),O(1),"Array,Binary Search,Divide and Conquer","Google,Amazon,Microsoft,Apple,Adobe",true
+5,Longest Palindromic Substring,medium,"Given a string s, return the longest palindromic substring in s.","• 1 <= s.length <= 1000
+• s consist of only digits and English letters","s = ""babad""","bab","Note: ""aba"" is also a valid answer.","• Expand around center approach
+• For each position, try to expand palindrome
+• Consider both odd and even length palindromes",O(n²),O(1),"String,Dynamic Programming","Amazon,Microsoft,Google,Adobe,Apple",true
+6,Zigzag Conversion,medium,"The string PAYPALISHIRING is written in a zigzag pattern on a given number of rows, then read line by line. Write the code that will take a string and make this conversion given a number of rows.","• 1 <= s.length <= 1000
+• s consists of English letters (lower-case and upper-case), ',' and '.'
+• 1 <= numRows <= 1000","s = ""PAYPALISHIRING""
+numRows = 3","PAHNAPLSIIGYIR","Read line by line: PAH NAP LSI IIG YIR","• Create an array of strings for each row
+• Iterate through the string and determine which row to add each character
+• Use a direction flag to go up and down",O(n),O(n),"String","Amazon,Microsoft,PayPal",true
+7,Reverse Integer,medium,"Given a signed 32-bit integer x, return x with its digits reversed. If reversing x causes the value to go outside the signed 32-bit integer range [-2^31, 2^31 - 1], then return 0.","• -2^31 <= x <= 2^31 - 1","x = 123","321","Reverse of 123 is 321.","• Handle negative numbers carefully
+• Check for overflow before multiplying by 10
+• Use modulo to get last digit",O(log(x)),O(1),"Math","Amazon,Apple,Bloomberg,Facebook",true
+8,String to Integer (atoi),medium,"Implement the myAtoi(string s) function, which converts a string to a 32-bit signed integer (similar to C/C++'s atoi function). The algorithm: Read in and ignore leading whitespace, check for sign, read in digits until non-digit or end of input, convert to integer and clamp to 32-bit range.","• 0 <= s.length <= 200
+• s consists of English letters (lower-case and upper-case), digits (0-9), ' ', '+', '-', and '.'","s = ""42""","42","The first non-whitespace character is '4', followed by '2'. So the result is 42.","• Handle whitespace, signs, and non-digit characters carefully
+• Check for overflow at each step
+• Stop reading when you encounter a non-digit",O(n),O(1),"String","Amazon,Microsoft,Bloomberg,Facebook,Uber",true
+9,Palindrome Number,easy,"Given an integer x, return true if x is a palindrome, and false otherwise.","• -2^31 <= x <= 2^31 - 1","x = 121","true","121 reads the same backward as forward.","• Negative numbers are not palindromes
+• Reverse the second half and compare with first half
+• No need to convert to string",O(log(x)),O(1),"Math","Amazon,Microsoft,Apple,PayPal",true
+10,Regular Expression Matching,hard,"Given an input string s and a pattern p, implement regular expression matching with support for '.' and '*' where: '.' Matches any single character, '*' Matches zero or more of the preceding element.","• 1 <= s.length <= 20
+• 1 <= p.length <= 30
+• s contains only lowercase English letters
+• p contains only lowercase English letters, '.', and '*'","s = ""aa""
+p = ""a*""","true","'*' means zero or more of the preceding element 'a'. Therefore, by repeating 'a' once, it becomes ""aa"".","• Use dynamic programming
+• dp[i][j] represents if s[0..i) matches p[0..j)
+• Handle '*' by considering zero or more occurrences",O(m*n),O(m*n),"String,Dynamic Programming,Recursion","Google,Facebook,Amazon,Microsoft,Uber",true
+11,Container With Most Water,medium,"You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]). Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store.","• n == height.length
+• 2 <= n <= 10^5
+• 0 <= height[i] <= 10^4","height = [1,8,6,2,5,4,8,3,7]","49","The vertical lines are at indices 1 and 8, with heights 8 and 7. Area = 7 * 7 = 49.","• Use two pointers from both ends
+• Move the pointer with smaller height inward
+• Calculate area at each step and track maximum",O(n),O(1),"Array,Two Pointers,Greedy","Amazon,Facebook,Google,Bloomberg,Microsoft",true
+12,Integer to Roman,medium,"Roman numerals are represented by seven different symbols: I, V, X, L, C, D and M. Given an integer, convert it to a roman numeral.","• 1 <= num <= 3999","num = 58","LVIII","L = 50, V = 5, III = 3.","• Create a mapping of values to roman symbols
+• Process from largest to smallest
+• Handle special cases like 4, 9, 40, 90, 400, 900",O(1),O(1),"Hash Table,Math,String","Amazon,Microsoft,Facebook,Adobe",true
+13,Roman to Integer,easy,"Roman numerals are represented by seven different symbols: I, V, X, L, C, D and M. Given a roman numeral, convert it to an integer.","• 1 <= s.length <= 15
+• s contains only the characters ('I', 'V', 'X', 'L', 'C', 'D', 'M')
+• It is guaranteed that s is a valid roman numeral in the range [1, 3999]","s = ""LVIII""","58","L = 50, V = 5, III = 3.","• Iterate from right to left
+• If current value < previous value, subtract it
+• Otherwise add it to result",O(n),O(1),"Hash Table,Math,String","Amazon,Microsoft,Facebook,Bloomberg,Adobe,Google",true
+14,Longest Common Prefix,easy,"Write a function to find the longest common prefix string amongst an array of strings. If there is no common prefix, return an empty string.","• 1 <= strs.length <= 200
+• 0 <= strs[i].length <= 200
+• strs[i] consists of only lowercase English letters","strs = [""flower"",""flow"",""flight""]","fl","The longest common prefix is ""fl"".","• Compare characters of first string with all others
+• Stop when you find a mismatch
+• Vertical scanning approach works well",O(S),O(1),"String","Amazon,Google,Facebook,Microsoft",true
+15,3Sum,medium,"Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0. Notice that the solution set must not contain duplicate triplets.","• 3 <= nums.length <= 3000
+• -10^5 <= nums[i] <= 10^5","nums = [-1,0,1,2,-1,-4]","[[-1,-1,2],[-1,0,1]]","The distinct triplets are [-1,0,1] and [-1,-1,2].","• Sort the array first
+• Fix one element and use two pointers for remaining two
+• Skip duplicates to avoid duplicate triplets",O(n²),O(log n),"Array,Two Pointers,Sorting","Amazon,Facebook,Microsoft,Google,Adobe,Bloomberg",true
+16,3Sum Closest,medium,"Given an integer array nums of length n and an integer target, find three integers in nums such that the sum is closest to target. Return the sum of the three integers.","• 3 <= nums.length <= 500
+• -1000 <= nums[i] <= 1000
+• -10^4 <= target <= 10^4","nums = [-1,2,1,-4]
+target = 1","2","The sum that is closest to the target is 2 (-1 + 2 + 1 = 2).","• Similar to 3Sum, use sorting and two pointers
+• Track the minimum difference
+• Update result when closer sum is found",O(n²),O(log n),"Array,Two Pointers,Sorting","Amazon,Bloomberg,Google",true
+17,Letter Combinations of a Phone Number,medium,"Given a string containing digits from 2-9 inclusive, return all possible letter combinations that the number could represent. A mapping of digits to letters (just like on telephone buttons) is given.","• 0 <= digits.length <= 4
+• digits[i] is a digit in the range ['2', '9']","digits = ""23""","[""ad"",""ae"",""af"",""bd"",""be"",""bf"",""cd"",""ce"",""cf""]","The digit 2 maps to ""abc"" and 3 maps to ""def"".","• Use backtracking to generate all combinations
+• Build string character by character
+• Use a map to store digit to letter mappings",O(4^n),O(n),"Hash Table,String,Backtracking","Amazon,Google,Microsoft,Facebook,Uber",true
+18,4Sum,medium,"Given an array nums of n integers, return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that nums[a] + nums[b] + nums[c] + nums[d] == target.","• 1 <= nums.length <= 200
+• -10^9 <= nums[i] <= 10^9
+• -10^9 <= target <= 10^9","nums = [1,0,-1,0,-2,2]
+target = 0","[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]","These are the unique quadruplets that sum to 0.","• Extension of 3Sum
+• Fix two elements, use two pointers for remaining two
+• Skip duplicates at all levels",O(n³),O(log n),"Array,Two Pointers,Sorting","Amazon,Google,Microsoft",true
+19,Remove Nth Node From End of List,medium,"Given the head of a linked list, remove the nth node from the end of the list and return its head.","• The number of nodes in the list is sz
+• 1 <= sz <= 30
+• 0 <= Node.val <= 100
+• 1 <= n <= sz","head = [1,2,3,4,5]
+n = 2","[1,2,3,5]","Remove the 2nd node from the end, which is 4.","• Use two pointers with n nodes gap
+• Move both pointers until fast reaches end
+• Slow pointer will be at node before target",O(L),O(1),"Linked List,Two Pointers","Amazon,Microsoft,Facebook,Google,Adobe",true
+20,Valid Parentheses,easy,"Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if: Open brackets must be closed by the same type of brackets, Open brackets must be closed in the correct order, Every close bracket has a corresponding open bracket of the same type.","• 1 <= s.length <= 10^4
+• s consists of parentheses only '()[]{}'","s = ""()[]{}""","true","All opening brackets have matching closing brackets in correct order.","• Use a stack to track opening brackets
+• When you see closing bracket, check if it matches top of stack
+• Stack should be empty at the end",O(n),O(n),"String,Stack","Amazon,Microsoft,Google,Facebook,Bloomberg,Apple",true
+21,Merge Two Sorted Lists,easy,"You are given the heads of two sorted linked lists list1 and list2. Merge the two lists into one sorted list. The list should be made by splicing together the nodes of the first two lists. Return the head of the merged linked list.","• The number of nodes in both lists is in the range [0, 50]
+• -100 <= Node.val <= 100
+• Both list1 and list2 are sorted in non-decreasing order","list1 = [1,2,4]
+list2 = [1,3,4]","[1,1,2,3,4,4]","Merge the two sorted lists.","• Use dummy node to simplify edge cases
+• Compare values and attach smaller node
+• Don't forget to attach remaining nodes",O(n+m),O(1),"Linked List,Recursion","Amazon,Microsoft,Facebook,Google,Adobe,Apple",true
+22,Generate Parentheses,medium,"Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.","• 1 <= n <= 8","n = 3","[""((()))"",""(()())"",""(())()"",""()(())"",""()()()""]","These are all combinations of 3 pairs of parentheses.","• Use backtracking
+• Track count of open and close parentheses
+• Add open if count < n, add close if close_count < open_count",O(4^n / √n),O(n),"String,Dynamic Programming,Backtracking","Amazon,Google,Microsoft,Facebook,Uber",true
+23,Merge k Sorted Lists,hard,"You are given an array of k linked-lists lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.","• k == lists.length
+• 0 <= k <= 10^4
+• 0 <= lists[i].length <= 500
+• -10^4 <= lists[i][j] <= 10^4
+• lists[i] is sorted in ascending order","lists = [[1,4,5],[1,3,4],[2,6]]","[1,1,2,3,4,4,5,6]","Merge all lists into one sorted list.","• Use min heap to track smallest elements
+• Add one node from each list to heap initially
+• Extract min and add its next node to heap",O(N log k),O(k),"Linked List,Divide and Conquer,Heap (Priority Queue),Merge Sort","Amazon,Google,Microsoft,Facebook,Uber,Apple",true
+24,Swap Nodes in Pairs,medium,"Given a linked list, swap every two adjacent nodes and return its head. You must solve the problem without modifying the values in the list's nodes (i.e., only nodes themselves may be changed.)","• The number of nodes in the list is in the range [0, 100]
+• 0 <= Node.val <= 100","head = [1,2,3,4]","[2,1,4,3]","Swap nodes in pairs: (1,2) and (3,4).","• Use dummy node and track previous, current, and next nodes
+• Swap two nodes at a time
+• Update pointers carefully",O(n),O(1),"Linked List,Recursion","Amazon,Microsoft,Facebook,Bloomberg",true
+25,Reverse Nodes in k-Group,hard,"Given the head of a linked list, reverse the nodes of the list k at a time, and return the modified list. k is a positive integer and is less than or equal to the length of the linked list. If the number of nodes is not a multiple of k then left-out nodes, in the end, should remain as it is.","• The number of nodes in the list is n
+• 1 <= k <= n <= 5000
+• 0 <= Node.val <= 1000","head = [1,2,3,4,5]
+k = 2","[2,1,4,3,5]","Reverse every 2 nodes. Last node remains as is.","• Check if there are k nodes remaining
+• Reverse k nodes using standard reverse technique
+• Connect reversed group with previous and next groups",O(n),O(1),"Linked List,Recursion","Amazon,Microsoft,Google,Facebook",true
+26,Remove Duplicates from Sorted Array,easy,"Given an integer array nums sorted in non-decreasing order, remove the duplicates in-place such that each unique element appears only once. The relative order of the elements should be kept the same. Return k after placing the final result in the first k slots of nums.","• 1 <= nums.length <= 3 * 10^4
+• -100 <= nums[i] <= 100
+• nums is sorted in non-decreasing order","nums = [1,1,2]","2, nums = [1,2,_]","First two elements should be 1 and 2.","• Use two pointers: one for current position, one for next unique
+• Compare adjacent elements
+• Move unique elements to front of array",O(n),O(1),"Array,Two Pointers","Amazon,Microsoft,Facebook,Google,Apple",true
+27,Remove Element,easy,"Given an integer array nums and an integer val, remove all occurrences of val in nums in-place. The order of the elements may be changed. Return k after placing the final result in the first k slots of nums.","• 0 <= nums.length <= 100
+• 0 <= nums[i] <= 50
+• 0 <= val <= 100","nums = [3,2,2,3]
+val = 3","2, nums = [2,2,_,_]","First two elements should be 2.","• Use two pointers
+• Move non-val elements to front
+• Track count of non-val elements",O(n),O(1),"Array,Two Pointers","Amazon,Microsoft,Google",true
+28,Find the Index of the First Occurrence in a String,easy,"Given two strings needle and haystack, return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack.","• 1 <= haystack.length, needle.length <= 10^4
+• haystack and needle consist of only lowercase English characters","haystack = ""sadbutsad""
+needle = ""sad""","0","First occurrence of ""sad"" is at index 0.","• Use built-in string search or implement KMP
+• Sliding window approach also works
+• Check for match at each position",O(n*m),O(1),"Two Pointers,String,String Matching","Amazon,Microsoft,Facebook",true
+29,Divide Two Integers,medium,"Given two integers dividend and divisor, divide two integers without using multiplication, division, and mod operator. The integer division should truncate toward zero. Return the quotient after dividing dividend by divisor.","• -2^31 <= dividend, divisor <= 2^31 - 1
+• divisor != 0","dividend = 10
+divisor = 3","3","10/3 = 3.33.. which truncates to 3.","• Use bit manipulation and subtraction
+• Double the divisor until it exceeds dividend
+• Handle overflow and negative numbers carefully",O(log n),O(1),"Math,Bit Manipulation","Amazon,Microsoft,Facebook,Google",true
+30,Substring with Concatenation of All Words,hard,"You are given a string s and an array of strings words of the same length. Return all starting indices of substring(s) in s that is a concatenation of each word in words exactly once, in any order, and without any intervening characters.","• 1 <= s.length <= 10^4
+• 1 <= words.length <= 5000
+• 1 <= words[i].length <= 30
+• s and words[i] consist of lowercase English letters","s = ""barfoothefoobarman""
+words = [""foo"",""bar""]","[0,9]","Substring starting at 0 is ""barfoo"" and at 9 is ""foobar"".","• Use sliding window with hash map
+• Track word frequencies
+• Window size is len(words) * len(words[0])",O(n*m),O(m),"Hash Table,String,Sliding Window","Amazon,Google,Microsoft",true

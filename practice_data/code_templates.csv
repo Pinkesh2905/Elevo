@@ -1,0 +1,630 @@
+problem_number,language,template_code,solution_code
+1,python3,"def twoSum(nums, target):
+    # Write your code here
+    pass","def twoSum(nums, target):
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []"
+1,cpp17,"class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // Write your code here
+        
+    }
+};","class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        unordered_map<int, int> seen;
+        for (int i = 0; i < nums.size(); i++) {
+            int complement = target - nums[i];
+            if (seen.find(complement) != seen.end()) {
+                return {seen[complement], i};
+            }
+            seen[nums[i]] = i;
+        }
+        return {};
+    }
+};"
+1,java,"class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Write your code here
+        
+    }
+}","class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (seen.containsKey(complement)) {
+                return new int[] {seen.get(complement), i};
+            }
+            seen.put(nums[i], i);
+        }
+        return new int[] {};
+    }
+}"
+2,python3,"class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def addTwoNumbers(l1, l2):
+    # Write your code here
+    pass","class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def addTwoNumbers(l1, l2):
+    dummy = ListNode(0)
+    current = dummy
+    carry = 0
+    
+    while l1 or l2 or carry:
+        val1 = l1.val if l1 else 0
+        val2 = l2.val if l2 else 0
+        
+        total = val1 + val2 + carry
+        carry = total // 10
+        current.next = ListNode(total % 10)
+        current = current.next
+        
+        if l1: l1 = l1.next
+        if l2: l2 = l2.next
+    
+    return dummy.next"
+2,cpp17,"struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        // Write your code here
+        
+    }
+};","struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* dummy = new ListNode(0);
+        ListNode* current = dummy;
+        int carry = 0;
+        
+        while (l1 || l2 || carry) {
+            int val1 = l1 ? l1->val : 0;
+            int val2 = l2 ? l2->val : 0;
+            
+            int sum = val1 + val2 + carry;
+            carry = sum / 10;
+            current->next = new ListNode(sum % 10);
+            current = current->next;
+            
+            if (l1) l1 = l1->next;
+            if (l2) l2 = l2->next;
+        }
+        
+        return dummy->next;
+    }
+};"
+3,python3,"def lengthOfLongestSubstring(s):
+    # Write your code here
+    pass","def lengthOfLongestSubstring(s):
+    char_set = set()
+    left = 0
+    max_length = 0
+    
+    for right in range(len(s)):
+        while s[right] in char_set:
+            char_set.remove(s[left])
+            left += 1
+        char_set.add(s[right])
+        max_length = max(max_length, right - left + 1)
+    
+    return max_length"
+3,cpp17,"class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        // Write your code here
+        
+    }
+};","class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        unordered_set<char> charSet;
+        int left = 0, maxLength = 0;
+        
+        for (int right = 0; right < s.length(); right++) {
+            while (charSet.find(s[right]) != charSet.end()) {
+                charSet.erase(s[left]);
+                left++;
+            }
+            charSet.insert(s[right]);
+            maxLength = max(maxLength, right - left + 1);
+        }
+        
+        return maxLength;
+    }
+};"
+4,python3,"def findMedianSortedArrays(nums1, nums2):
+    # Write your code here
+    pass","def findMedianSortedArrays(nums1, nums2):
+    if len(nums1) > len(nums2):
+        nums1, nums2 = nums2, nums1
+    
+    m, n = len(nums1), len(nums2)
+    left, right = 0, m
+    
+    while left <= right:
+        partition1 = (left + right) // 2
+        partition2 = (m + n + 1) // 2 - partition1
+        
+        maxLeft1 = float('-inf') if partition1 == 0 else nums1[partition1 - 1]
+        minRight1 = float('inf') if partition1 == m else nums1[partition1]
+        maxLeft2 = float('-inf') if partition2 == 0 else nums2[partition2 - 1]
+        minRight2 = float('inf') if partition2 == n else nums2[partition2]
+        
+        if maxLeft1 <= minRight2 and maxLeft2 <= minRight1:
+            if (m + n) % 2 == 0:
+                return (max(maxLeft1, maxLeft2) + min(minRight1, minRight2)) / 2
+            else:
+                return max(maxLeft1, maxLeft2)
+        elif maxLeft1 > minRight2:
+            right = partition1 - 1
+        else:
+            left = partition1 + 1
+    
+    return 0"
+5,python3,"def longestPalindrome(s):
+    # Write your code here
+    pass","def longestPalindrome(s):
+    def expandAroundCenter(left, right):
+        while left >= 0 and right < len(s) and s[left] == s[right]:
+            left -= 1
+            right += 1
+        return right - left - 1
+    
+    start = 0
+    max_len = 0
+    
+    for i in range(len(s)):
+        len1 = expandAroundCenter(i, i)
+        len2 = expandAroundCenter(i, i + 1)
+        length = max(len1, len2)
+        
+        if length > max_len:
+            max_len = length
+            start = i - (length - 1) // 2
+    
+    return s[start:start + max_len]"
+5,java,"class Solution {
+    public String longestPalindrome(String s) {
+        // Write your code here
+        
+    }
+}","class Solution {
+    public String longestPalindrome(String s) {
+        if (s == null || s.length() < 1) return """";
+        int start = 0, maxLen = 0;
+        
+        for (int i = 0; i < s.length(); i++) {
+            int len1 = expandAroundCenter(s, i, i);
+            int len2 = expandAroundCenter(s, i, i + 1);
+            int len = Math.max(len1, len2);
+            
+            if (len > maxLen) {
+                maxLen = len;
+                start = i - (len - 1) / 2;
+            }
+        }
+        
+        return s.substring(start, start + maxLen);
+    }
+    
+    private int expandAroundCenter(String s, int left, int right) {
+        while (left >= 0 && right < s.length() && s.charAt(left) == s.charAt(right)) {
+            left--;
+            right++;
+        }
+        return right - left - 1;
+    }
+}"
+7,python3,"def reverse(x):
+    # Write your code here
+    pass","def reverse(x):
+    sign = -1 if x < 0 else 1
+    x = abs(x)
+    result = 0
+    
+    while x:
+        result = result * 10 + x % 10
+        x //= 10
+    
+    result *= sign
+    
+    if result < -2**31 or result > 2**31 - 1:
+        return 0
+    
+    return result"
+9,python3,"def isPalindrome(x):
+    # Write your code here
+    pass","def isPalindrome(x):
+    if x < 0:
+        return False
+    
+    original = x
+    reversed_num = 0
+    
+    while x > 0:
+        reversed_num = reversed_num * 10 + x % 10
+        x //= 10
+    
+    return original == reversed_num"
+9,java,"class Solution {
+    public boolean isPalindrome(int x) {
+        // Write your code here
+        
+    }
+}","class Solution {
+    public boolean isPalindrome(int x) {
+        if (x < 0) return false;
+        
+        int original = x;
+        int reversed = 0;
+        
+        while (x > 0) {
+            reversed = reversed * 10 + x % 10;
+            x /= 10;
+        }
+        
+        return original == reversed;
+    }
+}"
+11,python3,"def maxArea(height):
+    # Write your code here
+    pass","def maxArea(height):
+    left, right = 0, len(height) - 1
+    max_area = 0
+    
+    while left < right:
+        width = right - left
+        current_area = min(height[left], height[right]) * width
+        max_area = max(max_area, current_area)
+        
+        if height[left] < height[right]:
+            left += 1
+        else:
+            right -= 1
+    
+    return max_area"
+11,cpp17,"class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        // Write your code here
+        
+    }
+};","class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int left = 0, right = height.size() - 1;
+        int maxArea = 0;
+        
+        while (left < right) {
+            int width = right - left;
+            int currentArea = min(height[left], height[right]) * width;
+            maxArea = max(maxArea, currentArea);
+            
+            if (height[left] < height[right]) {
+                left++;
+            } else {
+                right--;
+            }
+        }
+        
+        return maxArea;
+    }
+};"
+13,python3,"def romanToInt(s):
+    # Write your code here
+    pass","def romanToInt(s):
+    roman_map = {
+        'I': 1, 'V': 5, 'X': 10, 'L': 50,
+        'C': 100, 'D': 500, 'M': 1000
+    }
+    
+    result = 0
+    prev_value = 0
+    
+    for char in reversed(s):
+        value = roman_map[char]
+        if value < prev_value:
+            result -= value
+        else:
+            result += value
+        prev_value = value
+    
+    return result"
+14,python3,"def longestCommonPrefix(strs):
+    # Write your code here
+    pass","def longestCommonPrefix(strs):
+    if not strs:
+        return """"
+    
+    prefix = strs[0]
+    
+    for string in strs[1:]:
+        while not string.startswith(prefix):
+            prefix = prefix[:-1]
+            if not prefix:
+                return """"
+    
+    return prefix"
+15,python3,"def threeSum(nums):
+    # Write your code here
+    pass","def threeSum(nums):
+    nums.sort()
+    result = []
+    
+    for i in range(len(nums) - 2):
+        if i > 0 and nums[i] == nums[i-1]:
+            continue
+        
+        left, right = i + 1, len(nums) - 1
+        
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            
+            if total < 0:
+                left += 1
+            elif total > 0:
+                right -= 1
+            else:
+                result.append([nums[i], nums[left], nums[right]])
+                
+                while left < right and nums[left] == nums[left + 1]:
+                    left += 1
+                while left < right and nums[right] == nums[right - 1]:
+                    right -= 1
+                
+                left += 1
+                right -= 1
+    
+    return result"
+15,java,"class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        // Write your code here
+        
+    }
+}","class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        List<List<Integer>> result = new ArrayList<>();
+        
+        for (int i = 0; i < nums.length - 2; i++) {
+            if (i > 0 && nums[i] == nums[i-1]) continue;
+            
+            int left = i + 1, right = nums.length - 1;
+            
+            while (left < right) {
+                int sum = nums[i] + nums[left] + nums[right];
+                
+                if (sum < 0) {
+                    left++;
+                } else if (sum > 0) {
+                    right--;
+                } else {
+                    result.add(Arrays.asList(nums[i], nums[left], nums[right]));
+                    
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    
+                    left++;
+                    right--;
+                }
+            }
+        }
+        
+        return result;
+    }
+}"
+17,python3,"def letterCombinations(digits):
+    # Write your code here
+    pass","def letterCombinations(digits):
+    if not digits:
+        return []
+    
+    phone_map = {
+        '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+        '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+    }
+    
+    result = []
+    
+    def backtrack(index, path):
+        if index == len(digits):
+            result.append(path)
+            return
+        
+        for letter in phone_map[digits[index]]:
+            backtrack(index + 1, path + letter)
+    
+    backtrack(0, """")
+    return result"
+19,python3,"class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def removeNthFromEnd(head, n):
+    # Write your code here
+    pass","class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def removeNthFromEnd(head, n):
+    dummy = ListNode(0)
+    dummy.next = head
+    fast = slow = dummy
+    
+    for _ in range(n + 1):
+        fast = fast.next
+    
+    while fast:
+        fast = fast.next
+        slow = slow.next
+    
+    slow.next = slow.next.next
+    
+    return dummy.next"
+20,python3,"def isValid(s):
+    # Write your code here
+    pass","def isValid(s):
+    stack = []
+    mapping = {')': '(', '}': '{', ']': '['}
+    
+    for char in s:
+        if char in mapping:
+            top = stack.pop() if stack else '#'
+            if mapping[char] != top:
+                return False
+        else:
+            stack.append(char)
+    
+    return not stack"
+20,java,"class Solution {
+    public boolean isValid(String s) {
+        // Write your code here
+        
+    }
+}","class Solution {
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        Map<Character, Character> mapping = new HashMap<>();
+        mapping.put(')', '(');
+        mapping.put('}', '{');
+        mapping.put(']', '[');
+        
+        for (char c : s.toCharArray()) {
+            if (mapping.containsKey(c)) {
+                char top = stack.isEmpty() ? '#' : stack.pop();
+                if (top != mapping.get(c)) {
+                    return false;
+                }
+            } else {
+                stack.push(c);
+            }
+        }
+        
+        return stack.isEmpty();
+    }
+}"
+21,python3,"class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def mergeTwoLists(list1, list2):
+    # Write your code here
+    pass","class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+def mergeTwoLists(list1, list2):
+    dummy = ListNode(0)
+    current = dummy
+    
+    while list1 and list2:
+        if list1.val < list2.val:
+            current.next = list1
+            list1 = list1.next
+        else:
+            current.next = list2
+            list2 = list2.next
+        current = current.next
+    
+    current.next = list1 if list1 else list2
+    
+    return dummy.next"
+22,python3,"def generateParenthesis(n):
+    # Write your code here
+    pass","def generateParenthesis(n):
+    result = []
+    
+    def backtrack(path, open_count, close_count):
+        if len(path) == 2 * n:
+            result.append(path)
+            return
+        
+        if open_count < n:
+            backtrack(path + '(', open_count + 1, close_count)
+        
+        if close_count < open_count:
+            backtrack(path + ')', open_count, close_count + 1)
+    
+    backtrack("""", 0, 0)
+    return result"
+26,python3,"def removeDuplicates(nums):
+    # Write your code here
+    pass","def removeDuplicates(nums):
+    if not nums:
+        return 0
+    
+    write_index = 1
+    
+    for i in range(1, len(nums)):
+        if nums[i] != nums[i - 1]:
+            nums[write_index] = nums[i]
+            write_index += 1
+    
+    return write_index"
+26,cpp17,"class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        // Write your code here
+        
+    }
+};","class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        if (nums.empty()) return 0;
+        
+        int writeIndex = 1;
+        
+        for (int i = 1; i < nums.size(); i++) {
+            if (nums[i] != nums[i - 1]) {
+                nums[writeIndex] = nums[i];
+                writeIndex++;
+            }
+        }
+        
+        return writeIndex;
+    }
+};"
+28,python3,"def strStr(haystack, needle):
+    # Write your code here
+    pass","def strStr(haystack, needle):
+    if not needle:
+        return 0
+    
+    for i in range(len(haystack) - len(needle) + 1):
+        if haystack[i:i + len(needle)] == needle:
+            return i
+    
+    return -1"

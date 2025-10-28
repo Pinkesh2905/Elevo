@@ -1,0 +1,159 @@
+problem_number,input_data,expected_output,is_sample,explanation,order
+1,"[2,7,11,15]
+9","[0,1]",true,"nums[0] + nums[1] = 2 + 7 = 9",0
+1,"[3,2,4]
+6","[1,2]",true,"nums[1] + nums[2] = 2 + 4 = 6",1
+1,"[3,3]
+6","[0,1]",true,"nums[0] + nums[1] = 3 + 3 = 6",2
+1,"[1,5,3,7,9]
+12","[2,4]",false,"Hidden test case: 3 + 9 = 12",3
+1,"[-1,-2,-3,-4,-5]
+-8","[2,4]",false,"Hidden test case: -3 + -5 = -8",4
+2,"[2,4,3]
+[5,6,4]","[7,0,8]",true,"342 + 465 = 807",0
+2,"[0]
+[0]","[0]",true,"0 + 0 = 0",1
+2,"[9,9,9,9,9,9,9]
+[9,9,9,9]","[8,9,9,9,0,0,0,1]",true,"9999999 + 9999 = 10009998",2
+2,"[2,4,9]
+[5,6,4,9]","[7,0,4,0,1]",false,"Hidden test case: 942 + 9465 = 10407",3
+3,"abcabcbb","3",true,"The answer is 'abc' with length 3",0
+3,"bbbbb","1",true,"The answer is 'b' with length 1",1
+3,"pwwkew","3",true,"The answer is 'wke' with length 3",2
+3,"","0",false,"Hidden test case: empty string",3
+3,"abcdefghijklmnopqrstuvwxyz","26",false,"Hidden test case: all unique characters",4
+3,"aab","2",false,"Hidden test case: 'ab' has length 2",5
+4,"[1,3]
+[2]","2.00000",true,"Merged array is [1,2,3], median is 2",0
+4,"[1,2]
+[3,4]","2.50000",true,"Merged array is [1,2,3,4], median is (2+3)/2 = 2.5",1
+4,"[]
+[1]","1.00000",false,"Hidden test case: one array empty",2
+4,"[1]
+[2,3,4,5,6]","3.50000",false,"Hidden test case: arrays of different sizes",3
+5,"babad","bab",true,"'aba' is also a valid answer",0
+5,"cbbd","bb",true,"The longest palindrome is 'bb'",1
+5,"a","a",false,"Hidden test case: single character",2
+5,"ac","a",false,"Hidden test case: no palindrome longer than 1",3
+5,"racecar","racecar",false,"Hidden test case: entire string is palindrome",4
+6,"PAYPALISHIRING
+3","PAHNAPLSIIGYIR",true,"Read line by line gives the output",0
+6,"PAYPALISHIRING
+4","PINALSIGYAHRPI",true,"Read line by line with 4 rows",1
+6,"A
+1","A",false,"Hidden test case: single character",2
+7,"123","321",true,"Reverse of 123 is 321",0
+7,"-123","-321",true,"Reverse of -123 is -321",1
+7,"120","21",true,"Reverse of 120 is 21 (leading zeros dropped)",2
+7,"1534236469","0",false,"Hidden test case: overflow returns 0",3
+8,"42","42",true,"The first non-whitespace character is '4'",0
+8,"   -42","-42",true,"Leading whitespace ignored, sign detected",1
+8,"4193 with words","4193",true,"Stop reading at first non-digit character",2
+8,"words and 987","0",false,"Hidden test case: no valid conversion",3
+8,"-91283472332","-2147483648",false,"Hidden test case: clamp to 32-bit range",4
+9,"121","true",true,"121 reads the same backward as forward",0
+9,"-121","false",true,"Negative numbers are not palindromes",1
+9,"10","false",true,"10 reversed is 01 which is not equal to 10",2
+9,"12321","true",false,"Hidden test case: odd length palindrome",3
+10,"aa
+a","false",true,"'a' does not match the entire string 'aa'",0
+10,"aa
+a*","true",true,"'*' means zero or more of 'a'",1
+10,"ab
+.*","true",true,"'.*' means zero or more of any character",2
+10,"mississippi
+mis*is*p*.","false",false,"Hidden test case: complex pattern",3
+11,"[1,8,6,2,5,4,8,3,7]","49",true,"Lines at index 1 and 8 form largest container",0
+11,"[1,1]","1",true,"Height 1, width 1, area = 1",1
+11,"[4,3,2,1,4]","16",false,"Hidden test case: lines at index 0 and 4",2
+11,"[1,2,1]","2",false,"Hidden test case: choose middle positions",3
+12,"3","III",true,"3 is represented as III",0
+12,"58","LVIII",true,"L = 50, V = 5, III = 3",1
+12,"1994","MCMXCIV",true,"M = 1000, CM = 900, XC = 90, IV = 4",2
+12,"9","IX",false,"Hidden test case: subtractive notation",3
+13,"III","3",true,"III = 3",0
+13,"LVIII","58",true,"L = 50, V = 5, III = 3",1
+13,"MCMXCIV","1994",true,"M = 1000, CM = 900, XC = 90, IV = 4",2
+13,"IX","9",false,"Hidden test case: subtractive notation",3
+14,"[""flower"",""flow"",""flight""]","fl",true,"Common prefix is 'fl'",0
+14,"[""dog"",""racecar"",""car""]","",true,"No common prefix",1
+14,"[""ab"",""a""]","a",false,"Hidden test case: one string is prefix of another",2
+15,"[-1,0,1,2,-1,-4]","[[-1,-1,2],[-1,0,1]]",true,"Two unique triplets sum to 0",0
+15,"[0,1,1]","[]",true,"No triplets sum to 0",1
+15,"[0,0,0]","[[0,0,0]]",true,"All zeros sum to 0",2
+15,"[-2,0,1,1,2]","[[-2,0,2],[-2,1,1]]",false,"Hidden test case: multiple solutions",3
+16,"[-1,2,1,-4]
+1","2",true,"Sum closest to 1 is 2 (-1 + 2 + 1)",0
+16,"[0,0,0]
+1","0",true,"Sum closest to 1 is 0",1
+16,"[1,1,1,0]
+-100","2",false,"Hidden test case: minimum sum",2
+17,"23","[""ad"",""ae"",""af"",""bd"",""be"",""bf"",""cd"",""ce"",""cf""]",true,"All combinations of letters for digits 2 and 3",0
+17,"","[]",true,"Empty input returns empty result",1
+17,"2","[""a"",""b"",""c""]",false,"Hidden test case: single digit",2
+18,"[1,0,-1,0,-2,2]
+0","[[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]",true,"Unique quadruplets that sum to 0",0
+18,"[2,2,2,2,2]
+8","[[2,2,2,2]]",true,"All same number",1
+18,"[1,0,-1,0,-2,2]
+1","[[-2,0,1,2],[-1,0,0,2]]",false,"Hidden test case: target is 1",2
+19,"[1,2,3,4,5]
+2","[1,2,3,5]",true,"Remove 2nd node from end (node with value 4)",0
+19,"[1]
+1","[]",true,"Remove only node",1
+19,"[1,2]
+1","[1]",false,"Hidden test case: remove last node",2
+20,"()","true",true,"Valid parentheses",0
+20,"()[]{}","true",true,"All types of valid parentheses",1
+20,"(]","false",true,"Mismatched brackets",2
+20,"{[]}","true",false,"Hidden test case: nested brackets",3
+20,"([)]","false",false,"Hidden test case: incorrect nesting",4
+21,"[1,2,4]
+[1,3,4]","[1,1,2,3,4,4]",true,"Merge two sorted lists",0
+21,"[]
+[]","[]",true,"Both lists empty",1
+21,"[]
+[0]","[0]",false,"Hidden test case: one list empty",2
+22,"3","[""((()))"",""(()())"",""(())()"",""()(())"",""()()()""]",true,"All valid combinations of 3 pairs",0
+22,"1","[""()""]",true,"Only one combination for 1 pair",1
+22,"2","[""(())"",""()()""]",false,"Hidden test case: 2 pairs",2
+23,"[[1,4,5],[1,3,4],[2,6]]","[1,1,2,3,4,4,5,6]",true,"Merge all k sorted lists",0
+23,"[]","[]",true,"No lists to merge",1
+23,"[[]]","[]",false,"Hidden test case: single empty list",2
+24,"[1,2,3,4]","[2,1,4,3]",true,"Swap pairs: (1,2) and (3,4)",0
+24,"[]","[]",true,"Empty list",1
+24,"[1]","[1]",false,"Hidden test case: single node",2
+24,"[1,2,3]","[2,1,3]",false,"Hidden test case: odd number of nodes",3
+25,"[1,2,3,4,5]
+2","[2,1,4,3,5]",true,"Reverse every 2 nodes",0
+25,"[1,2,3,4,5]
+3","[3,2,1,4,5]",true,"Reverse first 3 nodes, leave last 2",1
+25,"[1,2]
+2","[2,1]",false,"Hidden test case: exactly k nodes",2
+26,"[1,1,2]","2",true,"Array becomes [1,2,_]",0
+26,"[0,0,1,1,1,2,2,3,3,4]","5",true,"Array becomes [0,1,2,3,4,_,_,_,_,_]",1
+26,"[1,2,3]","3",false,"Hidden test case: no duplicates",2
+27,"[3,2,2,3]
+3","2",true,"Array becomes [2,2,_,_]",0
+27,"[0,1,2,2,3,0,4,2]
+2","5",true,"Array becomes [0,1,3,0,4,_,_,_]",1
+27,"[1]
+1","0",false,"Hidden test case: single element to remove",2
+28,"sadbutsad
+sad","0",true,"First occurrence at index 0",0
+28,"leetcode
+leeto","-1",true,"Needle not found",1
+28,"hello
+ll","2",false,"Hidden test case: found in middle",2
+29,"10
+3","3",true,"10/3 = 3",0
+29,"7
+-3","-2",true,"7/(-3) = -2",1
+29,"-2147483648
+-1","2147483647",false,"Hidden test case: overflow handling",2
+30,"barfoothefoobarman
+[""foo"",""bar""]","[0,9]",true,"Substrings at indices 0 and 9",0
+30,"wordgoodgoodgoodbestword
+[""word"",""good"",""best"",""word""]","[]",true,"No valid concatenation found",1
+30,"barfoofoobarthefoobarman
+[""bar"",""foo"",""the""]","[6,9,12]",false,"Hidden test case: multiple occurrences",2

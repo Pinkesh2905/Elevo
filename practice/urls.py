@@ -1,43 +1,32 @@
 from django.urls import path
 from . import views
 
-app_name = "practice"
+app_name = 'practice'
 
 urlpatterns = [
-    # Main student views
-    path('', views.problem_list, name='problem_list'),
-    path('dashboard/', views.user_dashboard, name='user_dashboard'),
-    path('profile/<str:username>/', views.user_profile, name='user_profile'),
-    path('leaderboard/', views.leaderboard, name='leaderboard'),
-    path('my-badges/', views.my_badges, name='my_badges'),
+    # Problem browsing
+    path('', views.problem_list, name='problem-list'),
+    path('problems/', views.problem_list, name='problems'),
     
-    # Problem views
+    # Problem detail and solving - UPDATED TO USE SLUG
     path('problem/<slug:slug>/', views.problem_detail, name='problem_detail'),
     path('problem/<slug:slug>/run/', views.run_code, name='run_code'),
-    path('problem/<slug:slug>/submit/', views.submit_solution, name='submit_solution'),
-    path('problem/<slug:slug>/submissions/', views.my_submissions, name='my_submissions'),
-    path('problem/<slug:slug>/run-samples/', views.run_code_against_samples, name='run_samples'),
-    path('problem/<slug:slug>/template/<str:language>/', views.get_language_template, name='get_template'),
-    path('problem/<slug:slug>/hints/', views.get_problem_hints, name='get_hints'),
+    path('problem/<slug:slug>/submit/', views.submit_code, name='submit_code'),
     
-    # Discussion views
-    path('problem/<slug:slug>/discussions/', views.problem_discussions, name='problem_discussions'),
-    path('problem/<slug:slug>/discussions/create/', views.create_discussion, name='create_discussion'),
-    path('discussion/<int:discussion_id>/vote/', views.vote_discussion, name='vote_discussion'),
+    # Code template AJAX endpoint - UPDATED TO USE SLUG
+    path('problem/<slug:slug>/template/', views.get_code_template, name='get_code_template'),
     
-    # Video solutions
-    path('problem/<slug:slug>/add-video-solution/', views.add_video_solution, name='add_video_solution'),
+    # Editorial/Solution - UPDATED TO USE SLUG
+    path('problem/<slug:slug>/editorial/', views.editorial_view, name='editorial'),
     
-    # Tutor/Staff Paths
-    path('tutor/dashboard/', views.tutor_dashboard, name='tutor_dashboard'),
-    path('tutor/problems/add/', views.problem_create_edit, name='problem_add'),
-    path('tutor/problems/edit/<slug:slug>/', views.problem_create_edit, name='problem_edit'),
-    path('tutor/bulk-upload/', views.bulk_problem_upload, name='bulk_problem_upload'),
+    # Submissions
+    path('submissions/', views.user_submissions, name='user_submissions'),
+    path('submission/<int:submission_id>/', views.submission_detail, name='submission_detail'),
     
-    # Admin Paths
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('admin/tutors/<int:user_id>/approve/', views.admin_approve_tutor, name='admin_approve_tutor'),
-    path('admin/problems/<slug:problem_slug>/<str:action>/', views.admin_problem_approval, name='admin_problem_approval'),
+    # Topics and Companies
+    path('topics/', views.topic_list, name='topic_list'),
+    path('companies/', views.company_list, name='company_list'),
     
-    path('submission/<uuid:submission_id>/', views.get_submission_details, name='get_submission_details'),
+    # Admin actions
+    path('admin/activate-problem/<slug:slug>/', views.admin_activate_problem, name='admin_activate_problem'),
 ]

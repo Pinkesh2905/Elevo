@@ -1,680 +1,523 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}My Mock Interviews | MockMate{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50: '#eff6ff',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8',
+            900: '#1e3a8a'
+          }
+        }
+      }
+    }
+  }
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   
-  :root {
-    --primary-blue: #0f172a;
-    --secondary-blue: #1e40af;
-    --accent-blue: #3b82f6;
-    --success-green: #059669;
-    --warning-amber: #d97706;
-    --danger-red: #dc2626;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-600: #4b5563;
-    --gray-800: #1f2937;
-    --text-primary: #111827;
-    --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
-  }
-  
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--gray-50);
-    color: var(--text-primary);
-  }
-  
-  .page-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-  }
-  
-  .page-header {
-    display: flex;
-    justify-content: between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  
-  .page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
-  }
-  
-  .session-card {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
-    overflow: hidden;
-  }
-  
-  .session-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    border-color: var(--accent-blue);
-  }
-  
-  .session-header {
-    padding: 1.5rem;
-    background: linear-gradient(135deg, var(--gray-50), white);
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .session-body {
-    padding: 1.5rem;
-  }
-  
-  .session-footer {
-    padding: 1rem 1.5rem;
-    background: var(--gray-50);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-  
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.375rem 0.875rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-  }
-  
-  .status-completed {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-  }
-  
-  .status-started {
-    background: #dbeafe;
-    color: #1d4ed8;
-    border: 1px solid #93c5fd;
-    animation: pulse-subtle 2s infinite;
-  }
-  
-  .status-review-pending {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
-  }
-  
-  .status-reviewed {
-    background: #e9d5ff;
-    color: #7c3aed;
-    border: 1px solid #c4b5fd;
   }
   
   @keyframes pulse-subtle {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+    50% { opacity: 0.85; }
   }
   
-  .score-display {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
-    font-weight: 600;
-  }
-  
-  .score-number {
-    font-size: 1.125rem;
-    color: var(--accent-blue);
-  }
-  
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    min-width: fit-content;
-  }
-  
-  .btn-primary {
-    background: var(--accent-blue);
-    color: white;
-  }
-  
-  .btn-primary:hover {
-    background: var(--secondary-blue);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  }
-  
-  .btn-secondary {
-    background: white;
-    color: var(--gray-600);
-    border: 1px solid var(--border-color);
-  }
-  
-  .btn-secondary:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-600);
-  }
-  
-  .btn-danger {
-    background: white;
-    color: var(--danger-red);
-    border: 1px solid #fecaca;
-  }
-  
-  .btn-danger:hover {
-    background: #fef2f2;
-    border-color: var(--danger-red);
-  }
-  
-  .btn-large {
-    padding: 1rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 12px;
-  }
-  
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: white;
-    border-radius: 16px;
-    border: 2px dashed var(--border-color);
-  }
-  
-  .empty-icon {
-    width: 4rem;
-    height: 4rem;
-    background: var(--gray-100);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.5rem;
-    color: var(--gray-600);
-    font-size: 1.5rem;
-  }
-  
-  .skills-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    margin-top: 0.5rem;
-  }
-  
-  .skill-tag {
-    display: inline-block;
-    background: #eff6ff;
-    color: var(--secondary-blue);
-    padding: 0.25rem 0.625rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border: 1px solid #dbeafe;
-  }
-  
-  .feedback-preview {
-    background: var(--gray-50);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
-    position: relative;
-  }
-  
-  .feedback-preview::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--accent-blue);
-    border-radius: 2px 0 0 2px;
-  }
-  
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-  
-  .modal.show {
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  .modal-content {
-    background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    transform: scale(0.95);
-    transition: transform 0.3s ease;
-  }
-  
-  .modal.show .modal-content {
-    transform: scale(1);
-  }
-  
-  .modal-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-  
-  .modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-  }
-  
-  .session-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .session-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-  }
-  
-  .session-date {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-  
-  .session-details {
-    margin-bottom: 1.5rem;
-  }
-  
-  .detail-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .detail-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-  
-  .detail-icon {
-    color: var(--accent-blue);
-    width: 1rem;
-    margin-top: 0.125rem;
-    flex-shrink: 0;
-  }
-  
-  .detail-content {
-    flex: 1;
-  }
-  
-  .detail-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 0.25rem;
-  }
-  
-  .detail-value {
-    font-size: 0.875rem;
-    color: var(--text-primary);
-    font-weight: 500;
-  }
-  
-  @media (max-width: 768px) {
-    .page-container {
-      padding: 1rem;
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
     }
-    
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .page-title {
-      font-size: 2rem;
-    }
-    
-    .session-header,
-    .session-body,
-    .session-footer {
-      padding: 1rem;
-    }
-    
-    .session-meta {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-    
-    .session-footer {
-      flex-direction: column;
-    }
-    
-    .btn {
-      justify-content: center;
-      width: 100%;
-    }
-    
-    .modal-content {
-      margin: 1rem;
-      padding: 1.5rem;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  }
+  
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); }
+  .custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: rgba(148, 163, 184, 0.4); 
+    border-radius: 4px; 
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
 </style>
+{% endblock %}
 
-<section class="page-container">
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Interview History</h1>
-      <p class="text-gray-600">Track your progress and review past mock interview sessions</p>
+{% block content %}
+<div class="min-h-screen gradient-bg text-white">
+  <!-- Header Section -->
+  <div class="bg-black/20 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo and Title -->
+        <div class="flex items-center space-x-4">
+          <div class="relative w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <i class="fas fa-history text-xl text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Interview History
+            </h1>
+            <p class="text-sm text-gray-400">Track your progress and review past sessions</p>
+          </div>
+        </div>
+        
+        <!-- Clear All Button -->
+        {% if sessions %}
+          <button id="clear-all-btn" 
+                  class="glass-card px-4 py-2.5 rounded-xl font-medium text-red-300 border border-red-400/30 hover:bg-red-500/20 transition-all duration-200 flex items-center space-x-2">
+            <i class="fas fa-trash-alt"></i>
+            <span class="hidden sm:inline">Clear All History</span>
+          </button>
+        {% endif %}
+      </div>
     </div>
-    {% if sessions %}
-      <button id="clear-all-btn" class="btn btn-danger">
-        <i class="fas fa-trash-alt"></i>
-        Clear All History
-      </button>
-    {% endif %}
   </div>
 
-  {% if sessions %}
-    <div class="space-y-6">
-      {% for session in sessions %}
-        <article class="session-card">
-          <header class="session-header">
-            <div class="session-meta">
-              <div>
-                <h2 class="session-title">{{ session.job_role }} Interview</h2>
-                <div class="session-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  {{ session.start_time|date:"F j, Y \a\t g:i A" }}
-                </div>
-              </div>
-              <div class="flex items-center gap-3">
-                {% if session.status == 'COMPLETED' %}
-                  <span class="status-badge status-completed">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    Completed
-                  </span>
-                {% elif session.status == 'STARTED' %}
-                  <span class="status-badge status-started">
-                    <i class="fas fa-clock mr-1"></i>
-                    In Progress
-                  </span>
-                {% elif session.status == 'REVIEW_PENDING' %}
-                  <span class="status-badge status-review-pending">
-                    <i class="fas fa-hourglass-half mr-1"></i>
-                    Review Pending
-                  </span>
-                {% elif session.status == 'REVIEWED' %}
-                  <span class="status-badge status-reviewed">
-                    <i class="fas fa-star mr-1"></i>
-                    Reviewed
-                  </span>
-                {% endif %}
-                
-                {% if session.score %}
-                  <div class="score-display">
-                    <i class="fas fa-chart-line"></i>
-                    <span class="score-number">{{ session.score }}%</span>
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    {% if sessions %}
+      <!-- Sessions Grid -->
+      <div class="grid gap-6">
+        {% for session in sessions %}
+          <article class="glass-card rounded-2xl overflow-hidden hover:border-blue-400/30 transition-all duration-300 animate-slide-up" style="animation-delay: {{ forloop.counter0|multiply:0.1 }}s;">
+            
+            <!-- Header -->
+            <div class="p-6 bg-gradient-to-r from-slate-900/50 to-blue-900/20 border-b border-white/10">
+              <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div class="flex-1">
+                  <h2 class="text-2xl font-bold text-white mb-2 flex items-center space-x-3">
+                    <i class="fas fa-briefcase text-blue-400"></i>
+                    <span>{{ session.job_role }} Interview</span>
+                  </h2>
+                  <div class="flex items-center space-x-2 text-sm text-gray-400">
+                    <i class="fas fa-calendar-alt text-blue-400"></i>
+                    <time>{{ session.start_time|date:"F j, Y \a\t g:i A" }}</time>
                   </div>
-                {% endif %}
+                </div>
+                
+                <div class="flex items-center gap-3 flex-wrap">
+                  <!-- Status Badge -->
+                  {% if session.status == 'COMPLETED' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-semibold uppercase tracking-wide">
+                      <i class="fas fa-check-circle"></i>
+                      <span>Completed</span>
+                    </span>
+                  {% elif session.status == 'STARTED' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-full text-xs font-semibold uppercase tracking-wide animate-pulse-subtle">
+                      <i class="fas fa-clock"></i>
+                      <span>In Progress</span>
+                    </span>
+                  {% elif session.status == 'REVIEW_PENDING' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/20 text-amber-300 border border-amber-400/30 rounded-full text-xs font-semibold uppercase tracking-wide">
+                      <i class="fas fa-hourglass-half"></i>
+                      <span>Review Pending</span>
+                    </span>
+                  {% elif session.status == 'REVIEWED' %}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/20 text-purple-300 border border-purple-400/30 rounded-full text-xs font-semibold uppercase tracking-wide">
+                      <i class="fas fa-star"></i>
+                      <span>Reviewed</span>
+                    </span>
+                  {% endif %}
+                  
+                  <!-- Score Display -->
+                  {% if session.score %}
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-400/30 rounded-xl">
+                      <i class="fas fa-chart-line text-blue-400"></i>
+                      <span class="text-lg font-bold text-blue-300">{{ session.score }}%</span>
+                    </div>
+                  {% endif %}
+                </div>
               </div>
             </div>
-          </header>
 
-          <div class="session-body">
-            <div class="session-details">
-              <div class="detail-row">
-                <i class="fas fa-briefcase detail-icon"></i>
-                <div class="detail-content">
-                  <div class="detail-label">Target Position</div>
-                  <div class="detail-value">{{ session.job_role }}</div>
-                </div>
-              </div>
-              
-              {% if session.key_skills %}
-                <div class="detail-row">
-                  <i class="fas fa-code detail-icon"></i>
-                  <div class="detail-content">
-                    <div class="detail-label">Key Skills</div>
-                    <div class="skills-list">
-                      {% for skill in session.key_skills|split:"," %}
-                        <span class="skill-tag">{{ skill|trim_whitespace }}</span>
-                      {% endfor %}
+            <!-- Body -->
+            <div class="p-6">
+              <div class="space-y-4 mb-6">
+                
+                <!-- Job Role -->
+                <div class="flex items-start gap-3 pb-4 border-b border-white/10">
+                  <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-400/30">
+                    <i class="fas fa-briefcase text-blue-400"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+                      Target Position
+                    </div>
+                    <div class="text-base font-semibold text-white">
+                      {{ session.job_role }}
                     </div>
                   </div>
                 </div>
-              {% endif %}
-              
-              {% if session.duration_display %}
-                <div class="detail-row">
-                  <i class="fas fa-clock detail-icon"></i>
-                  <div class="detail-content">
-                    <div class="detail-label">Duration</div>
-                    <div class="detail-value">{{ session.duration_display }}</div>
+                
+                <!-- Key Skills -->
+                {% if session.key_skills %}
+                  <div class="flex items-start gap-3 pb-4 border-b border-white/10">
+                    <div class="flex-shrink-0 w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-400/30">
+                      <i class="fas fa-code text-indigo-400"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                        Key Skills
+                      </div>
+                      <div class="flex flex-wrap gap-2">
+                        {% for skill in session.key_skills|split:"," %}
+                          <span class="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 rounded-lg text-xs font-medium">
+                            {{ skill|trim_whitespace }}
+                          </span>
+                        {% endfor %}
+                      </div>
+                    </div>
                   </div>
+                {% endif %}
+                
+                <!-- Duration -->
+                {% if session.duration_display %}
+                  <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center border border-emerald-400/30">
+                      <i class="fas fa-clock text-emerald-400"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+                        Duration
+                      </div>
+                      <div class="text-base font-semibold text-white">
+                        {{ session.duration_display }}
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- AI Feedback -->
+              {% if session.overall_feedback %}
+                <div class="relative bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-l-4 border-blue-500 rounded-xl p-5 backdrop-blur-sm">
+                  <div class="flex items-start gap-3 mb-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <h4 class="font-semibold text-white text-sm">AI Feedback Summary</h4>
+                  </div>
+                  <p class="text-sm text-gray-300 leading-relaxed pl-11">
+                    {{ session.overall_feedback|truncatechars:200 }}
+                    {% if session.overall_feedback|length > 200 %}
+                      <a href="{% url 'mock_interview:review_interview' session_id=session.id %}" 
+                         class="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 font-medium ml-1 transition-colors">
+                        Read more
+                        <i class="fas fa-arrow-right text-xs"></i>
+                      </a>
+                    {% endif %}
+                  </p>
                 </div>
               {% endif %}
             </div>
 
-            {% if session.overall_feedback %}
-              <div class="feedback-preview">
-                <div class="flex items-start gap-2 mb-2">
-                  <i class="fas fa-robot text-blue-600 mt-1"></i>
-                  <h4 class="font-semibold text-gray-900">AI Feedback Summary</h4>
-                </div>
-                <p class="text-sm text-gray-700 leading-relaxed">
-                  {{ session.overall_feedback|truncatechars:200 }}
-                  {% if session.overall_feedback|length > 200 %}
-                    <a href="{% url 'mock_interview:review_interview' session_id=session.id %}" class="text-blue-600 hover:text-blue-800 font-medium">
-                      Read more
-                    </a>
-                  {% endif %}
-                </p>
-              </div>
-            {% endif %}
-          </div>
-
-          <footer class="session-footer">
-            {% if session.status == 'STARTED' %}
-              <a href="{% url 'mock_interview:main_interview' session_id=session.id %}" 
-                 class="btn btn-primary">
-                <i class="fas fa-play-circle"></i>
-                Continue Interview
+            <!-- Footer Actions -->
+            <footer class="px-6 py-4 bg-black/20 border-t border-white/10 flex flex-col sm:flex-row gap-3 sm:justify-end">
+              {% if session.status == 'STARTED' %}
+                <a href="{% url 'mock_interview:main_interview' session_id=session.id %}" 
+                   class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                  <i class="fas fa-play-circle"></i>
+                  <span>Continue Interview</span>
+                </a>
+              {% endif %}
+              
+              <a href="{% url 'mock_interview:review_interview' session_id=session.id %}" 
+                 class="inline-flex items-center justify-center gap-2 px-5 py-2.5 glass-card text-gray-300 hover:text-white rounded-xl font-medium hover:bg-white/10 transition-all duration-200">
+                <i class="fas fa-file-alt"></i>
+                <span>View Report</span>
               </a>
-            {% endif %}
-            
-            <a href="{% url 'mock_interview:review_interview' session_id=session.id %}" 
-               class="btn btn-secondary">
-              <i class="fas fa-file-alt"></i>
-              View Report
-            </a>
-            
-            <form id="delete-form-{{ session.id }}" method="post" action="{% url 'mock_interview:delete_session' session_id=session.id %}" class="inline-block">
-              {% csrf_token %}
-              <button type="button" onclick="confirmDelete('{{ session.id }}')" class="btn btn-danger" title="Delete Session">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </form>
-          </footer>
-        </article>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-icon">
-        <i class="fas fa-clipboard-list"></i>
+              
+              <form id="delete-form-{{ session.id }}" method="post" action="{% url 'mock_interview:delete_session' session_id=session.id %}" class="inline-block">
+                {% csrf_token %}
+                <button type="button" 
+                        onclick="confirmDelete('{{ session.id }}')" 
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 glass-card text-red-300 border border-red-400/30 rounded-xl font-medium hover:bg-red-500/20 transition-all duration-200"
+                        title="Delete Session">
+                  <i class="fas fa-trash-alt"></i>
+                  <span class="sm:hidden">Delete</span>
+                </button>
+              </form>
+            </footer>
+          </article>
+        {% endfor %}
       </div>
-      <h2 class="text-2xl font-semibold text-gray-900 mb-3">No Interview Sessions Yet</h2>
-      <p class="text-gray-600 mb-6 max-w-md mx-auto">
-        Start your first AI-powered mock interview to practice your skills and receive detailed feedback on your performance.
-      </p>
-      <a href="{% url 'mock_interview:interview_setup' %}" 
-         class="btn btn-primary btn-large">
-        <i class="fas fa-plus-circle"></i>
-        Start New Interview
-      </a>
-    </div>
-  {% endif %}
-</section>
+      
+    {% else %}
+      <!-- Empty State -->
+      <div class="glass-card rounded-2xl border-2 border-dashed border-white/20 p-12 text-center max-w-2xl mx-auto animate-fade-in">
+        <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-400/30">
+          <i class="fas fa-clipboard-list text-blue-400 text-3xl"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">
+          No Interview Sessions Yet
+        </h2>
+        <p class="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
+          Start your first AI-powered mock interview to practice your skills and receive detailed feedback on your performance.
+        </p>
+        <a href="{% url 'mock_interview:interview_setup' %}" 
+           class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+          <i class="fas fa-plus-circle"></i>
+          <span>Start New Interview</span>
+        </a>
+      </div>
+    {% endif %}
+    
+  </div>
+</div>
 
 <!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-icon">
-        <i class="fas fa-exclamation-triangle"></i>
+<div id="delete-modal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" onclick="hideDeleteModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div id="delete-modal-content" class="glass-card rounded-2xl p-8 max-w-md w-full border border-white/20 transform scale-95 opacity-0 transition-all duration-300">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-400/30">
+          <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2">
+          Delete Interview Session?
+        </h3>
+        <p class="text-gray-400">
+          This action cannot be undone. All data for this interview session will be permanently deleted.
+        </p>
       </div>
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Delete Interview Session?</h3>
-      <p class="text-gray-600">
-        This action cannot be undone. All data for this interview session will be permanently deleted.
-      </p>
-    </div>
-    <div class="modal-actions">
-      <button id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
-      <button id="modal-confirm-btn" class="btn btn-danger">
-        <i class="fas fa-trash-alt mr-2"></i>
-        Delete Session
-      </button>
+      <div class="flex gap-3">
+        <button onclick="hideDeleteModal()" 
+                class="flex-1 px-5 py-3 glass-card text-gray-300 hover:text-white rounded-xl font-medium hover:bg-white/10 transition-colors">
+          Cancel
+        </button>
+        <button id="modal-confirm-btn" 
+                class="flex-1 px-5 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-medium transition-colors inline-flex items-center justify-center gap-2">
+          <i class="fas fa-trash-alt"></i>
+          <span>Delete</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Clear All Confirmation Modal -->
-<div id="clear-all-modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-icon">
-        <i class="fas fa-exclamation-triangle"></i>
+<div id="clear-all-modal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" onclick="hideClearAllModal()"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div id="clear-all-modal-content" class="glass-card rounded-2xl p-8 max-w-md w-full border border-white/20 transform scale-95 opacity-0 transition-all duration-300">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-400/30">
+          <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2">
+          Clear All Interview History?
+        </h3>
+        <p class="text-gray-400">
+          This will permanently delete all your mock interview sessions and cannot be undone.
+        </p>
       </div>
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">Clear All Interview History?</h3>
-      <p class="text-gray-600">
-        This will permanently delete all your mock interview sessions and cannot be undone.
-      </p>
-    </div>
-    <div class="modal-actions">
-      <button id="clear-all-cancel-btn" class="btn btn-secondary">Cancel</button>
-      <form id="clear-all-form" method="post" action="{% url 'mock_interview:clear_all_sessions' %}" class="inline-block">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">
-          <i class="fas fa-trash-alt mr-2"></i>
-          Clear All History
+      <div class="flex gap-3">
+        <button onclick="hideClearAllModal()" 
+                class="flex-1 px-5 py-3 glass-card text-gray-300 hover:text-white rounded-xl font-medium hover:bg-white/10 transition-colors">
+          Cancel
         </button>
-      </form>
+        <form id="clear-all-form" method="post" action="{% url 'mock_interview:clear_all_sessions' %}" class="flex-1">
+          {% csrf_token %}
+          <button type="submit" 
+                  class="w-full px-5 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-medium transition-colors inline-flex items-center justify-center gap-2">
+            <i class="fas fa-trash-alt"></i>
+            <span>Clear All</span>
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Notification Container -->
+<div id="notification-container" class="fixed top-4 right-4 z-50 space-y-4 max-w-sm"></div>
+
 <script>
-// Delete confirmation functionality
+// Modal Management
+function showModal(modalId, contentId) {
+  const modal = document.getElementById(modalId);
+  const content = document.getElementById(contentId);
+  
+  modal.classList.remove('hidden');
+  
+  setTimeout(() => {
+    content.classList.remove('scale-95', 'opacity-0');
+    content.classList.add('scale-100', 'opacity-100');
+  }, 50);
+}
+
+function hideModal(modalId, contentId) {
+  const modal = document.getElementById(modalId);
+  const content = document.getElementById(contentId);
+  
+  content.classList.remove('scale-100', 'opacity-100');
+  content.classList.add('scale-95', 'opacity-0');
+  
+  setTimeout(() => {
+    modal.classList.add('hidden');
+  }, 300);
+}
+
+function hideDeleteModal() {
+  hideModal('delete-modal', 'delete-modal-content');
+}
+
+function hideClearAllModal() {
+  hideModal('clear-all-modal', 'clear-all-modal-content');
+}
+
+// Delete Confirmation
+let sessionToDelete = null;
+
 function confirmDelete(sessionId) {
-  const modal = document.getElementById('delete-modal');
+  sessionToDelete = sessionId;
+  showModal('delete-modal', 'delete-modal-content');
+  
   const confirmBtn = document.getElementById('modal-confirm-btn');
-  const cancelBtn = document.getElementById('modal-cancel-btn');
-  
-  modal.classList.add('show');
-  
-  // Clone button to remove previous event listeners
   const newConfirmBtn = confirmBtn.cloneNode(true);
   confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
   
   newConfirmBtn.addEventListener('click', function() {
-    document.getElementById('delete-form-' + sessionId).submit();
-  });
-  
-  cancelBtn.addEventListener('click', function() {
-    modal.classList.remove('show');
-  });
-  
-  // Close on backdrop click
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-      modal.classList.remove('show');
+    if (sessionToDelete) {
+      document.getElementById('delete-form-' + sessionToDelete).submit();
     }
   });
 }
 
-// Clear all confirmation functionality
+// Clear All Confirmation
 document.getElementById('clear-all-btn')?.addEventListener('click', function() {
-  const modal = document.getElementById('clear-all-modal');
-  const cancelBtn = document.getElementById('clear-all-cancel-btn');
-  
-  modal.classList.add('show');
-  
-  cancelBtn.addEventListener('click', function() {
-    modal.classList.remove('show');
-  });
-  
-  // Close on backdrop click
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-      modal.classList.remove('show');
-    }
-  });
+  showModal('clear-all-modal', 'clear-all-modal-content');
 });
 
 // Close modals on escape key
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
-    document.querySelectorAll('.modal.show').forEach(modal => {
-      modal.classList.remove('show');
-    });
+    hideDeleteModal();
+    hideClearAllModal();
+  }
+});
+
+// Notification System
+function showNotification(message, type = 'info', duration = 5000) {
+  const container = document.getElementById('notification-container');
+  if (!container) return;
+  
+  const notification = document.createElement('div');
+  
+  const bgColors = {
+    success: 'bg-green-500/20 border-green-400/30 text-green-300',
+    error: 'bg-red-500/20 border-red-400/30 text-red-300',
+    warning: 'bg-yellow-500/20 border-yellow-400/30 text-yellow-300',
+    info: 'bg-blue-500/20 border-blue-400/30 text-blue-300'
+  };
+  
+  const icons = {
+    success: 'fas fa-check-circle',
+    error: 'fas fa-exclamation-triangle',
+    warning: 'fas fa-exclamation-circle',
+    info: 'fas fa-info-circle'
+  };
+  
+  notification.className = `glass-card ${bgColors[type]} border rounded-lg p-4 flex items-start space-x-3 transform translate-x-full transition-transform duration-300`;
+  
+  notification.innerHTML = `
+    <i class="${icons[type]} text-lg mt-0.5"></i>
+    <div class="flex-1 font-medium">${message}</div>
+    <button onclick="this.closest('div').remove()" class="text-current opacity-70 hover:opacity-100 transition-opacity">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  
+  container.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.classList.remove('translate-x-full');
+  }, 100);
+  
+  if (duration > 0) {
+    setTimeout(() => {
+      notification.classList.add('translate-x-full');
+      setTimeout(() => notification.remove(), 300);
+    }, duration);
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('MockMate Interview History initialized');
+  
+  // Stagger animation for session cards
+  const sessionCards = document.querySelectorAll('.animate-slide-up');
+  sessionCards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.1}s`;
+  });
+});
+
+// Handle page visibility changes
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    console.log('Page visible again');
   }
 });
 </script>
-
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
