@@ -705,7 +705,10 @@ Generate ONLY Sarah's next response (brief and under 60 words unless closing):
 """
 
 def analyze_interview_performance(session):
-    """Enhanced performance analysis with better error handling."""
+    """
+    Enhanced performance analysis with STRICT JSON output.
+    Returns a valid JSON string with structured feedback.
+    """
     turns = session.turns.all().order_by('turn_number')
     conversation = []
     
@@ -720,6 +723,7 @@ def analyze_interview_performance(session):
     if session.start_time and session.end_time:
         interview_duration = (session.end_time - session.start_time).total_seconds() / 60
     
+    # Enhanced prompt with STRICT JSON requirements
     analysis_prompt = f"""
 You are an expert interview coach providing comprehensive analysis.
 
@@ -729,37 +733,159 @@ Interview Details:
 - Questions: {total_questions}
 - Duration: {interview_duration:.1f} minutes
 
-Conversation:
+Conversation (last 20 exchanges):
 {chr(10).join(conversation[-20:])}
 
-Provide analysis in JSON format:
+CRITICAL: You MUST respond with ONLY valid JSON. No markdown, no code blocks, no explanations.
+Start your response with {{ and end with }}.
+
+Provide analysis in this EXACT JSON format:
 {{
-    "overall_score": [70-95],
-    "strengths": ["specific positive observations"],
-    "areas_for_improvement": ["constructive suggestions"],
-    "technical_assessment": "Technical competency evaluation",
-    "communication_score": [1-100],
-    "confidence_level": "Good/Strong/Excellent",
-    "recommendations": ["actionable improvement steps"],
-    "encouragement_note": "Encouraging, personalized message"
+    "overall_score": 75,
+    "strengths": [
+        "First specific positive observation",
+        "Second specific positive observation",
+        "Third specific positive observation"
+    ],
+    "areas_for_improvement": [
+        "First constructive suggestion",
+        "Second constructive suggestion",
+        "Third constructive suggestion"
+    ],
+    "technical_assessment": "Single paragraph evaluating technical competency for {session.job_role}",
+    "communication_score": 75,
+    "confidence_level": "Good",
+    "recommendations": [
+        "First actionable improvement step",
+        "Second actionable improvement step",
+        "Third actionable improvement step",
+        "Fourth actionable improvement step"
+    ],
+    "encouragement_note": "Encouraging, personalized message in 2-3 sentences"
 }}
 
-Be encouraging yet constructive.
+Rules:
+- overall_score: integer 60-95
+- communication_score: integer 60-100
+- confidence_level: one of ["Developing", "Good", "Strong", "Excellent"]
+- All arrays must have at least 3 items
+- All strings must be properly escaped
+- No line breaks within string values
+- Be encouraging yet constructive
+
+Output ONLY the JSON, nothing else:
 """
     
     try:
-        return call_ai_model(analysis_prompt, model_type="text", max_tokens=1200, temperature=0.7)
-    except Exception as e:
-        logger.error(f"Performance analysis failed: {e}")
+        # Call AI with explicit JSON requirement
+        ai_response = call_ai_model(
+            analysis_prompt, 
+            model_type="text", 
+            max_tokens=1500,  # Increased for detailed feedback
+            temperature=0.7
+        )
+        
+        if not ai_response:
+            logger.error("No response from AI model for performance analysis")
+            raise Exception("No AI response received")
+        
+        # Log the raw response for debugging
+        logger.info(f"Raw AI analysis response (first 200 chars): {ai_response[:200]}")
+        
+        # Try to extract JSON if wrapped in markdown or extra text
+        cleaned_response = ai_response.strip()
+        
+        # Remove markdown code blocks if present
+        if cleaned_response.startswith('```'):
+            json_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', cleaned_response, re.DOTALL)
+            if json_match:
+                cleaned_response = json_match.group(1)
+                logger.info("Extracted JSON from markdown code block")
+        
+        # Find the JSON object (from first { to last })
+        first_brace = cleaned_response.find('{')
+        last_brace = cleaned_response.rfind('}')
+        
+        if first_brace != -1 and last_brace != -1:
+            json_str = cleaned_response[first_brace:last_brace+1]
+            
+            # Validate it's proper JSON
+            parsed_json = json.loads(json_str)
+            
+            # Validate structure
+            required_keys = ['overall_score', 'strengths', 'areas_for_improvement', 
+                           'technical_assessment', 'communication_score', 'confidence_level',
+                           'recommendations', 'encouragement_note']
+            
+            for key in required_keys:
+                if key not in parsed_json:
+                    logger.warning(f"Missing key in AI response: {key}")
+                    raise ValueError(f"Missing required key: {key}")
+            
+            # Return the cleaned, valid JSON string
+            logger.info("Successfully generated and validated performance analysis JSON")
+            return json_str
+            
+        else:
+            logger.error("Could not find JSON object in AI response")
+            raise ValueError("No valid JSON object found in response")
+            
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parsing error in performance analysis: {e}")
+        logger.error(f"Problematic response: {ai_response[:500] if ai_response else 'None'}")
+        
+        # Return a valid fallback JSON string
         return json.dumps({
-            "overall_score": 75,
-            "strengths": ["Completed the full interview", "Showed engagement throughout"],
-            "areas_for_improvement": ["Continue practicing interview skills"],
-            "technical_assessment": "Demonstrated understanding of key concepts",
-            "communication_score": 75,
+            "overall_score": 70,
+            "strengths": [
+                "Completed the full interview session",
+                "Engaged with all questions presented",
+                "Demonstrated interest in the position"
+            ],
+            "areas_for_improvement": [
+                "Provide more detailed responses with specific examples",
+                "Practice structuring answers using the STAR method",
+                "Prepare concrete examples from past experience"
+            ],
+            "technical_assessment": f"The interview covered skills relevant to the {session.job_role} position. To strengthen technical proficiency, focus on building deeper expertise in {session.key_skills}. Practice explaining technical concepts clearly and prepare specific project examples.",
+            "communication_score": 70,
             "confidence_level": "Good",
-            "recommendations": ["Keep practicing", "Focus on specific examples"],
-            "encouragement_note": "You did well! Keep practicing and you'll continue to improve."
+            "recommendations": [
+                "Practice mock interviews regularly to build confidence",
+                "Prepare 5-7 specific examples using the STAR method",
+                "Research common questions for your target role",
+                "Record yourself to improve delivery and pacing",
+                "Focus on clear, concise communication"
+            ],
+            "encouragement_note": "You've taken an important step by completing this mock interview! With continued practice and preparation, your interview skills will improve significantly. Keep working on providing specific examples and you'll see great results."
+        })
+        
+    except Exception as e:
+        logger.error(f"Performance analysis failed with error: {e}")
+        
+        # Return valid fallback JSON string
+        return json.dumps({
+            "overall_score": 70,
+            "strengths": [
+                "Successfully completed the mock interview",
+                "Showed engagement throughout the session",
+                "Demonstrated interest in improvement"
+            ],
+            "areas_for_improvement": [
+                "Continue practicing interview skills",
+                "Focus on providing detailed responses",
+                "Prepare specific examples from your experience"
+            ],
+            "technical_assessment": f"Technical skills for the {session.job_role} role were discussed. Continue building expertise in {session.key_skills}.",
+            "communication_score": 70,
+            "confidence_level": "Good",
+            "recommendations": [
+                "Practice regularly with mock interviews",
+                "Prepare concrete examples using STAR method",
+                "Research your target role thoroughly",
+                "Focus on clear communication"
+            ],
+            "encouragement_note": "Great job completing this interview! Keep practicing and you'll continue to improve your interview skills."
         })
 
 # -------------------------
@@ -1778,75 +1904,156 @@ def my_mock_interviews(request):
 @login_required
 @user_passes_test(is_student, login_url='/login/')
 def review_interview(request, session_id):
-    """Review completed interview with enhanced error handling."""
+    """Review completed interview with GUARANTEED proper feedback parsing."""
     try:
         session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
         turns = session.turns.all().order_by('turn_number')
         
-        # Allow viewing the review even if status is STARTED (in case completion didn't update status)
-        # Only redirect if there are no turns at all (interview never actually started)
+        # Allow viewing even if status is STARTED
         if turns.count() == 0:
             messages.info(request, "This interview hasn't been started yet.")
             return redirect('mock_interview:main_interview', session_id=session.id)
         
-        # If interview has turns but status is still STARTED, update it to COMPLETED
+        # Auto-complete if needed
         if session.status == 'STARTED' and turns.count() > 0:
-            # Check if this looks like a completed interview (has user answers)
             completed_turns = turns.filter(user_answer__isnull=False).count()
-            if completed_turns >= 3:  # At least 3 answered questions
+            if completed_turns >= 3:
                 logger.info(f"Auto-updating session {session.id} status from STARTED to COMPLETED")
                 session.status = 'COMPLETED'
                 if not session.end_time:
                     session.end_time = timezone.now()
-                
-                # Generate feedback if not already present
-                if not hasattr(session, 'ai_feedback') or not session.ai_feedback:
-                    if not session.overall_feedback or session.overall_feedback.strip() == '':
-                        try:
-                            logger.info(f"Generating missing performance analysis for session {session.id}")
-                            performance_analysis = analyze_interview_performance(session)
-                            if hasattr(session, 'ai_feedback'):
-                                session.ai_feedback = performance_analysis
-                            else:
-                                session.overall_feedback = performance_analysis
-                        except Exception as e:
-                            logger.warning(f"Failed to generate performance analysis: {e}")
-                
                 session.save()
         
-        # Calculate score degree for progress circle
-        score_deg = 0
-        
-        # Parse AI feedback
+        # ===== ROBUST FEEDBACK PARSING =====
         ai_feedback = None
         feedback_source = None
         
+        # Try to get feedback from available fields
         if hasattr(session, 'ai_feedback') and session.ai_feedback:
             feedback_source = session.ai_feedback
+            logger.info(f"Found ai_feedback field for session {session.id}")
         elif hasattr(session, 'overall_feedback') and session.overall_feedback:
             feedback_source = session.overall_feedback
+            logger.info(f"Found overall_feedback field for session {session.id}")
 
+        # Parse the feedback with robust error handling
         if feedback_source:
+            # Check if it's already a string that looks like JSON
+            if isinstance(feedback_source, str):
+                try:
+                    # Try to parse as JSON
+                    ai_feedback = json.loads(feedback_source)
+                    logger.info(f"Successfully parsed JSON feedback for session {session.id}")
+                except json.JSONDecodeError as e:
+                    logger.warning(f"JSON parsing failed for session {session.id}: {e}")
+                    logger.warning(f"Feedback content starts with: {feedback_source[:200]}")
+                    
+                    # Check if the string starts with triple backticks (markdown code block)
+                    if feedback_source.strip().startswith('```'):
+                        # Extract JSON from markdown code block
+                        try:
+                            json_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', feedback_source)
+                            if json_match:
+                                ai_feedback = json.loads(json_match.group(1))
+                                logger.info("Extracted JSON from markdown code block")
+                        except:
+                            pass
+                    
+                    # If still no valid JSON, this is raw JSON text that needs regeneration
+                    if not ai_feedback:
+                        logger.error(f"Feedback is not valid JSON. Will regenerate.")
+                        feedback_source = None  # Force regeneration
+            elif isinstance(feedback_source, dict):
+                # Already a dictionary
+                ai_feedback = feedback_source
+                logger.info(f"Feedback is already a dict for session {session.id}")
+        
+        # If no valid feedback, generate it now
+        if not ai_feedback:
+            logger.warning(f"No valid feedback found for session {session.id}, generating now...")
             try:
-                ai_feedback = json.loads(feedback_source)
-                score = ai_feedback.get('overall_score')
-                if isinstance(score, (int, float)):
-                    session.score = score  # Save score to session model if not already set
-                    score_deg = (score * 3.6)
-            except (json.JSONDecodeError, TypeError) as e:
-                logger.warning(f"Failed to parse AI feedback: {e}")
-                # If feedback_source is not JSON, try to use it as plain text
-                ai_feedback = {
-                    'overall_score': 75,
-                    'strengths': ['Completed the interview'],
-                    'areas_for_improvement': ['Continue practicing'],
-                    'technical_assessment': 'Review in progress',
-                    'communication_score': 75,
-                    'confidence_level': 'Good',
-                    'recommendations': ['Keep practicing'],
-                    'encouragement_note': feedback_source if isinstance(feedback_source, str) else 'Good effort!'
-                }
-                score_deg = 75 * 3.6
+                performance_analysis_json = analyze_interview_performance(session)
+                
+                # Try to parse the generated analysis
+                if performance_analysis_json:
+                    try:
+                        ai_feedback = json.loads(performance_analysis_json)
+                        
+                        # Save it back to the session
+                        if hasattr(session, 'ai_feedback'):
+                            session.ai_feedback = performance_analysis_json
+                        else:
+                            session.overall_feedback = performance_analysis_json
+                        session.save()
+                        logger.info(f"Generated and saved new feedback for session {session.id}")
+                        
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Generated feedback is not valid JSON: {e}")
+                        logger.error(f"Response was: {performance_analysis_json[:500]}")
+                        # Will fall through to emergency fallback
+                        
+            except Exception as e:
+                logger.error(f"Emergency feedback generation failed: {e}")
+        
+        # ABSOLUTE FALLBACK - Always ensure ai_feedback exists with proper structure
+        if not ai_feedback or not isinstance(ai_feedback, dict):
+            logger.warning(f"Using emergency fallback feedback for session {session.id}")
+            ai_feedback = {
+                'overall_score': 70,
+                'strengths': [
+                    'Successfully completed the mock interview session',
+                    'Engaged with the AI interviewer throughout the session',
+                    'Demonstrated willingness to practice and improve'
+                ],
+                'areas_for_improvement': [
+                    'Continue practicing mock interviews regularly',
+                    'Focus on providing detailed, structured responses',
+                    'Prepare specific examples from your experience using the STAR method'
+                ],
+                'technical_assessment': f'You discussed skills relevant to the {session.job_role} position. To strengthen your technical profile, continue building expertise in: {session.key_skills}. Practice explaining technical concepts clearly and be ready to discuss specific projects where you applied these skills.',
+                'communication_score': 70,
+                'confidence_level': 'Developing',
+                'recommendations': [
+                    'Practice the STAR method (Situation, Task, Action, Result) for behavioral questions',
+                    'Prepare 3-5 specific examples from your past work experience',
+                    'Research common interview questions for your target role',
+                    'Record yourself answering questions to improve delivery',
+                    'Practice speaking at a measured, confident pace'
+                ],
+                'encouragement_note': 'You took an important step by completing this mock interview! Every practice session helps you improve. Keep working on your interview skills, prepare thoroughly, and you\'ll see great progress. Remember, confidence comes from preparation and practice!'
+            }
+        
+        # Ensure all required keys exist with proper defaults
+        ai_feedback = {
+            'overall_score': ai_feedback.get('overall_score', 70),
+            'strengths': ai_feedback.get('strengths', ['Completed the interview session']),
+            'areas_for_improvement': ai_feedback.get('areas_for_improvement', ['Continue practicing interview skills']),
+            'technical_assessment': ai_feedback.get('technical_assessment', f'Technical skills assessment for {session.job_role} position.'),
+            'communication_score': ai_feedback.get('communication_score', 70),
+            'confidence_level': ai_feedback.get('confidence_level', 'Good'),
+            'recommendations': ai_feedback.get('recommendations', ['Keep practicing mock interviews']),
+            'encouragement_note': ai_feedback.get('encouragement_note', 'Great job completing the interview! Keep practicing to improve.')
+        }
+        
+        # Ensure all values are proper types (not nested JSON strings)
+        for key in ['strengths', 'areas_for_improvement', 'recommendations']:
+            if isinstance(ai_feedback[key], str):
+                try:
+                    ai_feedback[key] = json.loads(ai_feedback[key])
+                except:
+                    ai_feedback[key] = [ai_feedback[key]]  # Wrap single string in list
+            elif not isinstance(ai_feedback[key], list):
+                ai_feedback[key] = [str(ai_feedback[key])]
+        
+        # Calculate score for visual display
+        score_deg = 0
+        try:
+            score = ai_feedback.get('overall_score', 70)
+            if isinstance(score, (int, float)):
+                session.score = score
+                score_deg = score * 3.6
+        except:
+            score_deg = 70 * 3.6
         
         # Calculate interview metrics
         interview_duration = None
@@ -1858,7 +2065,6 @@ def review_interview(request, session_id):
             duration = session.end_time - session.start_time
             interview_duration = duration.total_seconds() / 60
         elif session.start_time:
-            # If no end_time, calculate from last turn timestamp
             last_turn = turns.order_by('-timestamp').first()
             if last_turn:
                 duration = last_turn.timestamp - session.start_time
@@ -1890,7 +2096,7 @@ def review_interview(request, session_id):
         context = {
             'session': session,
             'turns': turns,
-            'ai_feedback': ai_feedback,
+            'ai_feedback': ai_feedback,  # GUARANTEED to be a proper dict
             'transcript': session.turns.all(),
             'score_deg': score_deg,
             'interview_metrics': {
@@ -1904,6 +2110,7 @@ def review_interview(request, session_id):
             }
         }
         
+        logger.info(f"Successfully loaded review for session {session.id} with feedback keys: {list(ai_feedback.keys())}")
         return render(request, 'mock_interview/review_interview.html', context)
         
     except Exception as e:
