@@ -10,7 +10,7 @@
         {% if messages %}
             <div class="mb-6">
                 {% for message in messages %}
-                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-blue-100 text-blue-800 {% endif %}" role="alert">
+                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-sky-100 text-sky-800 {% endif %}" role="alert">
                         <p class="font-medium">{{ message }}</p>
                     </div>
                 {% endfor %}
@@ -19,8 +19,8 @@
 
         <div class="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10">
             <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-5">
-                    <svg class="h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-sky-100 mb-5">
+                    <svg class="h-10 w-10 text-sky-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.691L7.985 5.989m11.039 3.359l-3.182-3.182a8.25 8.25 0 00-11.667 0L2.985 9.348" />
                     </svg>                      
                 </div>
@@ -55,7 +55,7 @@
                 {% endif %}
 
                 <div>
-                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors duration-300">
                         Send Verification Email
                     </button>
                 </div>
@@ -64,7 +64,7 @@
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600">
                     Remembered your details?
-                    <a href="{% url 'users:login' %}" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+                    <a href="{% url 'users:login' %}" class="font-medium text-sky-600 hover:text-sky-500 hover:underline">
                         Log in here
                     </a>
                 </p>

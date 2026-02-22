@@ -1,4 +1,4 @@
-# mockmate01/users/models.py
+# elevo/users/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -76,7 +76,7 @@ class EmailVerificationToken(models.Model):
     
     def send_verification_email(self, request):
         """Send verification email to user"""
-        subject = 'Verify your MockMate account'
+        subject = 'Verify your Elevo account'
         verification_url = request.build_absolute_uri(f'/users/verify-email/{self.token}/')
         
         html_message = render_to_string('users/emails/verification_email.html', {
@@ -133,7 +133,7 @@ class PasswordResetToken(models.Model):
     
     def send_reset_email(self):
         """Send password reset email with OTP"""
-        subject = 'Reset your MockMate password'
+        subject = 'Reset your Elevo password'
         
         html_message = render_to_string('users/emails/password_reset_email.html', {
             'user': self.user,
@@ -177,7 +177,7 @@ class EmailChangeToken(models.Model):
     
     def send_change_email(self, request):
         """Send email change verification to new email"""
-        subject = 'Verify your new email for MockMate'
+        subject = 'Verify your new email for Elevo'
         verification_url = request.build_absolute_uri(f'/users/verify-email-change/{self.token}/')
         
         html_message = render_to_string('users/emails/email_change_verification.html', {

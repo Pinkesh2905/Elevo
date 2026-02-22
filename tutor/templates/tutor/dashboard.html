@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Tutor Dashboard | MockMate{% endblock %}
+{% block title %}Tutor Dashboard | Elevo{% endblock %}
 
 {% block content %}
 <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -11,7 +11,7 @@
     <div class="mb-12">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 brand-font mb-3">
+          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-emerald-400 to-emerald-400 brand-font mb-3">
             Tutor Dashboard
           </h1>
           <p class="text-slate-400 text-lg font-medium">Create and manage aptitude problems, coding challenges, and practice sets</p>
@@ -23,18 +23,18 @@
     {% if messages %}
     <div class="mb-8 space-y-3">
       {% for message in messages %}
-      <div class="glass rounded-xl p-4 border {% if message.tags == 'success' %}border-green-500/30 bg-green-500/10{% elif message.tags == 'error' %}border-red-500/30 bg-red-500/10{% else %}border-blue-500/30 bg-blue-500/10{% endif %} backdrop-blur-sm animate-slide-in">
+      <div class="glass rounded-xl p-4 border {% if message.tags == 'success' %}border-green-500/30 bg-green-500/10{% elif message.tags == 'error' %}border-red-500/30 bg-red-500/10{% else %}border-sky-500/30 bg-sky-500/10{% endif %} backdrop-blur-sm animate-slide-in">
         <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if message.tags == 'success' %}bg-green-500/20{% elif message.tags == 'error' %}bg-red-500/20{% else %}bg-blue-500/20{% endif %}">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if message.tags == 'success' %}bg-green-500/20{% elif message.tags == 'error' %}bg-red-500/20{% else %}bg-sky-500/20{% endif %}">
             {% if message.tags == 'success' %}
             <i class="ri-checkbox-circle-line text-xl text-green-400"></i>
             {% elif message.tags == 'error' %}
             <i class="ri-error-warning-line text-xl text-red-400"></i>
             {% else %}
-            <i class="ri-information-line text-xl text-blue-400"></i>
+            <i class="ri-information-line text-xl text-sky-400"></i>
             {% endif %}
           </div>
-          <p class="{% if message.tags == 'success' %}text-green-300{% elif message.tags == 'error' %}text-red-300{% else %}text-blue-300{% endif %} font-medium">{{ message }}</p>
+          <p class="{% if message.tags == 'success' %}text-green-300{% elif message.tags == 'error' %}text-red-300{% else %}text-sky-300{% endif %} font-medium">{{ message }}</p>
         </div>
       </div>
       {% endfor %}
@@ -48,13 +48,13 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Aptitude Problems</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">
               {{ aptitude_stats.total_problems }}
             </p>
             <p class="text-xs text-slate-500 mt-2">{{ aptitude_stats.total_categories }} categories</p>
           </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-questionnaire-line text-3xl text-blue-400"></i>
+          <div class="w-16 h-16 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-questionnaire-line text-3xl text-sky-400"></i>
           </div>
         </div>
       </div>
@@ -80,13 +80,13 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Coding Topics</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
               {{ practice_stats.total_topics }}
             </p>
             <p class="text-xs text-slate-500 mt-2">Algorithm categories</p>
           </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-stack-line text-3xl text-purple-400"></i>
+          <div class="w-16 h-16 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-stack-line text-3xl text-teal-400"></i>
           </div>
         </div>
       </div>
@@ -96,12 +96,12 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Companies</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-emerald-400">
               {{ practice_stats.total_companies }}
             </p>
             <p class="text-xs text-slate-500 mt-2">Tech companies</p>
           </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl flex items-center justify-center">
+          <div class="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
             <i class="ri-building-line text-3xl text-orange-400"></i>
           </div>
         </div>
@@ -116,8 +116,8 @@
         <!-- Aptitude Category -->
         <a href="?show=category" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
           <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-folder-add-line text-2xl text-blue-400"></i>
+            <div class="w-14 h-14 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-folder-add-line text-2xl text-sky-400"></i>
             </div>
             <span class="text-sm font-semibold text-slate-200">Add Category</span>
             <span class="text-xs text-slate-500 mt-1">Aptitude</span>
@@ -138,8 +138,8 @@
         <!-- Aptitude Problem -->
         <a href="?show=problem" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
           <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-question-answer-line text-2xl text-purple-400"></i>
+            <div class="w-14 h-14 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-question-answer-line text-2xl text-teal-400"></i>
             </div>
             <span class="text-sm font-semibold text-slate-200">Aptitude Problem</span>
             <span class="text-xs text-slate-500 mt-1">Create new</span>
@@ -149,8 +149,8 @@
         <!-- Coding Problem -->
         <a href="?show=practice_problem" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
           <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-code-box-line text-2xl text-cyan-400"></i>
+            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-code-box-line text-2xl text-emerald-400"></i>
             </div>
             <span class="text-sm font-semibold text-slate-200">Coding Problem</span>
             <span class="text-xs text-slate-500 mt-1">Create new</span>
@@ -160,8 +160,8 @@
         <!-- Coding Topic -->
         <a href="?show=coding_topic" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
           <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-stack-line text-2xl text-indigo-400"></i>
+            <div class="w-14 h-14 bg-gradient-to-br from-sky-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="ri-stack-line text-2xl text-sky-400"></i>
             </div>
             <span class="text-sm font-semibold text-slate-200">Coding Topic</span>
             <span class="text-xs text-slate-500 mt-1">Algorithm</span>
@@ -171,7 +171,7 @@
         <!-- Company -->
         <a href="?show=coding_company" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
           <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
               <i class="ri-building-line text-2xl text-orange-400"></i>
             </div>
             <span class="text-sm font-semibold text-slate-200">Add Company</span>
@@ -195,8 +195,8 @@
       <div class="dark-card rounded-2xl p-8 hover-lift">
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-questionnaire-line text-2xl text-blue-400"></i>
+            <div class="w-12 h-12 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="ri-questionnaire-line text-2xl text-sky-400"></i>
             </div>
             <div>
               <h3 class="text-2xl font-bold text-slate-100 brand-font">Aptitude Problems</h3>
@@ -211,7 +211,7 @@
             <div class="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-200 border border-slate-700/50 group">
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-slate-200 truncate mb-2 group-hover:text-blue-400 transition-colors">
+                  <p class="text-sm font-semibold text-slate-200 truncate mb-2 group-hover:text-sky-400 transition-colors">
                     {{ problem.question_text|truncatechars:60 }}
                   </p>
                   <div class="flex items-center gap-2 flex-wrap">
@@ -221,7 +221,7 @@
                       {% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
                       {{ problem.difficulty }}
                     </span>
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
                       {{ problem.topic.name }}
                     </span>
                   </div>
@@ -235,8 +235,8 @@
           </div>
         {% else %}
           <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-questionnaire-line text-5xl text-blue-400/50"></i>
+            <div class="w-24 h-24 bg-gradient-to-br from-sky-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="ri-questionnaire-line text-5xl text-sky-400/50"></i>
             </div>
             <p class="text-slate-400 font-medium">No aptitude problems yet</p>
             <p class="text-sm text-slate-500 mt-2">Create your first aptitude problem</p>

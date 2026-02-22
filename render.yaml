@@ -6,23 +6,23 @@ services:
   #  PostgreSQL DB    #
   # ----------------- #
   - type: psql
-    name: MockMateDB
+    name: ElevoDB
     plan: free 
 
   # ----------------- #
   #  Django Web App   #
   # ----------------- #
   - type: web
-    name: mockmate-web
+    name: elevo-web
     plan: free
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn mockmate01.wsgi:application"
+    startCommand: "gunicorn elevo.wsgi:application"
     envVars:
       - key: DATABASE_URL
         fromService:
           type: psql
-          name: MockMateDB
+          name: ElevoDB
           property: connectionString
       - key: SECRET_KEY
         generateValue: true

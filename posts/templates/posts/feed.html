@@ -1,388 +1,245 @@
 {% extends "base.html" %}
-{% load static %}
 {% load humanize %}
-{% load crispy_forms_tags %}
 
-{% block title %}The Buzz - MockMate{% endblock %}
+{% block title %}Elevo Community{% endblock %}
 
 {% block content %}
-<div class="min-h-screen">
-  <div class="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-
-    <!-- Page Header -->
-    <div class="text-center mb-12">
-      <div class="flex items-center justify-center mb-6">
-        <div class="text-6xl mr-4 animate-bounce">🚀</div>
-        <h1 class="text-6xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
-          The Buzz
-        </h1>
-        <div class="text-6xl ml-4 animate-pulse">✨</div>
-      </div>
-      <p class="text-xl text-gray-300 font-medium">Where ideas collide and connections ignite</p>
-      <div class="flex justify-center space-x-2 mt-4">
-        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
-        <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping" style="animation-delay: 0.2s"></div>
-        <div class="w-2 h-2 bg-purple-600 rounded-full animate-ping" style="animation-delay: 0.4s"></div>
-      </div>
-    </div>
-
-    <!-- Auth Status Banner -->
-    {% if not user.is_authenticated %}
-      <div class="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-xl border border-orange-500/30 rounded-2xl p-6 mb-10 transform hover:scale-[1.02] transition-all duration-300">
-        <div class="flex items-center">
-          <div class="text-4xl mr-4">🎭</div>
+<section class="min-h-screen py-8 px-4">
+  <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-8 space-y-6">
+      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+        <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-bold text-xl text-orange-300 mb-1">Join The Buzz!</h3>
-            <p class="text-gray-300 text-base">
-              <a href="{% url 'login' %}" class="underline font-semibold text-orange-400 hover:text-orange-300 transition-colors">
-                Sign in
-              </a> to share your thoughts and connect with amazing people.
-            </p>
+            <h1 class="text-2xl font-bold text-slate-100">Elevo Social</h1>
+            <p class="text-sm text-slate-400">Share progress, ask questions, and learn from peers.</p>
           </div>
-        </div>
-      </div>
-    {% endif %}
-
-    <!-- Feed Posts -->
-    <div class="space-y-6">
-      {% for post in posts %}
-        <!-- Post Card with Glassmorphism -->
-        <div class="group cursor-pointer transform hover:scale-[1.01] transition-all duration-300" 
-             onclick="openPostModal('{{ post.id }}')">
-          <div class="{% if post.is_repost %}border-l-4 border-purple-500{% endif %} bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-500 shadow-xl hover:shadow-2xl">
-
-            <!-- Reposted Badge -->
-            {% if post.is_repost %}
-              <div class="flex items-center text-sm font-bold mb-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-4 py-2 w-fit shadow-lg">
-                <i class="ri-repeat-line mr-2 text-lg"></i>
-                <span>Reposted</span>
-                {% if post.reposted_by %}
-                  <span class="ml-1">by {{ post.reposted_by.get_full_name|default:post.reposted_by.username }}</span>
-                {% endif %}
-              </div>
-            {% endif %}
-
-            <!-- Author Section -->
-            <div class="flex items-center mb-5">
-              {% if post.author.profile.avatar %}
-                <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}"
-                     class="w-14 h-14 rounded-full object-cover mr-4 ring-2 ring-cyan-400/50 shadow-lg">
-              {% else %}
-                <div class="w-14 h-14 rounded-full mr-4 ring-2 ring-cyan-400/50 shadow-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                  {{ post.author.username|first|upper }}
-                </div>
-              {% endif %}
-
-              <div class="flex-1">
-                <h3 class="font-bold text-lg text-gray-100 mb-1 group-hover:text-cyan-400 transition-colors">
-                  {{ post.author.get_full_name|default:post.author.username }}
-                </h3>
-                <div class="flex items-center text-gray-400 text-sm">
-                  <i class="ri-time-line mr-1.5"></i>
-                  <span>{{ post.created_at|timesince }} ago</span>
-                </div>
-              </div>
-
-              <div class="text-2xl text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                <i class="ri-more-fill"></i>
-              </div>
-            </div>
-
-            <!-- Content Preview -->
-            <div class="text-gray-200 text-base mb-5 leading-relaxed">
-              {% if post.content|length > 200 %}
-                {{ post.content|slice:":200" }}...
-                <span class="text-cyan-400 font-semibold ml-1 hover:text-cyan-300 transition-colors">Read more</span>
-              {% else %}
-                {{ post.content }}
-              {% endif %}
-            </div>
-
-            <!-- Image Preview -->
-            {% if post.image %}
-              <div class="mb-5 rounded-xl overflow-hidden shadow-2xl border border-white/10">
-                <img src="{{ post.image.url }}" alt="Post Image" 
-                     class="w-full h-72 object-cover group-hover:scale-105 transition-transform duration-500">
-              </div>
-            {% endif %}
-
-            <!-- Engagement Stats -->
-            <div class="flex items-center justify-between pt-4 border-t border-white/10">
-              <div class="flex items-center space-x-6 text-gray-400">
-                <div class="flex items-center bg-white/5 backdrop-blur-sm rounded-full px-3 py-1.5 hover:bg-white/10 transition-colors">
-                  <i class="ri-heart-3-fill text-red-400 mr-2"></i>
-                  <span class="font-medium text-sm">{{ post.likes.count }}</span>
-                </div>
-                <div class="flex items-center bg-white/5 backdrop-blur-sm rounded-full px-3 py-1.5 hover:bg-white/10 transition-colors">
-                  <i class="ri-chat-3-fill text-blue-400 mr-2"></i>
-                  <span class="font-medium text-sm">{{ post.comments.count }}</span>
-                </div>
-              </div>
-
-              <div class="flex items-center text-cyan-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                <span class="text-sm">View Details</span>
-                <i class="ri-arrow-right-line ml-2"></i>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      {% empty %}
-        <div class="text-center py-20">
-          <div class="text-8xl mb-6 animate-bounce">🌟</div>
-          <h3 class="text-3xl font-bold text-gray-200 mb-4">The stage is set!</h3>
-          <p class="text-xl text-gray-400 mb-8">Be the first to share something incredible with the community.</p>
-          {% if user.is_authenticated %}
-            <button onclick="openCreateModal()" 
-                    class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-8 py-4 rounded-full font-bold text-lg shadow-2xl hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300">
-              <i class="ri-add-line mr-2"></i>
-              Create First Post
-            </button>
-          {% endif %}
-        </div>
-      {% endfor %}
-    </div>
-
-  </div>
-
-  <!-- Floating Create Button -->
-  {% if user.is_authenticated %}
-    <div class="fixed bottom-8 right-8 z-40">
-      <button onclick="openCreateModal()" 
-              class="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full shadow-2xl hover:shadow-cyan-500/50 transform hover:scale-110 hover:rotate-90 transition-all duration-300 flex items-center justify-center group">
-        <i class="ri-add-line text-3xl group-hover:rotate-180 transition-transform duration-300"></i>
-      </button>
-    </div>
-  {% endif %}
-</div>
-
-<!-- Create Post Modal -->
-<div id="create-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-  <div class="bg-gray-900/90 backdrop-blur-2xl border border-white/10 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 max-h-[90vh] flex flex-col">
-    
-    <!-- Modal Header -->
-    <div class="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 backdrop-blur-xl border-b border-white/10 p-6 flex-shrink-0">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <div class="text-3xl mr-3">✨</div>
-          <h2 class="text-2xl font-bold text-gray-100">Share Your Thoughts</h2>
-        </div>
-        <button onclick="closeCreateModal()" 
-                class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white">
-          <i class="ri-close-line text-2xl"></i>
-        </button>
-      </div>
-      <p class="mt-2 text-gray-400">What's buzzing in your mind today?</p>
-    </div>
-
-    <!-- Modal Content -->
-    <div class="p-6 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-500 scrollbar-track-gray-800">
-      <form method="post" enctype="multipart/form-data" action="{% url 'posts:feed' %}" id="create-post-form">
-        {% csrf_token %}
-        
-        <!-- User Info -->
-        <div class="flex items-center mb-6">
-          {% if user.profile.avatar %}
-            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}"
-                 class="w-12 h-12 rounded-full object-cover mr-4 ring-2 ring-cyan-400/50">
-          {% else %}
-            <div class="w-12 h-12 rounded-full mr-4 ring-2 ring-cyan-400/50 bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold">
-              {{ user.username|first|upper }}
-            </div>
-          {% endif %}
-          <div>
-            <h3 class="font-bold text-lg text-gray-100">{{ user.get_full_name|default:user.username }}</h3>
-            <p class="text-gray-400 text-sm">Sharing publicly</p>
-          </div>
-        </div>
-
-        <!-- Content Input -->
-        <div class="mb-6">
-          <textarea name="content" rows="5" required
-                    class="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 text-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 resize-none"
-                    placeholder="Share your thoughts, experiences, or ask questions..." 
-                    id="post-content"></textarea>
-          <div class="flex justify-between items-center mt-2 text-sm">
-            <span class="text-gray-500">Express yourself freely</span>
-            <span class="text-gray-500">
-              <span id="char-count">0</span>/500
+          {% if discover_mode %}
+            <span class="text-xs font-medium px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              Discover mode
             </span>
-          </div>
+          {% endif %}
         </div>
+      </div>
 
-        <!-- Image Upload -->
-        <div class="mb-6">
-          <label class="flex items-center justify-center w-full border-2 border-dashed border-cyan-500/30 rounded-2xl p-8 cursor-pointer hover:border-cyan-500/60 hover:bg-cyan-500/5 transition-all duration-300 group">
-            <div class="text-center">
-              <i class="ri-image-add-line text-5xl text-cyan-400 mb-3 group-hover:scale-110 transition-transform"></i>
-              <p class="text-cyan-400 font-medium">Add a photo to your post</p>
-              <p class="text-sm text-gray-500 mt-2">PNG, JPG up to 10MB</p>
+      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+        <form method="post" enctype="multipart/form-data" action="{% url 'posts:feed' %}" class="space-y-4">
+          {% csrf_token %}
+          <textarea name="content" rows="3" required class="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none" placeholder="Share what you solved today, what you learned, or what you need help with..."></textarea>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20 bg-white/5 text-slate-300 cursor-pointer hover:bg-white/10 transition">
+              <i class="ri-image-line"></i>
+              <span class="text-sm">Attach image</span>
+              <input type="file" name="image" accept="image/*" class="hidden">
+            </label>
+            <button type="submit" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold hover:opacity-90">
+              Post
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="space-y-4">
+        {% for item in activity_items %}
+          <article class="rounded-2xl border border-white/15 bg-slate-900/65 backdrop-blur-xl p-5">
+            {% if item.type == 'repost' %}
+              <div class="mb-3 flex items-center gap-2 text-xs text-emerald-300">
+                <i class="ri-repeat-line"></i>
+                <a href="{% url 'users:public_profile' item.actor.username %}" class="font-semibold hover:underline">{{ item.actor.get_full_name|default:item.actor.username }}</a>
+                <span>reposted</span>
+                <span class="text-slate-500">{{ item.timestamp|naturaltime }}</span>
+              </div>
+              {% if item.repost.comment %}
+                <div class="mb-4 text-sm text-slate-300 bg-white/5 border border-white/10 rounded-lg p-3">{{ item.repost.comment }}</div>
+              {% endif %}
+            {% endif %}
+
+            <div class="flex items-start gap-3">
+              <a href="{% url 'users:public_profile' item.post.author.username %}">
+                {% if item.post.author.profile.avatar %}
+                  <img src="{{ item.post.author.profile.avatar.url }}" alt="{{ item.post.author.username }}" class="w-11 h-11 rounded-full object-cover border border-white/20">
+                {% else %}
+                  <div class="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white font-bold flex items-center justify-center">
+                    {{ item.post.author.username|first|upper }}
+                  </div>
+                {% endif %}
+              </a>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <a href="{% url 'users:public_profile' item.post.author.username %}" class="font-semibold text-slate-100 hover:text-cyan-300">{{ item.post.author.get_full_name|default:item.post.author.username }}</a>
+                    <span class="ml-2 text-xs text-slate-500">@{{ item.post.author.username }}</span>
+                  </div>
+                  <a href="{% url 'posts:post_detail' item.post.id %}" class="text-xs text-slate-500 hover:text-slate-300">
+                    {% if item.type == 'repost' %}{{ item.timestamp|naturaltime }}{% else %}{{ item.post.created_at|naturaltime }}{% endif %}
+                  </a>
+                </div>
+
+                <div class="mt-2 text-slate-200 whitespace-pre-line">{{ item.post.content }}</div>
+                {% if item.post.image %}
+                  <img src="{{ item.post.image.url }}" alt="Post image" class="mt-3 rounded-xl border border-white/10 max-h-[420px] w-full object-cover">
+                {% endif %}
+
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                  <button type="button" onclick="toggleLike('{{ item.post.id }}', this)" data-liked="{% if item.post.id in liked_post_ids %}1{% else %}0{% endif %}" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
+                    <i class="ri-heart-3-{% if item.post.id in liked_post_ids %}fill text-red-400{% else %}line{% endif %}"></i>
+                    <span class="ml-1 like-count">{{ item.post.like_count }}</span>
+                  </button>
+
+                  <button type="button" onclick="toggleCommentBox('{{ item.post.id }}')" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
+                    <i class="ri-chat-3-line"></i>
+                    <span class="ml-1">{{ item.post.comment_count }}</span>
+                  </button>
+
+                  {% if item.post.author != user %}
+                    <form method="post" action="{% url 'posts:repost' item.post.id %}" class="inline-flex items-center gap-2">
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="{{ request.path }}">
+                      <input type="text" name="comment" maxlength="280" placeholder="Add note (optional)" class="hidden md:inline-block px-2 py-1 text-xs rounded border border-white/20 bg-white/5 text-slate-300 placeholder-slate-500">
+                      <button type="submit" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
+                        <i class="ri-repeat-line"></i>
+                        <span class="ml-1">{{ item.post.repost_count }}</span>
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  <button type="button" onclick="sharePost('{{ item.post.id }}', this)" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
+                    <i class="ri-share-forward-line"></i>
+                    <span class="ml-1 share-count">{{ item.post.share_count }}</span>
+                  </button>
+                </div>
+
+                <div id="comment-box-{{ item.post.id }}" class="hidden mt-4">
+                  <form method="post" action="{% url 'posts:add_comment' item.post.id %}" class="space-y-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <textarea name="content" rows="2" required class="w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Write a comment..."></textarea>
+                    <div class="text-right">
+                      <button type="submit" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-white text-sm">Comment</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             </div>
-            <input type="file" name="image" accept="image/*" class="hidden" id="image-upload">
-          </label>
-          <div id="image-preview" class="hidden mt-4 rounded-xl overflow-hidden border border-white/10">
-            <img id="preview-img" class="w-full h-64 object-cover">
+          </article>
+        {% empty %}
+          <div class="rounded-2xl border border-dashed border-white/20 bg-slate-900/65 p-10 text-center text-slate-400">
+            No posts yet. Start by sharing your first progress update.
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <aside class="lg:col-span-4 space-y-5">
+      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+        <h3 class="text-sm font-semibold text-slate-200">Network</h3>
+        <div class="mt-3 grid grid-cols-2 gap-3 text-center">
+          <div class="rounded-lg bg-white/5 border border-white/10 p-3">
+            <div class="text-lg font-bold text-cyan-300">{{ following_count }}</div>
+            <div class="text-xs text-slate-400">Following</div>
+          </div>
+          <div class="rounded-lg bg-white/5 border border-white/10 p-3">
+            <div class="text-lg font-bold text-emerald-300">{{ suggested_users|length }}</div>
+            <div class="text-xs text-slate-400">Suggestions</div>
           </div>
         </div>
+      </div>
 
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-between pt-4 border-t border-white/10">
-          <button type="button" onclick="closeCreateModal()" 
-                  class="px-6 py-3 text-gray-400 hover:text-gray-200 font-medium transition-colors">
-            Cancel
-          </button>
-          <button type="submit"
-                  class="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-full shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300">
-            <i class="ri-send-plane-fill mr-2"></i>
-            Share Post
-          </button>
+      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+        <h3 class="text-sm font-semibold text-slate-200">People to Follow</h3>
+        <div class="mt-4 space-y-3">
+          {% for u in suggested_users %}
+            <div class="flex items-center justify-between gap-2">
+              <a href="{% url 'users:public_profile' u.username %}" class="flex items-center gap-2 min-w-0">
+                {% if u.profile.avatar %}
+                  <img src="{{ u.profile.avatar.url }}" alt="{{ u.username }}" class="w-9 h-9 rounded-full object-cover border border-white/20">
+                {% else %}
+                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-sm font-bold flex items-center justify-center">{{ u.username|first|upper }}</div>
+                {% endif %}
+                <div class="min-w-0">
+                  <div class="text-sm text-slate-200 truncate">{{ u.get_full_name|default:u.username }}</div>
+                  <div class="text-xs text-slate-500 truncate">@{{ u.username }}</div>
+                </div>
+              </a>
+              <button type="button" onclick="toggleFollow('{{ u.username }}', this)" class="px-3 py-1 rounded-full text-xs border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/15">
+                Follow
+              </button>
+            </div>
+          {% empty %}
+            <p class="text-sm text-slate-500">No suggestions right now.</p>
+          {% endfor %}
         </div>
-
-      </form>
-    </div>
-
+      </div>
+    </aside>
   </div>
-</div>
-
-<!-- Post Detail Modal -->
-<div id="post-modal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-  <div class="bg-gray-900/90 backdrop-blur-2xl border border-white/10 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh]">
-    <div class="flex justify-between items-center p-6 border-b border-white/10 bg-gradient-to-r from-indigo-600/20 to-purple-600/20">
-      <h2 class="text-2xl font-bold text-gray-100">Post Details</h2>
-      <button onclick="closePostModal()" 
-              class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-300 hover:text-white">
-        <i class="ri-close-line text-2xl"></i>
-      </button>
-    </div>
-    <div id="post-modal-content" class="overflow-y-auto max-h-[80vh] p-6 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-800">
-      <!-- AJAX content will be loaded here -->
-    </div>
-  </div>
-</div>
-
-<style>
-  /* Custom scrollbar */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-  }
-  .scrollbar-track-gray-800::-webkit-scrollbar-track {
-    background: rgba(31, 41, 55, 0.5);
-    border-radius: 4px;
-  }
-  .scrollbar-thumb-cyan-500::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #06b6d4, #3b82f6);
-    border-radius: 4px;
-  }
-  .scrollbar-thumb-cyan-500::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #0891b2, #2563eb);
-  }
-  .scrollbar-thumb-purple-500::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #a855f7, #ec4899);
-    border-radius: 4px;
-  }
-
-  /* Modal animations */
-  #create-modal.show .bg-gray-900\/90,
-  #post-modal.show .bg-gray-900\/90 {
-    transform: scale(1) !important;
-  }
-</style>
+</section>
 
 <script>
-  // Character counter
-  document.addEventListener('DOMContentLoaded', function() {
-    const textarea = document.getElementById('post-content');
-    const charCount = document.getElementById('char-count');
-    
-    if (textarea && charCount) {
-      textarea.addEventListener('input', function() {
-        charCount.textContent = this.value.length;
-        if (this.value.length > 500) {
-          charCount.parentElement.classList.add('text-red-400');
-        } else {
-          charCount.parentElement.classList.remove('text-red-400');
-        }
-      });
-    }
-
-    // Image preview
-    const imageUpload = document.getElementById('image-upload');
-    const imagePreview = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
-    
-    if (imageUpload) {
-      imageUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            imagePreview.classList.remove('hidden');
-          };
-          reader.readAsDataURL(file);
-        } else {
-          imagePreview.classList.add('hidden');
-        }
-      });
-    }
-  });
-
-  function openCreateModal() {
-    const modal = document.getElementById('create-modal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex', 'show');
-    document.body.style.overflow = 'hidden';
+  function getCsrfToken() {
+    const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    return tokenInput ? tokenInput.value : '';
   }
 
-  function closeCreateModal() {
-    const modal = document.getElementById('create-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex', 'show');
-    document.body.style.overflow = 'auto';
+  function toggleCommentBox(postId) {
+    const box = document.getElementById(`comment-box-${postId}`);
+    if (box) box.classList.toggle('hidden');
   }
 
-  function openPostModal(postId) {
-    const modal = document.getElementById('post-modal');
-    const content = document.getElementById('post-modal-content');
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex', 'show');
-    document.body.style.overflow = 'hidden';
-    
-    // Load post details via AJAX
-    fetch(`/posts/modal/${postId}/`)
-      .then(response => response.text())
-      .then(html => {
-        content.innerHTML = html;
-      })
-      .catch(error => {
-        content.innerHTML = '<div class="text-center text-red-400">Error loading post details.</div>';
-      });
+  async function toggleLike(postId, button) {
+    const response = await fetch(`/posts/like/${postId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+    const data = await response.json();
+    if (!data.success) return;
+    const icon = button.querySelector('i');
+    const count = button.querySelector('.like-count');
+    count.textContent = data.like_count;
+    if (data.liked) {
+      icon.className = 'ri-heart-3-fill text-red-400';
+    } else {
+      icon.className = 'ri-heart-3-line';
+    }
   }
 
-  function closePostModal() {
-    const modal = document.getElementById('post-modal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex', 'show');
-    document.body.style.overflow = 'auto';
+  async function sharePost(postId, button) {
+    const response = await fetch(`/posts/share/${postId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+    const data = await response.json();
+    if (!data.success) return;
+    const count = button.querySelector('.share-count');
+    count.textContent = data.share_count;
+    if (navigator.share) {
+      navigator.share({ title: 'Elevo Post', url: data.share_url }).catch(() => {});
+      return;
+    }
+    await navigator.clipboard.writeText(data.share_url);
   }
 
-  // Close modals on escape key
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeCreateModal();
-      closePostModal();
-    }
-  });
-
-  // Close modals on background click
-  document.addEventListener('click', function(e) {
-    if (e.target.id === 'create-modal') {
-      closeCreateModal();
-    }
-    if (e.target.id === 'post-modal') {
-      closePostModal();
-    }
-  });
+  async function toggleFollow(username, button) {
+    const response = await fetch(`/posts/follow/${username}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+    const data = await response.json();
+    if (!data.success) return;
+    button.textContent = data.following ? 'Following' : 'Follow';
+  }
 </script>
 {% endblock %}

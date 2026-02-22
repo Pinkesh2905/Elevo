@@ -1,14 +1,16 @@
 import csv
+import os
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from core.models import Topic, Lesson, Quiz, Question, Option, Article, CodeSnippet
 from django.utils.text import slugify
 
 class Command(BaseCommand):
-    help = 'Import full MockMate data from CSV'
+    help = 'Import full Elevo data from CSV'
 
     def handle(self, *args, **kwargs):
-        with open('mockmate_content.csv', newline='', encoding='utf-8') as file:
+        csv_file = 'elevo_content.csv' if os.path.exists('elevo_content.csv') else 'elevo_content.csv'
+        with open(csv_file, newline='', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 topic, _ = Topic.objects.get_or_create(

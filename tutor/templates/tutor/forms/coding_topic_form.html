@@ -4,11 +4,11 @@
   <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
-        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mr-4">
-          <i class="ri-stack-line text-3xl text-indigo-400"></i>
+        <div class="w-14 h-14 bg-gradient-to-br from-sky-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mr-4">
+          <i class="ri-stack-line text-3xl text-sky-400"></i>
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 brand-font">
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 brand-font">
             {% if edit_coding_topic_id %}Edit{% else %}Create{% endif %} Coding Topic
           </h2>
           <p class="text-sm text-slate-400 mt-1">Algorithm and data structure topics for coding problems</p>
@@ -100,7 +100,7 @@
 
       <!-- Buttons -->
       <div class="flex items-center gap-3 pt-6">
-        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-sky-500 to-teal-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
           <i class="ri-{% if edit_coding_topic_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
           {% if edit_coding_topic_id %}Update{% else %}Create{% endif %} Topic
         </button>
@@ -115,8 +115,8 @@
   {% if coding_topics %}
   <div class="dark-card rounded-2xl p-8 hover-lift">
     <div class="flex items-center mb-6">
-      <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mr-4">
-        <i class="ri-folder-3-line text-2xl text-purple-400"></i>
+      <div class="w-12 h-12 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+        <i class="ri-folder-3-line text-2xl text-teal-400"></i>
       </div>
       <div>
         <h3 class="text-2xl font-bold text-slate-100 brand-font">Existing Coding Topics</h3>
@@ -130,13 +130,13 @@
         <div class="flex items-start justify-between">
           <div class="flex-1 min-w-0">
             <div class="flex items-center mb-2">
-              <div class="w-8 h-8 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-lg flex items-center justify-center mr-3">
-                <i class="ri-hashtag text-indigo-400"></i>
+              <div class="w-8 h-8 bg-gradient-to-br from-sky-500/20 to-teal-500/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="ri-hashtag text-sky-400"></i>
               </div>
-              <p class="font-semibold text-slate-100 text-lg group-hover:text-indigo-400 transition-colors">{{ topic.name }}</p>
+              <p class="font-semibold text-slate-100 text-lg group-hover:text-sky-400 transition-colors">{{ topic.name }}</p>
             </div>
             <div class="flex items-center gap-3 ml-11">
-              <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
                 <i class="ri-code-s-slash-line mr-1"></i>
                 {{ topic.problem_count }} problem{{ topic.problem_count|pluralize }}
               </span>

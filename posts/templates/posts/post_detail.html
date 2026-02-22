@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load crispy_forms_tags %}
 
-{% block title %}{{ post.author.get_full_name|default:post.author.username }}'s Post - MockMate{% endblock %}
+{% block title %}{{ post.author.get_full_name|default:post.author.username }}'s Post - Elevo{% endblock %}
 
 {% block content %}
 <div class="min-h-screen">
@@ -12,7 +12,7 @@
     <!-- Back Navigation -->
     <div class="mb-8">
       <button onclick="history.back()" 
-              class="flex items-center text-cyan-400 hover:text-cyan-300 font-medium transition-colors group">
+              class="flex items-center text-emerald-400 hover:text-emerald-300 font-medium transition-colors group">
         <i class="ri-arrow-left-line text-xl mr-2 group-hover:-translate-x-1 transition-transform"></i>
         <span>Back to Feed</span>
       </button>
@@ -22,21 +22,21 @@
     <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
       
       <!-- Post Header -->
-      <div class="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 backdrop-blur-xl p-8 border-b border-white/10">
+      <div class="bg-gradient-to-r from-emerald-600/20 to-teal-600/20 backdrop-blur-xl p-8 border-b border-white/10">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             {% if post.author.profile.avatar %}
               <img src="{{ post.author.profile.avatar.url }}" 
-                   class="w-20 h-20 rounded-full object-cover mr-6 ring-4 ring-cyan-400/50 shadow-2xl" 
+                   class="w-20 h-20 rounded-full object-cover mr-6 ring-4 ring-emerald-400/50 shadow-2xl" 
                    alt="{{ post.author.username }}"/>
             {% else %}
-              <div class="w-20 h-20 rounded-full mr-6 ring-4 ring-cyan-400/50 shadow-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-2xl">
+              <div class="w-20 h-20 rounded-full mr-6 ring-4 ring-emerald-400/50 shadow-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-2xl">
                 {{ post.author.username|first|upper }}
               </div>
             {% endif %}
             <div>
               <a href="{% url 'users:public_profile' post.author.username %}" 
-                 class="text-2xl font-bold text-gray-100 hover:text-cyan-400 transition-colors">
+                 class="text-2xl font-bold text-gray-100 hover:text-emerald-400 transition-colors">
                 {{ post.author.get_full_name|default:post.author.username }}
               </a>
               <div class="flex items-center text-gray-400 mt-2">
@@ -52,7 +52,7 @@
           {% if post.author == request.user %}
             <div class="flex items-center space-x-2">
               <a href="{% url 'posts:edit_post' post.id %}" 
-                 class="p-3 text-blue-400 hover:bg-blue-500/20 rounded-full transition-all duration-200 group">
+                 class="p-3 text-sky-400 hover:bg-sky-500/20 rounded-full transition-all duration-200 group">
                 <i class="ri-edit-2-line text-xl group-hover:scale-110 transition-transform"></i>
               </a>
               <form method="post" action="{% url 'posts:delete_post' post.id %}" 
@@ -69,7 +69,7 @@
 
         <!-- Repost Badge -->
         {% if post.is_repost %}
-          <div class="mt-4 flex items-center bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full px-4 py-2 w-fit shadow-lg">
+          <div class="mt-4 flex items-center bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-full px-4 py-2 w-fit shadow-lg">
             <i class="ri-repeat-line mr-2 text-lg"></i>
             <span class="font-bold">Reposted</span>
             {% if post.reposted_by %}
@@ -94,7 +94,7 @@
         {% endif %}
 
         <!-- Engagement Stats -->
-        <div class="flex items-center justify-between p-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 backdrop-blur-sm border border-white/10 rounded-2xl mb-6">
+        <div class="flex items-center justify-between p-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-sm border border-white/10 rounded-2xl mb-6">
           <div class="flex items-center space-x-8">
             <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg hover:bg-white/20 transition-colors">
               <i class="ri-heart-3-fill text-red-400 mr-3 text-2xl"></i>
@@ -102,7 +102,7 @@
               <span class="text-gray-400 ml-2">likes</span>
             </div>
             <div class="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg hover:bg-white/20 transition-colors">
-              <i class="ri-chat-3-fill text-blue-400 mr-3 text-2xl"></i>
+              <i class="ri-chat-3-fill text-sky-400 mr-3 text-2xl"></i>
               <span class="font-bold text-gray-200 text-lg">{{ post.comments.count }}</span>
               <span class="text-gray-400 ml-2">comments</span>
             </div>
@@ -115,14 +115,14 @@
           <!-- Like Button -->
           <button type="button" onclick="toggleLike('{{ post.id }}')" 
                   id="like-btn"
-                  class="flex items-center px-8 py-4 rounded-2xl hover:bg-red-500/20 text-gray-300 hover:text-red-400 transition-all duration-300 group {% if post.is_liked_by user %}bg-red-500/20 text-red-400{% endif %}">
-            <i class="ri-heart-3-{% if post.is_liked_by user %}fill{% else %}line{% endif %} mr-3 text-2xl group-hover:scale-125 transition-transform" id="like-icon"></i>
-            <span class="font-medium text-lg" id="like-text">{% if post.is_liked_by user %}Liked{% else %}Like{% endif %}</span>
+                  class="flex items-center px-8 py-4 rounded-2xl hover:bg-red-500/20 text-gray-300 hover:text-red-400 transition-all duration-300 group {% if is_liked %}bg-red-500/20 text-red-400{% endif %}">
+            <i class="ri-heart-3-{% if is_liked %}fill{% else %}line{% endif %} mr-3 text-2xl group-hover:scale-125 transition-transform" id="like-icon"></i>
+            <span class="font-medium text-lg" id="like-text">{% if is_liked %}Liked{% else %}Like{% endif %}</span>
           </button>
 
           <!-- Comment Button -->
           <button type="button" onclick="focusCommentInput()" 
-                  class="flex items-center px-8 py-4 rounded-2xl hover:bg-blue-500/20 text-gray-300 hover:text-blue-400 transition-all duration-300 group">
+                  class="flex items-center px-8 py-4 rounded-2xl hover:bg-sky-500/20 text-gray-300 hover:text-sky-400 transition-all duration-300 group">
             <i class="ri-chat-3-line mr-3 text-2xl group-hover:scale-125 transition-transform"></i>
             <span class="font-medium text-lg">Comment</span>
           </button>
@@ -131,7 +131,7 @@
           <form method="post" action="{% url 'posts:repost' post.id %}" class="inline">
             {% csrf_token %}
             <button type="submit" 
-                    class="flex items-center px-8 py-4 rounded-2xl hover:bg-purple-500/20 text-gray-300 hover:text-purple-400 transition-all duration-300 group">
+                    class="flex items-center px-8 py-4 rounded-2xl hover:bg-teal-500/20 text-gray-300 hover:text-teal-400 transition-all duration-300 group">
               <i class="ri-repeat-line mr-3 text-2xl group-hover:scale-125 transition-transform"></i>
               <span class="font-medium text-lg">Repost</span>
             </button>
@@ -150,7 +150,7 @@
         <div class="space-y-8">
           <div class="flex items-center justify-between">
             <h3 class="text-2xl font-bold text-gray-100 flex items-center">
-              <i class="ri-chat-3-fill text-blue-400 mr-3"></i>
+              <i class="ri-chat-3-fill text-sky-400 mr-3"></i>
               Comments
             </h3>
             <span class="text-sm text-gray-400 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 font-medium border border-white/10">
@@ -164,9 +164,9 @@
               <div class="flex space-x-6">
                 {% if user.profile.avatar %}
                   <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}"
-                       class="w-16 h-16 rounded-full object-cover ring-4 ring-cyan-400/50 shadow-lg">
+                       class="w-16 h-16 rounded-full object-cover ring-4 ring-emerald-400/50 shadow-lg">
                 {% else %}
-                  <div class="w-16 h-16 rounded-full ring-4 ring-cyan-400/50 shadow-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                  <div class="w-16 h-16 rounded-full ring-4 ring-emerald-400/50 shadow-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xl">
                     {{ user.username|first|upper }}
                   </div>
                 {% endif %}
@@ -176,14 +176,14 @@
                     {% csrf_token %}
                     <textarea name="content" rows="4" required
                               id="comment-input"
-                              class="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 text-gray-200 text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 resize-none"
+                              class="w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 text-gray-200 text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 resize-none"
                               placeholder="Share your thoughts on this post..."></textarea>
                     <div class="flex justify-between items-center mt-4">
                       <div class="text-sm text-gray-500">
                         <span id="char-count">0</span>/500 characters
                       </div>
                       <button type="submit"
-                              class="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300">
+                              class="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-emerald-500/45 transform hover:scale-105 transition-all duration-300">
                         <i class="ri-send-plane-fill mr-2"></i>
                         Post Comment
                       </button>
@@ -193,12 +193,12 @@
               </div>
             </div>
           {% else %}
-            <div class="text-center py-16 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 backdrop-blur-sm border border-white/10 rounded-3xl">
+            <div class="text-center py-16 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-sm border border-white/10 rounded-3xl">
               <div class="text-6xl mb-6">🔒</div>
               <h4 class="text-2xl font-bold text-gray-200 mb-4">Join the conversation!</h4>
               <p class="text-gray-400 text-lg mb-8">Sign in to share your thoughts and connect with the community.</p>
               <a href="{% url 'login' %}" 
-                 class="inline-block px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300">
+                 class="inline-block px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-emerald-500/45 transform hover:scale-105 transition-all duration-300">
                 <i class="ri-user-line mr-2"></i>
                 Sign In to Comment
               </a>
@@ -214,7 +214,7 @@
                     <img src="{{ comment.author.profile.avatar.url }}" 
                          class="w-12 h-12 rounded-full object-cover ring-2 ring-white/20 shadow-lg" />
                   {% else %}
-                    <div class="w-12 h-12 rounded-full ring-2 ring-white/20 shadow-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                    <div class="w-12 h-12 rounded-full ring-2 ring-white/20 shadow-lg bg-gradient-to-br from-sky-500 to-teal-600 flex items-center justify-center text-white font-bold">
                       {{ comment.author.username|first|upper }}
                     </div>
                   {% endif %}
@@ -222,7 +222,7 @@
                   <div class="flex-1">
                     <div class="flex items-center space-x-3 mb-3">
                       <a href="{% url 'users:public_profile' comment.author.username %}" 
-                         class="font-bold text-gray-200 hover:text-cyan-400 transition-colors">
+                         class="font-bold text-gray-200 hover:text-emerald-400 transition-colors">
                         {{ comment.author.get_full_name|default:comment.author.username }}
                       </a>
                       <span class="text-sm text-gray-500 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
@@ -380,7 +380,7 @@
   function sharePost() {
     if (navigator.share) {
       navigator.share({
-        title: 'Check out this post on MockMate',
+        title: 'Check out this post on Elevo',
         text: '{{ post.content|truncatewords:20|escapejs }}',
         url: window.location.href
       }).catch(err => console.log('Error sharing:', err));

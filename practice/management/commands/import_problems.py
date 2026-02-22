@@ -68,7 +68,7 @@ class Command(BaseCommand):
             Problem.objects.all().delete()
             Company.objects.all().delete()
             Topic.objects.all().delete()
-            self.stdout.write(self.style.SUCCESS('✓ Data cleared'))
+            self.stdout.write(self.style.SUCCESS('Data cleared'))
 
         # Import in order of dependencies
         self.import_topics(data_dir)
@@ -78,14 +78,14 @@ class Command(BaseCommand):
         self.import_code_templates(data_dir)
         self.import_editorials(data_dir)
  
-        self.stdout.write(self.style.SUCCESS('\n🎉 Import completed successfully!'))
+        self.stdout.write(self.style.SUCCESS('\nImport completed successfully!'))
 
     def import_topics(self, data_dir):
         """Import topics from topics.csv"""
         csv_path = os.path.join(data_dir, 'topics.csv')
         
         if not os.path.exists(csv_path):
-            self.stdout.write(self.style.WARNING(f'⚠ Skipping topics: {csv_path} not found'))
+            self.stdout.write(self.style.WARNING(f'Skipping topics: {csv_path} not found'))
             return
 
         with open(csv_path, 'r', encoding='utf-8') as file:
@@ -102,14 +102,14 @@ class Command(BaseCommand):
                 )
                 count += 1
 
-        self.stdout.write(self.style.SUCCESS(f'✓ Imported {count} topics'))
+        self.stdout.write(self.style.SUCCESS(f'Imported {count} topics'))
 
     def import_companies(self, data_dir):
         """Import companies from companies.csv"""
         csv_path = os.path.join(data_dir, 'companies.csv')
         
         if not os.path.exists(csv_path):
-            self.stdout.write(self.style.WARNING(f'⚠ Skipping companies: {csv_path} not found'))
+            self.stdout.write(self.style.WARNING(f'Skipping companies: {csv_path} not found'))
             return
 
         with open(csv_path, 'r', encoding='utf-8') as file:
@@ -126,7 +126,7 @@ class Command(BaseCommand):
                 )
                 count += 1
 
-        self.stdout.write(self.style.SUCCESS(f'✓ Imported {count} companies'))
+        self.stdout.write(self.style.SUCCESS(f'Imported {count} companies'))
 
     def import_problems(self, data_dir, user):
         """Import problems from problems.csv"""
@@ -175,14 +175,14 @@ class Command(BaseCommand):
                 action = 'Created' if created else 'Updated'
                 self.stdout.write(f'  {action}: Problem #{problem.problem_number} - {problem.title}')
 
-        self.stdout.write(self.style.SUCCESS(f'✓ Imported {count} problems'))
+        self.stdout.write(self.style.SUCCESS(f'Imported {count} problems'))
 
     def import_test_cases(self, data_dir):
         """Import test cases from test_cases.csv"""
         csv_path = os.path.join(data_dir, 'test_cases.csv')
         
         if not os.path.exists(csv_path):
-            self.stdout.write(self.style.WARNING(f'⚠ Skipping test cases: {csv_path} not found'))
+            self.stdout.write(self.style.WARNING(f'Skipping test cases: {csv_path} not found'))
             return
 
         with open(csv_path, 'r', encoding='utf-8') as file:
@@ -207,14 +207,14 @@ class Command(BaseCommand):
                         self.style.WARNING(f'  Problem #{row["problem_number"]} not found for test case')
                     )
 
-        self.stdout.write(self.style.SUCCESS(f'✓ Imported {count} test cases'))
+        self.stdout.write(self.style.SUCCESS(f'Imported {count} test cases'))
 
     def import_code_templates(self, data_dir):
         """Import code templates from code_templates.csv"""
         csv_path = os.path.join(data_dir, 'code_templates.csv')
         
         if not os.path.exists(csv_path):
-            self.stdout.write(self.style.WARNING(f'⚠ Skipping code templates: {csv_path} not found'))
+            self.stdout.write(self.style.WARNING(f'Skipping code templates: {csv_path} not found'))
             return
 
         with open(csv_path, 'r', encoding='utf-8') as file:
@@ -239,14 +239,14 @@ class Command(BaseCommand):
                         self.style.WARNING(f'  Problem #{row["problem_number"]} not found for template')
                     )
 
-        self.stdout.write(self.style.SUCCESS(f'✓ Imported {count} code templates'))
+        self.stdout.write(self.style.SUCCESS(f'Imported {count} code templates'))
 
     def import_editorials(self, data_dir):
         """Import editorials from editorials.csv"""
         csv_path = os.path.join(data_dir, 'editorials.csv')
         
         if not os.path.exists(csv_path):
-            self.stdout.write(self.style.WARNING(f'⚠ Skipping editorials: {csv_path} not found'))
+            self.stdout.write(self.style.WARNING(f'Skipping editorials: {csv_path} not found'))
             return
 
         with open(csv_path, 'r', encoding='utf-8') as file:
@@ -272,4 +272,4 @@ class Command(BaseCommand):
                         self.style.WARNING(f'  Problem #{row["problem_number"]} not found for editorial')
                     )
 
-        self.stdout.write(self.style.SUCCESS(f'✓ Imported {count} editorials'))
+        self.stdout.write(self.style.SUCCESS(f'Imported {count} editorials'))

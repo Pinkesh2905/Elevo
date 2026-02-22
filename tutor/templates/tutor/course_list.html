@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}My Courses | MockMate{% endblock %}
+{% block title %}My Courses | Elevo{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -55,7 +55,7 @@
                   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                     {% if course.status == 'PUBLISHED' %}bg-green-100 text-green-800
                     {% elif course.status == 'PENDING_APPROVAL' %}bg-yellow-100 text-yellow-800
-                    {% elif course.status == 'DRAFT' %}bg-blue-100 text-blue-800
+                    {% elif course.status == 'DRAFT' %}bg-sky-100 text-sky-800
                     {% elif course.status == 'ARCHIVED' %}bg-gray-100 text-gray-800
                     {% endif %}">
                     {{ course.get_status_display }}
@@ -65,7 +65,7 @@
                   {{ course.created_at|date:"M d, Y" }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <a href="{% url 'courses:course_edit' course.slug %}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
+                  <a href="{% url 'courses:course_edit' course.slug %}" class="text-sky-600 hover:text-sky-900 mr-4">Edit</a>
                   <!-- Add delete functionality later if needed -->
                 </td>
               </tr>

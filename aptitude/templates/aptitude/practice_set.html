@@ -20,7 +20,7 @@
                     </div>
                 </div>
                 <h1 class="text-4xl font-black text-white mb-4">
-                    <span class="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+                    <span class="bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">
                         {{ practice_set.title }}
                     </span>
                 </h1>
@@ -52,7 +52,7 @@
             <div class="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl hover:bg-white/15 transition-all duration-300">
                 <!-- Question Header -->
                 <div class="flex items-start mb-8">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl mr-6">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-xl mr-6">
                         <span class="text-white font-black text-xl">{{ forloop.counter }}</span>
                     </div>
                     <div class="flex-1">
@@ -73,7 +73,7 @@
                         <input type="radio" name="question_{{ question.id }}" value="A" class="hidden peer">
                         <div class="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400/50 transition-all duration-300 hover:-translate-y-0.5">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                                <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-500 rounded-xl flex items-center justify-center shadow-lg mr-4">
                                     <span class="text-white font-bold">A</span>
                                 </div>
                                 <span class="text-white text-lg">{{ question.option_a }}</span>
@@ -92,7 +92,7 @@
                         <input type="radio" name="question_{{ question.id }}" value="B" class="hidden peer">
                         <div class="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400/50 transition-all duration-300 hover:-translate-y-0.5">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-violet-500 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                                <div class="w-10 h-10 bg-gradient-to-br from-teal-400 to-violet-500 rounded-xl flex items-center justify-center shadow-lg mr-4">
                                     <span class="text-white font-bold">B</span>
                                 </div>
                                 <span class="text-white text-lg">{{ question.option_b }}</span>
@@ -111,7 +111,7 @@
                         <input type="radio" name="question_{{ question.id }}" value="C" class="hidden peer">
                         <div class="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-400/50 transition-all duration-300 hover:-translate-y-0.5">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg mr-4">
+                                <div class="w-10 h-10 bg-gradient-to-br from-rose-400 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg mr-4">
                                     <span class="text-white font-bold">C</span>
                                 </div>
                                 <span class="text-white text-lg">{{ question.option_c }}</span>

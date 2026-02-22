@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Edit Post - MockMate{% endblock %}
+{% block title %}Edit Post - Elevo{% endblock %}
 
 {% block content %}
 <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -10,7 +10,7 @@
     <!-- Back Navigation -->
     <div class="mb-8">
       <a href="javascript:history.back()" 
-         class="flex items-center text-cyan-400 hover:text-cyan-300 font-medium transition-colors group">
+         class="flex items-center text-emerald-400 hover:text-emerald-300 font-medium transition-colors group">
         <i class="ri-arrow-left-line text-xl mr-2 group-hover:-translate-x-1 transition-transform"></i>
         <span>Back</span>
       </a>
@@ -20,13 +20,13 @@
     <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
       
       <!-- Form Header -->
-      <div class="bg-gradient-to-r from-cyan-600/20 to-blue-600/20 p-6 sm:p-8 border-b border-white/10">
+      <div class="bg-gradient-to-r from-emerald-600/20 to-teal-600/20 p-6 sm:p-8 border-b border-white/10">
         <div class="flex items-center">
           {% if user.profile.avatar %}
             <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}"
-                 class="w-14 h-14 rounded-full object-cover mr-5 ring-2 ring-cyan-400/50">
+                 class="w-14 h-14 rounded-full object-cover mr-5 ring-2 ring-emerald-400/50">
           {% else %}
-            <div class="w-14 h-14 rounded-full mr-5 ring-2 ring-cyan-400/50 bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+            <div class="w-14 h-14 rounded-full mr-5 ring-2 ring-emerald-400/50 bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xl">
               {{ user.username|first|upper }}
             </div>
           {% endif %}
@@ -52,7 +52,7 @@
                       id="{{ form.content.id_for_label }}"
                       rows="6" 
                       required
-                      class="w-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-300 resize-none"
+                      class="w-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300 resize-none"
                       placeholder="What's on your mind?">{{ form.content.value|default_if_none:"" }}</textarea>
             {% if form.content.errors %}
               <p class="text-red-400 text-sm mt-2">{{ form.content.errors.0 }}</p>
@@ -79,8 +79,8 @@
               <!-- Image Upload -->
               <div class="relative">
                 <label for="{{ form.image.id_for_label }}" 
-                       class="flex flex-col items-center justify-center w-full border-2 border-dashed border-white/20 rounded-xl p-6 cursor-pointer hover:border-cyan-400 hover:bg-cyan-500/10 transition-all duration-300 group">
-                  <i class="ri-upload-cloud-2-line text-4xl text-gray-400 group-hover:text-cyan-400 transition-colors"></i>
+                       class="flex flex-col items-center justify-center w-full border-2 border-dashed border-white/20 rounded-xl p-6 cursor-pointer hover:border-emerald-400 hover:bg-emerald-500/10 transition-all duration-300 group">
+                  <i class="ri-upload-cloud-2-line text-4xl text-gray-400 group-hover:text-emerald-400 transition-colors"></i>
                   <p class="text-gray-400 group-hover:text-gray-200 mt-2 text-sm font-semibold">
                     {% if form.instance.image %}Change image{% else %}Upload an image{% endif %}
                   </p>
@@ -111,7 +111,7 @@
               Cancel
             </a>
             <button type="submit"
-                    class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-full shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300 text-sm flex items-center gap-2">
+                    class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-full shadow-lg hover:shadow-emerald-500/45 transform hover:scale-105 transition-all duration-300 text-sm flex items-center gap-2">
               <i class="ri-check-line text-lg"></i>
               Update Post
             </button>
@@ -126,7 +126,7 @@
 <!-- Loading Overlay -->
 <div id="loading-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center">
   <div class="flex flex-col items-center gap-4">
-    <div class="animate-spin rounded-full h-10 w-10 border-4 border-white/20 border-t-cyan-400"></div>
+    <div class="animate-spin rounded-full h-10 w-10 border-4 border-white/20 border-t-emerald-400"></div>
     <p class="text-gray-200 font-medium">Updating...</p>
   </div>
 </div>

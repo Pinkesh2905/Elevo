@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-  {% if is_new %}Add New Article{% else %}Edit Article: {{ article.title }}{% endif %} | MockMate
+  {% if is_new %}Add New Article{% else %}Edit Article: {{ article.title }}{% endif %} | Elevo
 {% endblock %}
 
 {% block content %}
@@ -46,11 +46,11 @@
       {% endif %}
 
       <div class="mt-8 flex justify-end space-x-4">
-        <a href="{% url 'articles:tutor_article_list' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <a href="{% url 'articles:tutor_article_list' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
           Cancel
         </a>
         <button type="submit"
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
           {% if is_new %}Create Article{% else %}Save Changes{% endif %}
         </button>
       </div>

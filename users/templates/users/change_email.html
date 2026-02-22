@@ -10,7 +10,7 @@
         {% if messages %}
             <div class="mb-6">
                 {% for message in messages %}
-                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-blue-100 text-blue-800 {% endif %}" role="alert">
+                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-sky-100 text-sky-800 {% endif %}" role="alert">
                         <p class="font-medium">{{ message }}</p>
                     </div>
                 {% endfor %}
@@ -19,8 +19,8 @@
 
         <div class="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10">
             <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-5">
-                    <svg class="h-9 w-9 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-sky-100 mb-5">
+                    <svg class="h-9 w-9 text-sky-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                     </svg>
                 </div>
@@ -35,17 +35,19 @@
                 </p>
             </div>
 
-            <form class="mt-8 space-y-6" method="POST" action="{% url 'users:change_email' %}">
+            <form class="mt-8 space-y-6" method="POST" action="{% url 'users:change_email' %}" autocomplete="off">
                 {% csrf_token %}
+                <input type="text" name="fake_username" autocomplete="username" class="hidden" tabindex="-1" aria-hidden="true">
+                <input type="password" name="fake_password" autocomplete="current-password" class="hidden" tabindex="-1" aria-hidden="true">
                 
                 <div class="rounded-md shadow-sm space-y-4">
                     <div>
                         <label for="id_new_email" class="sr-only">New Email Address</label>
-                        {{ form.new_email }}
+                        {{ form.new_email|safe }}
                     </div>
                     <div>
                         <label for="id_password" class="sr-only">Confirm Password</label>
-                        {{ form.password }}
+                        {{ form.password|safe }}
                     </div>
                 </div>
 
@@ -66,14 +68,14 @@
                 {% endif %}
 
                 <div>
-                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors duration-300">
                         Send Verification Email
                     </button>
                 </div>
             </form>
              <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600">
-                    <a href="{% url 'users:account_settings' %}" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+                    <a href="{% url 'users:account_settings' %}" class="font-medium text-sky-600 hover:text-sky-500 hover:underline">
                         Cancel and return to settings
                     </a>
                 </p>
@@ -81,4 +83,18 @@
         </div>
     </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const email = document.getElementById('id_new_email');
+    const password = document.getElementById('id_password');
+    [email, password].forEach((el) => {
+      if (!el) return;
+      el.setAttribute('readonly', 'readonly');
+      el.setAttribute('autocomplete', 'off');
+      el.addEventListener('focus', function() {
+        this.removeAttribute('readonly');
+      }, { once: true });
+    });
+  });
+</script>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{% if is_new %}Create Problem{% else %}Edit Problem{% endif %} | MockMate{% endblock %}
+{% block title %}{% if is_new %}Create Problem{% else %}Edit Problem{% endif %} | Elevo{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-teal-50">
   <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
     
     <!-- Header -->
@@ -68,7 +68,7 @@
           <!-- Basic Information -->
           <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-6">
-              <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+              <i class="fas fa-info-circle mr-2 text-sky-600"></i>
               Basic Information
             </h2>
             
@@ -123,7 +123,7 @@
                       <input type="text" 
                              name="hints[]" 
                              placeholder="Enter a hint..."
-                             class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                             class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
                       <button type="button" onclick="removeHint(this)" 
                               class="p-2 text-red-600 hover:bg-red-50 rounded-md">
                         <i class="fas fa-trash"></i>
@@ -132,7 +132,7 @@
                   </div>
                 </div>
                 <button type="button" onclick="addHint()" 
-                        class="text-blue-600 text-sm hover:underline">
+                        class="text-sky-600 text-sm hover:underline">
                   <i class="fas fa-plus mr-1"></i>Add another hint
                 </button>
               </div>
@@ -221,11 +221,11 @@
           <div class="bg-white rounded-xl shadow-lg p-6">
             <div class="flex items-center justify-between mb-6">
               <h2 class="text-xl font-bold text-gray-900">
-                <i class="fas fa-code mr-2 text-purple-600"></i>
+                <i class="fas fa-code mr-2 text-teal-600"></i>
                 Code Templates
               </h2>
               <button type="button" onclick="addCodeTemplate()" 
-                      class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-200">
+                      class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition duration-200">
                 <i class="fas fa-plus mr-2"></i>Add Template
               </button>
             </div>
@@ -350,11 +350,11 @@
           <!-- Preview -->
           <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4">
-              <i class="fas fa-eye mr-2 text-indigo-600"></i>
+              <i class="fas fa-eye mr-2 text-sky-600"></i>
               Preview
             </h2>
             <button type="button" onclick="previewProblem()" 
-                    class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200">
+                    class="w-full px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition duration-200">
               <i class="fas fa-search mr-2"></i>Preview Problem
             </button>
           </div>

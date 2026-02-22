@@ -1,4 +1,4 @@
-# mockmate01/users/admin.py
+# elevo/users/admin.py
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -181,6 +181,6 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 # Admin site customization
-admin.site.site_header = 'MockMate Administration'
-admin.site.site_title = 'MockMate Admin'
-admin.site.index_title = 'Welcome to MockMate Administration'
+admin.site.site_header = 'Elevo Administration'
+admin.site.site_title = 'Elevo Admin'
+admin.site.index_title = 'Welcome to Elevo Administration'

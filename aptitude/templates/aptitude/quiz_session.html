@@ -1,0 +1,68 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Aptitude Quiz | Elevo{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-3xl font-bold text-white">Timed Aptitude Quiz</h1>
+      <p class="text-slate-300 mt-1">Attempt #{{ attempt.id }} · {{ attempt.total_questions }} questions</p>
+    </div>
+    <div class="rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-2">
+      <p class="text-xs text-red-200 uppercase tracking-wide">Time Left</p>
+      <p id="timer" class="text-xl font-bold text-red-300">--:--</p>
+    </div>
+  </div>
+
+  <form id="quiz-form" method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for q in questions %}
+      <article class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
+        <p class="text-xs text-slate-400 mb-1">Q{{ forloop.counter }} · {{ q.topic.category.name }} / {{ q.topic.name }} · {{ q.difficulty }}</p>
+        <h2 class="text-base text-white font-semibold mb-3">{{ q.question_text }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <label class="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2 text-slate-200 hover:border-teal-400 cursor-pointer"><input type="radio" name="question_{{ q.id }}" value="A" class="mr-2">A. {{ q.option_a }}</label>
+          <label class="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2 text-slate-200 hover:border-teal-400 cursor-pointer"><input type="radio" name="question_{{ q.id }}" value="B" class="mr-2">B. {{ q.option_b }}</label>
+          <label class="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2 text-slate-200 hover:border-teal-400 cursor-pointer"><input type="radio" name="question_{{ q.id }}" value="C" class="mr-2">C. {{ q.option_c }}</label>
+          <label class="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2 text-slate-200 hover:border-teal-400 cursor-pointer"><input type="radio" name="question_{{ q.id }}" value="D" class="mr-2">D. {{ q.option_d }}</label>
+        </div>
+      </article>
+    {% endfor %}
+
+    <div class="sticky bottom-4 z-20">
+      <div class="rounded-2xl border border-slate-700 bg-slate-900/95 backdrop-blur px-4 py-3 flex items-center justify-between">
+        <p class="text-sm text-slate-300">Auto-submit when timer reaches zero.</p>
+        <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-semibold">Submit Quiz</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<script>
+(function() {
+  let remaining = {{ remaining_seconds|default:0 }};
+  const timerEl = document.getElementById('timer');
+  const form = document.getElementById('quiz-form');
+
+  function render() {
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  render();
+
+  const interval = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(interval);
+      timerEl.textContent = '00:00';
+      form.submit();
+      return;
+    }
+    render();
+  }, 1000);
+})();
+</script>
+{% endblock %}

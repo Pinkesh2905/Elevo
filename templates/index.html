@@ -1,631 +1,207 @@
 {% extends 'base.html' %}
 
-{% block title %}MockMate - Master Your Tech Career{% endblock %}
+{% block title %}Elevo | Build Interview Momentum{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-  <!-- Dynamic background overlay -->
-  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-indigo-900/30 to-purple-900/40"></div>
-  
-  <div class="relative z-10 text-center max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Main headline with gradient animation -->
-    <h1 class="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-10 leading-tight">
-      Master Your
-      <span class="text-transparent bg-clip-text animated-gradient brand-font block mt-2">
-        Tech Future
-      </span>
-    </h1>
-    
-    <!-- Enhanced subtitle -->
-    <div class="text-2xl md:text-3xl text-slate-300 mb-16 max-w-4xl mx-auto leading-relaxed font-medium">
-      Code. Learn. Succeed. Land your dream job.
-    </div>
-    
-    <!-- Simplified CTA buttons -->
-    <div class="flex flex-col sm:flex-row gap-6 justify-center mb-20">
-      {% if not user.is_authenticated %}
-        <a href="{% url 'users:signup' %}" class="group px-10 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-rocket-line mr-3"></i>
-            Launch Career
-            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
-          </span>
-        </a>
-        <a href="#features" class="group px-10 py-4 glass border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-indigo-400/50 transition-all duration-300 font-bold text-lg hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-code-view mr-3"></i>
-            Explore Platform
-            <i class="ri-arrow-down-line ml-3 group-hover:translate-y-1 transition-transform duration-300"></i>
-          </span>
-        </a>
-      {% else %}
-        <a href="{% url 'practice:problem-list' %}" class="group px-10 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-code-s-slash-line mr-3"></i>
-            Continue Coding
-            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
-          </span>
-        </a>
-        <a href="{% url 'mock_interview:interview_setup' %}" class="group px-10 py-4 glass border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-cyan-400/50 transition-all duration-300 font-bold text-lg hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-robot-line mr-3"></i>
-            AI Interview
-          </span>
-        </a>
-      {% endif %}
-    </div>
-    
-    <!-- Trust indicators -->
-    <div class="flex flex-wrap items-center justify-center gap-8 text-slate-300">
-      <div class="flex items-center glass px-6 py-3 rounded-xl border border-amber-400/20 hover:border-amber-400/40 transition-all duration-300">
-        <i class="ri-star-fill text-amber-400 mr-2 text-lg"></i>
-        <span class="font-semibold">4.9★ Rating</span>
-      </div>
-      <div class="flex items-center glass px-6 py-3 rounded-xl border border-indigo-400/20 hover:border-indigo-400/40 transition-all duration-300">
-        <i class="ri-group-line mr-2 text-indigo-400 text-lg"></i>
-        <span class="font-semibold">25K+ Coders</span>
-      </div>
-      <div class="flex items-center glass px-6 py-3 rounded-xl border border-emerald-400/20 hover:border-emerald-400/40 transition-all duration-300">
-        <i class="ri-trophy-line mr-2 text-emerald-400 text-lg"></i>
-        <span class="font-semibold">95% Success</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Features Section -->
-<section id="features" class="py-24 relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/60 to-indigo-900/30"></div>
-  
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-    <div class="text-center mb-20">
-      <div class="inline-flex items-center px-6 py-3 rounded-xl glass border border-purple-400/30 mb-8">
-        <i class="ri-code-box-line mr-3 text-purple-400"></i>
-        <span class="text-slate-200 font-semibold">Platform Features</span>
-      </div>
-      <h2 class="text-5xl md:text-6xl font-bold text-white mb-8">
-        Everything for Your
-        <span class="text-transparent bg-clip-text animated-gradient brand-font">Success Journey</span>
-      </h2>
-      <p class="text-2xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-        Comprehensive tools designed for modern tech interview mastery
-      </p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      <!-- Coding Problems -->
-      <div class="feature-card group">
-        <div class="feature-card-inner">
-          <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
-          <div class="relative p-8">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <i class="ri-code-s-slash-line text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-indigo-400 transition-colors duration-300">
-              Coding Problems
-            </h3>
-            <p class="text-slate-300 mb-6 leading-relaxed">
-              Master algorithms and data structures with 1200+ curated problems from top tech companies.
-            </p>
-            
-            <div class="space-y-3 mb-6">
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Company-specific questions
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Multiple language support
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Detailed explanations
-              </div>
-            </div>
-            
-            <a href="{% url 'practice:problem-list' %}" class="inline-flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 group-hover:translate-x-1">
-              Start Coding
-              <i class="ri-arrow-right-line ml-2"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Aptitude Tests -->
-      <div class="feature-card group">
-        <div class="feature-card-inner">
-          <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
-          <div class="relative p-8">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <i class="ri-brain-line text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-purple-400 transition-colors duration-300">
-              Aptitude Tests
-            </h3>
-            <p class="text-slate-300 mb-6 leading-relaxed">
-              Sharpen logical reasoning, quantitative skills, and verbal ability with targeted assessments.
-            </p>
-            
-            <div class="space-y-3 mb-6">
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Logical reasoning puzzles
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Quantitative analysis
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Verbal comprehension
-              </div>
-            </div>
-            
-            <a href="{% url 'aptitude:dashboard' %}" class="inline-flex items-center px-5 py-2.5 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 group-hover:translate-x-1">
-              Take Tests
-              <i class="ri-arrow-right-line ml-2"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Community Hub -->
-      <div class="feature-card group">
-        <div class="feature-card-inner">
-          <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
-          <div class="relative p-8">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <i class="ri-team-line text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-emerald-400 transition-colors duration-300">
-              Community Hub
-            </h3>
-            <p class="text-slate-300 mb-6 leading-relaxed">
-              Connect with mentors, peers, and successful candidates in our thriving tech community.
-            </p>
-            
-            <div class="space-y-3 mb-6">
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Expert mentorship
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Industry insights
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Peer networking
-              </div>
-            </div>
-            
-            <a href="{% url 'posts:feed' %}" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-all duration-300 group-hover:translate-x-1">
-              Join Community
-              <i class="ri-arrow-right-line ml-2"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- AI Mock Interviews -->
-      <div class="feature-card group">
-        <div class="feature-card-inner">
-          <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
-          <div class="relative p-8">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <i class="ri-robot-2-line text-white text-2xl"></i>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-4 brand-font group-hover:text-cyan-400 transition-colors duration-300">
-              AI Interviews
-            </h3>
-            <p class="text-slate-300 mb-6 leading-relaxed">
-              Practice with realistic AI-powered interviews and receive detailed performance feedback.
-            </p>
-            
-            <div class="space-y-3 mb-6">
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Real-time AI feedback
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Company scenarios
-              </div>
-              <div class="flex items-center text-emerald-400 text-sm font-medium">
-                <i class="ri-check-line mr-2"></i>
-                Performance analytics
-              </div>
-            </div>
-            
-            <a href="{% url 'mock_interview:interview_setup' %}" class="inline-flex items-center px-5 py-2.5 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-all duration-300 group-hover:translate-x-1">
-              Book Session
-              <i class="ri-arrow-right-line ml-2"></i>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Stats Section -->
-<section class="py-24 relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-purple-900/40"></div>
-  
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-    <div class="text-center mb-20">
-      <h2 class="text-5xl font-bold text-white mb-6">
-        Proven <span class="text-transparent bg-clip-text animated-gradient brand-font">Results</span>
-      </h2>
-      <p class="text-2xl text-slate-300">Numbers that speak for themselves</p>
-    </div>
-    
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
-      <div class="text-center stats-card">
-        <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="1200">0</div>
-        <div class="text-xl text-indigo-400 font-semibold">Coding Problems</div>
-        <div class="text-slate-400 mt-2">Curated challenges</div>
-      </div>
-      <div class="text-center stats-card">
-        <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="500">0</div>
-        <div class="text-xl text-purple-400 font-semibold">Aptitude Tests</div>
-        <div class="text-slate-400 mt-2">Practice assessments</div>
-      </div>
-      <div class="text-center stats-card">
-        <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="25000">0</div>
-        <div class="text-xl text-emerald-400 font-semibold">Active Students</div>
-        <div class="text-slate-400 mt-2">Learning community</div>
-      </div>
-      <div class="text-center stats-card">
-        <div class="counter text-5xl md:text-6xl font-bold text-white mb-4" data-count="95">0</div>
-        <div class="text-xl text-amber-400 font-semibold">Success Rate %</div>
-        <div class="text-slate-400 mt-2">Job placements</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Success Stories -->
-<section class="py-24 relative">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-20">
-      <h2 class="text-5xl font-bold text-white mb-8">
-        Success <span class="text-transparent bg-clip-text animated-gradient brand-font">Stories</span>
-      </h2>
-      <p class="text-2xl text-slate-300">Real achievements from our community</p>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <!-- Testimonial 1 -->
-      <div class="testimonial-card group">
-        <div class="glass-elevated rounded-2xl p-8 border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-indigo-400/30">
-          <div class="flex items-center mb-6">
-            <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              A
-            </div>
-            <div class="ml-4">
-              <h4 class="font-bold text-white text-lg">Arjun Patel</h4>
-              <p class="text-indigo-400 font-medium text-sm">Software Engineer @ Google</p>
-            </div>
-          </div>
-          <div class="flex text-amber-400 mb-4">
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-          </div>
-          <p class="text-slate-300 leading-relaxed">"MockMate's structured coding approach and comprehensive problem set were instrumental in my Google interview success."</p>
-        </div>
-      </div>
-      
-      <!-- Testimonial 2 -->
-      <div class="testimonial-card group">
-        <div class="glass-elevated rounded-2xl p-8 border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-purple-400/30">
-          <div class="flex items-center mb-6">
-            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              P
-            </div>
-            <div class="ml-4">
-              <h4 class="font-bold text-white text-lg">Priya Sharma</h4>
-              <p class="text-purple-400 font-medium text-sm">Product Manager @ Microsoft</p>
-            </div>
-          </div>
-          <div class="flex text-amber-400 mb-4">
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-          </div>
-          <p class="text-slate-300 leading-relaxed">"The community mentorship and AI interviews gave me the confidence and insights needed for my Microsoft PM role."</p>
-        </div>
-      </div>
-      
-      <!-- Testimonial 3 -->
-      <div class="testimonial-card group">
-        <div class="glass-elevated rounded-2xl p-8 border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:border-emerald-400/30">
-          <div class="flex items-center mb-6">
-            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              R
-            </div>
-            <div class="ml-4">
-              <h4 class="font-bold text-white text-lg">Rahul Singh</h4>
-              <p class="text-emerald-400 font-medium text-sm">SDE @ Amazon</p>
-            </div>
-          </div>
-          <div class="flex text-amber-400 mb-4">
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-            <i class="ri-star-fill"></i>
-          </div>
-          <p class="text-slate-300 leading-relaxed">"From campus coding contests to Amazon SDE - MockMate's mock interviews were absolute game-changers."</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Final CTA -->
-<section class="py-24 relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-indigo-900/50 to-purple-900/70"></div>
-  
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
-    <h2 class="text-5xl md:text-6xl font-bold text-white mb-8">
-      Ready to Code Your
-      <span class="text-transparent bg-clip-text animated-gradient brand-font block mt-2">
-        Success Story?
-      </span>
-    </h2>
-    
-    <p class="text-2xl text-slate-300 mb-16 max-w-4xl mx-auto leading-relaxed">
-      Join the community of successful developers and start your journey today
-    </p>
-    
-    <div class="flex flex-col sm:flex-row gap-6 justify-center">
-      {% if not user.is_authenticated %}
-        <a href="{% url 'users:signup' %}" class="group px-12 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-code-line mr-3"></i>
-            Start Coding Now
-            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
-          </span>
-        </a>
-        <a href="{% url 'login' %}" class="group px-12 py-5 glass border-2 border-white/30 text-white rounded-xl hover:bg-white/10 hover:border-indigo-400/50 font-bold text-xl transition-all duration-300 hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-login-box-line mr-3"></i>
-            Sign In
-          </span>
-        </a>
-      {% else %}
-        <a href="{% url 'practice:problem-list' %}" class="group px-12 py-5 bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-600 text-white rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-          <span class="flex items-center justify-center">
-            <i class="ri-code-s-slash-line mr-3"></i>
-            Continue Coding
-            <i class="ri-arrow-right-line ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
-          </span>
-        </a>
-      {% endif %}
-    </div>
-  </div>
-</section>
-
 <style>
-/* Animated Gradient Text */
-@keyframes gradientShift {
-  0%, 100% {
-    background-position: 0% 50%;
+  .home-shell {
+    background:
+      radial-gradient(1200px 600px at 10% 0%, rgba(56, 189, 248, 0.12), transparent 60%),
+      radial-gradient(1000px 500px at 90% 15%, rgba(16, 185, 129, 0.14), transparent 60%);
   }
-  50% {
-    background-position: 100% 50%;
+
+  .hero-title {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
   }
-}
 
-.animated-gradient {
-  background: linear-gradient(-45deg, #6366f1, #8b5cf6, #06b6d4, #10b981);
-  background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-/* Feature Cards - Enhanced Styling */
-.feature-card {
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.feature-card-inner {
-  position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  height: 100%;
-}
-
-.feature-card:hover .feature-card-inner {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border-color: rgba(99, 102, 241, 0.3);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-/* Subtle entrance animation for cards */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+  .eyebrow {
+    font-family: 'Fira Code', monospace;
+    letter-spacing: 0.06em;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .home-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
-}
 
-.feature-card {
-  animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-.feature-card:nth-child(1) { animation-delay: 0.1s; }
-.feature-card:nth-child(2) { animation-delay: 0.2s; }
-.feature-card:nth-child(3) { animation-delay: 0.3s; }
-.feature-card:nth-child(4) { animation-delay: 0.4s; }
-
-/* Counter Animation */
-.counter {
-  display: inline-block;
-  transition: all 0.3s ease;
-}
-
-/* Stats Card Animation */
-@keyframes statsSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(50px);
+  .home-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(45, 212, 191, 0.45);
+    box-shadow: 0 14px 34px rgba(8, 47, 73, 0.35);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .cta-primary {
+    background: linear-gradient(90deg, #0ea5e9, #14b8a6);
   }
-}
 
-.stats-card {
-  animation: statsSlideIn 0.8s ease-out forwards;
-  opacity: 0;
-}
-
-.stats-card:nth-child(1) { animation-delay: 0.1s; }
-.stats-card:nth-child(2) { animation-delay: 0.2s; }
-.stats-card:nth-child(3) { animation-delay: 0.3s; }
-.stats-card:nth-child(4) { animation-delay: 0.4s; }
-
-/* Testimonial Cards */
-.testimonial-card {
-  animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-.testimonial-card:nth-child(1) { animation-delay: 0.1s; }
-.testimonial-card:nth-child(2) { animation-delay: 0.2s; }
-.testimonial-card:nth-child(3) { animation-delay: 0.3s; }
-
-/* Glass Effect Enhancement */
-.glass-elevated {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .text-6xl { font-size: 3rem !important; }
-  .text-7xl { font-size: 3.5rem !important; }
-  .text-8xl { font-size: 4rem !important; }
-}
-
-@media (max-width: 640px) {
-  .px-10 { padding-left: 2rem; padding-right: 2rem; }
-  .px-12 { padding-left: 2.5rem; padding-right: 2.5rem; }
-  .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-  .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
-  
-  .text-xl { font-size: 1.125rem !important; }
-  .text-2xl { font-size: 1.25rem !important; }
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .cta-primary:hover {
+    background: linear-gradient(90deg, #0284c7, #0f766e);
   }
-}
+
+  .accent-line {
+    background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(45, 212, 191, 0.9));
+  }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Counter Animation
-  function animateCounter(element) {
-    const target = parseInt(element.getAttribute('data-count'));
-    const duration = 2000;
-    const start = performance.now();
-    const startValue = 0;
+<div class="home-shell">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 lg:pt-24 lg:pb-20">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+      <div>
+        <p class="eyebrow text-sky-300 text-xs sm:text-sm mb-5 uppercase">career prep operating system</p>
+        <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl text-white mb-6">
+          From Practice
+          <span class="block text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-emerald-300">To Placement</span>
+        </h1>
+        <p class="text-slate-300 text-lg sm:text-xl leading-relaxed max-w-xl mb-8">
+          Elevo combines coding drills, aptitude training, social learning, and AI interviews in one focused workflow for real hiring outcomes.
+        </p>
 
-    function updateCounter(currentTime) {
-      const elapsed = currentTime - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const currentValue = Math.floor(progress * (target - startValue) + startValue);
-      
-      if (target > 1000) {
-        element.textContent = (currentValue / 1000).toFixed(0) + 'K+';
-      } else {
-        element.textContent = currentValue + (target === 95 ? '%' : '');
-      }
+        <div class="flex flex-col sm:flex-row gap-4 mb-8">
+          {% if not user.is_authenticated %}
+            <a href="{% url 'users:signup' %}" class="cta-primary text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+              <i class="ri-user-add-line mr-2"></i>Create Free Account
+            </a>
+            <a href="{% url 'login' %}" class="px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
+              <i class="ri-login-box-line mr-2"></i>Log In
+            </a>
+          {% else %}
+            <a href="{% url 'practice:problem-list' %}" class="cta-primary text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+              <i class="ri-code-s-slash-line mr-2"></i>Continue Practice
+            </a>
+            <a href="{% url 'mock_interview:interview_setup' %}" class="px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-emerald-300 hover:text-emerald-200 transition-colors inline-flex items-center justify-center">
+              <i class="ri-robot-2-line mr-2"></i>Start Interview
+            </a>
+          {% endif %}
+        </div>
 
-      if (progress < 1) {
-        requestAnimationFrame(updateCounter);
-      }
-    }
+        <div class="flex flex-wrap gap-3">
+          <span class="text-xs px-3 py-1.5 rounded-full bg-sky-500/15 text-sky-200 border border-sky-400/25">Structured Learning</span>
+          <span class="text-xs px-3 py-1.5 rounded-full bg-teal-500/15 text-teal-200 border border-teal-400/25">Live Coding Focus</span>
+          <span class="text-xs px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-200 border border-emerald-400/25">Interview Readiness</span>
+        </div>
+      </div>
 
-    requestAnimationFrame(updateCounter);
-  }
+      <div class="space-y-4">
+        <div class="home-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-white text-xl font-semibold">Weekly Momentum</h3>
+            <i class="ri-bar-chart-box-line text-teal-300 text-2xl"></i>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1"><span>Coding Streak</span><span>6 / 7 days</span></div>
+              <div class="w-full h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full accent-line" style="width: 86%;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1"><span>Aptitude Coverage</span><span>74%</span></div>
+              <div class="w-full h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full accent-line" style="width: 74%;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1"><span>Mock Interviews</span><span>3 completed</span></div>
+              <div class="w-full h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full accent-line" style="width: 60%;"></div></div>
+            </div>
+          </div>
+        </div>
 
-  // Intersection Observer for animations
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
+        <div class="grid grid-cols-2 gap-4">
+          <div class="home-card p-5">
+            <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Active Learners</p>
+            <p class="text-2xl font-bold text-white">25K+</p>
+          </div>
+          <div class="home-card p-5">
+            <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Practice Problems</p>
+            <p class="text-2xl font-bold text-white">1200+</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        // Counter animation
-        if (entry.target.classList.contains('stats-card')) {
-          const counter = entry.target.querySelector('.counter');
-          if (counter && !counter.dataset.animated) {
-            counter.dataset.animated = 'true';
-            setTimeout(() => animateCounter(counter), 200);
-          }
-        }
-      }
-    });
-  }, observerOptions);
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-3xl sm:text-4xl text-white hero-title">Core Modules</h2>
+      <span class="text-sm text-slate-400">each path links to live features</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <a href="{% url 'practice:problem-list' %}" class="home-card p-6 block">
+        <i class="ri-code-box-line text-2xl text-sky-300"></i>
+        <h3 class="text-white text-xl font-semibold mt-4 mb-2">Coding Arena</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">Solve company-tagged problems, test logic, and improve speed with guided patterns.</p>
+      </a>
 
-  // Observe elements
-  document.querySelectorAll('.stats-card').forEach(el => {
-    observer.observe(el);
-  });
+      <a href="{% url 'aptitude:dashboard' %}" class="home-card p-6 block">
+        <i class="ri-brain-line text-2xl text-teal-300"></i>
+        <h3 class="text-white text-xl font-semibold mt-4 mb-2">Aptitude Lab</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">Strengthen quant, reasoning, and verbal sections used in screening rounds.</p>
+      </a>
 
-  // Smooth scrolling for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    });
-  });
+      <a href="{% url 'posts:feed' %}" class="home-card p-6 block">
+        <i class="ri-team-line text-2xl text-emerald-300"></i>
+        <h3 class="text-white text-xl font-semibold mt-4 mb-2">Peer Network</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">Share progress, ask questions, and learn from others preparing for similar roles.</p>
+      </a>
 
-  // Pause animations on reduced motion preference
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.querySelectorAll('*').forEach(el => {
-      el.style.animationDuration = '0.01ms';
-      el.style.transitionDuration = '0.01ms';
-    });
-  }
-});
-</script>
+      <a href="{% url 'mock_interview:interview_setup' %}" class="home-card p-6 block">
+        <i class="ri-robot-2-line text-2xl text-emerald-300"></i>
+        <h3 class="text-white text-xl font-semibold mt-4 mb-2">AI Interview Room</h3>
+        <p class="text-slate-300 text-sm leading-relaxed">Practice realistic interview sessions and review detailed, skill-based feedback.</p>
+      </a>
+    </div>
+  </section>
 
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+    <div class="home-card p-8 lg:p-10">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div>
+          <p class="eyebrow text-teal-300 text-xs mb-3 uppercase">workflow</p>
+          <h2 class="hero-title text-4xl text-white">How Elevo Works</h2>
+        </div>
+        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-slate-900/55 border border-slate-700 rounded-xl p-5">
+            <p class="text-xs text-sky-300 mb-2">STEP 01</p>
+            <h3 class="text-white font-semibold mb-2">Build Fundamentals</h3>
+            <p class="text-slate-300 text-sm">Practice coding and aptitude daily with topic-focused goals.</p>
+          </div>
+          <div class="bg-slate-900/55 border border-slate-700 rounded-xl p-5">
+            <p class="text-xs text-teal-300 mb-2">STEP 02</p>
+            <h3 class="text-white font-semibold mb-2">Simulate Interviews</h3>
+            <p class="text-slate-300 text-sm">Run AI sessions that mirror real technical and behavioral rounds.</p>
+          </div>
+          <div class="bg-slate-900/55 border border-slate-700 rounded-xl p-5">
+            <p class="text-xs text-emerald-300 mb-2">STEP 03</p>
+            <h3 class="text-white font-semibold mb-2">Track Improvement</h3>
+            <p class="text-slate-300 text-sm">Use feedback loops to close gaps before your actual interviews.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24">
+    <div class="text-center mb-8">
+      <h2 class="hero-title text-4xl sm:text-5xl text-white mb-3">Ready To Start?</h2>
+      <p class="text-slate-300 text-lg">Turn random prep into a clear weekly system.</p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      {% if not user.is_authenticated %}
+        <a href="{% url 'users:signup' %}" class="cta-primary text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+          <i class="ri-flashlight-line mr-2"></i>Start With Elevo
+        </a>
+      {% else %}
+        <a href="{% url 'practice:problem-list' %}" class="cta-primary text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+          <i class="ri-play-circle-line mr-2"></i>Resume My Prep
+        </a>
+      {% endif %}
+      <a href="{% url 'mock_interview:interview_setup' %}" class="px-8 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
+        <i class="ri-mic-line mr-2"></i>Try AI Interview
+      </a>
+    </div>
+  </section>
+</div>
 {% endblock %}

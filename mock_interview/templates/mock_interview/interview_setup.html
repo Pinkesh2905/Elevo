@@ -1,743 +1,197 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Setup Mock Interview | MockMate{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<style>
-  :root {
-    --primary-blue: #3b82f6;
-    --secondary-blue: #1e40af;
-    --accent-blue: #60a5fa;
-    --success-green: #4ade80;
-    --warning-orange: #f59e0b;
-    --danger-red: #ef4444;
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --border-color: rgba(148, 163, 184, 0.2);
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  }
-  
-  .container-main {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border-radius: 16px;
-    box-shadow: var(--shadow-xl);
-    border: 1px solid var(--glass-border);
-    transition: all 0.2s ease;
-  }
-  
-  .container-main:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-label {
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-  }
-  
-  .form-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
-    backdrop-filter: blur(8px);
-  }
-  
-  .form-input::placeholder {
-    color: var(--text-secondary);
-  }
-  
-  .form-input:focus {
-    border-color: var(--primary-blue);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-  }
-  
-  .upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(8px);
-  }
-  
-  .upload-area:hover {
-    border-color: var(--primary-blue);
-    background: rgba(59, 130, 246, 0.05);
-  }
-  
-  .upload-area.has-file {
-    border-color: var(--success-green);
-    background: rgba(74, 222, 128, 0.05);
-  }
-  
-  .btn-primary {
-    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-    color: white;
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: var(--shadow-md);
-  }
-  
-  .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 25px -3px rgba(59, 130, 246, 0.4);
-  }
-  
-  .btn-primary:active {
-    transform: translateY(0);
-  }
-  
-  .skill-tag {
-    display: inline-block;
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--accent-blue);
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    margin: 0.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-  }
-  
-  .skill-tag:hover {
-    background: var(--primary-blue);
-    color: white;
-    transform: translateY(-1px);
-  }
-  
-  .progress-step {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    position: relative;
-  }
-  
-  .progress-step.active .step-circle {
-    background: var(--primary-blue);
-    color: white;
-  }
-  
-  .progress-step.active .step-label {
-    color: var(--primary-blue);
-    font-weight: 600;
-  }
-  
-  .step-circle {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: rgba(148, 163, 184, 0.3);
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.875rem;
-  }
-  
-  .step-label {
-    margin-left: 0.75rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-  }
-  
-  .step-connector {
-    flex: 1;
-    height: 2px;
-    background: var(--border-color);
-    margin: 0 1rem;
-  }
-  
-  .step-connector.active {
-    background: var(--primary-blue);
-  }
-  
-  .icon-container {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 6px;
-    background: var(--primary-blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.75rem;
-  }
-  
-  .feature-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-align: center;
-    border: 1px solid var(--glass-border);
-    transition: all 0.2s ease;
-  }
-  
-  .feature-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  .message-alert {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: flex-start;
-    backdrop-filter: blur(12px);
-  }
-  
-  .message-alert.success {
-    background: rgba(74, 222, 128, 0.1);
-    color: var(--success-green);
-    border: 1px solid rgba(74, 222, 128, 0.2);
-  }
-  
-  .message-alert.error {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-  }
-  
-  .message-alert.info {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--accent-blue);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-  }
-  
-  .radio-option {
-    position: relative;
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(8px);
-  }
-  
-  .radio-option:hover {
-    border-color: var(--primary-blue);
-    background: rgba(59, 130, 246, 0.05);
-  }
-  
-  .radio-option.active {
-    border-color: var(--primary-blue);
-    background: rgba(59, 130, 246, 0.1);
-  }
-  
-  .radio-option input[type="radio"] {
-    accent-color: var(--primary-blue);
-  }
-  
-  .tips-box {
-    padding: 1rem;
-    background: rgba(59, 130, 246, 0.05);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 8px;
-    backdrop-filter: blur(8px);
-  }
-  
-  .tips-box .tips-title {
-    color: var(--accent-blue);
-    font-weight: 600;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .tips-box ul {
-    color: rgba(96, 165, 250, 0.9);
-    font-size: 0.875rem;
-    margin: 0;
-    padding-left: 1rem;
-  }
-  
-  .tips-box ul li {
-    margin-bottom: 0.25rem;
-  }
-  
-  .security-badge {
-    display: flex;
-    align-items: center;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-  }
-  
-  .security-badge i {
-    color: var(--success-green);
-    margin-right: 0.5rem;
-  }
-  
-  .optional-badge {
-    font-size: 0.75rem;
-    background: rgba(148, 163, 184, 0.1);
-    color: var(--text-secondary);
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    margin-left: 0.5rem;
-  }
-  
-  .hero-section {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  
-  .hero-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 4rem;
-    height: 4rem;
-    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-    border-radius: 16px;
-    margin-bottom: 1rem;
-    box-shadow: var(--shadow-lg);
-  }
-  
-  .hero-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
-  }
-  
-  .hero-description {
-    color: var(--text-secondary);
-    max-width: 32rem;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-  
-  @media (max-width: 768px) {
-    .container-main {
-      margin: 1rem;
-      border-radius: 12px;
-    }
-    
-    .progress-steps {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    
-    .step-connector {
-      display: none;
-    }
-    
-    .hero-title {
-      font-size: 2rem;
-    }
-    
-    .grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .feature-card {
-      margin-bottom: 1rem;
-    }
-  }
-</style>
-{% endblock %}
+{% block title %}Interview Setup | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-8 px-4">
-  <div class="max-w-4xl mx-auto">
-    
-    <!-- Header -->
-    <div class="hero-section">
-      <div class="hero-icon">
-        <i class="fas fa-user-tie text-white text-2xl"></i>
-      </div>
-      
-      <h1 class="hero-title">
-        Mock Interview Setup
-      </h1>
-      
-      <p class="hero-description">
-        Configure your personalized interview experience. Upload your resume or manually enter your details to receive targeted questions that match your background.
-      </p>
-    </div>
+<section class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-8">
+  <div class="mx-auto max-w-6xl grid grid-cols-1 xl:grid-cols-12 gap-6">
+    <div class="xl:col-span-7 space-y-6">
+      <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <div>
+            <p class="text-xs uppercase tracking-[0.15em] text-cyan-300 font-semibold">Interview Setup</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-100 mt-1">Build Your Best First Impression</h1>
+            <p class="text-slate-400 mt-2">Upload your resume, review ATS readiness, then launch a focused Technical or HR mock interview.</p>
+          </div>
+          <div class="hidden sm:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-200 text-sm">
+            <i class="ri-star-smile-line"></i>
+            <span>Resume-first coaching</span>
+          </div>
+        </div>
 
-    <!-- Progress Indicator -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between max-w-2xl mx-auto">
-        <div class="progress-step active">
-          <div class="step-circle">1</div>
-          <div class="step-label">Setup</div>
-        </div>
-        <div class="step-connector"></div>
-        <div class="progress-step">
-          <div class="step-circle">2</div>
-          <div class="step-label">Interview</div>
-        </div>
-        <div class="step-connector"></div>
-        <div class="progress-step">
-          <div class="step-circle">3</div>
-          <div class="step-label">Review</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Messages - Only show setup-related messages -->
-    {% if messages %}
-      <div class="mb-6">
-        {% for message in messages %}
-          {% comment %}
-          Only show messages that are relevant to interview setup:
-          - Resume parsing errors
-          - Form validation errors
-          - Setup success messages
-          Filter out messages about deletions, reviews, etc.
-          {% endcomment %}
-          {% if 'resume' in message.message|lower or 'created' in message.message|lower or 'setup' in message.message|lower or 'invalid' in message.message|lower or 'required' in message.message|lower or 'error' in message.message|lower and 'delete' not in message.message|lower and 'review' not in message.message|lower and 'cleared' not in message.message|lower %}
-            <div class="message-alert {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}">
-              <div class="flex-shrink-0 mr-3">
-                {% if message.tags == 'error' %}
-                  <i class="fas fa-exclamation-circle"></i>
-                {% elif message.tags == 'success' %}
-                  <i class="fas fa-check-circle"></i>
-                {% else %}
-                  <i class="fas fa-info-circle"></i>
-                {% endif %}
+        {% if messages %}
+          <div class="space-y-3 mb-5">
+            {% for message in messages %}
+              <div class="rounded-xl border px-4 py-3 text-sm {% if message.tags == 'success' %}border-emerald-500/35 bg-emerald-500/15 text-emerald-100{% elif message.tags == 'error' %}border-red-500/35 bg-red-500/15 text-red-100{% elif message.tags == 'warning' %}border-amber-500/35 bg-amber-500/15 text-amber-100{% else %}border-cyan-500/35 bg-cyan-500/15 text-cyan-100{% endif %}">
+                {{ message }}
               </div>
-              <div>{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
+          {% csrf_token %}
+
+          <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Resume (Required)</label>
+            {{ form.resume_file }}
+            <p class="text-xs text-slate-500 mt-2">PDF, DOCX, or TXT. We use this to personalize your interview and ATS insights.</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Interview Type</label>
+              {{ form.interview_track }}
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Target Job Role</label>
+              {{ form.job_role }}
+              {% if form.job_role.errors %}
+                <p class="text-xs text-red-300 mt-2">{{ form.job_role.errors|striptags }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Key Skills (Optional)</label>
+            {{ form.key_skills }}
+            {% if form.key_skills.errors %}
+              <p class="text-xs text-red-300 mt-2">{{ form.key_skills.errors|striptags }}</p>
+            {% endif %}
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button type="submit" name="action" value="analyze" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-cyan-500/35 bg-cyan-500/15 text-cyan-200 font-semibold hover:bg-cyan-500/25 transition">
+              <i class="ri-search-eye-line"></i>
+              <span>Analyze Resume</span>
+            </button>
+            <button type="submit" name="action" value="start" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold hover:opacity-90 transition">
+              <i class="ri-play-circle-line"></i>
+              <span>Start Interview</span>
+            </button>
+            <p class="text-xs text-slate-500">Tip: Analyze first for better recommendations.</p>
+          </div>
+        </form>
+      </div>
+
+      {% if resume_insights %}
+        <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6 sm:p-8">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-xl font-bold text-slate-100">ATS Resume Insights</h2>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold {% if resume_insights.band == 'excellent' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% elif resume_insights.band == 'good' %}bg-cyan-500/20 text-cyan-300 border border-cyan-500/30{% elif resume_insights.band == 'average' %}bg-amber-500/20 text-amber-300 border border-amber-500/30{% else %}bg-red-500/20 text-red-300 border border-red-500/30{% endif %}">
+              {{ resume_insights.band|title }}
+            </span>
+          </div>
+
+          <div class="mb-4">
+            <div class="flex items-end justify-between mb-2">
+              <p class="text-sm text-slate-400">ATS Score</p>
+              <p class="text-3xl font-bold text-cyan-300">{{ resume_insights.ats_score }}/100</p>
+            </div>
+            <div class="h-2 rounded bg-slate-700">
+              <div class="h-2 rounded bg-gradient-to-r from-cyan-500 to-emerald-500" style="width: {{ resume_insights.ats_score }}%;"></div>
+            </div>
+            <p class="text-sm text-slate-300 mt-2">{{ resume_insights.summary }}</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4 mb-5">
+            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs text-slate-500">Keyword Match</p>
+              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.keyword_match }}%</p>
+            </div>
+            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs text-slate-500">Structure Quality</p>
+              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.structure_quality }}%</p>
+            </div>
+            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs text-slate-500">Impact Evidence</p>
+              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.impact_evidence }}%</p>
+            </div>
+            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs text-slate-500">Readability</p>
+              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.readability }}%</p>
+            </div>
+          </div>
+
+          {% if resume_insights.missing_keywords %}
+            <div class="mb-5">
+              <p class="text-sm font-semibold text-slate-200 mb-2">Missing Keywords</p>
+              <div class="flex flex-wrap gap-2">
+                {% for kw in resume_insights.missing_keywords %}
+                  <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs">{{ kw }}</span>
+                {% endfor %}
+              </div>
             </div>
           {% endif %}
-        {% endfor %}
-      </div>
-    {% endif %}
 
-    <!-- Main Form -->
-    <div class="container-main p-8">
-      <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-
-        <!-- Resume Upload Section -->
-        <div class="form-group">
-          <label class="form-label">
-            <div class="icon-container">
-              <i class="fas fa-file-upload text-white text-sm"></i>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm font-semibold text-slate-200 mb-2">Detected Highlights</p>
+              <ul class="space-y-2 text-sm text-slate-300">
+                {% for item in resume_insights.detected_highlights %}
+                  <li class="rounded-lg border border-white/10 bg-white/5 p-3">{{ item }}</li>
+                {% empty %}
+                  <li class="text-slate-500">No highlights detected.</li>
+                {% endfor %}
+              </ul>
             </div>
-            Resume Upload
-            <span class="optional-badge">Optional</span>
-          </label>
-          
-          <div class="upload-area" id="upload-area">
-            {{ form.resume_file }}
-            <div class="upload-content">
-              <i class="fas fa-cloud-upload-alt text-slate-400 text-3xl mb-3"></i>
-              <p class="text-slate-300 font-medium mb-1">Drop your resume here or click to browse</p>
-              <p class="text-slate-400 text-sm">Supports PDF, DOC, DOCX files up to 10MB</p>
+            <div>
+              <p class="text-sm font-semibold text-slate-200 mb-2">Actionable Improvements</p>
+              <ul class="space-y-2 text-sm text-slate-300">
+                {% for s in resume_insights.suggestions %}
+                  <li class="rounded-lg border border-white/10 bg-white/5 p-3">{{ s }}</li>
+                {% endfor %}
+              </ul>
             </div>
           </div>
         </div>
-
-        <!-- Job Role Section -->
-        <div class="form-group">
-          <label class="form-label">
-            <div class="icon-container">
-              <i class="fas fa-briefcase text-white text-sm"></i>
-            </div>
-            Target Position
-          </label>
-          
-          {{ form.job_role }}
-          
-          <!-- Popular Roles -->
-          <div class="mt-3">
-            <p class="text-sm text-slate-400 mb-2">Popular positions:</p>
-            <div class="flex flex-wrap">
-              <button type="button" class="skill-tag" onclick="fillJobRole('Software Engineer')">Software Engineer</button>
-              <button type="button" class="skill-tag" onclick="fillJobRole('Data Scientist')">Data Scientist</button>
-              <button type="button" class="skill-tag" onclick="fillJobRole('Product Manager')">Product Manager</button>
-              <button type="button" class="skill-tag" onclick="fillJobRole('Business Analyst')">Business Analyst</button>
-              <button type="button" class="skill-tag" onclick="fillJobRole('DevOps Engineer')">DevOps Engineer</button>
-              <button type="button" class="skill-tag" onclick="fillJobRole('UX/UI Designer')">UX/UI Designer</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skills Section -->
-        <div class="form-group">
-          <label class="form-label">
-            <div class="icon-container">
-              <i class="fas fa-code text-white text-sm"></i>
-            </div>
-            Key Skills & Technologies
-          </label>
-          
-          {{ form.key_skills }}
-          
-          <div class="mt-3 tips-box">
-            <div class="flex items-start">
-              <i class="fas fa-lightbulb text-blue-400 mr-2 mt-0.5"></i>
-              <div>
-                <p class="tips-title">Tips for better results:</p>
-                <ul class="text-sm mt-1 space-y-1">
-                  <li>• List relevant programming languages, frameworks, and tools</li>
-                  <li>• Include both technical and soft skills</li>
-                  <li>• Separate each skill with a comma</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Experience Level -->
-        <div class="form-group">
-          <label class="form-label">
-            <div class="icon-container">
-              <i class="fas fa-chart-line text-white text-sm"></i>
-            </div>
-            Experience Level
-          </label>
-          
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <label class="radio-option">
-              <input type="radio" name="experience_level" value="entry" class="mr-3">
-              <span class="text-sm font-medium text-slate-300">Entry Level</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="experience_level" value="mid" class="mr-3" checked>
-              <span class="text-sm font-medium text-slate-300">Mid Level</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="experience_level" value="senior" class="mr-3">
-              <span class="text-sm font-medium text-slate-300">Senior</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="experience_level" value="lead" class="mr-3">
-              <span class="text-sm font-medium text-slate-300">Lead</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Security & Submit -->
-        <div class="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-700/50">
-          <div class="security-badge mb-4 sm:mb-0">
-            <i class="fas fa-shield-alt"></i>
-            <span>Your data is secure and confidential</span>
-          </div>
-          
-          <button type="submit" class="btn-primary flex items-center">
-            <i class="fas fa-arrow-right mr-2"></i>
-            <span>Begin Interview</span>
-          </button>
-        </div>
-      </form>
+      {% endif %}
     </div>
 
-    <!-- Features Section -->
-    <div class="mt-12">
-      <h3 class="text-xl font-bold text-center text-slate-200 mb-8">What to Expect</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="feature-card">
-          <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-brain text-white text-xl"></i>
+    <aside class="xl:col-span-5 space-y-6">
+      <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6">
+        <h3 class="text-lg font-semibold text-slate-100 mb-4">What You Get</h3>
+        <div class="space-y-4 text-sm text-slate-300">
+          <div class="flex gap-3">
+            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-semibold text-xs">1</div>
+            <p>Resume ATS score with clear strengths, gaps, and exact improvement actions.</p>
           </div>
-          <h4 class="font-semibold text-slate-200 mb-2">AI-Powered Questions</h4>
-          <p class="text-slate-400 text-sm">Intelligent questions tailored to your role and experience level</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-microphone text-white text-xl"></i>
+          <div class="flex gap-3">
+            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-semibold text-xs">2</div>
+            <p>Interview mode control: Technical for concept depth, HR for behavioral readiness.</p>
           </div>
-          <h4 class="font-semibold text-slate-200 mb-2">Voice Interaction</h4>
-          <p class="text-slate-400 text-sm">Practice speaking naturally with real-time speech recognition</p>
-        </div>
-        
-        <div class="feature-card">
-          <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-chart-bar text-white text-xl"></i>
+          <div class="flex gap-3">
+            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-semibold text-xs">3</div>
+            <p>Personalized interview conversation and final performance report with transcript.</p>
           </div>
-          <h4 class="font-semibold text-slate-200 mb-2">Detailed Analysis</h4>
-          <p class="text-slate-400 text-sm">Comprehensive feedback on communication and technical responses</p>
         </div>
       </div>
-    </div>
+
+      <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6">
+        <h3 class="text-lg font-semibold text-slate-100 mb-4">Before You Start</h3>
+        <ul class="space-y-3 text-sm text-slate-300">
+          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Keep resume updated with latest project impact.</li>
+          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Add measurable outcomes in bullets.</li>
+          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Select interview type based on your preparation goal.</li>
+          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Use Analyze first, then launch mock interview.</li>
+        </ul>
+      </div>
+    </aside>
   </div>
 </section>
 
 <script>
-function fillJobRole(role) {
-  const input = document.querySelector('input[name="job_role"]');
-  input.value = role;
-  input.focus();
-  
-  // Visual feedback
-  input.style.borderColor = '#3b82f6';
-  setTimeout(() => {
-    input.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-  }, 1000);
-}
-
-// Enhanced file upload handling
-document.addEventListener('DOMContentLoaded', function() {
-  const fileInput = document.querySelector('input[type="file"]');
-  const uploadArea = document.getElementById('upload-area');
-  const uploadContent = uploadArea.querySelector('.upload-content');
-  
-  if (fileInput && uploadArea) {
-    fileInput.style.display = 'none';
-    
-    fileInput.addEventListener('change', function(e) {
-      handleFileSelect(e.target.files[0]);
-    });
-    
-    uploadArea.addEventListener('click', function(e) {
-      if (e.target !== fileInput) {
-        fileInput.click();
-      }
-    });
-    
-    // Drag and drop
-    uploadArea.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      uploadArea.style.borderColor = '#3b82f6';
-      uploadArea.style.background = 'rgba(59, 130, 246, 0.05)';
-    });
-    
-    uploadArea.addEventListener('dragleave', function(e) {
-      uploadArea.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-      uploadArea.style.background = 'rgba(255, 255, 255, 0.03)';
-    });
-    
-    uploadArea.addEventListener('drop', function(e) {
-      e.preventDefault();
-      uploadArea.style.borderColor = 'rgba(148, 163, 184, 0.2)';
-      uploadArea.style.background = 'rgba(255, 255, 255, 0.03)';
-      
-      if (e.dataTransfer.files.length > 0) {
-        fileInput.files = e.dataTransfer.files;
-        handleFileSelect(e.dataTransfer.files[0]);
-      }
-    });
-  }
-  
-  function handleFileSelect(file) {
-    if (file) {
-      uploadArea.classList.add('has-file');
-      uploadContent.innerHTML = `
-        <i class="fas fa-file-alt text-green-400 text-3xl mb-3"></i>
-        <p class="text-green-300 font-medium mb-1">${file.name}</p>
-        <p class="text-green-400 text-sm">${(file.size / 1024 / 1024).toFixed(1)} MB</p>
-      `;
-    }
-  }
-  
-  // Style form inputs
-  const inputs = document.querySelectorAll('input:not([type="file"]):not([type="radio"]), textarea, select');
-  inputs.forEach(input => {
-    input.classList.add('form-input');
+  document.addEventListener("DOMContentLoaded", function () {
+    const style = "w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-slate-100";
+    const file = document.getElementById("id_resume_file");
+    const track = document.getElementById("id_interview_track");
+    const role = document.getElementById("id_job_role");
+    const skills = document.getElementById("id_key_skills");
+    if (file) { file.className = style; file.setAttribute("accept", ".pdf,.docx,.txt"); }
+    if (track) track.className = style;
+    if (role) role.className = style;
+    if (skills) skills.className = `${style} h-24`;
   });
-  
-  // Style radio buttons for better UX
-  const radioInputs = document.querySelectorAll('input[type="radio"]');
-  radioInputs.forEach(radio => {
-    radio.addEventListener('change', function() {
-      // Remove active class from all labels
-      document.querySelectorAll('.radio-option').forEach(label => {
-        label.classList.remove('active');
-      });
-      
-      // Add active class to selected label
-      if (this.checked) {
-        this.closest('.radio-option').classList.add('active');
-      }
-    });
-  });
-  
-  // Set initial active state for checked radio
-  const checkedRadio = document.querySelector('input[type="radio"]:checked');
-  if (checkedRadio) {
-    checkedRadio.closest('.radio-option').classList.add('active');
-  }
-  
-  // Enhanced form validation feedback
-  const form = document.querySelector('form');
-  if (form) {
-    form.addEventListener('submit', function(e) {
-      const jobRoleInput = document.querySelector('input[name="job_role"]');
-      const skillsInput = document.querySelector('textarea[name="key_skills"]');
-      
-      if (!jobRoleInput.value.trim()) {
-        e.preventDefault();
-        jobRoleInput.style.borderColor = '#ef4444';
-        jobRoleInput.focus();
-        
-        // Show error message
-        showNotification('Please enter a target position', 'error');
-        return;
-      }
-      
-      if (!skillsInput.value.trim()) {
-        e.preventDefault();
-        skillsInput.style.borderColor = '#ef4444';
-        skillsInput.focus();
-        
-        // Show error message
-        showNotification('Please enter your key skills', 'error');
-        return;
-      }
-      
-      // Show success message
-      showNotification('Setting up your interview...', 'info');
-    });
-  }
-  
-  // Simple notification system
-  function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `message-alert ${type}`;
-    notification.innerHTML = `
-      <div class="flex-shrink-0 mr-3">
-        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-      </div>
-      <div>${message}</div>
-    `;
-    
-    // Insert at top of form
-    const form = document.querySelector('form');
-    form.insertBefore(notification, form.firstChild);
-    
-    // Remove after 5 seconds
-    setTimeout(() => {
-      notification.remove();
-    }, 5000);
-  }
-});
 </script>
 {% endblock %}

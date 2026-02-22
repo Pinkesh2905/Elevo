@@ -1,764 +1,140 @@
 {% extends "base.html" %}
 {% load static %}
-{% load custom_filters %}
 
-{% block title %}Interview Review | MockMate{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          primary: {
-            50: '#eff6ff',
-            500: '#3b82f6',
-            600: '#2563eb',
-            700: '#1d4ed8',
-            900: '#1e3a8a'
-          }
-        }
-      }
-    }
-  }
-</script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-  
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  
-  @keyframes pulse-subtle {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.85; }
-  }
-  
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
-  @keyframes rotateIn {
-    from {
-      opacity: 0;
-      transform: rotate(-180deg) scale(0.5);
-    }
-    to {
-      opacity: 1;
-      transform: rotate(0deg) scale(1);
-    }
-  }
-  
-  .animate-pulse-subtle {
-    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-  }
-  
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.3s ease-out;
-  }
-  
-  .animate-rotate-in {
-    animation: rotateIn 0.6s ease-out;
-  }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-  
-  .gradient-bg {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-  }
-  
-  /* Score circle animation */
-  .score-ring {
-    transform: rotate(-90deg);
-    transform-origin: center;
-  }
-  
-  .score-progress {
-    stroke-dasharray: 314;
-    stroke-dashoffset: 314;
-    transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  /* Custom scrollbar */
-  .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(148, 163, 184, 0.1); }
-  .custom-scrollbar::-webkit-scrollbar-thumb { 
-    background: rgba(148, 163, 184, 0.4); 
-    border-radius: 4px; 
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
-  
-  /* Print styles */
-  @media print {
-    body { background: white !important; }
-    .glass-card { 
-      background: white !important;
-      border: 1px solid #e5e7eb !important;
-      box-shadow: none !important;
-    }
-    .gradient-bg { background: white !important; }
-    .no-print { display: none !important; }
-    .transcript-container { max-height: none !important; }
-  }
-</style>
-{% endblock %}
+{% block title %}Interview Performance Report{% endblock %}
 
 {% block content %}
-<div class="min-h-screen gradient-bg text-white">
-  <!-- Header Section -->
-  <div class="bg-black/20 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50 no-print">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
-        <!-- Logo and Title -->
-        <div class="flex items-center space-x-4">
-          <div class="relative w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center animate-rotate-in">
-            <i class="fas fa-file-alt text-xl text-white"></i>
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Interview Review
-            </h1>
-            <p class="text-sm text-gray-400">Session #{{ session.id }}</p>
-          </div>
+<section class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 px-4 py-8">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <header class="rounded-2xl border border-white/10 bg-slate-900/80 p-6 backdrop-blur">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-cyan-300">Performance Report</p>
+          <h1 class="mt-1 text-2xl font-bold text-slate-100">{{ session.job_role|default:"Interview" }}</h1>
+          <p class="text-sm text-slate-400">{{ session.start_time|date:"F j, Y g:i A" }}</p>
         </div>
-        
-        <!-- Action Buttons -->
-        <div class="flex items-center gap-3">
-          <button onclick="window.print()" 
-                  class="glass-card px-4 py-2.5 rounded-xl font-medium text-blue-300 border border-blue-400/30 hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-2">
-            <i class="fas fa-print"></i>
-            <span class="hidden sm:inline">Print</span>
-          </button>
-          <a href="{% url 'mock_interview:my_mock_interviews' %}" 
-             class="glass-card px-4 py-2.5 rounded-xl font-medium text-gray-300 border border-white/20 hover:bg-white/10 transition-all duration-200 flex items-center space-x-2">
-            <i class="fas fa-arrow-left"></i>
-            <span class="hidden sm:inline">Back</span>
-          </a>
+        <div class="rounded-xl border border-cyan-500/40 bg-cyan-500/15 px-5 py-3 text-center">
+          <p class="text-xs text-cyan-200">Overall Score</p>
+          <p class="text-3xl font-semibold text-white">{{ ai_feedback.overall_score }}%</p>
         </div>
       </div>
+    </header>
+
+    <div class="grid gap-4 md:grid-cols-4">
+      <article class="rounded-xl border border-white/10 bg-slate-900/80 p-4">
+        <p class="text-xs text-slate-400">Communication</p>
+        <p class="mt-1 text-xl font-semibold text-slate-100">{{ ai_feedback.communication_score }}%</p>
+      </article>
+      <article class="rounded-xl border border-white/10 bg-slate-900/80 p-4">
+        <p class="text-xs text-slate-400">Confidence</p>
+        <p class="mt-1 text-xl font-semibold text-slate-100">{{ ai_feedback.confidence_level }}</p>
+      </article>
+      <article class="rounded-xl border border-white/10 bg-slate-900/80 p-4">
+        <p class="text-xs text-slate-400">Avg Answer Quality</p>
+        <p class="mt-1 text-xl font-semibold text-slate-100">{{ interview_metrics.avg_answer_quality|default:"N/A" }}</p>
+      </article>
+      <article class="rounded-xl border border-white/10 bg-slate-900/80 p-4">
+        <p class="text-xs text-slate-400">Duration</p>
+        <p class="mt-1 text-xl font-semibold text-slate-100">{{ interview_metrics.duration_minutes|default:"N/A" }}{% if interview_metrics.duration_minutes %} min{% endif %}</p>
+      </article>
     </div>
-  </div>
 
-  <!-- Main Content -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    
-    <!-- Session Overview Card -->
-    <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up">
-      <div class="p-6 bg-gradient-to-r from-slate-900/50 to-blue-900/20 border-b border-white/10">
-        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-          <div class="flex-1">
-            <h2 class="text-2xl font-bold text-white mb-2 flex items-center space-x-3">
-              <i class="fas fa-briefcase text-blue-400"></i>
-              <span>{{ session.job_role }} Interview</span>
-            </h2>
-            <div class="flex items-center space-x-2 text-sm text-gray-400">
-              <i class="fas fa-calendar-alt text-blue-400"></i>
-              <time>{{ session.start_time|date:"F j, Y \a\t g:i A" }}</time>
-            </div>
-          </div>
-          
-          <div class="flex items-center gap-3 flex-wrap">
-            <!-- Status Badge -->
-            {% if session.status == 'COMPLETED' or session.status == 'REVIEWED' %}
-              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-xs font-semibold uppercase tracking-wide">
-                <i class="fas fa-check-circle"></i>
-                <span>Completed</span>
-              </span>
-            {% endif %}
-            
-            <!-- Score Display -->
-            {% if ai_feedback.overall_score %}
-              <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 border border-blue-400/30 rounded-xl">
-                <i class="fas fa-chart-line text-blue-400"></i>
-                <span class="text-lg font-bold text-blue-300">{{ ai_feedback.overall_score }}%</span>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+    <div class="grid gap-4 lg:grid-cols-2">
+      <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+        <h2 class="text-lg font-semibold text-emerald-300">Strengths</h2>
+        <ul class="mt-3 space-y-2">
+          {% for item in ai_feedback.strengths %}
+            <li class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-slate-100">{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </article>
 
-      <!-- Session Info -->
-      <div class="p-6">
-        <div class="space-y-4">
-          
-          <!-- Job Role -->
-          <div class="flex items-start gap-3 pb-4 border-b border-white/10">
-            <div class="flex-shrink-0 w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-400/30">
-              <i class="fas fa-briefcase text-blue-400"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                Target Position
-              </div>
-              <div class="text-base font-semibold text-white">
-                {{ session.job_role }}
-              </div>
-            </div>
-          </div>
-          
-          <!-- Key Skills -->
-          {% if session.key_skills %}
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center border border-indigo-400/30">
-                <i class="fas fa-code text-indigo-400"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
-                  Target Skills
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  {% for skill in session.key_skills|split:"," %}
-                    <span class="inline-block px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 rounded-lg text-xs font-medium">
-                      {{ skill|trim_whitespace }}
-                    </span>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-          {% endif %}
-        </div>
-      </div>
+      <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+        <h2 class="text-lg font-semibold text-amber-300">Improvement Focus</h2>
+        <ul class="mt-3 space-y-2">
+          {% for item in ai_feedback.areas_for_improvement %}
+            <li class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-slate-100">{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+    </div>
+
+    <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+      <h2 class="text-lg font-semibold text-slate-100">Execution Guidance</h2>
+      <ol class="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-200">
+        {% for item in ai_feedback.recommendations %}
+          <li class="rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-3 py-2">{{ item }}</li>
+        {% endfor %}
+      </ol>
+      <p class="mt-4 text-sm text-slate-200">{{ ai_feedback.technical_assessment }}</p>
+      <p class="mt-2 text-sm text-cyan-300">{{ ai_feedback.encouragement_note }}</p>
     </article>
 
-    <!-- ENHANCED PERFORMANCE FEEDBACK SECTION -->
-    <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up" style="animation-delay: 0.1s;">
-      <!-- Header with Score -->
-      <div class="p-6 bg-gradient-to-r from-slate-900/50 to-purple-900/20 border-b border-white/10">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold text-white flex items-center space-x-3">
-            <i class="fas fa-chart-line text-yellow-400"></i>
-            <span>Your Interview Feedback</span>
-          </h2>
-          <div class="text-right">
-            <div class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              {{ ai_feedback.overall_score }}%
-            </div>
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Overall Score</div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="p-6 space-y-6">
-        
-        <!-- Visual Score Display -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <!-- Main Score Circle -->
-          <div class="flex items-center justify-center">
-            <div class="relative">
-              <svg class="w-48 h-48 transform -rotate-90" viewBox="0 0 120 120">
-                <circle class="stroke-white/10" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round"></circle>
-                <circle id="score-progress" class="transition-all duration-2000 ease-out" 
-                        cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round"
-                        style="stroke-dasharray: 314; stroke-dashoffset: 314;">
-                </circle>
-              </svg>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center">
-                  <div class="text-5xl font-bold text-white mb-1">{{ ai_feedback.overall_score }}</div>
-                  <div class="text-sm text-gray-400 uppercase tracking-wide">Score</div>
-                </div>
+    <div class="grid gap-4 lg:grid-cols-2">
+      <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+        <h2 class="text-sm font-semibold uppercase tracking-[0.15em] text-slate-300">Interview Stage Coverage</h2>
+        <div class="mt-3 space-y-2">
+          {% for stage, count in interview_metrics.stage_distribution.items %}
+            <div>
+              <div class="mb-1 flex justify-between text-xs text-slate-400">
+                <span>{{ stage }}</span>
+                <span>{{ count }}</span>
               </div>
-            </div>
-          </div>
-          
-          <!-- Score Breakdown -->
-          <div class="space-y-4">
-            <div class="glass-card rounded-xl p-4 border border-white/10">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-300">Communication</span>
-                <span class="text-lg font-bold text-blue-300">{{ ai_feedback.communication_score }}%</span>
+              <div class="h-2 rounded-full bg-slate-800">
+                <div class="h-2 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500" style="width: {% widthratio count interview_metrics.total_questions 100 %}%"></div>
               </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full transition-all duration-1000" 
-                     style="width: {{ ai_feedback.communication_score }}%"></div>
-              </div>
-            </div>
-            
-            <div class="glass-card rounded-xl p-4 border border-white/10">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-300">Confidence Level</span>
-                <span class="text-lg font-bold text-purple-300">{{ ai_feedback.confidence_level }}</span>
-              </div>
-              <div class="flex gap-1">
-                {% with confidence=ai_feedback.confidence_level|lower %}
-                  <div class="flex-1 h-2 rounded-full {% if confidence == 'excellent' or confidence == 'strong' or confidence == 'good' or confidence == 'developing' %}bg-purple-500{% else %}bg-white/10{% endif %}"></div>
-                  <div class="flex-1 h-2 rounded-full {% if confidence == 'excellent' or confidence == 'strong' or confidence == 'good' %}bg-purple-500{% else %}bg-white/10{% endif %}"></div>
-                  <div class="flex-1 h-2 rounded-full {% if confidence == 'excellent' or confidence == 'strong' %}bg-purple-500{% else %}bg-white/10{% endif %}"></div>
-                  <div class="flex-1 h-2 rounded-full {% if confidence == 'excellent' %}bg-purple-500{% else %}bg-white/10{% endif %}"></div>
-                {% endwith %}
-              </div>
-            </div>
-            
-            <div class="glass-card rounded-xl p-4 border border-white/10">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-300">Engagement</span>
-                <span class="text-lg font-bold text-emerald-300">{{ interview_metrics.engagement_score }}%</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-2">
-                <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 rounded-full transition-all duration-1000" 
-                     style="width: {{ interview_metrics.engagement_score }}%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Strengths Section -->
-        {% if ai_feedback.strengths %}
-        <div class="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-l-4 border-emerald-500 rounded-xl p-6">
-          <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-3">
-            <div class="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center border border-emerald-400/30">
-              <i class="fas fa-star text-emerald-400"></i>
-            </div>
-            <span>What You Did Well</span>
-          </h3>
-          <div class="space-y-3">
-            {% for strength in ai_feedback.strengths %}
-              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4 backdrop-blur-sm">
-                <i class="fas fa-check-circle text-emerald-400 text-lg mt-0.5 flex-shrink-0"></i>
-                <p class="text-gray-200 leading-relaxed">{{ strength }}</p>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-        
-        <!-- Areas for Improvement -->
-        {% if ai_feedback.areas_for_improvement %}
-        <div class="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-l-4 border-blue-500 rounded-xl p-6">
-          <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center border border-blue-400/30">
-              <i class="fas fa-arrow-trend-up text-blue-400"></i>
-            </div>
-            <span>Growth Opportunities</span>
-          </h3>
-          <div class="space-y-3">
-            {% for area in ai_feedback.areas_for_improvement %}
-              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4 backdrop-blur-sm">
-                <i class="fas fa-lightbulb text-blue-400 text-lg mt-0.5 flex-shrink-0"></i>
-                <p class="text-gray-200 leading-relaxed">{{ area }}</p>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-        
-        <!-- Technical Assessment -->
-        {% if ai_feedback.technical_assessment %}
-        <div class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-l-4 border-purple-500 rounded-xl p-6">
-          <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-3">
-            <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-400/30">
-              <i class="fas fa-code text-purple-400"></i>
-            </div>
-            <span>Technical Skills Assessment</span>
-          </h3>
-          <p class="text-gray-200 leading-relaxed pl-13">{{ ai_feedback.technical_assessment }}</p>
-        </div>
-        {% endif %}
-        
-        <!-- Recommendations -->
-        {% if ai_feedback.recommendations %}
-        <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-l-4 border-amber-500 rounded-xl p-6">
-          <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-3">
-            <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center border border-amber-400/30">
-              <i class="fas fa-tasks text-amber-400"></i>
-            </div>
-            <span>Action Steps for Improvement</span>
-          </h3>
-          <div class="space-y-3">
-            {% for recommendation in ai_feedback.recommendations %}
-              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4 backdrop-blur-sm">
-                <div class="w-6 h-6 bg-amber-500/30 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span class="text-amber-300 text-xs font-bold">{{ forloop.counter }}</span>
-                </div>
-                <p class="text-gray-200 leading-relaxed">{{ recommendation }}</p>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-        
-        <!-- Encouragement Note -->
-        {% if ai_feedback.encouragement_note %}
-        <div class="bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-white/20 relative overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 animate-pulse-subtle"></div>
-          <div class="relative z-10">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <i class="fas fa-heart text-white text-xl"></i>
-              </div>
-              <div class="flex-1">
-                <h4 class="text-lg font-bold text-white mb-2">You've Got This! 💪</h4>
-                <p class="text-gray-200 leading-relaxed text-base">{{ ai_feedback.encouragement_note }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-        
-      </div>
-    </article>
-
-    <!-- Session Statistics -->
-    <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up" style="animation-delay: 0.15s;">
-      <div class="p-6 bg-gradient-to-r from-slate-900/50 to-blue-900/20 border-b border-white/10">
-        <h2 class="text-xl font-bold text-white flex items-center space-x-3">
-          <i class="fas fa-chart-bar text-blue-400"></i>
-          <span>Interview Statistics</span>
-        </h2>
-      </div>
-      
-      <div class="p-6">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="glass-card rounded-xl p-4 border border-white/10 text-center">
-            <i class="fas fa-clock text-blue-400 text-2xl mb-2"></i>
-            <div class="text-2xl font-bold text-white mb-1">
-              {{ interview_metrics.duration_minutes|default:"N/A" }}
-              {% if interview_metrics.duration_minutes %}min{% endif %}
-            </div>
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Duration</div>
-          </div>
-          
-          <div class="glass-card rounded-xl p-4 border border-white/10 text-center">
-            <i class="fas fa-question-circle text-indigo-400 text-2xl mb-2"></i>
-            <div class="text-2xl font-bold text-white mb-1">
-              {{ interview_metrics.total_questions|default:"0" }}
-            </div>
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Questions</div>
-          </div>
-          
-          <div class="glass-card rounded-xl p-4 border border-white/10 text-center">
-            <i class="fas fa-comment text-purple-400 text-2xl mb-2"></i>
-            <div class="text-2xl font-bold text-white mb-1">
-              {{ interview_metrics.total_words|default:"0" }}
-            </div>
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Total Words</div>
-          </div>
-          
-          <div class="glass-card rounded-xl p-4 border border-white/10 text-center">
-            <i class="fas fa-chart-line text-emerald-400 text-2xl mb-2"></i>
-            <div class="text-2xl font-bold text-white mb-1">
-              {{ interview_metrics.avg_response_length|default:"0" }}
-            </div>
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Avg Response</div>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- Interview Transcript -->
-    <article class="glass-card rounded-2xl overflow-hidden mb-6 animate-slide-up" style="animation-delay: 0.2s;">
-      <div class="p-6 bg-gradient-to-r from-slate-900/50 to-green-900/20 border-b border-white/10">
-        <h2 class="text-xl font-bold text-white flex items-center space-x-3">
-          <i class="fas fa-comments text-green-400"></i>
-          <span>Interview Transcript</span>
-        </h2>
-      </div>
-      
-      <div class="p-0">
-        <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
-          {% for turn in turns %}
-            {% if turn.ai_question %}
-              <div class="border-b border-white/10 p-4 bg-purple-500/5 hover:bg-purple-500/10 transition-colors">
-                <div class="flex gap-4">
-                  <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-400/30">
-                      <i class="fas fa-robot text-purple-400"></i>
-                    </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="text-sm font-semibold text-purple-300">Sarah (AI Interviewer)</span>
-                      <span class="text-xs text-gray-500">Q{{ turn.turn_number }}</span>
-                    </div>
-                    <p class="text-sm text-gray-300 leading-relaxed">{{ turn.ai_question }}</p>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-            
-            {% if turn.user_answer %}
-              <div class="border-b border-white/10 p-4 bg-blue-500/5 hover:bg-blue-500/10 transition-colors">
-                <div class="flex gap-4">
-                  <div class="flex-shrink-0">
-                    <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-400/30">
-                      <i class="fas fa-user text-blue-400"></i>
-                    </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-2">
-                      <span class="text-sm font-semibold text-blue-300">You</span>
-                      <span class="text-xs text-gray-500">
-                        {{ turn.user_answer|wordcount }} words
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-300 leading-relaxed">{{ turn.user_answer }}</p>
-                  </div>
-                </div>
-              </div>
-            {% endif %}
-          {% empty %}
-            <div class="text-center py-12 px-4">
-              <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-comment-slash text-gray-400 text-2xl"></i>
-              </div>
-              <h3 class="text-lg font-semibold text-white mb-2">No Transcript Available</h3>
-              <p class="text-gray-400">The interview transcript could not be loaded.</p>
             </div>
           {% endfor %}
         </div>
+      </article>
+
+      <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+        <h2 class="text-sm font-semibold uppercase tracking-[0.15em] text-slate-300">Session Metrics</h2>
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div class="rounded-lg bg-slate-800 p-3">
+            <p class="text-xs text-slate-500">Questions</p>
+            <p class="text-lg text-slate-100">{{ interview_metrics.total_questions }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-800 p-3">
+            <p class="text-xs text-slate-500">Total Words</p>
+            <p class="text-lg text-slate-100">{{ interview_metrics.total_words }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-800 p-3">
+            <p class="text-xs text-slate-500">Avg Response</p>
+            <p class="text-lg text-slate-100">{{ interview_metrics.avg_response_length }}</p>
+          </div>
+          <div class="rounded-lg bg-slate-800 p-3">
+            <p class="text-xs text-slate-500">Engagement</p>
+            <p class="text-lg text-slate-100">{{ interview_metrics.engagement_score }}%</p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+      <h2 class="text-lg font-semibold text-slate-100">Transcript</h2>
+      <div class="mt-3 max-h-[460px] space-y-3 overflow-y-auto">
+        {% for turn in turns %}
+          {% if turn.ai_question %}
+            <div class="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-sm text-slate-100">
+              <p class="mb-1 text-xs font-semibold text-cyan-300">Elevo (Q{{ turn.turn_number }})</p>
+              <p>{{ turn.ai_question }}</p>
+            </div>
+          {% endif %}
+          {% if turn.user_answer %}
+            <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-slate-100">
+              <p class="mb-1 text-xs font-semibold text-emerald-300">You</p>
+              <p>{{ turn.user_answer }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
       </div>
     </article>
 
-    <!-- Action Buttons -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center no-print animate-fade-in">
-      <a href="{% url 'mock_interview:my_mock_interviews' %}" 
-         class="inline-flex items-center justify-center gap-2 px-6 py-3 glass-card text-gray-300 hover:text-white rounded-xl font-medium hover:bg-white/10 transition-all duration-200 min-w-[200px]">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back to Interviews</span>
-      </a>
-      
-      <a href="{% url 'mock_interview:interview_setup' %}" 
-         class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[200px]">
-        <i class="fas fa-redo-alt"></i>
-        <span>Practice Again</span>
-      </a>
-      
-      <button onclick="window.print()" 
-              class="inline-flex items-center justify-center gap-2 px-6 py-3 glass-card text-blue-300 border border-blue-400/30 hover:bg-blue-500/20 rounded-xl font-medium transition-all duration-200 min-w-[200px]">
-        <i class="fas fa-print"></i>
-        <span>Print Report</span>
-      </button>
-    </div>
+    <footer class="flex flex-wrap gap-2">
+      <a href="{% url 'mock_interview:my_mock_interviews' %}" class="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-slate-200 hover:bg-white/10">Back to History</a>
+      <a href="{% url 'mock_interview:interview_setup' %}" class="rounded-lg bg-cyan-600 px-4 py-2 text-white hover:bg-cyan-500">Practice Again</a>
+    </footer>
   </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('MockMate Interview Review initialized');
-  
-  // Animate the score circle
-  const scoreProgress = document.getElementById('score-progress');
-  if (scoreProgress) {
-    const score = {{ ai_feedback.overall_score|default:75 }};
-    const circumference = 314; // 2 * π * 50
-    const offset = circumference - (score / 100) * circumference;
-    
-    // Determine color based on score
-    let colorClass = 'stroke-blue-500';
-    if (score >= 85) {
-      colorClass = 'stroke-emerald-500';
-    } else if (score >= 70) {
-      colorClass = 'stroke-blue-500';
-    } else if (score >= 50) {
-      colorClass = 'stroke-amber-500';
-    } else {
-      colorClass = 'stroke-red-500';
-    }
-    
-    scoreProgress.classList.add(colorClass);
-    
-    // Animate the circle after a delay
-    setTimeout(() => {
-      scoreProgress.style.strokeDashoffset = offset;
-    }, 500);
-  }
-  
-  // Stagger animations for cards
-  const cards = document.querySelectorAll('.animate-slide-up');
-  cards.forEach((card, index) => {
-    card.style.animationDelay = `${index * 0.1}s`;
-  });
-  
-  // Animate progress bars
-  setTimeout(() => {
-    const progressBars = document.querySelectorAll('[style*="width"]');
-    progressBars.forEach(bar => {
-      if (bar.classList.contains('bg-gradient-to-r')) {
-        const width = bar.style.width;
-        bar.style.width = '0%';
-        setTimeout(() => {
-          bar.style.width = width;
-        }, 100);
-      }
-    });
-  }, 600);
-  
-  // Handle print functionality
-  window.addEventListener('beforeprint', function() {
-    console.log('Preparing document for printing...');
-  });
-  
-  window.addEventListener('afterprint', function() {
-    console.log('Print dialog closed');
-  });
-});
-
-// Smooth scroll to sections
-function scrollToSection(sectionId) {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-
-// Copy transcript functionality (optional enhancement)
-function copyTranscript() {
-  const transcriptElements = document.querySelectorAll('.transcript-container p');
-  let transcriptText = '';
-  
-  transcriptElements.forEach((el) => {
-    transcriptText += el.textContent + '\n\n';
-  });
-  
-  navigator.clipboard.writeText(transcriptText).then(() => {
-    showNotification('Transcript copied to clipboard!', 'success');
-  }).catch((err) => {
-    console.error('Failed to copy transcript:', err);
-    showNotification('Failed to copy transcript', 'error');
-  });
-}
-
-// Notification system (optional)
-function showNotification(message, type = 'info') {
-  const notification = document.createElement('div');
-  notification.className = `fixed top-4 right-4 z-50 glass-card rounded-lg p-4 flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
-  
-  const icons = {
-    success: 'fas fa-check-circle text-green-400',
-    error: 'fas fa-exclamation-circle text-red-400',
-    info: 'fas fa-info-circle text-blue-400',
-    warning: 'fas fa-exclamation-triangle text-yellow-400'
-  };
-  
-  notification.innerHTML = `
-    <i class="${icons[type]} text-xl"></i>
-    <span class="text-white font-medium">${message}</span>
-    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-white ml-2">
-      <i class="fas fa-times"></i>
-    </button>
-  `;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.classList.remove('translate-x-full');
-  }, 100);
-  
-  setTimeout(() => {
-    notification.classList.add('translate-x-full');
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
-}
-
-// Export functionality (optional enhancement)
-function exportToJSON() {
-  const sessionData = {
-    session_id: {{ session.id }},
-    job_role: "{{ session.job_role|escapejs }}",
-    date: "{{ session.start_time|date:'Y-m-d H:i:s' }}",
-    overall_score: {{ ai_feedback.overall_score|default:0 }},
-    communication_score: {{ ai_feedback.communication_score|default:0 }},
-    confidence_level: "{{ ai_feedback.confidence_level|default:'N/A'|escapejs }}",
-    duration_minutes: {{ interview_metrics.duration_minutes|default:0 }},
-    total_questions: {{ interview_metrics.total_questions|default:0 }},
-    total_words: {{ interview_metrics.total_words|default:0 }},
-    feedback: {
-      strengths: {{ ai_feedback.strengths|safe|default:'[]' }},
-      areas_for_improvement: {{ ai_feedback.areas_for_improvement|safe|default:'[]' }},
-      recommendations: {{ ai_feedback.recommendations|safe|default:'[]' }},
-      technical_assessment: "{{ ai_feedback.technical_assessment|default:''|escapejs }}",
-      encouragement: "{{ ai_feedback.encouragement_note|default:''|escapejs }}"
-    }
-  };
-  
-  const dataStr = JSON.stringify(sessionData, null, 2);
-  const dataBlob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `interview-report-${sessionData.session_id}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-  
-  showNotification('Report exported successfully!', 'success');
-}
-
-// Share functionality (optional)
-async function shareReport() {
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'MockMate Interview Report',
-        text: `I completed a mock interview for {{ session.job_role }} and scored {{ ai_feedback.overall_score }}%!`,
-        url: window.location.href
-      });
-      console.log('Report shared successfully');
-    } catch (err) {
-      console.log('Error sharing:', err);
-    }
-  } else {
-    showNotification('Sharing not supported on this browser', 'warning');
-  }
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Ctrl/Cmd + P for print
-  if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-    e.preventDefault();
-    window.print();
-  }
-  
-  // Escape to scroll to top
-  if (e.key === 'Escape') {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-});
-
-// Performance monitoring
-if (window.performance && window.performance.timing) {
-  window.addEventListener('load', function() {
-    const loadTime = window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart;
-    console.log(`Page loaded in ${loadTime}ms`);
-  });
-}
-</script>
+</section>
 {% endblock %}

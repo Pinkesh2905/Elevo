@@ -32,7 +32,7 @@ class Command(BaseCommand):
         admin_user, created = User.objects.get_or_create(
             username='admin',
             defaults={
-                'email': 'admin@mockmate.com',
+                'email': 'admin@elevo.com',
                 'is_staff': True,
                 'is_superuser': True
             }

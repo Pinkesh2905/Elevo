@@ -1,0 +1,64 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Quiz Result | Elevo{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+    <div>
+      <h1 class="text-3xl font-bold text-white">Quiz Result · Attempt #{{ attempt.id }}</h1>
+      <p class="text-slate-300 mt-1">Submitted {{ attempt.submitted_at|date:"M d, Y H:i" }} · Status: {{ attempt.get_status_display }}</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'aptitude:dashboard' %}" class="px-4 py-2 rounded-xl border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Dashboard</a>
+      <a href="{% url 'aptitude:start_quiz' %}" onclick="event.preventDefault(); document.getElementById('start-form').submit();" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 text-white font-semibold">Retake</a>
+      <form id="start-form" method="post" action="{% url 'aptitude:start_quiz' %}" class="hidden">{% csrf_token %}</form>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Score</p><p class="text-2xl font-bold text-white">{{ attempt.score_percent }}%</p></div>
+    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Correct</p><p class="text-2xl font-bold text-white">{{ attempt.correct_answers }}</p></div>
+    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Attempted</p><p class="text-2xl font-bold text-white">{{ attempt.attempted_questions }}</p></div>
+    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Total</p><p class="text-2xl font-bold text-white">{{ attempt.total_questions }}</p></div>
+    <div class="rounded-xl border border-emerald-500/35 bg-emerald-500/10 p-4"><p class="text-xs text-emerald-200">Achievement</p><p class="text-lg font-semibold text-emerald-300">{{ attempt.achievement_label }}</p></div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
+    <div class="xl:col-span-2 rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
+      <h2 class="text-xl font-semibold text-white mb-4">Question Review</h2>
+      <div class="space-y-3 max-h-[620px] overflow-y-auto pr-1">
+        {% for r in responses %}
+          <article class="rounded-xl border {% if r.is_correct %}border-emerald-500/30 bg-emerald-500/10{% elif r.selected_option %}border-red-500/30 bg-red-500/10{% else %}border-yellow-500/30 bg-yellow-500/10{% endif %} p-4">
+            <p class="text-xs text-slate-300 mb-1">{{ r.problem.topic.category.name }} / {{ r.problem.topic.name }}</p>
+            <h3 class="text-sm font-semibold text-white mb-2">{{ r.problem.question_text }}</h3>
+            <p class="text-xs text-slate-300">Your answer: {{ r.selected_option|default:'Not Answered' }}</p>
+            <p class="text-xs text-slate-300">Correct answer: {{ r.problem.correct_option }}</p>
+            {% if r.problem.explanation %}<p class="text-xs text-slate-400 mt-2">{{ r.problem.explanation }}</p>{% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
+      <h2 class="text-xl font-semibold text-white mb-4">Category Insights</h2>
+      <div class="space-y-3">
+        {% for i in insights %}
+          <div class="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+            <div class="flex items-center justify-between mb-1">
+              <p class="text-sm text-slate-200">{{ i.name }}</p>
+              <p class="text-xs text-slate-400">{{ i.correct }}/{{ i.attempted }}</p>
+            </div>
+            <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div class="h-2 bg-gradient-to-r from-sky-500 to-teal-500" style="width: {{ i.accuracy }}%"></div>
+            </div>
+            <p class="text-xs text-teal-300 mt-1">{{ i.accuracy }}%</p>
+          </div>
+        {% empty %}
+          <p class="text-sm text-slate-400">No answered questions to compute insights.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

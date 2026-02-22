@@ -2,17 +2,17 @@
 {% load static %}
 {% load form_filters %} {# For add_class and add_attr filters #}
 
-{% block title %}Login | MockMate{% endblock %}
+{% block title %}Login | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 relative overflow-hidden">
+<section class="min-h-screen bg-gradient-to-br from-teal-400 via-emerald-500 to-emerald-500 relative overflow-hidden">
   <!-- Enhanced Animated Background Elements -->
   <div class="absolute inset-0 overflow-hidden">
     <div class="floating-element absolute top-20 left-10 w-20 h-20 bg-white/20 rounded-full blur-xl"></div>
     <div class="floating-element absolute top-40 right-20 w-32 h-32 bg-yellow-300/30 rounded-full blur-2xl animation-delay-1000"></div>
-    <div class="floating-element absolute bottom-32 left-20 w-24 h-24 bg-blue-400/25 rounded-full blur-xl animation-delay-2000"></div>
+    <div class="floating-element absolute bottom-32 left-20 w-24 h-24 bg-sky-400/25 rounded-full blur-xl animation-delay-2000"></div>
     <div class="floating-element absolute bottom-20 right-32 w-16 h-16 bg-green-300/30 rounded-full blur-lg animation-delay-3000"></div>
-    <div class="floating-element absolute top-1/2 left-1/4 w-12 h-12 bg-indigo-300/20 rounded-full blur-md animation-delay-4000"></div>
+    <div class="floating-element absolute top-1/2 left-1/4 w-12 h-12 bg-sky-300/20 rounded-full blur-md animation-delay-4000"></div>
     <div class="floating-element absolute top-1/3 right-1/3 w-28 h-28 bg-rose-300/15 rounded-full blur-2xl animation-delay-5000"></div>
   </div>
 
@@ -22,10 +22,10 @@
       <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 transform hover:scale-105 transition-all duration-300 animate-fade-in-up">
         <!-- Header with animated icon -->
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-6 shadow-lg animate-bounce-slow">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full mb-6 shadow-lg animate-bounce-slow">
             <i class="ri-user-smile-line text-3xl text-white"></i>
           </div>
-          <h1 class="text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent mb-2 animate-gradient">
+          <h1 class="text-4xl font-black bg-gradient-to-r from-teal-600 via-emerald-600 to-emerald-600 bg-clip-text text-transparent mb-2 animate-gradient">
             Welcome Back! 
           </h1>
           <div class="flex items-center justify-center gap-2 mb-4">
@@ -43,7 +43,7 @@
                 {% if message.tags == 'success' %}bg-green-50 text-green-800 border-green-400 shadow-green-100
                 {% elif message.tags == 'error' %}bg-red-50 text-red-800 border-red-400 shadow-red-100
                 {% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-800 border-yellow-400 shadow-yellow-100
-                {% else %}bg-blue-50 text-blue-800 border-blue-400 shadow-blue-100{% endif %} shadow-lg">
+                {% else %}bg-sky-50 text-sky-800 border-sky-400 shadow-blue-100{% endif %} shadow-lg">
                 <div class="flex items-center gap-2">
                   {% if message.tags == 'success' %}<i class="ri-check-circle-line text-lg animate-bounce"></i>
                   {% elif message.tags == 'error' %}<i class="ri-error-warning-line text-lg animate-pulse"></i>
@@ -56,8 +56,10 @@
           </div>
         {% endif %}
 
-        <form method="POST" action="{% url 'login' %}" class="space-y-6" novalidate>
+        <form method="POST" action="{% url 'login' %}" class="space-y-6" novalidate autocomplete="off">
           {% csrf_token %}
+          <input type="text" name="fake_username" autocomplete="username" class="hidden" tabindex="-1" aria-hidden="true">
+          <input type="password" name="fake_password" autocomplete="current-password" class="hidden" tabindex="-1" aria-hidden="true">
 
           {% if form.non_field_errors %}
             <div class="bg-red-50 border border-red-200 rounded-2xl p-4 animate-shake">
@@ -75,13 +77,13 @@
           <!-- Username Field -->
           <div class="form-group">
             <label for="{{ form.username.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-              <i class="ri-user-line text-purple-500"></i>
+              <i class="ri-user-line text-teal-500"></i>
               Username
             </label>
             <div class="relative group">
-              {{ form.username|add_attr:"autofocus=true"|add_attr:"placeholder=Enter your username"|add_class:"w-full px-4 py-4 pl-12 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-gray-50 hover:bg-white text-lg font-medium group-hover:border-purple-300" }}
-              <i class="ri-user-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-purple-500 transition-colors duration-300"></i>
-              <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              {{ form.username|add_attr:"autofocus=true"|add_attr:"autocomplete=off"|add_attr:"autocapitalize=none"|add_attr:"spellcheck=false"|add_attr:"readonly=true"|add_attr:"onfocus=this.removeAttribute('readonly')"|add_attr:"placeholder=Enter your username"|add_class:"w-full px-4 py-4 pl-12 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 transition-all duration-300 bg-gray-50 hover:bg-white text-lg font-medium group-hover:border-teal-300" }}
+              <i class="ri-user-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-teal-500 transition-colors duration-300"></i>
+              <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-teal-500/10 to-emerald-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             {% if form.username.errors %}
               <div class="mt-2 animate-fade-in">
@@ -98,17 +100,17 @@
           <!-- Password Field -->
           <div class="form-group">
             <label for="{{ form.password.id_for_label }}" class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-              <i class="ri-lock-line text-purple-500"></i>
+              <i class="ri-lock-line text-teal-500"></i>
               Password
             </label>
             <div class="relative group">
-              {{ form.password|add_attr:"placeholder=Enter your password"|add_class:"w-full px-4 py-4 pl-12 pr-12 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-gray-50 hover:bg-white text-lg font-medium group-hover:border-purple-300" }}
-              <i class="ri-lock-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-purple-500 transition-colors duration-300"></i>
+              {{ form.password|add_attr:"autocomplete=off"|add_attr:"readonly=true"|add_attr:"onfocus=this.removeAttribute('readonly')"|add_attr:"placeholder=Enter your password"|add_class:"w-full px-4 py-4 pl-12 pr-12 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 transition-all duration-300 bg-gray-50 hover:bg-white text-lg font-medium group-hover:border-teal-300" }}
+              <i class="ri-lock-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg group-focus-within:text-teal-500 transition-colors duration-300"></i>
               <!-- Password Toggle Button (Optional enhancement) -->
-              <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-500 transition-colors duration-300 focus:outline-none" onclick="togglePassword('{{ form.password.id_for_label }}')">
+              <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-teal-500 transition-colors duration-300 focus:outline-none" onclick="togglePassword('{{ form.password.id_for_label }}')">
                 <i class="ri-eye-line text-lg" id="password-toggle-icon"></i>
               </button>
-              <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-teal-500/10 to-emerald-500/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             </div>
             {% if form.password.errors %}
               <div class="mt-2 animate-fade-in">
@@ -127,23 +129,23 @@
             <label class="flex items-center gap-3 cursor-pointer group">
               <input type="checkbox" name="remember_me" class="sr-only">
               <div class="relative">
-                <div class="w-5 h-5 border-2 border-gray-300 rounded group-hover:border-purple-400 transition-colors duration-200"></div>
+                <div class="w-5 h-5 border-2 border-gray-300 rounded group-hover:border-teal-400 transition-colors duration-200"></div>
                 <i class="ri-check-line absolute inset-0 text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center"></i>
               </div>
-              <span class="text-sm text-gray-600 font-medium group-hover:text-purple-600 transition-colors duration-200">Remember me</span>
+              <span class="text-sm text-gray-600 font-medium group-hover:text-teal-600 transition-colors duration-200">Remember me</span>
             </label>
-            <a href="#" class="text-sm font-medium text-purple-600 hover:text-pink-600 transition-colors duration-300 hover:underline">
+            <a href="#" class="text-sm font-medium text-teal-600 hover:text-emerald-600 transition-colors duration-300 hover:underline">
               Forgot password?
             </a>
           </div>
 
           <!-- Enhanced Login Button -->
-          <button type="submit" class="w-full group relative overflow-hidden px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-purple-500/25 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-300 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="submit" class="w-full group relative overflow-hidden px-8 py-4 bg-gradient-to-r from-teal-600 via-emerald-600 to-emerald-600 text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-teal-500/25 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-teal-300 disabled:opacity-50 disabled:cursor-not-allowed">
             <span class="relative z-10 flex items-center justify-center gap-3">
               <span class="login-text">Let's Go!</span>
               <i class="ri-rocket-line text-xl group-hover:animate-pulse"></i>
             </span>
-            <div class="absolute inset-0 bg-gradient-to-r from-purple-700 via-pink-700 to-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-teal-700 via-emerald-700 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="absolute -top-2 -left-2 w-4 h-4 bg-white/30 rounded-full animate-ping opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
           </button>
@@ -156,11 +158,11 @@
               <div class="w-full border-t border-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-4 bg-white text-gray-500 font-medium">New to MockMate?</span>
+              <span class="px-4 bg-white text-gray-500 font-medium">New to Elevo?</span>
             </div>
           </div>
           <div class="mt-4">
-            <a href="{% url 'users:signup' %}" class="inline-flex items-center gap-2 font-bold text-purple-600 hover:text-pink-600 transition-all duration-300 group hover:scale-105">
+            <a href="{% url 'users:signup' %}" class="inline-flex items-center gap-2 font-bold text-teal-600 hover:text-emerald-600 transition-all duration-300 group hover:scale-105">
               <span>Join the community</span>
               <i class="ri-arrow-right-line group-hover:translate-x-2 transition-transform duration-300"></i>
             </a>
@@ -181,8 +183,8 @@
             <button class="p-3 bg-gray-100 hover:bg-red-50 rounded-full transition-all duration-300 group hover:scale-110">
               <i class="ri-google-line text-xl text-red-500 group-hover:animate-pulse"></i>
             </button>
-            <button class="p-3 bg-gray-100 hover:bg-blue-50 rounded-full transition-all duration-300 group hover:scale-110">
-              <i class="ri-linkedin-line text-xl text-blue-600 group-hover:animate-pulse"></i>
+            <button class="p-3 bg-gray-100 hover:bg-sky-50 rounded-full transition-all duration-300 group hover:scale-110">
+              <i class="ri-linkedin-line text-xl text-sky-600 group-hover:animate-pulse"></i>
             </button>
             <button class="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-300 group hover:scale-110">
               <i class="ri-github-line text-xl text-gray-800 group-hover:animate-pulse"></i>

@@ -10,7 +10,7 @@
         {% if messages %}
             <div class="mb-6">
                 {% for message in messages %}
-                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-blue-100 text-blue-800 {% endif %}" role="alert">
+                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-sky-100 text-sky-800 {% endif %}" role="alert">
                         <p class="font-medium">{{ message }}</p>
                     </div>
                 {% endfor %}
@@ -19,8 +19,8 @@
 
         <div class="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10">
             <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-5">
-                    <svg class="h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-sky-100 mb-5">
+                    <svg class="h-10 w-10 text-sky-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" />
                     </svg>                                                       
                 </div>
@@ -56,13 +56,13 @@
 
                 <div class="text-center text-sm text-gray-500">
                     <span>This code will expire in </span>
-                    <span id="timer" class="font-bold text-blue-600" data-expires-in="{{ expires_in|floatformat:0 }}">
+                    <span id="timer" class="font-bold text-sky-600" data-expires-in="{{ expires_in|floatformat:0 }}">
                         --:--
                     </span>
                 </div>
 
                 <div>
-                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors duration-300">
                         Verify Code
                     </button>
                 </div>
@@ -71,7 +71,7 @@
             <div class="mt-6 text-center">
                 <p class="text-sm text-gray-600">
                     Didn't get the code?
-                    <a href="{% url 'users:forgot_password' %}" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+                    <a href="{% url 'users:forgot_password' %}" class="font-medium text-sky-600 hover:text-sky-500 hover:underline">
                         Start over
                     </a>
                 </p>

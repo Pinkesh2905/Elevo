@@ -1,4 +1,4 @@
-# MockMate 🎯
+# Elevo 🎯
 
 *A Django-based learning platform for practice problems, quizzes, video-based courses, and AI-powered mock interviews.*
 
@@ -11,7 +11,7 @@ Some modules are functional, while others are under construction.
 
 ## 📖 Overview
 
-MockMate is an advanced online learning platform designed to help students practice coding, test their knowledge through quizzes, learn from video-based lessons, and prepare for interviews with AI assistance.
+Elevo is an advanced online learning platform designed to help students practice coding, test their knowledge through quizzes, learn from video-based lessons, and prepare for interviews with AI assistance.
 It takes inspiration from platforms like **GeeksforGeeks** & **Coursera**, but with unique features like adaptive learning, personalized progress tracking, and social post sharing.
 
 ---
@@ -43,7 +43,7 @@ It takes inspiration from platforms like **GeeksforGeeks** & **Coursera**, but w
 ## 📂 Project Structure
 
 ```
-mockmate/
+elevo/
 │── core/           # Global features & search
 │── courses/        # Courses & video lessons
 │── quizzes/        # Quizzes & certificates
@@ -71,8 +71,8 @@ mockmate/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mockmate.git
-cd mockmate
+git clone https://github.com/yourusername/elevo.git
+cd elevo
 
 # Create virtual environment
 python -m venv myenv

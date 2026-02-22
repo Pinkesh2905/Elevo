@@ -8,9 +8,9 @@
 
   <!-- Tabs -->
   <div class="flex space-x-4 border-b pb-2 mb-6">
-    <a href="?tab=topics" class="px-3 py-2 rounded-lg text-sm font-medium {% if active_tab == 'topics' %}bg-blue-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">Topics</a>
-    <a href="?tab=problems" class="px-3 py-2 rounded-lg text-sm font-medium {% if active_tab == 'problems' %}bg-blue-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">Problems</a>
-    <a href="?tab=sets" class="px-3 py-2 rounded-lg text-sm font-medium {% if active_tab == 'sets' %}bg-blue-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">Practice Sets</a>
+    <a href="?tab=topics" class="px-3 py-2 rounded-lg text-sm font-medium {% if active_tab == 'topics' %}bg-sky-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">Topics</a>
+    <a href="?tab=problems" class="px-3 py-2 rounded-lg text-sm font-medium {% if active_tab == 'problems' %}bg-sky-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">Problems</a>
+    <a href="?tab=sets" class="px-3 py-2 rounded-lg text-sm font-medium {% if active_tab == 'sets' %}bg-sky-600 text-white{% else %}text-gray-600 hover:bg-gray-100{% endif %}">Practice Sets</a>
   </div>
 
   <!-- Topic Management -->
@@ -20,7 +20,7 @@
     <form method="post" class="flex items-center space-x-3">
       {% csrf_token %}
       {{ topic_form.name|add_class:"flex-1 border-gray-300 rounded-lg" }}
-      <button type="submit" name="add_topic" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add</button>
+      <button type="submit" name="add_topic" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">Add</button>
     </form>
 
     <ul class="mt-6 space-y-2">
@@ -69,7 +69,7 @@
         <label class="block text-sm font-medium">Explanation (optional)</label>
         {{ problem_form.explanation|add_class:"w-full border-gray-300 rounded-lg" }}
       </div>
-      <button type="submit" name="add_problem" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add Problem</button>
+      <button type="submit" name="add_problem" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">Add Problem</button>
     </form>
 
     <ul class="mt-6 space-y-2">
@@ -103,7 +103,7 @@
         <label class="block text-sm font-medium">Select Problems</label>
         {{ set_form.problems|add_class:"w-full border-gray-300 rounded-lg h-40" }}
       </div>
-      <button type="submit" name="add_set" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Create Set</button>
+      <button type="submit" name="add_set" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">Create Set</button>
     </form>
 
     <ul class="mt-6 space-y-2">

@@ -1,4 +1,6 @@
 import json
+import ast
+import re
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -21,6 +23,175 @@ from django.conf import settings
 JD_CLIENT_ID = getattr(settings, 'JDOODLE_CLIENT_ID', None)
 JD_CLIENT_SECRET = getattr(settings, 'JDOODLE_CLIENT_SECRET', None)
 JD_EXECUTE_URL = "https://api.jdoodle.com/v1/execute"
+
+
+def _parse_structured_value(text):
+    """
+    Parse output/expected strings into comparable Python values.
+    Supports JSON-like and Python-literal-like values.
+    """
+    value = (text or "").strip()
+    if value == "":
+        return ""
+
+    low = value.lower()
+    if low == "true":
+        return True
+    if low == "false":
+        return False
+    if low in {"null", "none"}:
+        return None
+
+    try:
+        return json.loads(value)
+    except Exception:
+        pass
+
+    try:
+        return ast.literal_eval(value)
+    except Exception:
+        return value
+
+
+def _is_two_sum_problem(problem):
+    """
+    Identify Two Sum robustly by canonical number/title/slug.
+    """
+    if not problem:
+        return False
+    title = (problem.title or "").strip().lower()
+    slug = (problem.slug or "").strip().lower()
+    return problem.problem_number == 1 or title == "two sum" or "two-sum" in slug
+
+
+def _validate_two_sum_output(output, test_input):
+    """
+    Validate any correct index pair for Two Sum.
+    Returns:
+      True/False when validation is possible,
+      None when input/output cannot be parsed.
+    """
+    try:
+        lines = [ln.strip() for ln in (test_input or "").splitlines() if ln.strip()]
+        if len(lines) < 2:
+            return None
+
+        nums = _parse_structured_value(lines[0])
+        target = _parse_structured_value(lines[1])
+        ans = _parse_structured_value(output)
+
+        if not isinstance(nums, list) or len(nums) < 2:
+            return None
+        if not isinstance(target, int):
+            try:
+                target = int(target)
+            except Exception:
+                return None
+        if not isinstance(ans, list) or len(ans) != 2:
+            return False
+
+        i, j = ans[0], ans[1]
+        if not isinstance(i, int) or not isinstance(j, int):
+            return False
+        if i == j:
+            return False
+        if i < 0 or j < 0 or i >= len(nums) or j >= len(nums):
+            return False
+
+        return nums[i] + nums[j] == target
+    except Exception:
+        return None
+
+
+def outputs_match(output, expected, problem=None, test_input=None):
+    """
+    Compare output and expected values with tolerant normalization.
+    """
+    if _is_two_sum_problem(problem):
+        valid = _validate_two_sum_output(output, test_input)
+        if valid is not None:
+            return valid
+
+    left = _parse_structured_value(output)
+    right = _parse_structured_value(expected)
+    return left == right
+
+
+def _extract_python_function_name(code):
+    """
+    Return first top-level function name from user code.
+    """
+    match = re.search(r"^\s*def\s+([A-Za-z_]\w*)\s*\(", code or "", re.MULTILINE)
+    return match.group(1) if match else None
+
+
+def _should_wrap_python_function(code):
+    """
+    Detect LeetCode-style function-only submissions.
+    """
+    text = code or ""
+    return (
+        "def " in text
+        and "input(" not in text
+        and "sys.stdin" not in text
+        and "__name__" not in text
+    )
+
+
+def _build_python_harness(code, stdin):
+    """
+    Wrap function-only Python submissions so students only fill the placeholder.
+    Reads each stdin line as one argument and prints normalized output.
+    """
+    fn_name = _extract_python_function_name(code)
+    if not fn_name:
+        return code
+
+    stdin_literal = repr(stdin or "")
+    harness = f"""
+
+import ast as __ast
+import json as __json
+
+def __parse_arg(__line):
+    __line = (__line or "").strip()
+    if __line == "":
+        return ""
+    __low = __line.lower()
+    if __low == "true":
+        return True
+    if __low == "false":
+        return False
+    if __low in ("null", "none"):
+        return None
+    try:
+        return __json.loads(__line)
+    except Exception:
+        pass
+    try:
+        return __ast.literal_eval(__line)
+    except Exception:
+        return __line
+
+__raw = {stdin_literal}
+__args = [__parse_arg(__ln) for __ln in __raw.splitlines() if __ln.strip() != ""]
+__fn = {fn_name}
+
+try:
+    __result = __fn(*__args)
+except TypeError:
+    __result = __fn(__args)
+
+if isinstance(__result, bool):
+    print("true" if __result else "false")
+elif __result is None:
+    print("null")
+elif isinstance(__result, (list, dict)):
+    print(__json.dumps(__result, separators=(",", ":")))
+else:
+    print(__result)
+"""
+    return (code or "") + harness
 
 
 def problem_list(request):
@@ -197,7 +368,7 @@ def run_code(request, slug):
         
         output = result['output']
         expected = tc.expected_output.strip()
-        passed = (output.strip() == expected)
+        passed = outputs_match(output, expected, problem=problem, test_input=tc.input_data)
         
         if not passed:
             all_passed = False
@@ -285,7 +456,7 @@ def submit_code(request, slug):
         output = result['output']
         expected = tc.expected_output.strip()
         
-        if output.strip() == expected:
+        if outputs_match(output, expected, problem=problem, test_input=tc.input_data):
             passed_count += 1
         else:
             if not failed_test_case:
@@ -355,13 +526,20 @@ def execute_code_jdoodle(code, language, stdin):
             'details': ''
         }
     
+    script = code
+    stdin_value = stdin
+    if language == "python3" and _should_wrap_python_function(code):
+        script = _build_python_harness(code, stdin)
+        # Harness consumes prepared stdin embedded in the script.
+        stdin_value = ""
+
     payload = {
         "clientId": JD_CLIENT_ID,
         "clientSecret": JD_CLIENT_SECRET,
-        "script": code,
+        "script": script,
         "language": language,
         "versionIndex": "0",
-        "stdin": stdin
+        "stdin": stdin_value
     }
     
     try:

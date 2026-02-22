@@ -4,11 +4,11 @@
   <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
-        <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl flex items-center justify-center mr-4">
+        <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
           <i class="ri-building-line text-3xl text-orange-400"></i>
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400 brand-font">
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-emerald-400 brand-font">
             {% if edit_coding_company_id %}Edit{% else %}Add{% endif %} Company
           </h2>
           <p class="text-sm text-slate-400 mt-1">Companies that ask coding interview questions</p>
@@ -83,7 +83,7 @@
         <div class="glass rounded-xl p-4 border border-slate-700/50">
           <div class="flex items-center space-x-4">
             <div class="flex-shrink-0">
-              <div class="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-lg flex items-center justify-center">
+              <div class="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-lg flex items-center justify-center">
                 <i class="ri-image-line text-2xl text-orange-400"></i>
               </div>
             </div>
@@ -138,7 +138,7 @@
 
       <!-- Buttons -->
       <div class="flex items-center gap-3 pt-6">
-        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-orange-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
           <i class="ri-{% if edit_coding_company_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
           {% if edit_coding_company_id %}Update{% else %}Add{% endif %} Company
         </button>
@@ -153,8 +153,8 @@
   {% if coding_companies %}
   <div class="dark-card rounded-2xl p-8 hover-lift">
     <div class="flex items-center mb-6">
-      <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mr-4">
-        <i class="ri-building-2-line text-2xl text-purple-400"></i>
+      <div class="w-12 h-12 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+        <i class="ri-building-2-line text-2xl text-teal-400"></i>
       </div>
       <div>
         <h3 class="text-2xl font-bold text-slate-100 brand-font">Existing Companies</h3>
@@ -172,7 +172,7 @@
               <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-full h-full object-contain">
             </div>
             {% else %}
-            <div class="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-lg flex items-center justify-center">
               <i class="ri-building-line text-2xl text-orange-400"></i>
             </div>
             {% endif %}

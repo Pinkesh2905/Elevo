@@ -36,9 +36,9 @@
       <div class="mt-4">
         <span class="px-3 py-1 rounded-full text-xs font-semibold
           {% if session.status == 'REVIEW_PENDING' %}bg-yellow-100 text-yellow-800
-          {% elif session.status == 'REVIEWED' %}bg-purple-100 text-purple-800
+          {% elif session.status == 'REVIEWED' %}bg-teal-100 text-teal-800
           {% elif session.status == 'COMPLETED' %}bg-green-100 text-green-800
-          {% elif session.status == 'STARTED' %}bg-blue-100 text-blue-800
+          {% elif session.status == 'STARTED' %}bg-sky-100 text-sky-800
           {% else %}bg-gray-100 text-gray-800{% endif %}">
           {{ session.get_status_display }}
         </span>
@@ -71,8 +71,8 @@
               <p class="mt-2 text-gray-500 italic">No answer provided</p>
             {% endif %}
             {% if turn.ai_follow_up_feedback %}
-              <div class="mt-3 bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                <p class="text-sm text-blue-800"><strong>AI Feedback:</strong> {{ turn.ai_follow_up_feedback }}</p>
+              <div class="mt-3 bg-sky-50 border border-sky-100 p-3 rounded-lg">
+                <p class="text-sm text-sky-800"><strong>AI Feedback:</strong> {{ turn.ai_follow_up_feedback }}</p>
               </div>
             {% endif %}
           </div>
@@ -90,16 +90,16 @@
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Tutor Feedback</label>
           <textarea name="tutor_feedback" rows="4"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">{{ session.overall_feedback }}</textarea>
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">{{ session.overall_feedback }}</textarea>
         </div>
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Score (%)</label>
           <input type="number" name="tutor_score" value="{{ session.score|default:'' }}" step="0.01" min="0" max="100"
-                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
         </div>
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
             <option value="REVIEW_PENDING" {% if session.status == 'REVIEW_PENDING' %}selected{% endif %}>Review Pending</option>
             <option value="REVIEWED" {% if session.status == 'REVIEWED' %}selected{% endif %}>Reviewed</option>
             <option value="COMPLETED" {% if session.status == 'COMPLETED' %}selected{% endif %}>Completed</option>

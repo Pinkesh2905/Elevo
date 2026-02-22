@@ -1,4 +1,4 @@
-# mockmate01/users/forms.py
+# elevo/users/forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
 from django.contrib.auth.models import User
@@ -65,13 +65,17 @@ class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'placeholder': 'Username or Email'
+            'placeholder': 'Username or Email',
+            'autocomplete': 'off',
+            'autocapitalize': 'none',
+            'spellcheck': 'false',
         })
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-            'placeholder': 'Password'
+            'placeholder': 'Password',
+            'autocomplete': 'off',
         })
     )
     
@@ -251,13 +255,17 @@ class EmailChangeForm(forms.Form):
     new_email = forms.EmailField(
         widget=forms.EmailInput(attrs={
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500',
-            'placeholder': 'Enter new email address'
+            'placeholder': 'Enter new email address',
+            'autocomplete': 'off',
+            'autocapitalize': 'none',
+            'spellcheck': 'false',
         })
     )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500',
-            'placeholder': 'Confirm your password'
+            'placeholder': 'Confirm your password',
+            'autocomplete': 'off',
         })
     )
     

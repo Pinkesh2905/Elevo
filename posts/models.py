@@ -43,6 +43,12 @@ class Post(models.Model):
             return self.likes.filter(user=user).exists()
         return False
 
+    def repost_count(self):
+        return self.reposts.count()
+
+    def share_count(self):
+        return self.shares.count()
+
     class Meta:
         ordering = ['-created_at']
         indexes = [
@@ -95,6 +101,41 @@ class Repost(models.Model):
 
     def __str__(self):
         return f"{self.user.username} reposted {self.original_post.slug}"
+
+
+class Share(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='shares')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_shares')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('post', 'user')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} shared {self.post.slug}"
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following_links')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower_links')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['follower', 'following']),
+            models.Index(fields=['following', 'follower']),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.follower_id == self.following_id:
+            raise ValueError("Users cannot follow themselves.")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
 
 
 class PostView(models.Model):

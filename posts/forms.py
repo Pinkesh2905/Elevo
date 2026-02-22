@@ -28,3 +28,15 @@ class CommentForm(forms.ModelForm):
                 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500',
             }),
         }
+
+
+class RepostForm(forms.Form):
+    comment = forms.CharField(
+        required=False,
+        max_length=280,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Add your thoughts before reposting (optional)...',
+            'class': 'w-full px-4 py-3 border border-white/20 bg-white/5 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none',
+        })
+    )

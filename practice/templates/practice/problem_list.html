@@ -1,448 +1,148 @@
-{% extends 'base.html' %}
-{% load static %}
+﻿{% extends 'base.html' %}
 
-{% block title %}Practice Problems - MockMate{% endblock %}
+{% block title %}Practice Problems | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-12">
-    <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-indigo-900/10 to-purple-900/20 pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Header Section -->
-        <div class="mb-8 animate-slideInUp">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold text-white">Practice Problems</h1>
-                    <p class="text-slate-400 text-sm">Solve coding problems and improve your skills</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="stat-card group">
-                <div class="glass rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-500/5 to-gray-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <dt class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Problems</dt>
-                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <dd class="text-3xl font-bold text-white">{{ total_problems }}</dd>
-                    </div>
-                </div>
-            </div>
-            
-            {% if user.is_authenticated %}
-            <div class="stat-card group">
-                <div class="glass rounded-xl p-5 border border-emerald-400/20 hover:border-emerald-400/40 transition-all duration-300 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <dt class="text-xs font-semibold text-emerald-300 uppercase tracking-wider">Solved</dt>
-                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <dd class="text-3xl font-bold text-white">{{ user.problem_progress.filter.count }}</dd>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="stat-card group">
-                <div class="glass rounded-xl p-5 border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <dt class="text-xs font-semibold text-yellow-300 uppercase tracking-wider">Attempted</dt>
-                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <dd class="text-3xl font-bold text-white">0</dd>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="stat-card group">
-                <div class="glass rounded-xl p-5 border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="relative">
-                        <div class="flex items-center justify-between mb-2">
-                            <dt class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Success Rate</dt>
-                            <div class="w-8 h-8 glass rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <dd class="text-3xl font-bold text-white">0%</dd>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Filters Section -->
-        <div class="glass-elevated rounded-2xl border border-white/10 p-6 mb-6 animate-slideInUp" style="animation-delay: 100ms;">
-            <form method="get" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    
-                    <!-- Search -->
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Search</label>
-                        {{ filter_form.search }}
-                    </div>
-                    
-                    <!-- Difficulty -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Difficulty</label>
-                        {{ filter_form.difficulty }}
-                    </div>
-                    
-                    <!-- Topic -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Topic</label>
-                        {{ filter_form.topic }}
-                    </div>
-                    
-                    <!-- Company -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Company</label>
-                        {{ filter_form.company }}
-                    </div>
-                </div>
-                
-                {% if user.is_authenticated %}
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <!-- Status -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Status</label>
-                        {{ filter_form.status }}
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Filter Buttons -->
-                <div class="flex gap-3 pt-2">
-                    <button type="submit" 
-                            class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 border border-white/10">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                        </svg>
-                        Apply Filters
-                    </button>
-                    <a href="{% url 'practice:problem-list' %}" 
-                       class="inline-flex items-center px-6 py-2.5 glass border border-white/10 hover:border-white/20 text-slate-300 hover:text-white rounded-lg font-semibold transition-all duration-300">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Clear Filters
-                    </a>
-                </div>
-            </form>
-        </div>
-
-        <!-- Problems Table -->
-        <div class="glass-elevated rounded-2xl border border-white/10 overflow-hidden animate-slideInUp" style="animation-delay: 200ms;">
-            {% if page_obj %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-white/10">
-                    <thead>
-                        <tr class="bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-cyan-600/10">
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-16">
-                                Status
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-24">
-                                #
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                                Title
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-32">
-                                Difficulty
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                                Topics
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider w-32">
-                                Acceptance
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/10">
-                        {% for problem in page_obj %}
-                        <tr class="hover:bg-white/5 transition-all duration-200 cursor-pointer group" 
-                            onclick="window.location='{% url 'practice:problem_detail' problem.slug %}'">
-                            
-                            <!-- Status Icon -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {% if user.is_authenticated %}
-                                    {% if problem.user_status == 'solved' %}
-                                        <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
-                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </div>
-                                    {% elif problem.user_status == 'attempted' %}
-                                        <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg">
-                                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </div>
-                                    {% else %}
-                                        <div class="w-6 h-6 rounded-lg glass border border-slate-500/30"></div>
-                                    {% endif %}
-                                {% else %}
-                                    <div class="w-6 h-6 rounded-lg glass border border-slate-500/20"></div>
-                                {% endif %}
-                            </td>
-                            
-                            <!-- Problem Number -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-400">
-                                {{ problem.problem_number }}
-                            </td>
-                            
-                            <!-- Title -->
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 transition-all duration-300">
-                                    {{ problem.title }}
-                                </div>
-                            </td>
-                            
-                            <!-- Difficulty Badge -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                {% if problem.difficulty == 'easy' %}
-                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                        Easy
-                                    </span>
-                                {% elif problem.difficulty == 'medium' %}
-                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-lg bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
-                                        Medium
-                                    </span>
-                                {% else %}
-                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-lg bg-red-500/20 text-red-300 border border-red-400/30">
-                                        Hard
-                                    </span>
-                                {% endif %}
-                            </td>
-                            
-                            <!-- Topics -->
-                            <td class="px-6 py-4">
-                                <div class="flex flex-wrap gap-1">
-                                    {% for topic in problem.topics.all|slice:":3" %}
-                                        <span class="px-2 py-1 text-xs font-medium glass text-slate-300 rounded border border-white/10">
-                                            {{ topic.name }}
-                                        </span>
-                                    {% endfor %}
-                                    {% if problem.topics.count > 3 %}
-                                        <span class="px-2 py-1 text-xs font-medium glass text-slate-400 rounded border border-white/10">
-                                            +{{ problem.topics.count|add:"-3" }}
-                                        </span>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            
-                            <!-- Acceptance Rate -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-300">
-                                {% if problem.acceptance_rate > 0 %}
-                                    {{ problem.acceptance_rate }}%
-                                {% else %}
-                                    <span class="text-slate-500">N/A</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            {% if page_obj.has_other_pages %}
-            <div class="bg-gradient-to-r from-indigo-600/5 via-purple-600/5 to-cyan-600/5 px-6 py-4 border-t border-white/10">
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-slate-400">
-                        Showing 
-                        <span class="font-semibold text-white">{{ page_obj.start_index }}</span>
-                        to 
-                        <span class="font-semibold text-white">{{ page_obj.end_index }}</span>
-                        of 
-                        <span class="font-semibold text-white">{{ page_obj.paginator.count }}</span>
-                        results
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
-                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
-                                First
-                            </a>
-                            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
-                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
-                                Previous
-                            </a>
-                        {% endif %}
-                        
-                        <span class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600/20 border border-indigo-400/30 rounded-lg">
-                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-                        </span>
-                        
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
-                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
-                                Next
-                            </a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}" 
-                               class="px-3 py-2 text-sm font-medium text-slate-300 glass border border-white/10 rounded-lg hover:border-white/20 hover:text-white transition-all duration-200">
-                                Last
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            {% else %}
-            <!-- No Problems Found -->
-            <div class="text-center py-12">
-                <div class="w-16 h-16 mx-auto glass rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-2">No problems found</h3>
-                <p class="text-slate-400 mb-6">Try adjusting your filters or search query</p>
-                <a href="{% url 'practice:problem-list' %}" 
-                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 border border-white/10">
-                    Clear all filters
-                </a>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Quick Links -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 animate-slideInUp" style="animation-delay: 300ms;">
-            <a href="{% url 'practice:topic_list' %}" 
-               class="group glass-elevated rounded-2xl border border-white/10 hover:border-white/20 p-6 transition-all duration-300 hover:-translate-y-1">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-cyan-400 transition-all duration-300">Browse by Topics</h3>
-                        <p class="text-sm text-slate-400">Explore problems by algorithm categories</p>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'practice:company_list' %}" 
-               class="group glass-elevated rounded-2xl border border-white/10 hover:border-white/20 p-6 transition-all duration-300 hover:-translate-y-1">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all duration-300">Browse by Companies</h3>
-                        <p class="text-sm text-slate-400">Practice problems asked by top companies</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[0.16em] text-sky-300 font-semibold">Practice Module</p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-white">Coding Problems</h1>
+      <p class="text-slate-300 mt-2">Fast filtering, clear status, and direct jump into solving.</p>
     </div>
-</div>
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div class="rounded-xl border border-sky-400/25 bg-sky-500/10 px-4 py-3">
+        <p class="text-sky-200">Total Problems</p>
+        <p class="text-2xl font-bold text-white">{{ total_problems }}</p>
+      </div>
+      <div class="rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3">
+        <p class="text-emerald-200">Page</p>
+        <p class="text-2xl font-bold text-white">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</p>
+      </div>
+    </div>
+  </div>
 
-<style>
-    /* Style form inputs */
-    input[type="text"], 
-    input[type="search"],
-    select {
-        width: 100%;
-        padding: 0.625rem 0.875rem;
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0.5rem;
-        color: #e2e8f0;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-    }
-    
-    input[type="text"]:focus,
-    input[type="search"]:focus,
-    select:focus {
-        outline: none;
-        border-color: rgba(99, 102, 241, 0.5);
-        background: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-    
-    input::placeholder {
-        color: #64748b;
-    }
-    
-    select option {
-        background: #1e293b;
-        color: #e2e8f0;
-    }
+  <form method="get" class="rounded-2xl border border-slate-700 bg-slate-900/70 backdrop-blur p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-3">
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Search</label>
+        {{ filter_form.search }}
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Difficulty</label>
+        {{ filter_form.difficulty }}
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Topic</label>
+        {{ filter_form.topic }}
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Company</label>
+        {{ filter_form.company }}
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Status</label>
+        {{ filter_form.status }}
+      </div>
+      <div class="flex items-end gap-2">
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-semibold">Apply</button>
+        <a href="{% url 'practice:problem-list' %}" class="px-4 py-3 rounded-xl border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Reset</a>
+      </div>
+    </div>
+  </form>
 
-    /* Entrance Animation */
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+  <div class="rounded-2xl border border-slate-700 overflow-hidden bg-slate-900/60">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[860px]">
+        <thead class="bg-slate-800/80 text-slate-300 text-xs uppercase tracking-wide">
+          <tr>
+            <th class="px-4 py-3 text-left">Problem</th>
+            <th class="px-4 py-3 text-left">Difficulty</th>
+            <th class="px-4 py-3 text-left">Topics</th>
+            <th class="px-4 py-3 text-left">Companies</th>
+            <th class="px-4 py-3 text-left">Acceptance</th>
+            {% if user.is_authenticated %}<th class="px-4 py-3 text-left">Your Status</th>{% endif %}
+            <th class="px-4 py-3 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800 text-sm">
+          {% for problem in page_obj %}
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="px-4 py-4">
+              <a href="{% url 'practice:problem_detail' problem.slug %}" class="text-white font-semibold hover:text-teal-300 transition-colors">
+                {{ problem.problem_number }}. {{ problem.title }}
+              </a>
+            </td>
+            <td class="px-4 py-4">
+              {% if problem.difficulty == 'easy' %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Easy</span>
+              {% elif problem.difficulty == 'medium' %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">Medium</span>
+              {% else %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-500/30">Hard</span>
+              {% endif %}
+            </td>
+            <td class="px-4 py-4">
+              <div class="flex flex-wrap gap-1.5">
+                {% for t in problem.topics.all|slice:":3" %}
+                  <span class="px-2 py-1 rounded-lg text-xs bg-slate-800 border border-slate-600 text-slate-300">{{ t.name }}</span>
+                {% empty %}
+                  <span class="text-slate-500 text-xs">-</span>
+                {% endfor %}
+              </div>
+            </td>
+            <td class="px-4 py-4">
+              <div class="flex flex-wrap gap-1.5">
+                {% for c in problem.companies.all|slice:":2" %}
+                  <span class="px-2 py-1 rounded-lg text-xs bg-slate-800 border border-slate-600 text-slate-300">{{ c.name }}</span>
+                {% empty %}
+                  <span class="text-slate-500 text-xs">-</span>
+                {% endfor %}
+              </div>
+            </td>
+            <td class="px-4 py-4 text-slate-300 font-medium">{{ problem.acceptance_rate }}%</td>
+            {% if user.is_authenticated %}
+            <td class="px-4 py-4">
+              {% if problem.user_status == 'solved' %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Solved</span>
+              {% elif problem.user_status == 'attempted' %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">Attempted</span>
+              {% else %}
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700/50 text-slate-300 border border-slate-600">Not Attempted</span>
+              {% endif %}
+            </td>
+            {% endif %}
+            <td class="px-4 py-4 text-right">
+              <a href="{% url 'practice:problem_detail' problem.slug %}" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-semibold">
+                Solve <i class="ri-arrow-right-line"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if user.is_authenticated %}7{% else %}6{% endif %}" class="px-6 py-12 text-center text-slate-400">
+              No problems matched your filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    .animate-slideInUp {
-        animation: slideInUp 0.6s ease-out forwards;
-        opacity: 0;
-    }
-
-    .stat-card {
-        animation: slideInUp 0.6s ease-out forwards;
-        opacity: 0;
-    }
-
-    .stat-card:nth-child(1) { animation-delay: 0s; }
-    .stat-card:nth-child(2) { animation-delay: 0.05s; }
-    .stat-card:nth-child(3) { animation-delay: 0.1s; }
-    .stat-card:nth-child(4) { animation-delay: 0.15s; }
-
-    /* Responsive Design */
-    @media (prefers-reduced-motion: reduce) {
-        * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-    }
-</style>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="mt-6 flex items-center justify-between text-sm">
+    <div class="text-slate-400">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</div>
+    <div class="flex items-center gap-2">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}{% if request.GET.topic %}&topic={{ request.GET.topic }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-2 rounded-lg border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Previous</a>
+      {% endif %}
+      <span class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200">{{ page_obj.number }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}{% if request.GET.difficulty %}&difficulty={{ request.GET.difficulty }}{% endif %}{% if request.GET.topic %}&topic={{ request.GET.topic }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-2 rounded-lg border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</section>
 {% endblock %}

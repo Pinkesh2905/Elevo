@@ -4,11 +4,11 @@
   <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
-        <div class="w-14 h-14 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 rounded-xl flex items-center justify-center mr-4">
-          <i class="ri-question-answer-line text-3xl text-purple-400"></i>
+        <div class="w-14 h-14 bg-gradient-to-br from-teal-500/20 to-fuchsia-500/20 rounded-xl flex items-center justify-center mr-4">
+          <i class="ri-question-answer-line text-3xl text-teal-400"></i>
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-400 brand-font">
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-fuchsia-400 brand-font">
             {% if edit_aptitude_problem_id %}Edit{% else %}Create{% endif %} Aptitude Problem
           </h2>
           <p class="text-sm text-slate-400 mt-1">Multiple choice aptitude question</p>
@@ -91,7 +91,7 @@
       <!-- Options Section -->
       <div class="glass rounded-xl p-6 border border-slate-700/50">
         <h3 class="text-lg font-semibold text-slate-100 mb-4 flex items-center">
-          <i class="ri-list-check text-purple-400 mr-2"></i>
+          <i class="ri-list-check text-teal-400 mr-2"></i>
           Answer Options
         </h3>
         
@@ -218,7 +218,7 @@
 
       <!-- Buttons -->
       <div class="flex items-center gap-3 pt-6">
-        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-teal-500 to-fuchsia-600 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
           <i class="ri-{% if edit_aptitude_problem_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
           {% if edit_aptitude_problem_id %}Update{% else %}Create{% endif %} Problem
         </button>

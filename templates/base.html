@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}MockMate{% endblock %}</title>
+  <title>{% block title %}Elevo{% endblock %}</title>
   {% load static %}
 
   <!-- Modern, Fun & Professional Fonts: Outfit, Plus Jakarta Sans, Fira Code -->
@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <meta name="description" content="MockMate: Master coding interviews with practice problems, aptitude tests, and AI-powered mock interviews." />
+  <meta name="description" content="Elevo: Master coding interviews with practice problems, aptitude tests, and AI-powered mock interviews." />
   
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
   
@@ -20,10 +20,10 @@
   
   <style>
     :root {
-      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 25%, #06b6d4 50%, #10b981 75%, #f59e0b 100%);
-      --coding-bg-primary: #0f0f23;
-      --coding-bg-secondary: #1a1a2e;
-      --coding-accent: #262640;
+      --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 35%, #22c55e 70%, #f59e0b 100%);
+      --coding-bg-primary: #07111f;
+      --coding-bg-secondary: #0b1d33;
+      --coding-accent: #123457;
       --text-primary: #f8fafc;
       --text-secondary: #cbd5e1;
       --border-color: rgba(203, 213, 225, 0.2);
@@ -33,7 +33,7 @@
       --shadow-elevated: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       --code-green: #22d3ee;
       --code-blue: #60a5fa;
-      --code-purple: #a78bfa;
+      --code-purple: #2dd4bf;
       --code-yellow: #fbbf24;
       --code-red: #fb7185;
       --code-pink: #f472b6;
@@ -75,7 +75,9 @@
       height: 100%;
       z-index: -1;
       overflow: hidden;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #262640 100%);
+      background: radial-gradient(circle at 18% 18%, rgba(14, 165, 233, 0.2), transparent 40%),
+                  radial-gradient(circle at 80% 30%, rgba(20, 184, 166, 0.18), transparent 42%),
+                  linear-gradient(135deg, #07111f 0%, #0b1d33 55%, #123457 100%);
     }
     
     /* Enhanced Floating Elements Animation */
@@ -257,15 +259,15 @@
     
     /* Professional glow effect */
     .pro-glow {
-      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.1), 
+      box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.16), 
                   0 4px 6px -1px rgba(0, 0, 0, 0.1), 
                   0 2px 4px -1px rgba(0, 0, 0, 0.06);
       transition: box-shadow 0.3s ease;
     }
     
     .pro-glow:hover {
-      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3), 
-                  0 12px 30px -5px rgba(99, 102, 241, 0.3), 
+      box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.35), 
+                  0 12px 30px -5px rgba(20, 184, 166, 0.28), 
                   0 8px 16px -5px rgba(0, 0, 0, 0.1);
     }
     
@@ -279,12 +281,12 @@
     }
     
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(45deg, #6366f1, #8b5cf6);
+      background: linear-gradient(45deg, #0ea5e9, #14b8a6);
       border-radius: 6px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(45deg, #4f46e5, #7c3aed);
+      background: linear-gradient(45deg, #0284c7, #0f766e);
     }
     
     /* Professional button animations */
@@ -303,15 +305,15 @@
     
     /* Enhanced Navbar background */
     .navbar-bg {
-      background: rgba(15, 15, 35, 0.95);
+      background: linear-gradient(90deg, rgba(7, 17, 31, 0.95), rgba(11, 29, 51, 0.95), rgba(18, 52, 87, 0.92));
       backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+      border-bottom: 1px solid rgba(20, 184, 166, 0.2);
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     }
     
     /* Footer gradient */
     .footer-gradient {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      background: linear-gradient(135deg, #07111f 0%, #0b1d33 45%, #123457 100%);
     }
     
     /* Card hover effects */
@@ -326,6 +328,7 @@
       transform: translateY(-4px);
       box-shadow: var(--shadow-elevated);
       background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(20, 184, 166, 0.22);
     }
 
     /* Enhanced Hamburger menu */
@@ -339,7 +342,7 @@
     }
 
     .hamburger:hover {
-      background: rgba(99, 102, 241, 0.1);
+      background: rgba(20, 184, 166, 0.14);
     }
 
     .hamburger span {
@@ -376,7 +379,7 @@
       left: 0;
       width: 0;
       height: 2px;
-      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      background: linear-gradient(90deg, #0ea5e9, #14b8a6);
       transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
       border-radius: 2px;
     }
@@ -464,41 +467,41 @@
   <div id="mobileMenu" class="mobile-menu md:hidden">
     <div class="flex flex-col space-y-6">
       <div class="flex justify-between items-center mb-8">
-        <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 brand-font">Menu</h3>
+        <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 brand-font">Menu</h3>
         <button onclick="toggleMobileMenu()" class="text-slate-300 hover:text-red-400 transition-colors focus-ring rounded-lg p-2">
           <i class="ri-close-line text-2xl"></i>
         </button>
       </div>
       
       {% if user.is_authenticated and user.profile.role == 'STUDENT' %}
-        <a href="{% url 'home' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-home-line mr-4 text-indigo-400 text-lg"></i> 
+        <a href="{% url 'home' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-home-line mr-4 text-sky-400 text-lg"></i> 
           <span class="font-medium">Home</span>
         </a>
-        <a href="{% url 'practice:problem-list' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-code-line mr-4 text-blue-400 text-lg"></i> 
+        <a href="{% url 'practice:problem-list' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-code-line mr-4 text-sky-400 text-lg"></i> 
           <span class="font-medium">Coding</span>
         </a>
         <a href="{% url 'aptitude:dashboard' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
           <i class="ri-brain-line mr-4 text-emerald-400 text-lg"></i> 
           <span class="font-medium">Aptitude</span>
         </a>
-        <a href="{% url 'posts:feed' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-chat-3-line mr-4 text-purple-400 text-lg"></i> 
+        <a href="{% url 'posts:feed' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-teal-400 hover:bg-teal-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-chat-3-line mr-4 text-teal-400 text-lg"></i> 
           <span class="font-medium">Posts</span>
         </a>
-        <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-cyan-400 hover:bg-cyan-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-robot-line mr-4 text-cyan-400 text-lg"></i> 
+        <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-robot-line mr-4 text-emerald-400 text-lg"></i> 
           <span class="font-medium">Mock Interviews</span>
         </a>
       {% endif %}
       
       {% if not user.is_authenticated %}
-        <a href="{% url 'login' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-login-box-line mr-4 text-indigo-400 text-lg"></i> 
+        <a href="{% url 'login' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-login-box-line mr-4 text-sky-400 text-lg"></i> 
           <span class="font-medium">Login</span>
         </a>
-        <a href="{% url 'users:signup' %}" class="flex items-center py-4 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+        <a href="{% url 'users:signup' %}" class="flex items-center py-4 px-6 bg-gradient-to-r from-sky-600 to-teal-600 text-white rounded-xl hover:from-sky-700 hover:to-teal-700 transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
           <i class="ri-rocket-line mr-4 text-lg"></i> 
           <span class="font-semibold">Get Started</span>
         </a>
@@ -510,63 +513,31 @@
   <header class="sticky top-0 z-50 navbar-bg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
       <!-- Enhanced Logo -->
-      <a href="{% url 'home' %}" class="flex items-center gap-3 font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 hover:from-indigo-300 hover:to-cyan-300 transition-all duration-300 brand-font group">
+      <a href="{% url 'home' %}" class="flex items-center gap-3 font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-emerald-300 hover:from-sky-200 hover:to-emerald-200 transition-all duration-300 brand-font group">
         <div class="relative">
-          <!-- Placement Preparation Platform Logo -->
+          <!-- Elevo Logo -->
           <div class="relative w-11 h-11 logo-float group-hover:scale-110 transition-transform duration-300">
-            <!-- Outer ring with career progression gradient -->
-            <div class="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 via-blue-500 via-indigo-500 to-purple-500 p-0.5">
+            <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-sky-400 via-teal-400 to-emerald-400 p-0.5">
               <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
-                <!-- Main logo content -->
-                <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none">
-                  <!-- Laptop/Computer with bright border for visibility -->
-                  <rect x="6" y="12" width="20" height="12" rx="1" fill="url(#laptopGradient)" stroke="#22d3ee" strokeWidth="1"/>
-                  <rect x="8" y="14" width="16" height="8" rx="0.5" fill="#111827" stroke="#374151" strokeWidth="0.5"/>
-                  <!-- Bright code lines on screen -->
-                  <line x1="10" y1="16" x2="14" y2="16" stroke="#22d3ee" strokeWidth="1" strokeLinecap="round"/>
-                  <line x1="10" y1="18" x2="12" y2="18" stroke="#a78bfa" strokeWidth="1" strokeLinecap="round"/>
-                  <line x1="14" y1="18" x2="18" y2="18" stroke="#22d3ee" strokeWidth="1" strokeLinecap="round"/>
-                  <line x1="10" y1="20" x2="16" y2="20" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round"/>
-                  <!-- Laptop base with bright outline -->
-                  <rect x="4" y="24" width="24" height="2" rx="1" fill="url(#baseGradient)" stroke="#6366f1" strokeWidth="0.8"/>
-                  
-                  <!-- Career progression arrow -->
-                  <path d="M26 8L28 6L30 8M28 6V14" stroke="url(#arrowGradient)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  <!-- Success stars -->
-                  <circle cx="26" cy="4" r="1.2" fill="#fbbf24" opacity="0.9"/>
-                  <circle cx="29" cy="2" r="1" fill="#22d3ee" opacity="0.8"/>
-                  
-                  <!-- Target/Goal ring (interview success) -->
-                  <circle cx="4" cy="6" r="2.5" fill="none" stroke="url(#targetGradient)" strokeWidth="1.2" opacity="0.8"/>
-                  <circle cx="4" cy="6" r="1.2" fill="#10b981" opacity="0.9"/>
-                  
+                <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <path d="M8 5H24L28 9V23L24 27H8L4 23V9L8 5Z" fill="url(#elevoHeaderShell)" stroke="#7dd3fc" stroke-width="1.2"/>
+                  <rect x="10" y="10" width="12" height="2.4" rx="1.2" fill="#a7f3d0"/>
+                  <rect x="10" y="15" width="9.5" height="2.4" rx="1.2" fill="#67e8f9"/>
+                  <rect x="10" y="20" width="12" height="2.4" rx="1.2" fill="#34d399"/>
                   <defs>
-                    <linearGradient id="laptopGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#4b5563"/>
-                      <stop offset="100%" stopColor="#374151"/>
-                    </linearGradient>
-                    <linearGradient id="baseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#6b7280"/>
-                      <stop offset="100%" stopColor="#4b5563"/>
-                    </linearGradient>
-                    <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#10b981"/>
-                      <stop offset="100%" stopColor="#22d3ee"/>
-                    </linearGradient>
-                    <linearGradient id="targetGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#f59e0b"/>
-                      <stop offset="100%" stopColor="#10b981"/>
+                    <linearGradient id="elevoHeaderShell" x1="4" y1="5" x2="28" y2="27" gradientUnits="userSpaceOnUse">
+                      <stop offset="0" stop-color="#0b1d33"/>
+                      <stop offset="1" stop-color="#123457"/>
                     </linearGradient>
                   </defs>
                 </svg>
               </div>
             </div>
-            <!-- Animated indicators -->
-            <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
-            <div class="absolute -bottom-0.5 -left-0.5 w-2 h-2 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full animate-ping" style="animation-delay: 0.5s; animation-duration: 2s;"></div>
+            <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-teal-300 to-emerald-400 rounded-full animate-pulse"></div>
+            <div class="absolute -bottom-0.5 -left-0.5 w-2 h-2 bg-gradient-to-r from-sky-300 to-emerald-400 rounded-full animate-ping" style="animation-delay: 0.5s; animation-duration: 2s;"></div>
           </div>
         </div>
-        MockMate
+        Elevo
       </a>
 
       <!-- Desktop Navigation -->
@@ -581,19 +552,19 @@
               <i class="ri-admin-line mr-2"></i>Admin Dashboard
             </a>
           {% else %}
-            <a href="{% url 'home' %}" class="px-4 py-2 text-slate-300 hover:text-indigo-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
+            <a href="{% url 'home' %}" class="px-4 py-2 text-slate-300 hover:text-sky-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Home
             </a>
-            <a href="{% url 'practice:problem-list' %}" class="px-4 py-2 text-slate-300 hover:text-blue-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
+            <a href="{% url 'practice:problem-list' %}" class="px-4 py-2 text-slate-300 hover:text-sky-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Coding
             </a>
             <a href="{% url 'aptitude:dashboard' %}" class="px-4 py-2 text-slate-300 hover:text-emerald-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Aptitude
             </a>
-            <a href="{% url 'posts:feed' %}" class="px-4 py-2 text-slate-300 hover:text-purple-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
+            <a href="{% url 'posts:feed' %}" class="px-4 py-2 text-slate-300 hover:text-teal-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Posts
             </a>
-            <a href="{% url 'mock_interview:interview_setup' %}" class="px-4 py-2 text-slate-300 hover:text-cyan-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
+            <a href="{% url 'mock_interview:interview_setup' %}" class="px-4 py-2 text-slate-300 hover:text-emerald-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
               Interviews
             </a>
           {% endif %}
@@ -606,8 +577,8 @@
         {% if user.is_authenticated and user.profile.role == 'STUDENT' %}
         <form method="get" action="{% url 'search' %}" class="relative hidden lg:block">
           <input type="text" name="q" placeholder="Search problems, posts..." 
-                class="w-64 px-4 py-2.5 rounded-full border border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none bg-slate-800/80 backdrop-blur-sm transition-all duration-200 text-sm font-medium placeholder:text-slate-400 text-slate-100">
-          <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-400 transition-colors">
+                class="w-64 px-4 py-2.5 rounded-full border border-slate-600 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:outline-none bg-slate-800/80 backdrop-blur-sm transition-all duration-200 text-sm font-medium placeholder:text-slate-400 text-slate-100">
+          <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-400 transition-colors">
             <i class="ri-search-line text-lg"></i>
           </button>
         </form>
@@ -616,21 +587,21 @@
         <!-- User Menu / Auth Buttons -->
         {% if user.is_authenticated %}
           <div class="relative">
-            <button onclick="toggleDropdown()" class="focus:outline-none rounded-full ring-2 ring-indigo-400/20 ring-offset-2 ring-offset-transparent transition-all duration-200 hover:ring-indigo-400/40 hover:ring-4 pro-glow btn-professional">
+            <button onclick="toggleDropdown()" class="focus:outline-none rounded-full ring-2 ring-sky-400/20 ring-offset-2 ring-offset-transparent transition-all duration-200 hover:ring-sky-400/40 hover:ring-4 pro-glow btn-professional">
               {% if user.profile.avatar %}
-                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-400/50 shadow-md">
+                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full object-cover border-2 border-sky-400/50 shadow-md">
               {% else %}
-                <img src="{% static 'default_avatar.png' %}" alt="Default avatar" class="w-10 h-10 rounded-full object-cover border-2 border-indigo-400/50 shadow-md">
+                <img src="{% static 'default_avatar.png' %}" alt="Default avatar" class="w-10 h-10 rounded-full object-cover border-2 border-sky-400/50 shadow-md">
               {% endif %}
             </button>
             <div id="dropdown" class="hidden absolute right-0 mt-3 w-56 rounded-2xl shadow-2xl z-50 overflow-hidden dropdown-menu">
-              <div class="px-5 py-4 text-sm border-b border-slate-700/50 bg-gradient-to-r from-indigo-500/20 to-purple-500/20">
+              <div class="px-5 py-4 text-sm border-b border-slate-700/50 bg-gradient-to-r from-sky-500/20 to-teal-500/20">
                 <div class="font-semibold text-slate-100">{{ user.username }}</div>
                 <div class="text-slate-400 truncate text-xs mt-1 font-medium">{{ user.email }}</div>
               </div>
               <div class="py-2">
-                <a href="{% url 'users:profile' %}" class="block px-5 py-3 text-slate-300 hover:bg-indigo-500/10 hover:text-indigo-400 transition-all duration-200 hover-scale font-medium">
-                  <i class="ri-user-line mr-3 text-indigo-400"></i> Profile
+                <a href="{% url 'users:profile' %}" class="block px-5 py-3 text-slate-300 hover:bg-sky-500/10 hover:text-sky-400 transition-all duration-200 hover-scale font-medium">
+                  <i class="ri-user-line mr-3 text-sky-400"></i> Profile
                 </a>
                 {% if user.profile.role == 'STUDENT' %}
                   <a href="{% url 'mock_interview:my_mock_interviews' %}" class="block px-5 py-3 text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale font-medium">
@@ -647,14 +618,14 @@
             </div>
           </div>
         {% else %}
-          <a href="{% url 'login' %}" class="mobile-hidden hover:text-indigo-400 text-base font-medium transition-all duration-200 hover-scale px-3 py-2 rounded-lg">Login</a>
-          <a href="{% url 'users:signup' %}" class="mobile-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-full hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 text-base font-semibold shadow-md hover-lift btn-professional pro-glow">
+          <a href="{% url 'login' %}" class="mobile-hidden hover:text-sky-400 text-base font-medium transition-all duration-200 hover-scale px-3 py-2 rounded-lg">Login</a>
+          <a href="{% url 'users:signup' %}" class="mobile-hidden bg-gradient-to-r from-sky-600 to-teal-600 text-white px-6 py-2.5 rounded-full hover:from-sky-700 hover:to-teal-700 transition-all duration-200 text-base font-semibold shadow-md hover-lift btn-professional pro-glow">
             <i class="ri-rocket-line mr-2"></i>Get Started
           </a>
         {% endif %}
 
         <!-- Mobile Menu Button -->
-        <button class="md:hidden hamburger text-slate-300 hover:text-indigo-400 transition-colors focus-ring rounded-lg p-2" onclick="toggleMobileMenu()" id="hamburgerBtn">
+        <button class="md:hidden hamburger text-slate-300 hover:text-sky-400 transition-colors focus-ring rounded-lg p-2" onclick="toggleMobileMenu()" id="hamburgerBtn">
           <span></span>
           <span></span>
           <span></span>
@@ -670,9 +641,9 @@
   <!-- Enhanced Footer -->
   <footer class="footer-gradient text-slate-300 relative overflow-hidden">
     <!-- Decorative elements -->
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500"></div>
-    <div class="absolute top-6 right-10 w-20 h-20 bg-indigo-500 rounded-full opacity-5 animate-pulse"></div>
-    <div class="absolute bottom-10 left-10 w-16 h-16 bg-purple-500 rounded-full opacity-5 animate-bounce"></div>
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500"></div>
+    <div class="absolute top-6 right-10 w-20 h-20 bg-sky-500 rounded-full opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-10 left-10 w-16 h-16 bg-teal-500 rounded-full opacity-5 animate-bounce"></div>
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 footer-grid">
@@ -680,50 +651,33 @@
         <!-- Brand + Social -->
         <div class="lg:col-span-2">
           <div class="flex items-center gap-3 mb-6">
-            <!-- Footer Placement Platform Logo -->
-            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 via-blue-500 via-indigo-500 to-purple-500 p-0.5 rounded-full">
+            <!-- Footer Elevo Logo -->
+            <div class="w-12 h-12 bg-gradient-to-br from-sky-400 via-teal-400 to-emerald-400 p-0.5 rounded-2xl">
               <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
-                <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none">
-                  <!-- Laptop with bright cyan border for visibility -->
-                  <rect x="6" y="12" width="20" height="12" rx="1" fill="url(#footerLaptopGradient)" stroke="#22d3ee" strokeWidth="1"/>
-                  <rect x="8" y="14" width="16" height="8" rx="0.5" fill="#111827" stroke="#374151" strokeWidth="0.5"/>
-                  <!-- Bright code lines -->
-                  <line x1="10" y1="16" x2="14" y2="16" stroke="#22d3ee" strokeWidth="1" strokeLinecap="round"/>
-                  <line x1="10" y1="18" x2="12" y2="18" stroke="#a78bfa" strokeWidth="1" strokeLinecap="round"/>
-                  <line x1="14" y1="18" x2="18" y2="18" stroke="#22d3ee" strokeWidth="1" strokeLinecap="round"/>
-                  <line x1="10" y1="20" x2="16" y2="20" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round"/>
-                  <!-- Base with bright border -->
-                  <rect x="4" y="24" width="24" height="2" rx="1" fill="#6b7280" stroke="#6366f1" strokeWidth="0.8"/>
-                  
-                  <!-- Career growth arrow -->
-                  <path d="M26 8L28 6L30 8M28 6V14" stroke="#10b981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  <!-- Success indicators -->
-                  <circle cx="26" cy="4" r="1.2" fill="#fbbf24" opacity="0.9"/>
-                  <circle cx="29" cy="2" r="1" fill="#22d3ee" opacity="0.8"/>
-                  
-                  <!-- Target achievement -->
-                  <circle cx="4" cy="6" r="2.5" fill="none" stroke="#10b981" strokeWidth="1.2" opacity="0.8"/>
-                  <circle cx="4" cy="6" r="1.2" fill="#10b981" opacity="0.9"/>
-                  
+                <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <path d="M8 5H24L28 9V23L24 27H8L4 23V9L8 5Z" fill="url(#elevoFooterShell)" stroke="#7dd3fc" stroke-width="1.2"/>
+                  <rect x="10" y="10" width="12" height="2.4" rx="1.2" fill="#a7f3d0"/>
+                  <rect x="10" y="15" width="9.5" height="2.4" rx="1.2" fill="#67e8f9"/>
+                  <rect x="10" y="20" width="12" height="2.4" rx="1.2" fill="#34d399"/>
                   <defs>
-                    <linearGradient id="footerLaptopGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#4b5563"/>
-                      <stop offset="100%" stopColor="#374151"/>
+                    <linearGradient id="elevoFooterShell" x1="4" y1="5" x2="28" y2="27" gradientUnits="userSpaceOnUse">
+                      <stop offset="0" stop-color="#0b1d33"/>
+                      <stop offset="1" stop-color="#123457"/>
                     </linearGradient>
                   </defs>
                 </svg>
               </div>
             </div>
-            <h3 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 brand-font">MockMate</h3>
+            <h3 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-emerald-300 brand-font">Elevo</h3>
           </div>
           <p class="text-slate-400 text-base leading-relaxed mb-8 max-w-md font-medium">
             Master coding interviews with comprehensive Coding problems, aptitude tests, and AI-powered mock interviews. Your pathway to tech success starts here.
           </p>
           <div class="flex space-x-6">
-            <a href="#" class="text-slate-400 hover:text-indigo-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
+            <a href="#" class="text-slate-400 hover:text-sky-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
               <i class="ri-linkedin-fill text-2xl"></i>
             </a>
-            <a href="#" class="text-slate-400 hover:text-cyan-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
+            <a href="#" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
               <i class="ri-twitter-fill text-2xl"></i>
             </a>
             <a href="#" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
@@ -739,21 +693,21 @@
         <!-- Practice & Learning (Students Only) -->
         <div>
           <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Practice & Learn</span>
-            <div class="absolute -bottom-2 left-0 w-16 h-0.5 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full"></div>
+            <span class="bg-gradient-to-r from-sky-400 to-teal-400 bg-clip-text text-transparent">Practice & Learn</span>
+            <div class="absolute -bottom-2 left-0 w-16 h-0.5 bg-gradient-to-r from-sky-400 to-teal-400 rounded-full"></div>
           </h4>
           <ul class="space-y-4">
-            <li><a href="{% url 'practice:problem-list' %}" class="text-slate-400 hover:text-indigo-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-code-line mr-3 text-indigo-400 group-hover:scale-110 transition-transform"></i> Coding Practice
+            <li><a href="{% url 'practice:problem-list' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+              <i class="ri-code-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Coding Practice
             </a></li>
             <li><a href="{% url 'aptitude:dashboard' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
               <i class="ri-brain-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Aptitude Tests
             </a></li>
-            <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-slate-400 hover:text-cyan-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-robot-line mr-3 text-cyan-400 group-hover:scale-110 transition-transform"></i> Mock Interviews
+            <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+              <i class="ri-robot-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Mock Interviews
             </a></li>
-            <li><a href="{% url 'posts:feed' %}" class="text-slate-400 hover:text-purple-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-chat-3-line mr-3 text-purple-400 group-hover:scale-110 transition-transform"></i> Community Posts
+            <li><a href="{% url 'posts:feed' %}" class="text-slate-400 hover:text-teal-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+              <i class="ri-chat-3-line mr-3 text-teal-400 group-hover:scale-110 transition-transform"></i> Community Posts
             </a></li>
           </ul>
         </div>
@@ -761,15 +715,15 @@
         <!-- Progress & Profile (Students Only) -->
         <div>
           <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">Progress & Profile</span>
-            <div class="absolute -bottom-2 left-0 w-18 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full"></div>
+            <span class="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Progress & Profile</span>
+            <div class="absolute -bottom-2 left-0 w-18 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"></div>
           </h4>
           <ul class="space-y-4">
-            <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-slate-400 hover:text-cyan-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-history-line mr-3 text-cyan-400 group-hover:scale-110 transition-transform"></i> My Interviews
+            <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+              <i class="ri-history-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> My Interviews
             </a></li>
-            <li><a href="{% url 'users:profile' %}" class="text-slate-400 hover:text-blue-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-user-line mr-3 text-blue-400 group-hover:scale-110 transition-transform"></i> Profile Settings
+            <li><a href="{% url 'users:profile' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+              <i class="ri-user-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Profile Settings
             </a></li>
             <li><a href="#" class="text-slate-400 hover:text-amber-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
               <i class="ri-trophy-line mr-3 text-amber-400 group-hover:scale-110 transition-transform"></i> Achievements
@@ -783,13 +737,13 @@
         <!-- Quick Links for non-students or unauthenticated users -->
         <div>
           <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-rose-400 to-pink-400 bg-clip-text text-transparent">Quick Links</span>
-            <div class="absolute -bottom-2 left-0 w-14 h-0.5 bg-gradient-to-r from-rose-400 to-pink-400 rounded-full"></div>
+            <span class="bg-gradient-to-r from-rose-400 to-emerald-400 bg-clip-text text-transparent">Quick Links</span>
+            <div class="absolute -bottom-2 left-0 w-14 h-0.5 bg-gradient-to-r from-rose-400 to-emerald-400 rounded-full"></div>
           </h4>
           <ul class="space-y-4">
             {% if user.is_authenticated %}
-              <li><a href="{% url 'users:profile' %}" class="text-slate-400 hover:text-indigo-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                <i class="ri-user-line mr-3 text-indigo-400 group-hover:scale-110 transition-transform"></i> Profile
+              <li><a href="{% url 'users:profile' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+                <i class="ri-user-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Profile
               </a></li>
               {% if user.is_superuser %}
                 <li><a href="{% url 'users:admin_dashboard' %}" class="text-slate-400 hover:text-red-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
@@ -801,8 +755,8 @@
                 </a></li>
               {% endif %}
             {% else %}
-              <li><a href="{% url 'login' %}" class="text-slate-400 hover:text-indigo-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                <i class="ri-login-box-line mr-3 text-indigo-400 group-hover:scale-110 transition-transform"></i> Login
+              <li><a href="{% url 'login' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+                <i class="ri-login-box-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Login
               </a></li>
               <li><a href="{% url 'users:signup' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
                 <i class="ri-user-add-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Register
@@ -837,20 +791,20 @@
 
       <!-- Footer Bottom -->
       <div class="mt-16 pt-8 border-t border-slate-700/50 relative">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-sky-500 to-teal-500 rounded-full"></div>
         <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div class="text-center md:text-left">
             <p class="text-slate-400 text-base font-medium">
-              © 2025 <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 font-semibold brand-font">MockMate</span>. All rights reserved.
+              © 2025 <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 font-semibold brand-font">Elevo</span>. All rights reserved.
             </p>
             <p class="text-sm text-slate-500 mt-2 font-medium">
               Designed with ❤️ for aspiring tech professionals.
             </p>
           </div>
           <div class="flex items-center space-x-8 text-sm text-slate-400 font-medium">
-            <a href="#" class="hover:text-indigo-400 transition-colors">Privacy Policy</a>
-            <a href="#" class="hover:text-purple-400 transition-colors">Terms of Service</a>
-            <a href="#" class="hover:text-cyan-400 transition-colors">Cookie Policy</a>
+            <a href="#" class="hover:text-sky-400 transition-colors">Privacy Policy</a>
+            <a href="#" class="hover:text-teal-400 transition-colors">Terms of Service</a>
+            <a href="#" class="hover:text-emerald-400 transition-colors">Cookie Policy</a>
           </div>
         </div>
       </div>

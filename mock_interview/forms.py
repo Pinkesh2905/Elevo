@@ -1,47 +1,59 @@
-# mock_interview/forms.py
 from django import forms
+
 from .models import MockInterviewSession
 
 
 class InterviewSetupForm(forms.ModelForm):
-    """
-    Form for students to set up a mock interview session.
-    Optional resume upload will be parsed by AI to prefill fields.
-    """
-    resume_file = forms.FileField(
-        required=False,
-        label="Upload Resume (PDF/DOCX/TXT)",
-        help_text="Optional: Upload your resume to automatically detect your job role and skills."
+    resume_file = forms.FileField(required=False, label="Resume (PDF/DOCX/TXT)")
+    interview_track = forms.ChoiceField(
+        choices=[
+            ("technical", "Technical Interview"),
+            ("hr", "HR Interview"),
+        ],
+        initial="technical",
+        required=True,
+        label="Interview Type",
     )
 
     class Meta:
         model = MockInterviewSession
-        fields = ['job_role', 'key_skills']  # resume_file is handled separately
+        fields = ["job_role", "key_skills"]
         widgets = {
-            'job_role': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'e.g., Full Stack Developer, Data Scientist'
-            }),
-            'key_skills': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Comma-separated skills (e.g., Python, Django, React)',
-                'rows': 3
-            }),
-        }
-        labels = {
-            'job_role': 'Target Job Role',
-            'key_skills': 'Key Skills',
+            "job_role": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "e.g. Software Engineer",
+                }
+            ),
+            "key_skills": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": "e.g. Python, Django, SQL",
+                }
+            ),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["interview_track"].widget.attrs.update(
+            {
+                "class": "form-control",
+            }
+        )
+
     def clean_resume_file(self):
-        file = self.cleaned_data.get('resume_file')
-        if file:
-            allowed_types = ['application/pdf',
-                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                             'application/msword',
-                             'text/plain']
-            if file.content_type not in allowed_types:
-                raise forms.ValidationError("Unsupported file type. Please upload PDF, DOCX, DOC, or TXT.")
-            if file.size > 5 * 1024 * 1024:  # 5MB limit
-                raise forms.ValidationError("File too large. Maximum size is 5 MB.")
-        return file
+        file_obj = self.cleaned_data.get("resume_file")
+        if not file_obj:
+            return None
+
+        name = (file_obj.name or "").lower()
+        ext = name.rsplit(".", 1)[-1] if "." in name else ""
+        allowed_ext = {"pdf", "docx", "txt"}
+        if ext not in allowed_ext:
+            raise forms.ValidationError("Upload a PDF, DOCX, or TXT file.")
+
+        if file_obj.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Maximum file size is 5 MB.")
+
+        return file_obj

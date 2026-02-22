@@ -4,11 +4,11 @@
   <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
-        <div class="w-14 h-14 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-xl flex items-center justify-center mr-4">
-          <i class="ri-code-box-line text-3xl text-cyan-400"></i>
+        <div class="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mr-4">
+          <i class="ri-code-box-line text-3xl text-emerald-400"></i>
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 brand-font">
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400 brand-font">
             {% if edit_practice_problem_id %}Edit{% else %}Create{% endif %} Coding Problem
           </h2>
           <p class="text-sm text-slate-400 mt-1">LeetCode-style coding challenge with test cases</p>
@@ -31,7 +31,7 @@
     <!-- Basic Information -->
     <div class="dark-card rounded-2xl p-8 hover-lift">
       <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-slate-700/50 flex items-center brand-font">
-        <i class="ri-information-line text-blue-400 mr-2"></i>
+        <i class="ri-information-line text-sky-400 mr-2"></i>
         Basic Information
       </h3>
       
@@ -150,7 +150,7 @@
     <!-- Problem Description -->
     <div class="dark-card rounded-2xl p-8 hover-lift">
       <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-slate-700/50 flex items-center brand-font">
-        <i class="ri-file-text-line text-purple-400 mr-2"></i>
+        <i class="ri-file-text-line text-teal-400 mr-2"></i>
         Problem Description
       </h3>
       
@@ -318,9 +318,9 @@
     </div>
 
     <!-- Test Cases -->
-    <div class="dark-card rounded-2xl p-8 hover-lift border-2 border-blue-500/20">
-      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-blue-500/30 flex items-center brand-font">
-        <i class="ri-test-tube-line text-blue-400 mr-2"></i>
+    <div class="dark-card rounded-2xl p-8 hover-lift border-2 border-sky-500/20">
+      <h3 class="text-xl font-bold text-slate-100 mb-6 pb-4 border-b border-sky-500/30 flex items-center brand-font">
+        <i class="ri-test-tube-line text-sky-400 mr-2"></i>
         Test Cases
       </h3>
       
@@ -330,7 +330,7 @@
         <div class="testcase-form glass rounded-xl p-5 border border-slate-700/50">
           <div class="flex items-center justify-between mb-4">
             <h4 class="font-semibold text-slate-100 flex items-center">
-              <span class="w-7 h-7 bg-blue-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-blue-400">{{ forloop.counter }}</span>
+              <span class="w-7 h-7 bg-sky-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-sky-400">{{ forloop.counter }}</span>
               Test Case {{ forloop.counter }}
             </h4>
             {% if not forloop.first %}
@@ -375,7 +375,7 @@
         {% endfor %}
       </div>
       
-      <button type="button" onclick="addTestCase()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all shadow-lg hover-lift">
+      <button type="button" onclick="addTestCase()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-sky-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-emerald-700 transition-all shadow-lg hover-lift">
         <i class="ri-add-line mr-1"></i>Add Test Case
       </button>
     </div>
@@ -442,7 +442,7 @@
 
     <!-- Buttons -->
     <div class="flex items-center gap-3 pt-4">
-      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
         <i class="ri-{% if edit_practice_problem_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
         {% if edit_practice_problem_id %}Update{% else %}Create{% endif %} Coding Problem
       </button>

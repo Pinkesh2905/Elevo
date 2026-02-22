@@ -3,22 +3,22 @@
 {% block content %}
 <div class="min-h-screen relative overflow-hidden py-12">
     <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-indigo-900/10 to-purple-900/20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <!-- Topic Header -->
         <div class="mb-12 animate-slideInUp">
             <div class="glass-elevated rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden">
-                <div class="bg-gradient-to-r from-indigo-600/10 via-purple-600/10 to-cyan-600/10 px-8 py-8 border-b border-white/10">
+                <div class="bg-gradient-to-r from-sky-600/10 via-teal-600/10 to-emerald-600/10 px-8 py-8 border-b border-white/10">
                     <div class="flex items-center mb-6">
-                        <div class="p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg mr-6">
+                        <div class="p-4 bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg mr-6">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                             </svg>
                         </div>
                         <div>
                             <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">{{ topic.name }}</h1>
-                            <div class="w-16 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full"></div>
+                            <div class="w-16 h-1 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 rounded-full"></div>
                         </div>
                     </div>
                     <p class="text-lg text-slate-300 leading-relaxed">{{ topic.description }}</p>
@@ -29,7 +29,7 @@
         <!-- Problems Header -->
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-white mb-2">Available Problems</h2>
-            <div class="w-16 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-full"></div>
+            <div class="w-16 h-1 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 rounded-full"></div>
         </div>
 
         <!-- Problems List -->
@@ -43,11 +43,11 @@
                             <div class="flex-1 min-w-0">
                                 <!-- Problem Number and Title -->
                                 <div class="flex items-start mb-4">
-                                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                                    <div class="w-12 h-12 bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg mr-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                                         <span class="text-white font-bold text-lg">{{ forloop.counter }}</span>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 transition-all duration-300">
+                                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-sky-400 group-hover:to-teal-400 transition-all duration-300">
                                             {{ problem.question_text|truncatewords:15 }}
                                         </h3>
                                         <p class="text-slate-400 text-sm line-clamp-2">
@@ -85,7 +85,7 @@
                             <!-- Action Button -->
                             <div class="flex-shrink-0">
                                 <a href="{% url 'aptitude:problem_detail' problem.id %}" 
-                                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 border border-white/10 group">
+                                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-500 hover:to-teal-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 border border-white/10 group">
                                     <span>Solve Problem</span>
                                     <svg class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
@@ -99,7 +99,7 @@
             {% empty %}
             <div class="glass-elevated rounded-2xl p-12 text-center border border-white/10">
                 <div class="w-16 h-16 mx-auto glass rounded-xl flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-8 h-8 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                 </div>

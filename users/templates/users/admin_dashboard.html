@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Admin Dashboard | MockMate{% endblock %}
+{% block title %}Admin Dashboard | Elevo{% endblock %}
 
 {% block content %}
 <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -11,7 +11,7 @@
     <div class="mb-12">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-400 to-pink-400 brand-font mb-3">
+          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-400 to-emerald-400 brand-font mb-3">
             Admin Dashboard
           </h1>
           <p class="text-slate-400 text-lg font-medium">Manage tutors, problems, and platform content</p>
@@ -31,12 +31,12 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Pending Tutors</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">
               {{ pending_tutors.count }}
             </p>
           </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-user-add-line text-3xl text-blue-400"></i>
+          <div class="w-16 h-16 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-user-add-line text-3xl text-sky-400"></i>
           </div>
         </div>
       </div>
@@ -57,19 +57,19 @@
       </div>
 
       <!-- Pending Articles Stat -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
+      {% comment %} <div class="dark-card rounded-2xl p-6 hover-lift">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Pending Articles</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
               {{ pending_articles.count }}
             </p>
           </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-article-line text-3xl text-purple-400"></i>
+          <div class="w-16 h-16 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <i class="ri-article-line text-3xl text-teal-400"></i>
           </div>
         </div>
-      </div>
+      </div> {% endcomment %}
     </div>
 
     <!-- Main Content Grid -->
@@ -79,8 +79,8 @@
       <div class="dark-card rounded-2xl p-8 hover-lift">
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-user-add-line text-2xl text-blue-400"></i>
+            <div class="w-12 h-12 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="ri-user-add-line text-2xl text-sky-400"></i>
             </div>
             <div>
               <h2 class="text-2xl font-bold text-slate-100 brand-font">Pending Tutors</h2>
@@ -96,9 +96,9 @@
                 <div class="flex items-start justify-between mb-4">
                   <div class="flex items-center space-x-3">
                     {% if user_profile.avatar %}
-                      <img src="{{ user_profile.avatar.url }}" alt="{{ user_profile.user.username }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-blue-400/30">
+                      <img src="{{ user_profile.avatar.url }}" alt="{{ user_profile.user.username }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-sky-400/30">
                     {% else %}
-                      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg">
+                      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
                         {{ user_profile.user.username|slice:":1"|upper }}
                       </div>
                     {% endif %}
@@ -115,12 +115,12 @@
 
                 <div class="flex items-center space-x-2 mb-4">
                   {% if user_profile.github %}
-                    <a href="{{ user_profile.github }}" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors">
+                    <a href="{{ user_profile.github }}" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">
                       <i class="ri-github-fill text-lg"></i>
                     </a>
                   {% endif %}
                   {% if user_profile.linkedin %}
-                    <a href="{{ user_profile.linkedin }}" target="_blank" class="text-slate-400 hover:text-blue-400 transition-colors">
+                    <a href="{{ user_profile.linkedin }}" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">
                       <i class="ri-linkedin-fill text-lg"></i>
                     </a>
                   {% endif %}
@@ -144,8 +144,8 @@
           </div>
         {% else %}
           <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-user-add-line text-5xl text-blue-400/50"></i>
+            <div class="w-24 h-24 bg-gradient-to-br from-sky-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="ri-user-add-line text-5xl text-sky-400/50"></i>
             </div>
             <p class="text-slate-400 font-medium">No tutor accounts pending approval</p>
             <p class="text-sm text-slate-500 mt-2">New tutor registrations will appear here</p>
@@ -174,7 +174,7 @@
                 <div class="flex items-start justify-between mb-3">
                   <div class="flex-1">
                     <a href="{% url 'practice:problem_detail' problem.slug %}" 
-                       class="font-semibold text-blue-400 hover:text-blue-300 text-lg line-clamp-2 transition-colors">
+                       class="font-semibold text-sky-400 hover:text-sky-300 text-lg line-clamp-2 transition-colors">
                       {{ problem.title }}
                     </a>
                     <div class="flex items-center space-x-3 mt-2">
@@ -202,7 +202,7 @@
                 {% if problem.topics.exists %}
                   <div class="flex flex-wrap gap-2 mb-4">
                     {% for topic in problem.topics.all|slice:":3" %}
-                      <span class="px-2 py-1 bg-indigo-500/10 text-indigo-400 text-xs rounded-lg border border-indigo-500/20">
+                      <span class="px-2 py-1 bg-sky-500/10 text-sky-400 text-xs rounded-lg border border-sky-500/20">
                         {{ topic.name }}
                       </span>
                     {% endfor %}
@@ -239,11 +239,11 @@
       </div>
 
       <!-- Pending Articles Section -->
-      <div class="dark-card rounded-2xl p-8 hover-lift">
+      {% comment %} <div class="dark-card rounded-2xl p-8 hover-lift">
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-article-line text-2xl text-purple-400"></i>
+            <div class="w-12 h-12 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="ri-article-line text-2xl text-teal-400"></i>
             </div>
             <div>
               <h2 class="text-2xl font-bold text-slate-100 brand-font">Pending Articles</h2>
@@ -259,7 +259,7 @@
                 <div class="flex items-start justify-between mb-3">
                   <div class="flex-1">
                     <a href="{% url 'articles:article_detail' article.slug %}" 
-                       class="font-semibold text-purple-400 hover:text-purple-300 text-lg line-clamp-2 transition-colors">
+                       class="font-semibold text-teal-400 hover:text-teal-300 text-lg line-clamp-2 transition-colors">
                       {{ article.title }}
                     </a>
                   </div>
@@ -292,14 +292,14 @@
           </div>
         {% else %}
           <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-article-line text-5xl text-purple-400/50"></i>
+            <div class="w-24 h-24 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="ri-article-line text-5xl text-teal-400/50"></i>
             </div>
             <p class="text-slate-400 font-medium">No articles pending approval</p>
             <p class="text-sm text-slate-500 mt-2">New article submissions will appear here</p>
           </div>
         {% endif %}
-      </div>
+      </div> {% endcomment %}
 
     </div>
 
@@ -309,8 +309,8 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <a href="/admin/auth/user/" class="dark-card rounded-xl p-6 hover:bg-white/10 transition-all duration-200 hover-lift group">
           <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <i class="ri-group-line text-2xl text-blue-400"></i>
+            <div class="w-12 h-12 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i class="ri-group-line text-2xl text-sky-400"></i>
             </div>
             <div>
               <p class="font-semibold text-slate-100">Manage Users</p>

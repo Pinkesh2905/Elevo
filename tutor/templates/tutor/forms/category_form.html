@@ -4,11 +4,11 @@
   <div class="dark-card rounded-2xl p-8 mb-8 hover-lift">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
-        <div class="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mr-4">
-          <i class="ri-folder-add-line text-3xl text-blue-400"></i>
+        <div class="w-14 h-14 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+          <i class="ri-folder-add-line text-3xl text-sky-400"></i>
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 brand-font">
+          <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 brand-font">
             {% if edit_category_id %}Edit{% else %}Create{% endif %} Aptitude Category
           </h2>
           <p class="text-sm text-slate-400 mt-1">Categories help organize aptitude topics</p>
@@ -77,7 +77,7 @@
 
       <!-- Buttons -->
       <div class="flex items-center gap-3 pt-6">
-        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
+        <button type="submit" class="px-6 py-3 bg-gradient-to-r from-sky-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all shadow-lg hover-lift">
           <i class="ri-{% if edit_category_id %}refresh-line{% else %}add-line{% endif %} mr-2"></i>
           {% if edit_category_id %}Update{% else %}Create{% endif %} Category
         </button>
@@ -92,8 +92,8 @@
   {% if categories %}
   <div class="dark-card rounded-2xl p-8 hover-lift">
     <div class="flex items-center mb-6">
-      <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mr-4">
-        <i class="ri-folder-3-line text-2xl text-purple-400"></i>
+      <div class="w-12 h-12 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+        <i class="ri-folder-3-line text-2xl text-teal-400"></i>
       </div>
       <div>
         <h3 class="text-2xl font-bold text-slate-100 brand-font">Existing Categories</h3>
@@ -107,10 +107,10 @@
         <div class="flex items-start justify-between">
           <div class="flex-1 min-w-0">
             <div class="flex items-center mb-2">
-              <div class="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg flex items-center justify-center mr-3">
-                <i class="ri-bookmark-line text-blue-400"></i>
+              <div class="w-8 h-8 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-lg flex items-center justify-center mr-3">
+                <i class="ri-bookmark-line text-sky-400"></i>
               </div>
-              <p class="font-semibold text-slate-100 text-lg group-hover:text-blue-400 transition-colors">{{ category.name }}</p>
+              <p class="font-semibold text-slate-100 text-lg group-hover:text-sky-400 transition-colors">{{ category.name }}</p>
             </div>
             {% if category.description %}
               <p class="text-sm text-slate-400 ml-11 line-clamp-2">{{ category.description|truncatechars:100 }}</p>

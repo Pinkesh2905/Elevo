@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Avg, Count, Prefetch
 from django.conf import settings
 
 from .models import UserProfile, EmailVerificationToken, PasswordResetToken, EmailChangeToken
@@ -18,7 +19,7 @@ from .forms import (
     ForgotPasswordForm, OTPVerificationForm, PasswordResetForm, 
     ResendVerificationForm, EmailChangeForm
 )
-from posts.models import Post, Repost
+from posts.models import Comment, Follow, Post, Repost
 
 
 # --- Role helper functions ---
@@ -69,7 +70,7 @@ def signup(request):
                 
                 messages.success(
                     request, 
-                    f"Welcome to MockMate, {user.username}! Your account has been created successfully."
+                    f"Welcome to Elevo, {user.username}! Your account has been created successfully."
                 )
                 return redirect('dashboard_redirect')
         else:
@@ -419,8 +420,102 @@ def profile(request):
             if 'is_approved_tutor' in profile_form.fields:
                 del profile_form.fields['is_approved_tutor']
 
-    # Fetch logged-in user's posts
-    user_posts = Post.objects.filter(author=request.user).order_by('-created_at')
+    comment_prefetch = Prefetch(
+        'comments',
+        queryset=(
+            Comment.objects
+            .select_related('author', 'author__profile')
+            .prefetch_related(
+                Prefetch(
+                    'replies',
+                    queryset=(
+                        Comment.objects
+                        .select_related('author', 'author__profile')
+                    )
+                )
+            )
+            .order_by('created_at')
+        )
+    )
+
+    user_posts = Post.objects.filter(author=request.user).select_related(
+        'author', 'author__profile'
+    ).prefetch_related(
+        'likes', comment_prefetch, 'reposts', 'shares'
+    ).order_by('-created_at')
+
+    followers_count = Follow.objects.filter(following=request.user).count()
+    following_count = Follow.objects.filter(follower=request.user).count()
+
+    own_reposts = Repost.objects.filter(user=request.user).select_related(
+        'user', 'user__profile', 'original_post', 'original_post__author', 'original_post__author__profile'
+    ).prefetch_related(
+        'original_post__likes',
+        Prefetch(
+            'original_post__comments',
+            queryset=(
+                Comment.objects
+                .select_related('author', 'author__profile')
+                .prefetch_related(
+                    Prefetch(
+                        'replies',
+                        queryset=(
+                            Comment.objects
+                            .select_related('author', 'author__profile')
+                        )
+                    )
+                )
+                .order_by('created_at')
+            )
+        ),
+        'original_post__reposts',
+        'original_post__shares',
+    )
+
+    own_activity_items = []
+    for post in user_posts:
+        own_activity_items.append({
+            'type': 'post',
+            'post': post,
+            'actor': request.user,
+            'timestamp': post.created_at,
+        })
+
+    for repost in own_reposts:
+        own_activity_items.append({
+            'type': 'repost',
+            'post': repost.original_post,
+            'repost': repost,
+            'actor': request.user,
+            'timestamp': repost.created_at,
+        })
+
+    own_activity_items.sort(key=lambda item: item['timestamp'], reverse=True)
+    recent_reposts = own_reposts.order_by('-created_at')[:10]
+
+    coding_total = coding_solved = 0
+    aptitude_quizzes = aptitude_avg = 0
+    try:
+        from practice.models import UserProblemProgress
+        coding_total = UserProblemProgress.objects.filter(user=request.user).count()
+        coding_solved = UserProblemProgress.objects.filter(
+            user=request.user, status='solved'
+        ).count()
+    except Exception:
+        pass
+
+    try:
+        from aptitude.models import AptitudeQuizAttempt
+        quiz_qs = AptitudeQuizAttempt.objects.filter(
+            user=request.user, status='completed'
+        )
+        aptitude_quizzes = quiz_qs.count()
+        aptitude_avg = round(
+            quiz_qs.aggregate(avg=Avg('score_percent')).get('avg', 0) or 0,
+            1
+        ) if aptitude_quizzes else 0
+    except Exception:
+        pass
 
     context = {
         'user_profile': user_profile,
@@ -428,6 +523,14 @@ def profile(request):
         'profile_form': profile_form,
         'is_admin_user': is_admin_user,
         'user_posts': user_posts,
+        'activity_items': own_activity_items,
+        'recent_reposts': recent_reposts,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'coding_total': coding_total,
+        'coding_solved': coding_solved,
+        'aptitude_quizzes': aptitude_quizzes,
+        'aptitude_avg': aptitude_avg,
         'is_own_profile': True,
     }
 
@@ -436,19 +539,143 @@ def profile(request):
 
 # --- Public User Profile View ---
 def public_profile(request, username):
-    """Public profile view."""
+    """Public profile view with social timeline and progress insights."""
     user_profile = get_object_or_404(UserProfile, user__username=username)
-    
-    reposts = Repost.objects.filter(user=user_profile.user).select_related("original_post__author", "original_post__author__profile")
-    reposted_posts = [re.original_post for re in reposts]
-    
-    user_posts = list(Post.objects.filter(author=user_profile.user)) + reposted_posts
-    user_posts = sorted(user_posts, key=lambda p: p.created_at, reverse=True)
+
+    comment_prefetch = Prefetch(
+        'comments',
+        queryset=(
+            Comment.objects
+            .select_related('author', 'author__profile')
+            .prefetch_related(
+                Prefetch(
+                    'replies',
+                    queryset=(
+                        Comment.objects
+                        .select_related('author', 'author__profile')
+                    )
+                )
+            )
+            .order_by('created_at')
+        )
+    )
+
+    posts = Post.objects.filter(author=user_profile.user).select_related(
+        'author', 'author__profile'
+    ).prefetch_related('likes', comment_prefetch, 'reposts', 'shares')
+
+    reposts = Repost.objects.filter(user=user_profile.user).select_related(
+        'user', 'user__profile', 'original_post', 'original_post__author', 'original_post__author__profile'
+    ).prefetch_related(
+        'original_post__likes',
+        Prefetch(
+            'original_post__comments',
+            queryset=(
+                Comment.objects
+                .select_related('author', 'author__profile')
+                .prefetch_related(
+                    Prefetch(
+                        'replies',
+                        queryset=(
+                            Comment.objects
+                            .select_related('author', 'author__profile')
+                        )
+                    )
+                )
+                .order_by('created_at')
+            )
+        ),
+        'original_post__reposts',
+        'original_post__shares'
+    )
+
+    activity_items = []
+    for post in posts:
+        activity_items.append({
+            'type': 'post',
+            'post': post,
+            'actor': post.author,
+            'timestamp': post.created_at,
+        })
+
+    for repost in reposts:
+        activity_items.append({
+            'type': 'repost',
+            'post': repost.original_post,
+            'repost': repost,
+            'actor': repost.user,
+            'timestamp': repost.created_at,
+        })
+
+    activity_items.sort(key=lambda item: item['timestamp'], reverse=True)
+
+    followers_count = Follow.objects.filter(following=user_profile.user).count()
+    following_count = Follow.objects.filter(follower=user_profile.user).count()
+
+    is_own_profile = request.user.is_authenticated and request.user == user_profile.user
+    is_following = False
+    if request.user.is_authenticated and not is_own_profile:
+        is_following = Follow.objects.filter(
+            follower=request.user, following=user_profile.user
+        ).exists()
+
+    coding_total = coding_solved = coding_attempted = 0
+    aptitude_quizzes = aptitude_best = 0
+    recent_achievements = []
+    try:
+        from practice.models import Submission, UserProblemProgress
+        coding_total = UserProblemProgress.objects.filter(user=user_profile.user).count()
+        coding_solved = UserProblemProgress.objects.filter(
+            user=user_profile.user, status='solved'
+        ).count()
+        coding_attempted = UserProblemProgress.objects.filter(
+            user=user_profile.user, status='attempted'
+        ).count()
+        solved_recent = Submission.objects.filter(
+            user=user_profile.user, status='accepted'
+        ).select_related('problem').order_by('-created_at')[:4]
+        for sub in solved_recent:
+            recent_achievements.append({
+                'label': 'Solved coding problem',
+                'value': sub.problem.title,
+                'time': sub.created_at,
+            })
+    except Exception:
+        pass
+
+    try:
+        from aptitude.models import AptitudeQuizAttempt
+        quiz_qs = AptitudeQuizAttempt.objects.filter(
+            user=user_profile.user, status='completed'
+        ).order_by('-submitted_at')
+        aptitude_quizzes = quiz_qs.count()
+        best_quiz = quiz_qs.order_by('-score_percent').first()
+        aptitude_best = round(best_quiz.score_percent, 1) if best_quiz else 0
+        for quiz in quiz_qs[:4]:
+            recent_achievements.append({
+                'label': 'Aptitude quiz',
+                'value': f"{quiz.correct_answers}/{quiz.total_questions} ({quiz.score_percent:.1f}%)",
+                'time': quiz.submitted_at or quiz.started_at,
+            })
+    except Exception:
+        pass
+
+    recent_achievements.sort(key=lambda item: item['time'], reverse=True)
+    recent_achievements = recent_achievements[:6]
 
     context = {
         'user_profile': user_profile,
-        'user_posts': user_posts,
-        'is_own_profile': request.user == user_profile.user,
+        'activity_items': activity_items,
+        'is_own_profile': is_own_profile,
+        'is_following': is_following,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'coding_total': coding_total,
+        'coding_solved': coding_solved,
+        'coding_attempted': coding_attempted,
+        'aptitude_quizzes': aptitude_quizzes,
+        'aptitude_best': aptitude_best,
+        'recent_achievements': recent_achievements,
         'is_admin_user': request.user.is_staff,
     }
     return render(request, 'users/view_profile.html', context)

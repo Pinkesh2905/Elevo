@@ -10,7 +10,7 @@
         {% if messages %}
             <div class="mb-6">
                 {% for message in messages %}
-                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-blue-100 text-blue-800 {% endif %}" role="alert">
+                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-sky-100 text-sky-800 {% endif %}" role="alert">
                         <p class="font-medium">{{ message }}</p>
                     </div>
                 {% endfor %}
@@ -20,8 +20,8 @@
         <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl text-center transform transition-all hover:shadow-2xl duration-500">
             
             <!-- Icon -->
-            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-blue-100 to-indigo-200 mb-6">
-                <svg class="h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-sky-100 to-sky-200 mb-6">
+                <svg class="h-12 w-12 text-sky-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                 </svg>                  
             </div>
@@ -33,7 +33,7 @@
 
             <!-- Message -->
             <p class="mt-4 text-base text-gray-600">
-                We've sent a verification link to your email address. Please check your inbox (and spam folder!) to activate your MockMate account.
+                We've sent a verification link to your email address. Please check your inbox (and spam folder!) to activate your Elevo account.
             </p>
 
             <!-- Separator -->
@@ -54,7 +54,7 @@
             <div class="space-y-4">
                 <p class="text-sm text-gray-500">
                     Didn't receive the email?
-                    <a href="{% url 'users:resend_verification' %}" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+                    <a href="{% url 'users:resend_verification' %}" class="font-medium text-sky-600 hover:text-sky-500 hover:underline">
                         Resend verification link
                     </a>
                 </p>

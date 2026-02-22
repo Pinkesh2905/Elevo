@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-  {% if is_new %}Add New Problem{% else %}Edit Problem: {{ problem.title }}{% endif %} | MockMate
+  {% if is_new %}Add New Problem{% else %}Edit Problem: {{ problem.title }}{% endif %} | Elevo
 {% endblock %}
 
 {% block content %}
@@ -128,16 +128,16 @@
         {% endfor %}
       </div>
 
-      <button type="button" id="add-testcase-button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      <button type="button" id="add-testcase-button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-sky-700 bg-sky-100 hover:bg-sky-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
         <i class="fas fa-plus mr-2"></i> Add Another Test Case
       </button>
 
       <div class="mt-8 flex justify-end space-x-4">
-        <a href="{% url 'practice:tutor_dashboard' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <a href="{% url 'practice:tutor_dashboard' %}" class="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
           Cancel
         </a>
         <button type="submit"
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
           {% if is_new %}Create Problem{% else %}Save Changes{% endif %}
         </button>
       </div>
@@ -172,18 +172,18 @@
               <label for="id_testcase_set-${newFormIndex}-input" class="block text-sm font-medium text-gray-700 mb-1">
                 Input:
               </label>
-              <textarea name="testcase_set-${newFormIndex}-input" cols="40" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" id="id_testcase_set-${newFormIndex}-input"></textarea>
+              <textarea name="testcase_set-${newFormIndex}-input" cols="40" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500" id="id_testcase_set-${newFormIndex}-input"></textarea>
             </div>
             <div>
               <label for="id_testcase_set-${newFormIndex}-expected_output" class="block text-sm font-medium text-gray-700 mb-1">
                 Expected Output:
               </label>
-              <textarea name="testcase_set-${newFormIndex}-expected_output" cols="40" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" id="id_testcase_set-${newFormIndex}-expected_output"></textarea>
+              <textarea name="testcase_set-${newFormIndex}-expected_output" cols="40" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500" id="id_testcase_set-${newFormIndex}-expected_output"></textarea>
             </div>
           </div>
           <div class="mt-4">
             <label for="id_testcase_set-${newFormIndex}-is_sample" class="inline-flex items-center">
-              <input type="checkbox" name="testcase_set-${newFormIndex}-is_sample" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" id="id_testcase_set-${newFormIndex}-is_sample">
+              <input type="checkbox" name="testcase_set-${newFormIndex}-is_sample" class="rounded border-gray-300 text-sky-600 shadow-sm focus:ring-sky-500" id="id_testcase_set-${newFormIndex}-is_sample">
               <span class="ml-2 text-sm text-gray-700">Is Sample</span>
             </label>
           </div>
@@ -191,7 +191,7 @@
             <label for="id_testcase_set-${newFormIndex}-description" class="block text-sm font-medium text-gray-700 mb-1">
               Description:
             </label>
-            <input type="text" name="testcase_set-${newFormIndex}-description" maxlength="255" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" id="id_testcase_set-${newFormIndex}-description">
+            <input type="text" name="testcase_set-${newFormIndex}-description" maxlength="255" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500" id="id_testcase_set-${newFormIndex}-description">
           </div>
           <div class="mt-4 text-right">
             <label for="id_testcase_set-${newFormIndex}-DELETE" class="inline-flex items-center text-red-600 hover:text-red-800 cursor-pointer">

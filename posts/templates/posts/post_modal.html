@@ -13,15 +13,15 @@
       {% if post.author.profile.avatar %}
         <img src="{{ post.author.profile.avatar.url }}" 
              alt="{{ post.author.username }}'s avatar"
-             class="w-14 h-14 rounded-full object-cover ring-2 ring-cyan-400/50 shadow-lg" />
+             class="w-14 h-14 rounded-full object-cover ring-2 ring-emerald-400/50 shadow-lg" />
       {% else %}
-        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl ring-2 ring-cyan-400/50 shadow-lg">
+        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-xl ring-2 ring-emerald-400/50 shadow-lg">
           {{ post.author.username|first|upper }}
         </div>
       {% endif %}
       <div>
         <a href="{% url 'users:public_profile' post.author.username %}" 
-           class="text-lg font-bold text-gray-100 hover:text-cyan-300 transition-colors duration-300">
+           class="text-lg font-bold text-gray-100 hover:text-emerald-300 transition-colors duration-300">
           {{ post.author.get_full_name|default:post.author.username }}
         </a>
         <div class="flex items-center text-gray-400 text-sm mt-1">
@@ -35,7 +35,7 @@
     {% if post.author == request.user %}
       <div class="flex items-center space-x-1">
         <a href="{% url 'posts:edit_post' post.id %}" 
-           class="p-2 text-blue-400 hover:bg-blue-500/20 rounded-full transition-all duration-200 group">
+           class="p-2 text-sky-400 hover:bg-sky-500/20 rounded-full transition-all duration-200 group">
           <i class="ri-edit-2-line text-xl group-hover:scale-110 transition-transform"></i>
         </a>
         <form method="post" action="{% url 'posts:delete_post' post.id %}" 
@@ -74,7 +74,7 @@
         <span class="text-gray-400 ml-1.5">likes</span>
       </div>
       <div class="flex items-center text-sm">
-        <i class="ri-chat-3-fill text-blue-400/80 mr-2 text-lg"></i>
+        <i class="ri-chat-3-fill text-sky-400/80 mr-2 text-lg"></i>
         <span class="font-bold text-gray-200">{{ post.comment_count }}</span>
         <span class="text-gray-400 ml-1.5">comments</span>
       </div>
@@ -94,7 +94,7 @@
 
     <!-- Comment Button -->
     <button type="button" onclick="focusCommentInput()" 
-            class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-300 hover:bg-blue-500/20 hover:text-blue-400 transition-all duration-300 group">
+            class="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-300 hover:bg-sky-500/20 hover:text-sky-400 transition-all duration-300 group">
       <i class="ri-chat-3-line text-2xl group-hover:scale-110 transition-transform"></i>
       <span class="font-medium text-sm">Comment</span>
     </button>
@@ -114,9 +114,9 @@
       <div class="flex gap-3">
         {% if user.profile.avatar %}
           <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}"
-               class="w-10 h-10 rounded-full object-cover ring-2 ring-cyan-400/50 mt-1">
+               class="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-400/50 mt-1">
         {% else %}
-          <div class="w-10 h-10 rounded-full ring-2 ring-cyan-400/50 bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 mt-1">
+          <div class="w-10 h-10 rounded-full ring-2 ring-emerald-400/50 bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 mt-1">
             {{ user.username|first|upper }}
           </div>
         {% endif %}
@@ -125,11 +125,11 @@
           {% csrf_token %}
           <textarea name="content" rows="2" required
                     id="modal-comment-input"
-                    class="w-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-2 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all duration-300 resize-none text-sm"
+                    class="w-full bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-2 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300 resize-none text-sm"
                     placeholder="Add a comment..."></textarea>
           <div class="flex justify-end items-center mt-2">
             <button type="submit"
-                    class="px-5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300">
+                    class="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-emerald-500/45 transform hover:scale-105 transition-all duration-300">
               Post
             </button>
           </div>
@@ -139,7 +139,7 @@
       <div class="text-center py-8 bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl">
         <p class="text-gray-300 mb-4">You must be logged in to comment.</p>
         <a href="{% url 'login' %}" 
-           class="inline-block px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-full font-semibold shadow-lg hover:shadow-cyan-500/50 transform hover:scale-105 transition-all duration-300">
+           class="inline-block px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-full font-semibold shadow-lg hover:shadow-emerald-500/45 transform hover:scale-105 transition-all duration-300">
           Sign In
         </a>
       </div>
@@ -153,7 +153,7 @@
             <img src="{{ comment.author.profile.avatar.url }}" 
                  class="w-9 h-9 rounded-full object-cover ring-1 ring-white/20 mt-1" />
           {% else %}
-            <div class="w-9 h-9 rounded-full ring-1 ring-white/20 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 mt-1">
+            <div class="w-9 h-9 rounded-full ring-1 ring-white/20 bg-gradient-to-br from-sky-500 to-teal-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 mt-1">
               {{ comment.author.username|first|upper }}
             </div>
           {% endif %}
@@ -161,7 +161,7 @@
           <div class="flex-1 bg-black/10 backdrop-blur-sm rounded-xl p-3 border border-white/5">
             <div class="flex items-center gap-2 mb-1">
               <a href="{% url 'users:public_profile' comment.author.username %}" 
-                 class="font-bold text-gray-200 hover:text-cyan-400 transition-colors text-sm">
+                 class="font-bold text-gray-200 hover:text-emerald-400 transition-colors text-sm">
                 {{ comment.author.get_full_name|default:comment.author.username }}
               </a>
               <span class="text-xs text-gray-500">
@@ -252,7 +252,7 @@
       const url = window.location.href; // This will be the URL of the main page
       if (navigator.share) {
         navigator.share({
-          title: 'Check out this post on MockMate',
+          title: 'Check out this post on Elevo',
           text: `{{ post.content|truncatewords:20|escapejs }}`,
           url: url
         }).catch(err => console.error('Error sharing:', err));

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load form_filters %}
 
-{% block title %}Sign Up | MockMate{% endblock %}
+{% block title %}Sign Up | Elevo{% endblock %}
 
 {% block content %}
 <section class="py-12 px-4">
@@ -20,35 +20,35 @@
 
       <div class="mb-4">
         <label class="block text-sm font-medium text-[#0e141b] mb-1">Username</label>
-        {{ form.username|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+        {{ form.username|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" }}
         {% if form.username.errors %}<p class="mt-2 text-sm text-red-600">{{ form.username.errors }}</p>{% endif %}
       </div>
 
       <div class="mb-4">
         <label class="block text-sm font-medium text-[#0e141b] mb-1">Email</label>
-        {{ form.email|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+        {{ form.email|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" }}
         {% if form.email.errors %}<p class="mt-2 text-sm text-red-600">{{ form.email.errors }}</p>{% endif %}
       </div>
 
       <div class="mb-4">
         <label class="block text-sm font-medium text-[#0e141b] mb-1">Password</label>
-        {{ form.password1|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+        {{ form.password1|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" }}
         {% if form.password1.errors %}<p class="mt-2 text-sm text-red-600">{{ form.password1.errors }}</p>{% endif %}
       </div>
 
       <div class="mb-6">
         <label class="block text-sm font-medium text-[#0e141b] mb-1">Confirm Password</label>
-        {{ form.password2|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+        {{ form.password2|add_class:"w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" }}
         {% if form.password2.errors %}<p class="mt-2 text-sm text-red-600">{{ form.password2.errors }}</p>{% endif %}
       </div>
 
-      <button type="submit" class="w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-semibold hover:opacity-90 transition shadow-lg flex items-center justify-center">
+      <button type="submit" class="w-full px-8 py-4 bg-gradient-to-r from-sky-500 to-teal-600 text-white rounded-full font-semibold hover:opacity-90 transition shadow-lg flex items-center justify-center">
         Sign Up <i class="fas fa-user-plus ml-2"></i>
       </button>
     </form>
     
     <div class="mt-6 text-center">
-      <p class="text-gray-600">Already have an account? <a href="{% url 'login' %}" class="text-blue-600 hover:underline font-semibold">Login</a></p>
+      <p class="text-gray-600">Already have an account? <a href="{% url 'login' %}" class="text-sky-600 hover:underline font-semibold">Login</a></p>
     </div>
   </div>
 </section>

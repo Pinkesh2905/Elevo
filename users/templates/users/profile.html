@@ -1,525 +1,291 @@
 {% extends "base.html" %}
-{% load static %}
 {% load form_filters %}
 {% load humanize %}
 
-{% block title %}My Profile | MockMate{% endblock %}
+{% block title %}My Profile | Elevo{% endblock %}
 
 {% block content %}
 <section class="min-h-screen py-8 px-4">
-  <div class="max-w-4xl mx-auto">
-    <!-- Success/Error Messages -->
+  <div class="mx-auto max-w-7xl space-y-6">
     {% if messages %}
-      <div class="mb-6 space-y-3">
+      <div class="space-y-3">
         {% for message in messages %}
-          <div class="glass-elevated rounded-lg p-4 border {% if message.tags == 'success' %}border-emerald-500/30 bg-emerald-500/10{% elif message.tags == 'error' %}border-red-500/30 bg-red-500/10{% elif message.tags == 'warning' %}border-yellow-500/30 bg-yellow-500/10{% else %}border-blue-500/30 bg-blue-500/10{% endif %}">
-            <div class="flex items-center gap-3">
-              <i class="ri-{% if message.tags == 'success' %}check{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}alert{% else %}info{% endif %}-line text-{% if message.tags == 'success' %}emerald{% elif message.tags == 'error' %}red{% elif message.tags == 'warning' %}yellow{% else %}blue{% endif %}-400"></i>
-              <p class="text-{% if message.tags == 'success' %}emerald{% elif message.tags == 'error' %}red{% elif message.tags == 'warning' %}yellow{% else %}blue{% endif %}-200 font-medium">{{ message }}</p>
-            </div>
+          <div class="rounded-xl border px-4 py-3 text-sm {% if message.tags == 'success' %}border-emerald-500/35 bg-emerald-500/15 text-emerald-100{% elif message.tags == 'error' %}border-red-500/35 bg-red-500/15 text-red-100{% elif message.tags == 'warning' %}border-amber-500/35 bg-amber-500/15 text-amber-100{% else %}border-cyan-500/35 bg-cyan-500/15 text-cyan-100{% endif %}">
+            {{ message }}
           </div>
         {% endfor %}
       </div>
     {% endif %}
 
-    <!-- Main Profile Card -->
-    <div class="glass-elevated rounded-xl overflow-hidden border border-slate-700/50">
-      
-      <!-- Header Section -->
-      <div class="relative h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
-        <div class="absolute inset-0 bg-black/20"></div>
-      </div>
+    <div class="rounded-3xl border border-white/15 bg-slate-900/70 backdrop-blur-xl overflow-hidden">
+      <div class="h-40 bg-[radial-gradient(circle_at_15%_20%,rgba(34,211,238,0.35),transparent_45%),radial-gradient(circle_at_85%_30%,rgba(16,185,129,0.25),transparent_45%),linear-gradient(90deg,rgba(15,23,42,0.95),rgba(30,41,59,0.95))]"></div>
 
-      <!-- Profile Content -->
-      <div class="relative -mt-16 px-6 pb-6">
-        <!-- Profile Header -->
-        <div class="flex flex-col items-center text-center mb-6">
-          <!-- Avatar -->
-          <div class="relative mb-4 group">
-            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-700/50 bg-slate-800 group-hover:scale-105 transition-transform duration-300 shadow-xl">
+      <div class="px-6 pb-6 -mt-14">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+          <div class="flex items-end gap-4">
+            <div class="w-28 h-28 rounded-2xl overflow-hidden ring-4 ring-slate-900 border border-white/20 bg-slate-800 shrink-0">
               {% if user.profile.avatar %}
                 <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-full h-full object-cover">
               {% else %}
-                <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-                  <i class="ri-user-smile-line text-4xl text-white"></i>
+                <div class="w-full h-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-3xl font-bold flex items-center justify-center">
+                  {{ user.username|first|upper }}
                 </div>
               {% endif %}
             </div>
-            <!-- Email Verification Status -->
-            {% if user.profile.is_email_verified %}
-              <div class="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-2 border-slate-800 rounded-full flex items-center justify-center">
-                <i class="ri-check-line text-white text-sm"></i>
-              </div>
-            {% else %}
-              <div class="absolute bottom-1 right-1 w-6 h-6 bg-yellow-500 border-2 border-slate-800 rounded-full flex items-center justify-center">
-                <i class="ri-alert-line text-white text-sm"></i>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Name and Info -->
-          <div class="space-y-2 mb-4">
-            <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400">
-              {{ user.get_full_name|default:user.username }}
-            </h2>
-            <p class="text-slate-400 font-medium flex items-center justify-center gap-2">
-              <i class="ri-mail-line text-blue-400"></i>
-              {{ user.email }}
-              {% if not user.profile.is_email_verified %}
-                <span class="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-full border border-yellow-500/30">
-                  Unverified
-                </span>
-              {% endif %}
-            </p>
-          </div>
-
-          <!-- Role Badge -->
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm shadow-lg glass border
-            {% if user.profile.role == 'TUTOR' %}
-              border-emerald-500/30 bg-emerald-500/10
-            {% elif user.profile.role == 'STUDENT' %}
-              border-blue-500/30 bg-blue-500/10  
-            {% else %}
-              border-purple-500/30 bg-purple-500/10
-            {% endif %}">
-            {% if user.profile.role == 'TUTOR' %}
-              <i class="ri-graduation-cap-line text-emerald-400"></i>
-              <span class="text-emerald-200">{{ user.profile.get_role_display }}</span>
-              {% if not user.profile.is_approved_tutor %}
-                <span class="ml-2 px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-xs font-medium border border-yellow-500/30">
-                  Pending Approval
-                </span>
-              {% endif %}
-            {% elif user.profile.role == 'STUDENT' %}
-              <i class="ri-book-open-line text-blue-400"></i>
-              <span class="text-blue-200">{{ user.profile.get_role_display }}</span>
-            {% else %}
-              <i class="ri-user-line text-purple-400"></i>
-              <span class="text-purple-200">{{ user.profile.get_role_display }}</span>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Profile Details -->
-        <div class="glass rounded-lg p-6 mb-6 border border-slate-700/50">
-          <h3 class="text-xl font-semibold text-slate-200 mb-4 flex items-center gap-2">
-            <i class="ri-information-line text-blue-400"></i>
-            Profile Details
-          </h3>
-          
-          <div class="grid md:grid-cols-2 gap-4">
-            <!-- Left Column -->
-            <div class="space-y-3">
-              <div class="flex items-center gap-3 p-3 glass rounded-lg hover:bg-white/5 transition-colors border border-slate-700/30">
-                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <i class="ri-user-line text-white"></i>
-                </div>
-                <div>
-                  <span class="text-xs font-medium text-slate-400 uppercase tracking-wide">First Name</span>
-                  <p class="text-slate-200 font-medium">{{ user.first_name|default:"Not provided" }}</p>
-                </div>
-              </div>
-              
-              <div class="flex items-center gap-3 p-3 glass rounded-lg hover:bg-white/5 transition-colors border border-slate-700/30">
-                <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <i class="ri-user-line text-white"></i>
-                </div>
-                <div>
-                  <span class="text-xs font-medium text-slate-400 uppercase tracking-wide">Last Name</span>
-                  <p class="text-slate-200 font-medium">{{ user.last_name|default:"Not provided" }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right Column -->
-            <div class="space-y-3">
-              <div class="flex items-center gap-3 p-3 glass rounded-lg hover:bg-white/5 transition-colors border border-slate-700/30">
-                <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-                  <i class="ri-calendar-line text-white"></i>
-                </div>
-                <div>
-                  <span class="text-xs font-medium text-slate-400 uppercase tracking-wide">Member Since</span>
-                  <p class="text-slate-200 font-medium">{{ user.date_joined|date:"M d, Y" }}</p>
-                </div>
-              </div>
-              
-              <div class="flex items-center gap-3 p-3 glass rounded-lg hover:bg-white/5 transition-colors border border-slate-700/30">
-                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <i class="ri-time-line text-white"></i>
-                </div>
-                <div>
-                  <span class="text-xs font-medium text-slate-400 uppercase tracking-wide">Last Active</span>
-                  <p class="text-slate-200 font-medium">{{ user.last_login|naturaltime|default:"Never" }}</p>
-                </div>
+            <div class="pb-1">
+              <h1 class="text-2xl sm:text-3xl font-bold text-slate-100">{{ user.get_full_name|default:user.username }}</h1>
+              <p class="text-sm text-slate-400">@{{ user.username }}</p>
+              <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                <span class="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/15 text-cyan-200">{{ user.profile.get_role_display }}</span>
+                {% if user.profile.is_email_verified %}
+                  <span class="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 text-emerald-200">Email verified</span>
+                {% else %}
+                  <span class="px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/15 text-amber-200">Email not verified</span>
+                {% endif %}
               </div>
             </div>
           </div>
 
-          <!-- Bio Section -->
-          <div class="mt-4 p-4 glass rounded-lg border border-blue-500/20 bg-blue-500/5">
-            <div class="flex items-center gap-2 mb-2">
-              <i class="ri-file-text-line text-blue-400"></i>
-              <span class="font-medium text-slate-200">About Me</span>
-            </div>
-            <p class="text-slate-300 leading-relaxed">{{ user.profile.bio|default:"This user hasn't written their bio yet." }}</p>
-          </div>
-
-          <!-- Social Links -->
-          {% if user.profile.linkedin or user.profile.github %}
-          <div class="mt-4 flex flex-wrap gap-3">
-            {% if user.profile.linkedin %}
-              <a href="{{ user.profile.linkedin }}" target="_blank" 
-                 class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg font-medium transition-colors border border-blue-500/30">
-                <i class="fab fa-linkedin"></i>
-                <span>LinkedIn</span>
-                <i class="ri-external-link-line text-sm"></i>
-              </a>
-            {% endif %}
-            {% if user.profile.github %}
-              <a href="{{ user.profile.github }}" target="_blank" 
-                 class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700/50 hover:bg-slate-700/70 text-slate-200 rounded-lg font-medium transition-colors border border-slate-600/50">
-                <i class="fab fa-github"></i>
-                <span>GitHub</span>
-                <i class="ri-external-link-line text-sm"></i>
-              </a>
-            {% endif %}
-          </div>
-          {% endif %}
-        </div>
-        
-        <!-- Posts Section -->
-        <div class="glass rounded-lg p-6 mb-6 border border-slate-700/50">
-          <h3 class="text-xl font-semibold text-slate-200 mb-4 flex items-center gap-2">
-            <i class="ri-article-line text-purple-400"></i>
-            My Posts
-          </h3>
-
-          {% for post in user_posts %}
-            <div class="glass rounded-lg p-4 mb-4 border border-slate-700/30 hover:border-slate-600/50 transition-colors">
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-full overflow-hidden border border-blue-500/30">
-                    {% if post.author.profile.avatar %}
-                      <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}" class="w-full h-full object-cover">
-                    {% else %}
-                      <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                        {{ post.author.username|slice:":1"|upper }}
-                      </div>
-                    {% endif %}
-                  </div>
-                  <div>
-                    <p class="font-medium text-slate-200 text-sm">{{ post.author.username }}</p>
-                    <p class="text-xs text-slate-400">{{ post.created_at|naturaltime }}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="text-slate-300 whitespace-pre-line leading-relaxed">{{ post.content }}</div>
-
-              {% if post.image %}
-                <img src="{{ post.image.url }}" alt="Post Image" class="mt-3 rounded-lg max-h-64 w-full object-cover border border-slate-700/50">
-              {% endif %}
-
-              <!-- Interaction buttons -->
-              <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-400">
-                <span class="flex items-center gap-1">
-                  <i class="ri-heart-line text-red-400"></i>
-                  <span>{{ post.like_set.count }} Likes</span>
-                </span>
-                <span class="flex items-center gap-1">
-                  <i class="ri-chat-4-line text-blue-400"></i>
-                  <span>{{ post.comment_set.count }} Comments</span>
-                </span>
-                <span class="flex items-center gap-1">
-                  <i class="ri-repeat-line text-emerald-400"></i>
-                  <span>{{ post.repost_set.count }} Reposts</span>
-                </span>
-              </div>
-            </div>
-          {% empty %}
-            <div class="glass rounded-lg p-6 text-center border border-slate-700/30">
-              <i class="ri-article-line text-4xl text-slate-500 mb-2"></i>
-              <p class="text-slate-400 font-medium">No posts yet. Share your thoughts!</p>
-            </div>
-          {% endfor %}
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button onclick="openEditModal()"
-                  class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-            <i class="ri-edit-line"></i>
-            <span>Edit Profile</span>
-          </button>
-          
-          {% if not user.profile.is_email_verified %}
-            <a href="{% url 'users:resend_verification' %}"
-               class="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold transition-colors">
-              <i class="ri-mail-line"></i>
-              <span>Verify Email</span>
+          <div class="flex flex-wrap items-center gap-2 lg:pb-1">
+            <button onclick="openEditModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold hover:opacity-90 transition">
+              <i class="ri-edit-line"></i>
+              <span>Edit Profile</span>
+            </button>
+            <a href="{% url 'users:account_settings' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/20 bg-white/5 text-slate-200 hover:bg-white/10 transition">
+              <i class="ri-settings-3-line"></i>
+              <span>Settings</span>
             </a>
-          {% endif %}
+          </div>
+        </div>
+
+        <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+            <p class="text-xs text-slate-500">Followers</p>
+            <p class="text-xl font-bold text-cyan-300">{{ followers_count }}</p>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+            <p class="text-xs text-slate-500">Following</p>
+            <p class="text-xl font-bold text-emerald-300">{{ following_count }}</p>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+            <p class="text-xs text-slate-500">Coding Solved</p>
+            <p class="text-xl font-bold text-emerald-300">{{ coding_solved }}/{{ coding_total }}</p>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+            <p class="text-xs text-slate-500">Aptitude Avg</p>
+            <p class="text-xl font-bold text-cyan-300">{{ aptitude_avg }}%</p>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-xl border border-white/10 bg-white/5 p-4">
+          <p class="text-xs text-slate-500 mb-1">Bio</p>
+          <p class="text-sm text-slate-300 leading-relaxed">{{ user.profile.bio|default:"Add a short bio to make your profile stand out." }}</p>
         </div>
       </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <aside class="lg:col-span-4 space-y-5">
+        <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Account</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between text-slate-400"><span>Email</span><span class="text-slate-200">{{ user.email }}</span></div>
+            <div class="flex justify-between text-slate-400"><span>Joined</span><span class="text-slate-200">{{ user.date_joined|date:"M d, Y" }}</span></div>
+            <div class="flex justify-between text-slate-400"><span>Last active</span><span class="text-slate-200">{{ user.last_login|naturaltime|default:"Never" }}</span></div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+          <h3 class="text-sm font-semibold text-slate-200 mb-3">Links</h3>
+          <div class="space-y-2 text-sm">
+            {% if user.profile.github %}
+              <a href="{{ user.profile.github }}" target="_blank" class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-slate-200 hover:bg-white/10 transition">
+                <span class="inline-flex items-center gap-2"><i class="ri-github-fill"></i>GitHub</span>
+                <i class="ri-external-link-line text-slate-400"></i>
+              </a>
+            {% endif %}
+            {% if user.profile.linkedin %}
+              <a href="{{ user.profile.linkedin }}" target="_blank" class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-slate-200 hover:bg-white/10 transition">
+                <span class="inline-flex items-center gap-2"><i class="ri-linkedin-box-fill"></i>LinkedIn</span>
+                <i class="ri-external-link-line text-slate-400"></i>
+              </a>
+            {% endif %}
+            {% if not user.profile.github and not user.profile.linkedin %}
+              <p class="text-slate-500">No social links added yet.</p>
+            {% endif %}
+          </div>
+        </div>
+      </aside>
+
+      <main class="lg:col-span-8 space-y-4">
+        <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+          <h2 class="text-lg font-semibold text-slate-100">My Activity Feed</h2>
+          <p class="text-sm text-slate-500">Your posts, reposts, and thread interactions.</p>
+        </div>
+
+        {% for item in activity_items %}
+          <article class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+            {% if item.type == 'repost' %}
+              <div class="mb-3 px-3 py-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-200 inline-flex items-center gap-2">
+                <i class="ri-repeat-line"></i>
+                <span>You reposted this {{ item.timestamp|naturaltime }}</span>
+              </div>
+              {% if item.repost.comment %}
+                <p class="mb-3 rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-slate-300">{{ item.repost.comment }}</p>
+              {% endif %}
+            {% endif %}
+
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full overflow-hidden border border-white/20 shrink-0">
+                {% if item.post.author.profile.avatar %}
+                  <img src="{{ item.post.author.profile.avatar.url }}" alt="{{ item.post.author.username }}" class="w-full h-full object-cover">
+                {% else %}
+                  <div class="w-full h-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-xs font-bold flex items-center justify-center">
+                    {{ item.post.author.username|first|upper }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <div class="min-w-0">
+                    <p class="font-semibold text-slate-100 truncate">{{ item.post.author.get_full_name|default:item.post.author.username }}</p>
+                    <p class="text-xs text-slate-500">@{{ item.post.author.username }}</p>
+                  </div>
+                  <a href="{% url 'posts:post_detail' item.post.id %}" class="text-xs text-slate-500 hover:text-slate-300">{{ item.timestamp|naturaltime }}</a>
+                </div>
+
+                <p class="mt-2 text-slate-200 whitespace-pre-line">{{ item.post.content }}</p>
+                {% if item.post.image %}
+                  <img src="{{ item.post.image.url }}" alt="Post image" class="mt-3 rounded-xl border border-white/10 max-h-[430px] w-full object-cover">
+                {% endif %}
+
+                <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                  <span class="px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-200">{{ item.post.like_count }} Likes</span>
+                  <span class="px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-200">{{ item.post.comment_count }} Comments</span>
+                  <span class="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-200">{{ item.post.repost_count }} Reposts</span>
+                  <span class="px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-200">{{ item.post.share_count }} Shares</span>
+                </div>
+
+                <div class="mt-4 space-y-2">
+                  {% for comment in item.post.comments.all|slice:":6" %}
+                    {% if not comment.parent_id %}
+                      <div class="rounded-md border border-white/10 bg-white/5 p-3">
+                        <div class="text-xs text-slate-400">
+                          <span class="font-semibold text-slate-200">{{ comment.author.get_full_name|default:comment.author.username }}</span>
+                          <span>@{{ comment.author.username }}</span>
+                          <span class="ml-1">{{ comment.created_at|naturaltime }}</span>
+                        </div>
+                        <p class="mt-1 text-sm text-slate-300">{{ comment.content }}</p>
+
+                        {% for reply in comment.replies.all|slice:":2" %}
+                          <div class="mt-2 ml-3 rounded-md border border-white/10 bg-slate-950/50 p-2">
+                            <p class="text-xs text-cyan-300">{{ reply.author.get_full_name|default:reply.author.username }} replied {{ reply.created_at|naturaltime }}</p>
+                            <p class="text-xs text-slate-300 mt-1">{{ reply.content }}</p>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  {% empty %}
+                    <p class="text-xs text-slate-500">No comments yet.</p>
+                  {% endfor %}
+                </div>
+
+                <a href="{% url 'posts:post_detail' item.post.id %}" class="inline-flex items-center gap-1 mt-3 text-xs text-cyan-300 hover:text-cyan-200">
+                  Open full discussion
+                  <i class="ri-arrow-right-line"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+        {% empty %}
+          <div class="rounded-2xl border border-dashed border-white/20 bg-slate-900/70 p-12 text-center text-slate-500">
+            No activity yet. Start posting your progress.
+          </div>
+        {% endfor %}
+      </main>
     </div>
   </div>
 </section>
 
-<!-- Edit Modal -->
-<div id="editModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-  <div class="glass-elevated w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-slate-700/50 bg-slate-900/90">
-    <!-- Modal Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-t-xl">
-      <h2 class="text-2xl font-bold text-white text-center flex items-center justify-center gap-2">
-        <i class="ri-edit-line"></i>
-        <span>Edit Profile</span>
-      </h2>
-      <button onclick="closeEditModal()" class="absolute top-4 right-4 text-white/80 hover:text-white transition-colors">
-        <i class="ri-close-line text-xl"></i>
+<div id="editModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm p-4">
+  <div class="mx-auto max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl border border-white/15 bg-slate-900/95">
+    <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-900/95">
+      <h3 class="text-lg font-semibold text-slate-100">Edit Profile</h3>
+      <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-200">
+        <i class="ri-close-line text-2xl"></i>
       </button>
     </div>
 
-    <!-- Modal Content -->
-    <div class="p-6">
-      <form method="POST" action="{% url 'users:profile' %}" enctype="multipart/form-data" class="space-y-6" id="profileForm">
-        {% csrf_token %}
-        
-        <!-- User Form Fields -->
-        <div class="grid md:grid-cols-2 gap-4">
-          <!-- Username -->
-          <div class="form-group">
-            <label for="{{ user_form.username.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <i class="ri-user-line text-blue-400"></i>
-              Username
-            </label>
-            {{ user_form.username|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-200" }}
-            {% if user_form.username.errors %}
-              <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ user_form.username.errors.0 }}</span>
-              </div>
-            {% endif %}
-          </div>
+    <form method="post" action="{% url 'users:profile' %}" enctype="multipart/form-data" class="p-6 space-y-5">
+      {% csrf_token %}
 
-          <!-- Email -->
-          <div class="form-group">
-            <label for="{{ user_form.email.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <i class="ri-mail-line text-purple-400"></i>
-              Email
-            </label>
-            {{ user_form.email|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-slate-200" }}
-            {% if user_form.email.errors %}
-              <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ user_form.email.errors.0 }}</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- First Name -->
-          <div class="form-group">
-            <label for="{{ user_form.first_name.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <i class="ri-user-smile-line text-emerald-400"></i>
-              First Name
-            </label>
-            {{ user_form.first_name|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-slate-200" }}
-            {% if user_form.first_name.errors %}
-              <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ user_form.first_name.errors.0 }}</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Last Name -->
-          <div class="form-group">
-            <label for="{{ user_form.last_name.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <i class="ri-user-heart-line text-pink-400"></i>
-              Last Name
-            </label>
-            {{ user_form.last_name|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all text-slate-200" }}
-            {% if user_form.last_name.errors %}
-              <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ user_form.last_name.errors.0 }}</span>
-              </div>
-            {% endif %}
-          </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-2">Username</label>
+          {{ user_form.username|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500" }}
         </div>
-
-        <!-- Profile Form Fields -->
-        <div class="space-y-4">
-          <!-- Bio -->
-          <div class="form-group">
-            <label for="{{ profile_form.bio.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <i class="ri-file-text-line text-blue-400"></i>
-              About Me
-            </label>
-            {{ profile_form.bio|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-200 resize-none h-24" }}
-            {% if profile_form.bio.errors %}
-              <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ profile_form.bio.errors.0 }}</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Social Links -->
-          <div class="grid md:grid-cols-2 gap-4">
-            <!-- GitHub -->
-            <div class="form-group">
-              <label for="{{ profile_form.github.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                <i class="fab fa-github text-slate-400"></i>
-                GitHub Profile
-              </label>
-              {{ profile_form.github|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all text-slate-200" }}
-              {% if profile_form.github.errors %}
-                <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                  <i class="ri-error-warning-line"></i>
-                  <span>{{ profile_form.github.errors.0 }}</span>
-                </div>
-              {% endif %}
-            </div>
-
-            <!-- LinkedIn -->
-            <div class="form-group">
-              <label for="{{ profile_form.linkedin.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                <i class="fab fa-linkedin text-blue-400"></i>
-                LinkedIn Profile
-              </label>
-              {{ profile_form.linkedin|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-200" }}
-              {% if profile_form.linkedin.errors %}
-                <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                  <i class="ri-error-warning-line"></i>
-                  <span>{{ profile_form.linkedin.errors.0 }}</span>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Avatar Upload -->
-          <div class="form-group">
-            <label for="{{ profile_form.avatar.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <i class="ri-image-line text-purple-400"></i>
-              Profile Picture
-            </label>
-            <div class="w-full px-4 py-4 border-2 border-dashed border-slate-600 rounded-lg bg-slate-800/50 hover:bg-slate-800/70 transition-colors text-center cursor-pointer" onclick="document.getElementById('{{ profile_form.avatar.id_for_label }}').click()">
-              <input type="file" id="{{ profile_form.avatar.id_for_label }}" name="{{ profile_form.avatar.name }}" accept="image/*" class="hidden" onchange="previewImage(this)">
-              <i class="ri-upload-cloud-line text-2xl mb-2 block text-slate-400"></i>
-              <p class="text-sm font-medium text-slate-300">Choose a new profile picture</p>
-              <p class="text-xs text-slate-500 mt-1">Click here to browse files</p>
-            </div>
-            {% if profile_form.avatar.errors %}
-              <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ profile_form.avatar.errors.0 }}</span>
-              </div>
-            {% endif %}
-          </div>
-
-          <!-- Admin-only fields -->
-          {% if is_admin_user %}
-            {% if 'role' in profile_form.fields %}
-            <div class="form-group">
-              <label for="{{ profile_form.role.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                <i class="ri-user-settings-line text-red-400"></i>
-                User Role (Admin Only)
-              </label>
-              {{ profile_form.role|add_class:"w-full px-4 py-3 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all text-slate-200" }}
-              {% if profile_form.role.errors %}
-                <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                  <i class="ri-error-warning-line"></i>
-                  <span>{{ profile_form.role.errors.0 }}</span>
-                </div>
-              {% endif %}
-            </div>
-            {% endif %}
-
-            {% if 'is_approved_tutor' in profile_form.fields %}
-            <div class="form-group flex items-center p-4 glass rounded-lg border border-slate-700/30">
-              {{ profile_form.is_approved_tutor|add_class:"mr-3" }}
-              <label for="{{ profile_form.is_approved_tutor.id_for_label }}" class="text-sm font-semibold text-slate-300 flex items-center gap-2 cursor-pointer">
-                <i class="ri-check-double-line text-emerald-400"></i>
-                {{ profile_form.is_approved_tutor.label }}
-              </label>
-              {% if profile_form.is_approved_tutor.errors %}
-                <div class="text-red-400 text-sm mt-1 flex items-center gap-1">
-                  <i class="ri-error-warning-line"></i>
-                  <span>{{ profile_form.is_approved_tutor.errors.0 }}</span>
-                </div>
-              {% endif %}
-            </div>
-            {% endif %}
-          {% endif %}
+        <div>
+          <label class="block text-xs text-slate-400 mb-2">Email</label>
+          {{ user_form.email|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500" }}
         </div>
-
-        <!-- Form Actions -->
-        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-700/50">
-          <button type="button" onclick="closeEditModal()"
-                  class="px-6 py-3 border border-slate-600 bg-slate-800/50 hover:bg-slate-800/70 rounded-lg text-slate-300 hover:text-slate-200 transition-colors font-medium">
-            Cancel
-          </button>
-          <button type="submit" 
-                  class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all">
-            Save Changes
-          </button>
+        <div>
+          <label class="block text-xs text-slate-400 mb-2">First Name</label>
+          {{ user_form.first_name|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500" }}
         </div>
-      </form>
-    </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-2">Last Name</label>
+          {{ user_form.last_name|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500" }}
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-slate-400 mb-2">Bio</label>
+        {{ profile_form.bio|add_class:"w-full h-24 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none" }}
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-2">GitHub</label>
+          {{ profile_form.github|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500" }}
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-2">LinkedIn</label>
+          {{ profile_form.linkedin|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500" }}
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-slate-400 mb-2">Profile Photo</label>
+        {{ profile_form.avatar|add_class:"w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-cyan-500/20 file:px-3 file:py-1 file:text-cyan-200" }}
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-lg border border-white/20 bg-white/5 text-slate-300 hover:bg-white/10">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold hover:opacity-90">Save</button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
-// Modal functions
-function openEditModal() {
+  function openEditModal() {
     const modal = document.getElementById('editModal');
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-}
+  }
 
-function closeEditModal() {
+  function closeEditModal() {
     const modal = document.getElementById('editModal');
     modal.classList.add('hidden');
     document.body.style.overflow = '';
-}
+  }
 
-// Image preview functionality
-function previewImage(input) {
-    // Add image preview logic here if needed
-}
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeEditModal();
+  });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('editModal');
-    
-    // Close modal when clicking outside
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeEditModal();
-        }
-    });
-    
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            closeEditModal();
-        }
-    });
-    
-    // Auto-hide messages
-    setTimeout(() => {
-        const messages = document.querySelectorAll('.glass-elevated');
-        messages.forEach(message => {
-            if (message.textContent.includes('success') || message.textContent.includes('error')) {
-                message.style.transition = 'opacity 0.5s ease';
-                message.style.opacity = '0';
-                setTimeout(() => {
-                    message.remove();
-                }, 500);
-            }
-        });
-    }, 5000);
-});
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target.id === 'editModal') closeEditModal();
+  });
 </script>
-
-<!-- Font Awesome for social icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

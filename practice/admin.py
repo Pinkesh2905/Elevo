@@ -263,6 +263,6 @@ class UserProblemProgressAdmin(admin.ModelAdmin):
 
 
 # Customize admin site header
-admin.site.site_header = "MockMate Practice Admin"
+admin.site.site_header = "Elevo Practice Admin"
 admin.site.site_title = "Practice Admin"
 admin.site.index_title = "Welcome to Practice Management"

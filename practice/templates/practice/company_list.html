@@ -1,261 +1,36 @@
-{% extends 'base.html' %}
-{% load static %}
+﻿{% extends 'base.html' %}
 
-{% block title %}Browse by Companies - MockMate{% endblock %}
+{% block title %}Companies | Practice | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-8">
-    <!-- Animated Background Elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-20 right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div class="absolute bottom-20 left-20 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-    </div>
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-white">Browse by Companies</h1>
+    <p class="text-slate-300 mt-2">Practice the most asked questions by company.</p>
+  </div>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-4xl font-bold text-white mb-2">Browse by Companies</h1>
-                    <p class="text-lg text-slate-400">Practice problems asked by top tech companies in their interviews</p>
-                </div>
-                <a href="{% url 'practice:problem-list' %}" 
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-white backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg hover:bg-white/8 transition-all duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
-                    </svg>
-                    Back to Problems
-                </a>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for company in companies %}
+      <a href="{% url 'practice:problem-list' %}?company={{ company.id }}" class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5 hover:border-teal-400 transition-colors">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {% if company.logo %}
+                <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-8 h-8 object-contain">
+              {% else %}
+                <i class="ri-building-line text-slate-400"></i>
+              {% endif %}
             </div>
+            <h2 class="text-lg font-semibold text-white truncate">{{ company.name }}</h2>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">{{ company.problem_count }}</span>
         </div>
-
-        <!-- Stats Card -->
-        <div class="backdrop-blur-lg bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-400/30 rounded-xl shadow-lg p-8 mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-2xl font-bold text-white mb-2">{{ companies.count }} Companies Featured</h2>
-                    <p class="text-purple-200">Prepare for your dream company by solving their interview questions</p>
-                </div>
-                <svg class="w-20 h-20 text-purple-300/30" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/>
-                </svg>
-            </div>
-        </div>
-
-        <!-- Companies Grid -->
-        {% if companies %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for company in companies %}
-            <a href="{% url 'practice:problem-list' %}?company={{ company.id }}" 
-               class="block backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl hover:bg-white/8 hover:shadow-lg hover:border-purple-400/30 transition-all duration-300 overflow-hidden group">
-                
-                <!-- Company Header -->
-                <div class="bg-gradient-to-br from-purple-500/10 to-pink-500/10 px-6 py-5 border-b border-white/10 group-hover:from-purple-500/20 group-hover:to-pink-500/20 transition-colors">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4 flex-1">
-                            <!-- Company Logo -->
-                            {% if company.logo %}
-                            <div class="flex-shrink-0 w-12 h-12 bg-white/10 backdrop-blur-lg rounded-lg shadow-sm p-2 flex items-center justify-center group-hover:bg-white/15 group-hover:shadow-md transition-all">
-                                <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="max-w-full max-h-full object-contain">
-                            </div>
-                            {% else %}
-                            <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg shadow-sm flex items-center justify-center group-hover:shadow-md transition-shadow">
-                                <span class="text-white font-bold text-lg">{{ company.name|slice:":1" }}</span>
-                            </div>
-                            {% endif %}
-                            
-                            <!-- Company Name -->
-                            <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition-colors truncate">
-                                {{ company.name }}
-                            </h3>
-                        </div>
-                        
-                        <svg class="w-6 h-6 text-purple-400 transform group-hover:scale-110 group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-                
-                <!-- Company Body -->
-                <div class="px-6 py-4">
-                    <!-- Website Link -->
-                    {% if company.website %}
-                    <div class="flex items-center text-xs text-slate-500 mb-4">
-                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
-                        </svg>
-                        <span class="truncate">{{ company.website|slice:"8:40" }}</span>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Problem Count Badge -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center text-sm">
-                            <svg class="w-5 h-5 text-slate-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-slate-300">
-                                <span class="font-semibold text-white">{{ company.problem_count }}</span> 
-                                problem{{ company.problem_count|pluralize }}
-                            </span>
-                        </div>
-                        
-                        <span class="text-xs font-medium text-purple-400 group-hover:text-pink-400 transition-colors">
-                            Explore →
-                        </span>
-                    </div>
-                </div>
-                
-                <!-- Progress Bar (if user is authenticated) -->
-                {% if user.is_authenticated %}
-                <div class="px-6 pb-4">
-                    <div class="w-full bg-white/10 rounded-full h-2">
-                        <div class="bg-gradient-to-r from-purple-500 to-pink-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-1">0% completed</p>
-                </div>
-                {% endif %}
-            </a>
-            {% endfor %}
-        </div>
-        {% else %}
-        <!-- No Companies Found -->
-        <div class="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center mb-4">
-                <svg class="w-8 h-8 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-2">No companies available</h3>
-            <p class="text-slate-400">Companies will appear here once they are added by tutors</p>
-        </div>
-        {% endif %}
-
-        <!-- Interview Preparation Tips -->
-        <div class="mt-12 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-8">
-            <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
-                <span class="mr-2">🎯</span>
-                Interview Preparation Strategy
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-10 w-10 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-400 font-bold">1</div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1">Research the Company</h3>
-                        <p class="text-sm text-slate-400">Start by solving problems from your target company to understand their interview style</p>
-                    </div>
-                </div>
-                
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-10 w-10 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-400 font-bold">2</div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1">Practice Regularly</h3>
-                        <p class="text-sm text-slate-400">Solve at least one problem daily from companies you're targeting</p>
-                    </div>
-                </div>
-                
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-10 w-10 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-400 font-bold">3</div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1">Analyze Patterns</h3>
-                        <p class="text-sm text-slate-400">Notice common question types and focus on those topics</p>
-                    </div>
-                </div>
-                
-                <div class="flex items-start">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center h-10 w-10 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-400 font-bold">4</div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1">Mock Interviews</h3>
-                        <p class="text-sm text-slate-400">Practice under time pressure to simulate real interview conditions</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pro Tip Highlight -->
-        <div class="mt-8 backdrop-blur-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-xl p-6">
-            <div class="flex items-start">
-                <svg class="w-6 h-6 text-purple-400 mt-1 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                </svg>
-                <div>
-                    <h3 class="text-lg font-semibold text-white mb-2 flex items-center">
-                        <span class="mr-2">💡</span>
-                        Pro Tip
-                    </h3>
-                    <p class="text-sm text-slate-300">
-                        Many companies ask similar questions. After solving problems from one company, 
-                        you'll find patterns that help with interviews at other companies too. Focus on 
-                        understanding core concepts rather than memorizing solutions.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <a href="{% url 'practice:topic_list' %}" 
-               class="group backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/8 hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors">Browse by Topics</h3>
-                        <p class="text-sm text-slate-400">Master specific algorithms and data structures</p>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{% url 'practice:problem-list' %}" 
-               class="group backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/8 hover:shadow-lg transition-all duration-300">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-purple-400 transition-colors">View All Problems</h3>
-                        <p class="text-sm text-slate-400">Browse the complete problem collection</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-    </div>
-</div>
-
-<style>
-    .delay-700 {
-        animation-delay: 700ms;
-    }
-    
-    .delay-1000 {
-        animation-delay: 1000ms;
-    }
-    
-    .truncate {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-</style>
+        <p class="text-sm text-slate-400 mt-3">{{ company.website|default:"Company-tagged interview problems" }}</p>
+        <div class="mt-4 text-sm text-teal-300 font-medium inline-flex items-center gap-1">View problems <i class="ri-arrow-right-line"></i></div>
+      </a>
+    {% empty %}
+      <div class="col-span-full rounded-2xl border border-slate-700 bg-slate-900/65 p-8 text-center text-slate-400">No companies available yet.</div>
+    {% endfor %}
+  </div>
+</section>
 {% endblock %}
