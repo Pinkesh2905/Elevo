@@ -1,0 +1,2 @@
+problem_number,title,difficulty,description,constraints,example_input,example_output,example_explanation,hints,time_complexity,space_complexity,topics,companies,is_active
+1,Two Sum,easy,Return indices of two numbers that add to target.,2 <= n <= 1000,"[2,7,11,15], 9","[0,1]",2+7=9,Use a hash map.,O(n),O(n),Array,Sample Company,true

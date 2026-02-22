@@ -1,0 +1,2 @@
+problem_number,approach,complexity_analysis,code_explanation,video_url
+1,Use a hash map to track seen numbers.,Time O(n) and Space O(n).,Check complement before storing current number.,

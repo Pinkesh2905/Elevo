@@ -46,6 +46,9 @@ DATABASE_URL=postgres://postgres:password@localhost:5432/Elevo
 GEMINI_API_KEY=your_gemini_key
 OPENAI_API_KEY=your_openai_key
 AI_PROVIDER=gemini
+APTITUDE_DATA_DIR=private_data/aptitude
+PRACTICE_DATA_DIR=private_data/practice
+ELEVO_CONTENT_CSV=private_data/elevo_content.csv
 ```
 
 5. Run migrations and start:
@@ -53,6 +56,29 @@ AI_PROVIDER=gemini
 python manage.py migrate
 python manage.py runserver
 ```
+
+## Data Privacy (Important)
+
+- This repository keeps only sample datasets:
+  - `data/*_sample.csv`
+  - `practice_data/*_sample.csv`
+  - `elevo_content_sample.csv`
+- Real production datasets must stay outside Git in a private location.
+- Set private paths in `.env`:
+```env
+APTITUDE_DATA_DIR=private_data/aptitude
+PRACTICE_DATA_DIR=private_data/practice
+ELEVO_CONTENT_CSV=private_data/elevo_content.csv
+```
+
+Import commands:
+```bash
+python manage.py import_aptitude_data
+python manage.py import_problems --clear
+python manage.py import_csv
+```
+
+The commands first use private files (`*.csv`) and automatically fall back to sample files (`*_sample.csv`) if private files are not present.
 
 ## Production Notes
 

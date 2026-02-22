@@ -20,6 +20,15 @@ package-lock.json
 NLTK data
 nltk_data/
 
+Dataset privacy
+data/*.csv
+!data/*_sample.csv
+practice_data/*.csv
+!practice_data/*_sample.csv
+elevo_content.csv
+private_data/
+private_data/**
+
 Editor-specific files
 .vscode/
 .idea/

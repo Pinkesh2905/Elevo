@@ -1,0 +1,2 @@
+problem_number,language,template_code,solution_code
+1,python3,"def solve(nums, target):\n    pass","def solve(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        need = target - num\n        if need in seen:\n            return [seen[need], i]\n        seen[num] = i"

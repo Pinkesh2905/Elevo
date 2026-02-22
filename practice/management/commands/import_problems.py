@@ -26,8 +26,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--data-dir',
             type=str,
-            default='practice_data',
-            help='Directory containing CSV files (default: practice_data)'
+            default=os.getenv('PRACTICE_DATA_DIR', 'practice_data'),
+            help='Directory containing CSV files (default: PRACTICE_DATA_DIR or practice_data)'
         )
         parser.add_argument(
             '--clear',
@@ -80,9 +80,20 @@ class Command(BaseCommand):
  
         self.stdout.write(self.style.SUCCESS('\nImport completed successfully!'))
 
+    def _resolve_csv_path(self, data_dir, base_name):
+        csv_path = os.path.join(data_dir, f'{base_name}.csv')
+        sample_csv_path = os.path.join(data_dir, f'{base_name}_sample.csv')
+
+        if os.path.exists(csv_path):
+            return csv_path
+        if os.path.exists(sample_csv_path):
+            self.stdout.write(self.style.WARNING(f'Using sample CSV: {sample_csv_path}'))
+            return sample_csv_path
+        return csv_path
+
     def import_topics(self, data_dir):
         """Import topics from topics.csv"""
-        csv_path = os.path.join(data_dir, 'topics.csv')
+        csv_path = self._resolve_csv_path(data_dir, 'topics')
         
         if not os.path.exists(csv_path):
             self.stdout.write(self.style.WARNING(f'Skipping topics: {csv_path} not found'))
@@ -106,7 +117,7 @@ class Command(BaseCommand):
 
     def import_companies(self, data_dir):
         """Import companies from companies.csv"""
-        csv_path = os.path.join(data_dir, 'companies.csv')
+        csv_path = self._resolve_csv_path(data_dir, 'companies')
         
         if not os.path.exists(csv_path):
             self.stdout.write(self.style.WARNING(f'Skipping companies: {csv_path} not found'))
@@ -130,7 +141,7 @@ class Command(BaseCommand):
 
     def import_problems(self, data_dir, user):
         """Import problems from problems.csv"""
-        csv_path = os.path.join(data_dir, 'problems.csv')
+        csv_path = self._resolve_csv_path(data_dir, 'problems')
         
         if not os.path.exists(csv_path):
             raise CommandError(f'Required file not found: {csv_path}')
@@ -179,7 +190,7 @@ class Command(BaseCommand):
 
     def import_test_cases(self, data_dir):
         """Import test cases from test_cases.csv"""
-        csv_path = os.path.join(data_dir, 'test_cases.csv')
+        csv_path = self._resolve_csv_path(data_dir, 'test_cases')
         
         if not os.path.exists(csv_path):
             self.stdout.write(self.style.WARNING(f'Skipping test cases: {csv_path} not found'))
@@ -211,7 +222,7 @@ class Command(BaseCommand):
 
     def import_code_templates(self, data_dir):
         """Import code templates from code_templates.csv"""
-        csv_path = os.path.join(data_dir, 'code_templates.csv')
+        csv_path = self._resolve_csv_path(data_dir, 'code_templates')
         
         if not os.path.exists(csv_path):
             self.stdout.write(self.style.WARNING(f'Skipping code templates: {csv_path} not found'))
@@ -243,7 +254,7 @@ class Command(BaseCommand):
 
     def import_editorials(self, data_dir):
         """Import editorials from editorials.csv"""
-        csv_path = os.path.join(data_dir, 'editorials.csv')
+        csv_path = self._resolve_csv_path(data_dir, 'editorials')
         
         if not os.path.exists(csv_path):
             self.stdout.write(self.style.WARNING(f'Skipping editorials: {csv_path} not found'))
