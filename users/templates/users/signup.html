@@ -1,365 +1,179 @@
 {% extends 'base.html' %}
 {% load form_filters %}
 
-{% block title %}Sign Up | Elevo{% endblock %}
+{% block title %}Create Account | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-8 px-4 flex items-center justify-center">
-  <div class="relative max-w-md w-full mx-auto">
-    <!-- Main card -->
-    <div class="glass-elevated p-8 rounded-xl border border-slate-700/50 bg-slate-900/90 backdrop-blur-xl">
-      
-      <!-- Header -->
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-sky-500 via-teal-500 to-sky-500 rounded-full mb-4 shadow-lg">
-          <i class="ri-user-add-line text-white text-2xl"></i>
+<section class="min-h-screen px-4 py-10 sm:px-6 lg:px-8">
+  <div class="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-5">
+    <aside class="dark-card rounded-2xl border border-white/10 p-6 lg:col-span-2">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Welcome to Elevo</p>
+      <h1 class="mt-3 text-3xl font-bold text-white brand-font">Build interview confidence, step by step.</h1>
+      <p class="mt-3 text-sm leading-6 text-slate-300">
+        Join as a student to practice coding, aptitude, and AI interviews. Join as a tutor to manage question banks and review interview sessions.
+      </p>
+
+      <div class="mt-6 space-y-3">
+        <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-4">
+          <p class="text-sm font-semibold text-slate-100">Student Account</p>
+          <p class="mt-1 text-xs text-slate-400">Access coding practice, aptitude tracks, and mock interviews.</p>
         </div>
-        <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-teal-400 to-sky-400 mb-2">
-          Join Elevo
-        </h2>
-        <p class="text-slate-400 text-sm font-medium">Start your interview prep journey today</p>
+        <div class="rounded-xl border border-amber-400/30 bg-amber-500/10 p-4">
+          <p class="text-sm font-semibold text-amber-100">Tutor Account</p>
+          <p class="mt-1 text-xs text-amber-200">Requires admin approval before tutor dashboard access is enabled.</p>
+        </div>
       </div>
 
-      <form method="post" class="space-y-6" autocomplete="off">
+      <div class="mt-8 rounded-xl border border-sky-400/30 bg-sky-500/10 p-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-sky-200">Security</p>
+        <p class="mt-1 text-xs text-sky-100">Use a strong password with upper/lowercase letters, numbers, and symbols.</p>
+      </div>
+    </aside>
+
+    <main class="dark-card rounded-2xl border border-white/10 p-6 sm:p-8 lg:col-span-3">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-white">Create Your Account</h2>
+        <p class="mt-1 text-sm text-slate-400">Start in less than a minute.</p>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if form.errors %}
+      <div class="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+        <p class="font-semibold">Please correct the highlighted fields.</p>
+      </div>
+      {% endif %}
+
+      <form method="post" class="space-y-5" autocomplete="off" novalidate>
         {% csrf_token %}
-        <input type="text" name="fake_username" autocomplete="username" class="hidden" tabindex="-1" aria-hidden="true">
-        <input type="password" name="fake_password" autocomplete="new-password" class="hidden" tabindex="-1" aria-hidden="true">
 
-        <!-- Error display -->
-        {% if form.errors %}
-          <div class="glass border-l-4 border-red-500 bg-red-500/10 text-red-300 px-4 py-3 rounded-r-lg border border-red-500/30">
-            <div class="flex items-start">
-              <i class="ri-error-warning-line text-red-400 mt-0.5 mr-3"></i>
-              <div>
-                <strong class="font-semibold text-red-300">Please fix these issues:</strong>
-                <ul class="text-sm mt-2 space-y-1 text-red-200">
-                  {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                      <li><strong class="text-red-300">{{ field }}:</strong> {{ error }}</li>
-                    {% endfor %}
-                  {% endfor %}
-                </ul>
-              </div>
-            </div>
-          </div>
-        {% endif %}
-
-        <!-- Username field -->
-        <div class="form-group">
-          <label class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-            <i class="ri-user-line text-sky-400"></i>
-            Username
-          </label>
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-200">Username</label>
           <div class="relative">
-            {{ form.username|add_attr:"autocomplete=off"|add_attr:"autocapitalize=none"|add_attr:"spellcheck=false"|add_attr:"readonly=true"|add_attr:"onfocus=this.removeAttribute('readonly')"|add_class:"w-full px-4 py-3 pl-11 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all text-slate-200 font-medium placeholder:text-slate-500" }}
-            <i class="ri-at-line absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+            <i class="ri-at-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            {{ form.username|add_attr:"autocomplete=off,autocapitalize=none,spellcheck=false"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
           </div>
           {% if form.username.errors %}
-            <p class="mt-2 text-sm text-red-400 flex items-center font-medium">
-              <i class="ri-error-warning-line mr-1"></i>
-              {{ form.username.errors.0 }}
-            </p>
+            <p class="mt-1 text-xs text-red-300">{{ form.username.errors.0 }}</p>
           {% endif %}
         </div>
 
-        <!-- Email field -->
-        <div class="form-group">
-          <label class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-            <i class="ri-mail-line text-teal-400"></i>
-            Email Address
-          </label>
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-200">Email</label>
           <div class="relative">
-            {{ form.email|add_attr:"autocomplete=off"|add_attr:"readonly=true"|add_attr:"onfocus=this.removeAttribute('readonly')"|add_class:"w-full px-4 py-3 pl-11 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all text-slate-200 font-medium placeholder:text-slate-500" }}
-            <i class="ri-mail-send-line absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+            <i class="ri-mail-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            {{ form.email|add_attr:"autocomplete=email"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
           </div>
           {% if form.email.errors %}
-            <p class="mt-2 text-sm text-red-400 flex items-center font-medium">
-              <i class="ri-error-warning-line mr-1"></i>
-              {{ form.email.errors.0 }}
-            </p>
+            <p class="mt-1 text-xs text-red-300">{{ form.email.errors.0 }}</p>
           {% endif %}
         </div>
 
-        <!-- Role selection -->
-        <div class="form-group">
-          <label class="block text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-            <i class="ri-group-line text-emerald-400"></i>
-            I am a:
-          </label>
-          <div class="space-y-3">
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-200">Choose Your Role</label>
+          <div class="grid gap-3 sm:grid-cols-2" id="roleCards">
             {% for radio in form.role %}
-              <div class="relative">
-                <label for="{{ radio.id_for_label }}" class="flex items-center p-3 border border-slate-600 bg-slate-800/50 rounded-lg cursor-pointer hover:border-slate-500 hover:bg-slate-800/70 transition-all group">
-                  {{ radio.tag }}
-                  <div class="flex items-center justify-center w-5 h-5 border border-slate-500 rounded-full mr-3 group-hover:border-emerald-400 transition-colors">
-                    <div class="w-3 h-3 bg-emerald-400 rounded-full opacity-0 scale-0 transition-all"></div>
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-slate-200 font-medium group-hover:text-emerald-200 transition-colors">{{ radio.choice_label }}</span>
-                    <span class="text-xs text-slate-500 mt-1">
-                      {% if radio.choice_label == 'Student' %}
-                        Practice coding problems and take mock interviews
-                      {% elif radio.choice_label == 'Tutor' %}
-                        Help students and create educational content
-                      {% endif %}
-                    </span>
-                  </div>
-                  <i class="ri-check-line text-emerald-400 ml-auto opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all"></i>
-                </label>
+            <label for="{{ radio.id_for_label }}" class="role-card cursor-pointer rounded-xl border border-slate-600/70 bg-slate-900/50 p-4 transition hover:border-sky-400/60">
+              <div class="flex items-start gap-3">
+                {{ radio.tag }}
+                <div>
+                  <p class="text-sm font-semibold text-slate-100">{{ radio.choice_label }}</p>
+                  <p class="mt-1 text-xs text-slate-400">
+                    {% if radio.choice_label == 'Student' %}
+                      Practice and track your placement preparation.
+                    {% else %}
+                      Create and review learning content after admin approval.
+                    {% endif %}
+                  </p>
+                </div>
               </div>
+            </label>
             {% endfor %}
           </div>
           {% if form.role.errors %}
-            <p class="mt-2 text-sm text-red-400 flex items-center font-medium">
-              <i class="ri-error-warning-line mr-1"></i>
-              {{ form.role.errors.0 }}
-            </p>
+            <p class="mt-1 text-xs text-red-300">{{ form.role.errors.0 }}</p>
           {% endif %}
+          <p class="mt-2 text-xs text-amber-200">Tutor accounts are created immediately but remain pending until approved by admin.</p>
         </div>
 
-        <!-- Password field -->
-        <div class="form-group">
-          <label class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-            <i class="ri-lock-line text-orange-400"></i>
-            Password
-          </label>
-          <div class="relative">
-            {{ form.password1|add_attr:"autocomplete=off"|add_attr:"readonly=true"|add_attr:"onfocus=this.removeAttribute('readonly')"|add_class:"w-full px-4 py-3 pl-11 pr-11 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-slate-200 font-medium placeholder:text-slate-500" }}
-            <i class="ri-key-line absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
-            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-orange-400 transition-colors" onclick="togglePassword(this, 'password1')">
-              <i class="ri-eye-line"></i>
-            </button>
-          </div>
-          {% if form.password1.errors %}
-            <p class="mt-2 text-sm text-red-400 flex items-center font-medium">
-              <i class="ri-error-warning-line mr-1"></i>
-              {{ form.password1.errors.0 }}
-            </p>
-          {% endif %}
-          
-          <!-- Password strength indicator -->
-          <div class="mt-2">
-            <div class="text-xs text-slate-500 mb-1">Password strength:</div>
-            <div class="flex space-x-1">
-              <div id="strength-1" class="h-1 w-1/4 bg-slate-700 rounded transition-colors"></div>
-              <div id="strength-2" class="h-1 w-1/4 bg-slate-700 rounded transition-colors"></div>
-              <div id="strength-3" class="h-1 w-1/4 bg-slate-700 rounded transition-colors"></div>
-              <div id="strength-4" class="h-1 w-1/4 bg-slate-700 rounded transition-colors"></div>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-slate-200">Password</label>
+            <div class="relative">
+              <i class="ri-lock-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              {{ form.password1|add_attr:"autocomplete=new-password"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-10 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
+              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200" data-toggle-password="id_password1">
+                <i class="ri-eye-line"></i>
+              </button>
             </div>
+            {% if form.password1.errors %}
+              <p class="mt-1 text-xs text-red-300">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-slate-200">Confirm Password</label>
+            <div class="relative">
+              <i class="ri-shield-check-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              {{ form.password2|add_attr:"autocomplete=new-password"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-10 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
+              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200" data-toggle-password="id_password2">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+            {% if form.password2.errors %}
+              <p class="mt-1 text-xs text-red-300">{{ form.password2.errors.0 }}</p>
+            {% endif %}
           </div>
         </div>
 
-        <!-- Confirm password field -->
-        <div class="form-group">
-          <label class="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-            <i class="ri-shield-check-line text-green-400"></i>
-            Confirm Password
-          </label>
-          <div class="relative">
-            {{ form.password2|add_attr:"autocomplete=off"|add_attr:"readonly=true"|add_attr:"onfocus=this.removeAttribute('readonly')"|add_class:"w-full px-4 py-3 pl-11 pr-11 border border-slate-600 bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all text-slate-200 font-medium placeholder:text-slate-500" }}
-            <i class="ri-check-double-line absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
-            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-green-400 transition-colors" onclick="togglePassword(this, 'password2')">
-              <i class="ri-eye-line"></i>
-            </button>
-          </div>
-          {% if form.password2.errors %}
-            <p class="mt-2 text-sm text-red-400 flex items-center font-medium">
-              <i class="ri-error-warning-line mr-1"></i>
-              {{ form.password2.errors.0 }}
-            </p>
-          {% endif %}
-        </div>
-
-        <!-- Submit button -->
-        <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-sky-600 via-teal-600 to-sky-600 text-white rounded-lg font-semibold text-lg hover:from-sky-700 hover:via-teal-700 hover:to-sky-700 transform hover:scale-[1.02] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-          <span class="signup-text">Create Account</span>
-          <i class="ri-arrow-right-line"></i>
+        <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white hover:from-sky-700 hover:to-teal-700 transition">
+          Create Account
         </button>
       </form>
 
-      <!-- Login link -->
-      <div class="mt-6 text-center">
-        <p class="text-slate-400 mb-3 font-medium">Already have an account?</p>
-        <a href="{% url 'login' %}" class="inline-flex items-center px-4 py-2 border border-slate-600 bg-slate-800/50 text-slate-300 rounded-lg font-medium hover:bg-slate-800/70 hover:border-slate-500 hover:text-slate-200 transition-all">
-          <i class="ri-login-box-line mr-2"></i>
-          Sign In
-        </a>
-      </div>
-      
-      <!-- Terms -->
-      <div class="mt-4 text-center">
-        <p class="text-xs text-slate-500">
-          By creating an account, you agree to our 
-          <a href="#" class="text-sky-400 hover:text-sky-300 underline">Terms of Service</a> 
-          and 
-          <a href="#" class="text-sky-400 hover:text-sky-300 underline">Privacy Policy</a>
-        </p>
-      </div>
-    </div>
+      <p class="mt-5 text-center text-sm text-slate-400">
+        Already have an account?
+        <a href="{% url 'login' %}" class="font-semibold text-sky-300 hover:text-sky-200">Sign in</a>
+      </p>
+    </main>
   </div>
 </section>
 
-<style>
-/* Custom radio button styling */
-input[type="radio"] {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #64748b;
-  border-radius: 50%;
-  background-color: transparent;
-  margin-right: 12px;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-input[type="radio"]:checked {
-  border-color: #10b981;
-  background-color: #10b981;
-}
-
-input[type="radio"]:checked::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: white;
-  transform: translate(-50%, -50%);
-}
-
-input[type="radio"]:checked + div .w-3 {
-  opacity: 1 !important;
-  transform: scale(1) !important;
-}
-
-input[type="radio"]:checked + div .ri-check-line {
-  opacity: 1 !important;
-  transform: scale(1) !important;
-}
-
-input[type="radio"]:checked + label,
-input[type="radio"]:checked ~ * {
-  border-color: #10b981 !important;
-  background-color: rgba(16, 185, 129, 0.1) !important;
-}
-
-/* Password strength colors */
-.strength-weak { background-color: #ef4444 !important; }
-.strength-fair { background-color: #f97316 !important; }
-.strength-good { background-color: #eab308 !important; }
-.strength-strong { background-color: #22c55e !important; }
-
-/* Loading state */
-button[type="submit"]:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none !important;
-}
-</style>
-
 <script>
-function togglePassword(button, fieldName) {
-  const field = document.querySelector(`input[name="${fieldName}"]`);
-  const icon = button.querySelector('i');
-  
-  if (field.type === 'password') {
-    field.type = 'text';
-    icon.classList.remove('ri-eye-line');
-    icon.classList.add('ri-eye-off-line');
-  } else {
-    field.type = 'password';
-    icon.classList.remove('ri-eye-off-line');
-    icon.classList.add('ri-eye-line');
-  }
-}
-
-// Password strength checker
-function checkPasswordStrength(password) {
-  let strength = 0;
-  
-  if (password.length >= 8) strength++;
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-  if (/\d/.test(password)) strength++;
-  if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) strength++;
-  
-  return strength;
-}
-
-function updatePasswordStrength(strength) {
-  const indicators = ['strength-1', 'strength-2', 'strength-3', 'strength-4'];
-  
-  indicators.forEach((id, index) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.className = element.className.replace(/strength-\w+/g, '');
-      
-      if (index < strength) {
-        if (strength === 1) element.classList.add('strength-weak');
-        else if (strength === 2) element.classList.add('strength-fair');
-        else if (strength === 3) element.classList.add('strength-good');
-        else if (strength === 4) element.classList.add('strength-strong');
-      } else {
-        element.classList.add('bg-slate-700');
-      }
-    }
+(function () {
+  const passwordToggles = document.querySelectorAll('[data-toggle-password]');
+  passwordToggles.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.togglePassword);
+      if (!target) return;
+      const icon = btn.querySelector('i');
+      const isPassword = target.type === 'password';
+      target.type = isPassword ? 'text' : 'password';
+      icon.className = isPassword ? 'ri-eye-off-line' : 'ri-eye-line';
+    });
   });
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Password strength monitoring
-  const passwordField = document.querySelector('input[name="password1"]');
-  if (passwordField) {
-    passwordField.addEventListener('input', function() {
-      const strength = checkPasswordStrength(this.value);
-      updatePasswordStrength(strength);
-    });
-  }
-  
-  // Form submission handling
-  const form = document.querySelector('form');
-  if (form) {
-    form.addEventListener('submit', function(e) {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        const btnText = submitBtn.querySelector('.signup-text');
-        if (btnText) {
-          btnText.textContent = 'Creating Account...';
-          
-          setTimeout(() => {
-            submitBtn.disabled = false;
-            btnText.textContent = 'Create Account';
-          }, 10000);
-        }
-      }
-    });
-  }
-  
-  // Role selection enhancement
+  const roleCards = document.querySelectorAll('.role-card');
   const roleInputs = document.querySelectorAll('input[name="role"]');
-  roleInputs.forEach(input => {
-    input.addEventListener('change', function() {
-      roleInputs.forEach(radio => {
-        const label = radio.closest('label');
-        if (label) {
-          label.classList.remove('border-emerald-500', 'bg-emerald-500/10');
-          label.classList.add('border-slate-600');
-        }
-      });
-      
-      if (this.checked) {
-        const label = this.closest('label');
-        if (label) {
-          label.classList.remove('border-slate-600');
-          label.classList.add('border-emerald-500', 'bg-emerald-500/10');
+  function refreshRoleUI() {
+    roleCards.forEach((card) => card.classList.remove('border-emerald-400/70', 'bg-emerald-500/10'));
+    roleInputs.forEach((input) => {
+      if (input.checked) {
+        const card = input.closest('.role-card');
+        if (card) {
+          card.classList.add('border-emerald-400/70', 'bg-emerald-500/10');
         }
       }
     });
-  });
-});
+  }
+  roleInputs.forEach((input) => input.addEventListener('change', refreshRoleUI));
+  refreshRoleUI();
+})();
 </script>
 {% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}{{ org.name }} — Dashboard | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+  .stat-card { border: 1px solid rgba(255,255,255,0.08); transition: all 0.25s ease; }
+  .stat-card:hover { border-color: rgba(14,165,233,0.25); transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.3); }
+  .member-row { border: 1px solid rgba(255,255,255,0.06); transition: all 0.2s ease; }
+  .member-row:hover { border-color: rgba(14,165,233,0.2); background: rgba(14,165,233,0.03); }
+  .sub-badge { animation: pulse-glow 2s infinite; }
+  @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 8px rgba(14,165,233,0.2); } 50% { box-shadow: 0 0 16px rgba(14,165,233,0.4); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-8 px-4">
+  <div class="mx-auto max-w-6xl">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div class="flex items-center gap-4">
+        {% if org.logo %}
+          <img src="{{ org.logo.url }}" alt="{{ org.name }}" class="w-14 h-14 rounded-2xl object-cover border border-white/15">
+        {% else %}
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-violet-500 flex items-center justify-center text-white text-xl font-bold">
+            {{ org.name|first|upper }}
+          </div>
+        {% endif %}
+        <div>
+          <h1 class="text-2xl font-bold text-slate-100 brand-font">{{ org.name }}</h1>
+          <p class="text-sm text-slate-500">Organization Dashboard</p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <a href="{% url 'organizations:members' %}" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm hover:bg-white/10 transition-all">
+          <i class="ri-group-line mr-1"></i> Members
+        </a>
+        <a href="{% url 'organizations:subscription' %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white text-sm font-medium hover:from-sky-600 hover:to-teal-600 transition-all shadow-lg shadow-sky-500/15">
+          <i class="ri-vip-crown-line mr-1"></i> Subscription
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <!-- Members -->
+      <div class="stat-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center">
+            <i class="ri-group-line text-cyan-400 text-lg"></i>
+          </div>
+          {% if subscription %}
+          <span class="text-xs text-slate-600">/ {{ subscription.plan.max_students|default:"∞" }}</span>
+          {% endif %}
+        </div>
+        <p class="text-3xl font-bold text-slate-100">{{ member_count }}</p>
+        <p class="text-xs text-slate-500 mt-1">Active Members</p>
+      </div>
+
+      <!-- Plan -->
+      <div class="stat-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center">
+            <i class="ri-vip-crown-line text-violet-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-xl font-bold text-slate-100">
+          {% if subscription %}{{ subscription.plan.display_name }}{% else %}No Plan{% endif %}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">Current Plan</p>
+      </div>
+
+      <!-- Days Remaining -->
+      <div class="stat-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
+            <i class="ri-time-line text-amber-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-bold {% if subscription.days_remaining < 7 %}text-rose-400{% else %}text-slate-100{% endif %}">
+          {% if subscription %}{{ subscription.days_remaining }}{% else %}0{% endif %}
+        </p>
+        <p class="text-xs text-slate-500 mt-1">Days Remaining</p>
+      </div>
+
+      <!-- Pending Invites -->
+      <div class="stat-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-500/15 border border-teal-500/25 flex items-center justify-center">
+            <i class="ri-mail-send-line text-teal-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-3xl font-bold text-slate-100">{{ pending_invites.count }}</p>
+        <p class="text-xs text-slate-500 mt-1">Pending Invites</p>
+      </div>
+    </div>
+
+    <!-- Recent Members -->
+    <div class="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+          <i class="ri-group-line text-sky-400"></i> Recent Members
+        </h2>
+        <a href="{% url 'organizations:members' %}" class="text-sm text-sky-400 hover:text-sky-300 transition-colors">
+          View all <i class="ri-arrow-right-s-line"></i>
+        </a>
+      </div>
+      <div class="space-y-2">
+        {% for m in members|slice:":5" %}
+        <div class="member-row flex items-center gap-4 px-4 py-3 rounded-xl">
+          {% if m.user.profile.avatar %}
+            <img src="{{ m.user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover border border-white/15">
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 text-white font-bold flex items-center justify-center">
+              {{ m.user.username|first|upper }}
+            </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-200 truncate">{{ m.user.get_full_name|default:m.user.username }}</p>
+            <p class="text-xs text-slate-500">@{{ m.user.username }}</p>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
+            {% if m.role == 'ORG_ADMIN' %}bg-violet-500/15 text-violet-400 border border-violet-500/25
+            {% else %}bg-slate-500/15 text-slate-400 border border-slate-500/25{% endif %}">
+            {{ m.get_role_display }}
+          </span>
+        </div>
+        {% empty %}
+        <p class="text-sm text-slate-500 text-center py-8">No members yet. Invite your students!</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

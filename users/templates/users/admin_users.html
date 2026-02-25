@@ -84,15 +84,26 @@
                                         {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
-                                        <!-- Toggle Status -->
                                         <a href="{% url 'users:toggle_user_status' profile.user.id %}" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
                                             {% if profile.user.is_active %}Deactivate{% else %}Activate{% endif %}
                                         </a>
-                                        <!-- Approve Tutor -->
                                         {% if profile.role == 'TUTOR' %}
-                                            <a href="{% url 'users:approve_tutor' profile.user.id %}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white {% if profile.is_approved_tutor %}bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500{% else %}bg-green-600 hover:bg-green-700 focus:ring-green-500{% endif %} focus:outline-none focus:ring-2 focus:ring-offset-2">
-                                                {% if profile.is_approved_tutor %}Revoke{% else %}Approve{% endif %}
-                                            </a>
+                                            {% if profile.is_approved_tutor %}
+                                                <form method="post" action="{% url 'users:reject_tutor' profile.user.id %}" class="inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="admin_notes" value="Revoked from admin users table.">
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                        Revoke
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <form method="post" action="{% url 'users:approve_tutor' profile.user.id %}" class="inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                            {% endif %}
                                         {% endif %}
                                     </td>
                                 </tr>

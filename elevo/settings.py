@@ -72,6 +72,8 @@ INSTALLED_APPS = [
     'mock_interview',
     'posts',
     'tutor',
+    'chat',
+    'organizations',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -88,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'organizations.middleware.PremiumAccessMiddleware',
 ]
 
 # REST FRAMEWORK CONFIGURATION

@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetP
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate
-from .models import UserProfile
+from .models import TutorApplication, UserProfile
 
 
 class SignupForm(UserCreationForm):
@@ -286,3 +286,74 @@ class EmailChangeForm(forms.Form):
         if not self.user.check_password(password):
             raise ValidationError("Invalid password.")
         return password
+
+
+class TutorApplicationForm(forms.ModelForm):
+    """
+    Tutor application form used for tutor onboarding and resubmission.
+    """
+
+    class Meta:
+        model = TutorApplication
+        fields = [
+            'headline',
+            'expertise_areas',
+            'years_experience',
+            'current_organization',
+            'motivation',
+            'teaching_experience',
+            'linkedin_url',
+            'github_url',
+            'portfolio_url',
+            'resume',
+        ]
+        widgets = {
+            'headline': forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'placeholder': 'Short tutor headline'
+            }),
+            'expertise_areas': forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'placeholder': 'Python, DSA, SQL, ML'
+            }),
+            'years_experience': forms.NumberInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'min': 0,
+                'max': 50,
+            }),
+            'current_organization': forms.TextInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'placeholder': 'Company / Institute'
+            }),
+            'motivation': forms.Textarea(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'rows': 4,
+                'placeholder': 'Why do you want to teach on Elevo?'
+            }),
+            'teaching_experience': forms.Textarea(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'rows': 4,
+                'placeholder': 'Relevant mentoring / teaching experience'
+            }),
+            'linkedin_url': forms.URLInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'placeholder': 'https://linkedin.com/in/username'
+            }),
+            'github_url': forms.URLInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'placeholder': 'https://github.com/username'
+            }),
+            'portfolio_url': forms.URLInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100',
+                'placeholder': 'https://your-portfolio.com'
+            }),
+            'resume': forms.FileInput(attrs={
+                'class': 'w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-slate-100'
+            }),
+        }
+
+    def clean_years_experience(self):
+        value = self.cleaned_data.get('years_experience')
+        if value is not None and value > 50:
+            raise ValidationError("Please enter a realistic experience value.")
+        return value

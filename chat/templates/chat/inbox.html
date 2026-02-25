@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Messages | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+  .thread-item { transition: all 0.2s ease; }
+  .thread-item:hover { background: rgba(14, 165, 233, 0.08); border-color: rgba(14, 165, 233, 0.25); }
+  .thread-item.active { background: rgba(14, 165, 233, 0.12); border-color: rgba(14, 165, 233, 0.35); }
+  .unread-badge {
+    min-width: 20px; height: 20px;
+    background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+    border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white; padding: 0 6px;
+  }
+  .chat-search:focus { border-color: rgba(14, 165, 233, 0.5); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-6 px-4">
+  <div class="mx-auto max-w-6xl">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-100 brand-font flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-teal-500/20 border border-sky-500/30 flex items-center justify-center">
+            <i class="ri-message-3-line text-sky-400 text-lg"></i>
+          </div>
+          Messages
+        </h1>
+        <p class="text-sm text-slate-500 mt-1 ml-13">Your private conversations</p>
+      </div>
+    </div>
+
+    <!-- Thread List -->
+    <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl overflow-hidden">
+      <!-- Search -->
+      <div class="p-4 border-b border-white/10">
+        <div class="relative">
+          <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <input type="text" id="threadSearch" placeholder="Search conversations..."
+                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-search transition-all">
+        </div>
+      </div>
+
+      {% if thread_list %}
+        <div class="divide-y divide-white/5" id="threadListContainer">
+          {% for item in thread_list %}
+            <a href="{% url 'chat:thread' item.thread.id %}"
+               class="thread-item flex items-center gap-3 px-5 py-4 cursor-pointer" data-username="{{ item.other_user.username|lower }}" data-fullname="{{ item.other_user.get_full_name|lower }}">
+              <!-- Avatar -->
+              {% if item.other_user.profile.avatar %}
+                <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}"
+                     class="w-12 h-12 rounded-full object-cover border border-white/20 flex-shrink-0">
+              {% else %}
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-lg font-bold flex items-center justify-center flex-shrink-0">
+                  {{ item.other_user.username|first|upper }}
+                </div>
+              {% endif %}
+
+              <!-- Info -->
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-semibold text-slate-100 truncate text-sm">
+                    {{ item.other_user.get_full_name|default:item.other_user.username }}
+                  </span>
+                  {% if item.last_message %}
+                    <span class="text-xs text-slate-500 flex-shrink-0 ml-2">{{ item.last_message.created_at|naturaltime }}</span>
+                  {% endif %}
+                </div>
+                <div class="flex items-center justify-between mt-0.5">
+                  <p class="text-xs text-slate-400 truncate pr-2">
+                    {% if item.last_message %}
+                      {% if item.last_message.sender == request.user %}
+                        <span class="text-slate-500">You: </span>
+                      {% endif %}
+                      {{ item.last_message.content|truncatechars:50 }}
+                    {% else %}
+                      <span class="text-slate-600 italic">No messages yet</span>
+                    {% endif %}
+                  </p>
+                  {% if item.unread > 0 %}
+                    <span class="unread-badge flex-shrink-0">{{ item.unread }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="py-20 text-center">
+          <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-sky-500/10 to-teal-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
+            <i class="ri-message-3-line text-3xl text-sky-400/60"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-300 brand-font">No conversations yet</h3>
+          <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">Visit someone's profile and click <strong>Message</strong> to start chatting!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  // Client-side search filtering
+  const searchInput = document.getElementById('threadSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const q = this.value.toLowerCase().trim();
+      document.querySelectorAll('.thread-item').forEach(item => {
+        const name = (item.dataset.username || '') + ' ' + (item.dataset.fullname || '');
+        item.style.display = name.includes(q) ? '' : 'none';
+      });
+    });
+  }
+</script>
+{% endblock %}

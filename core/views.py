@@ -37,9 +37,7 @@ def home(request):
             if request.user.profile.is_approved_tutor:
                 return redirect('tutor:dashboard')
             else:
-                return render(request, 'tutor/pending_approval.html', {
-                    "message": "Your tutor account is awaiting admin approval. Please check back later."
-                })
+                return redirect('users:tutor_application')
 
         elif role == 'ADMIN':
             return redirect('practice:admin_dashboard')
@@ -74,9 +72,7 @@ def dashboard_redirect(request):
     elif is_approved_tutor(request.user):
         return redirect('tutor:dashboard')
     elif is_tutor(request.user) and not request.user.profile.is_approved_tutor:
-        return render(request, 'tutor/pending_approval.html', {
-            "message": "Your tutor account is awaiting admin approval. Please check back later."
-        })
+        return redirect('users:tutor_application')
     elif is_student(request.user):
         return redirect('home')
 
@@ -87,7 +83,7 @@ def dashboard_redirect(request):
 # --- Smart Search View ---
 def search(request):
     query = request.GET.get('q', '').strip()
-    users = courses = posts = []
+    users = posts = []
 
     if query:
         # Search users by username or name fields
@@ -96,12 +92,6 @@ def search(request):
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query)
         ).select_related('profile')[:5]
-
-        # Search courses by title or description
-        courses = Course.objects.filter(
-            Q(title__icontains=query) |
-            Q(description__icontains=query)
-        ).distinct()[:5]
 
         # Search posts by content, hashtags or author
         posts = Post.objects.filter(
@@ -113,7 +103,6 @@ def search(request):
     context = {
         'query': query,
         'users': users,
-        'courses': courses,
         'posts': posts,
     }
     return render(request, 'core/search_results.html', context)

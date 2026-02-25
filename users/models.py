@@ -12,6 +12,7 @@ import uuid
 import secrets
 import string
 from datetime import timedelta
+from django.core.validators import FileExtensionValidator
 
 class UserProfile(models.Model):
     """
@@ -49,6 +50,70 @@ class UserProfile(models.Model):
     def get_role_display(self):
         """Returns the human-readable role."""
         return dict(self.ROLE_CHOICES).get(self.role, self.role)
+
+
+class TutorApplication(models.Model):
+    """
+    Stores tutor onboarding details and review status.
+    """
+
+    STATUS_DRAFT = "DRAFT"
+    STATUS_SUBMITTED = "SUBMITTED"
+    STATUS_UNDER_REVIEW = "UNDER_REVIEW"
+    STATUS_APPROVED = "APPROVED"
+    STATUS_REJECTED = "REJECTED"
+
+    STATUS_CHOICES = [
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_SUBMITTED, "Submitted"),
+        (STATUS_UNDER_REVIEW, "Under Review"),
+        (STATUS_APPROVED, "Approved"),
+        (STATUS_REJECTED, "Rejected"),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="tutor_application")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
+
+    headline = models.CharField(max_length=180, blank=True)
+    expertise_areas = models.TextField(
+        blank=True,
+        help_text="Comma separated expertise areas, e.g. Python, DSA, SQL",
+    )
+    years_experience = models.PositiveIntegerField(null=True, blank=True)
+    current_organization = models.CharField(max_length=180, blank=True)
+    motivation = models.TextField(blank=True)
+    teaching_experience = models.TextField(blank=True)
+
+    linkedin_url = models.URLField(blank=True)
+    github_url = models.URLField(blank=True)
+    portfolio_url = models.URLField(blank=True)
+
+    resume = models.FileField(
+        upload_to="tutor_applications/resumes/",
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx"])],
+    )
+
+    admin_notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_tutor_applications",
+    )
+
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"TutorApplication<{self.user.username}>: {self.status}"
 
 
 class EmailVerificationToken(models.Model):

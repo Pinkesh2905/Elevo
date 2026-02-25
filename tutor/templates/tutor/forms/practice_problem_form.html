@@ -327,14 +327,14 @@
       {{ testcase_formset.management_form }}
       <div id="testcase-forms" class="space-y-4">
         {% for form in testcase_formset %}
-        <div class="testcase-form glass rounded-xl p-5 border border-slate-700/50">
+        <div class="testcase-form glass rounded-xl p-5 border border-slate-700/50 formset-card testcases-form-card">
           <div class="flex items-center justify-between mb-4">
             <h4 class="font-semibold text-slate-100 flex items-center">
               <span class="w-7 h-7 bg-sky-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-sky-400">{{ forloop.counter }}</span>
               Test Case {{ forloop.counter }}
             </h4>
             {% if not forloop.first %}
-            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="this.closest('.testcase-form').remove()">
+            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="removeForm(this, 'testcases')">
               <i class="ri-delete-bin-line mr-1"></i>Remove
             </button>
             {% endif %}
@@ -374,6 +374,48 @@
         </div>
         {% endfor %}
       </div>
+      <template id="empty-testcase-form-template">
+        <div class="testcase-form glass rounded-xl p-5 border border-slate-700/50 formset-card testcases-form-card">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-semibold text-slate-100 flex items-center">
+              <span class="w-7 h-7 bg-sky-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-sky-400">New</span>
+              Test Case
+            </h4>
+            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="removeForm(this, 'testcases')">
+              <i class="ri-delete-bin-line mr-1"></i>Remove
+            </button>
+          </div>
+          {{ testcase_formset.empty_form.id }}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Input</label>
+              {{ testcase_formset.empty_form.input_data }}
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Expected Output</label>
+              {{ testcase_formset.empty_form.expected_output }}
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">Order</label>
+              {{ testcase_formset.empty_form.order }}
+            </div>
+            <div class="flex items-center h-[54px] px-4 glass border border-slate-600/50 rounded-xl">
+              {{ testcase_formset.empty_form.is_sample }}
+              <label class="ml-3 text-sm text-slate-300 cursor-pointer">Is Sample?</label>
+            </div>
+            <div class="flex items-center h-[54px] px-4 glass border border-slate-600/50 rounded-xl">
+              {{ testcase_formset.empty_form.DELETE }}
+              <label class="ml-3 text-sm text-slate-300 cursor-pointer">Delete?</label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Explanation</label>
+            {{ testcase_formset.empty_form.explanation }}
+          </div>
+        </div>
+      </template>
       
       <button type="button" onclick="addTestCase()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-sky-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-sky-600 hover:to-emerald-700 transition-all shadow-lg hover-lift">
         <i class="ri-add-line mr-1"></i>Add Test Case
@@ -390,14 +432,14 @@
       {{ codetemplate_formset.management_form }}
       <div id="template-forms" class="space-y-4">
         {% for form in codetemplate_formset %}
-        <div class="template-form glass rounded-xl p-5 border border-slate-700/50">
+        <div class="template-form glass rounded-xl p-5 border border-slate-700/50 formset-card templates-form-card">
           <div class="flex items-center justify-between mb-4">
             <h4 class="font-semibold text-slate-100 flex items-center">
               <span class="w-7 h-7 bg-green-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-green-400">{{ forloop.counter }}</span>
               Template {{ forloop.counter }}
             </h4>
             {% if not forloop.first %}
-            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="this.closest('.template-form').remove()">
+            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="removeForm(this, 'templates')">
               <i class="ri-delete-bin-line mr-1"></i>Remove
             </button>
             {% endif %}
@@ -434,6 +476,36 @@
         </div>
         {% endfor %}
       </div>
+      <template id="empty-template-form-template">
+        <div class="template-form glass rounded-xl p-5 border border-slate-700/50 formset-card templates-form-card">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-semibold text-slate-100 flex items-center">
+              <span class="w-7 h-7 bg-green-500/20 rounded-lg flex items-center justify-center mr-2 text-sm text-green-400">New</span>
+              Template
+            </h4>
+            <button type="button" class="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-all" onclick="removeForm(this, 'templates')">
+              <i class="ri-delete-bin-line mr-1"></i>Remove
+            </button>
+          </div>
+          {{ codetemplate_formset.empty_form.id }}
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Language</label>
+            {{ codetemplate_formset.empty_form.language }}
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Template Code</label>
+            {{ codetemplate_formset.empty_form.template_code }}
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-slate-200 mb-2">Solution Code</label>
+            {{ codetemplate_formset.empty_form.solution_code }}
+          </div>
+          <div class="flex items-center px-4 py-3 glass border border-slate-600/50 rounded-xl">
+            {{ codetemplate_formset.empty_form.DELETE }}
+            <label class="ml-3 text-sm text-slate-300 cursor-pointer">Delete?</label>
+          </div>
+        </div>
+      </template>
       
       <button type="button" onclick="addTemplate()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg hover-lift">
         <i class="ri-add-line mr-1"></i>Add Template
@@ -454,12 +526,47 @@
 </div>
 
 <script>
-// Dynamic form management would go here
 function addTestCase() {
-  alert('Test case addition requires JavaScript formset management');
+  addForm('testcases', 'testcase-forms', 'empty-testcase-form-template');
 }
 
 function addTemplate() {
-  alert('Template addition requires JavaScript formset management');
+  addForm('templates', 'template-forms', 'empty-template-form-template');
+}
+
+function addForm(prefix, containerId, templateId) {
+  const totalInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+  if (!totalInput) {
+    return;
+  }
+
+  const formIndex = parseInt(totalInput.value, 10);
+  const templateNode = document.getElementById(templateId);
+  if (!templateNode) {
+    return;
+  }
+
+  const html = templateNode.innerHTML.replaceAll('__prefix__', String(formIndex));
+  const container = document.getElementById(containerId);
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = html.trim();
+  container.appendChild(wrapper.firstElementChild);
+
+  totalInput.value = String(formIndex + 1);
+}
+
+function removeForm(button, prefix) {
+  const formCard = button.closest(`.${prefix}-form-card`);
+  if (!formCard) {
+    return;
+  }
+
+  const deleteInput = formCard.querySelector(`input[name$='-DELETE']`);
+  if (deleteInput) {
+    deleteInput.checked = true;
+    formCard.classList.add('hidden');
+  } else {
+    formCard.remove();
+  }
 }
 </script>

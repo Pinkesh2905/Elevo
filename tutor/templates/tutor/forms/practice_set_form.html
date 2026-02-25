@@ -138,8 +138,8 @@
                 {{ set.problems.count }} problem{{ set.problems.count|pluralize }}
               </span>
               <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-lg bg-green-500/10 text-green-400 border border-green-500/20">
-                <i class="ri-time-line mr-1"></i>
-                {{ set.time_limit_minutes }} min
+                <i class="ri-user-line mr-1"></i>
+                {{ set.created_by.username|default:"System" }}
               </span>
             </div>
             {% if set.description %}

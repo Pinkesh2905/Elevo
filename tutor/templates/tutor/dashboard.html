@@ -1,379 +1,340 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block title %}Tutor Dashboard | Elevo{% endblock %}
+{% block title %}Tutor Workspace | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto">
-    
-    <!-- Header Section -->
-    <div class="mb-12">
-      <div class="flex items-center justify-between">
+<div class="min-h-screen px-4 py-10 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl space-y-8">
+    <section class="dark-card rounded-2xl border border-white/10 p-6 sm:p-8">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-emerald-400 to-emerald-400 brand-font mb-3">
-            Tutor Dashboard
-          </h1>
-          <p class="text-slate-400 text-lg font-medium">Create and manage aptitude problems, coding challenges, and practice sets</p>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Tutor Studio</p>
+          <h1 class="mt-2 text-3xl font-bold text-white brand-font sm:text-4xl">Content, Reviews, and Quality Control</h1>
+          <p class="mt-2 text-sm text-slate-300">Manage aptitude, coding problems, and interview reviews from one place.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="{% url 'tutor:mock_interview_review_list' %}" class="rounded-xl border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-200 hover:bg-amber-500/20 transition">
+            Interview Queue ({{ review_stats.pending }})
+          </a>
+          <a href="?tab=coding&show=practice_problem" class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2 text-sm font-semibold text-white hover:from-emerald-600 hover:to-teal-700 transition">
+            Add Coding Problem
+          </a>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Messages -->
     {% if messages %}
-    <div class="mb-8 space-y-3">
+    <section class="space-y-3">
       {% for message in messages %}
-      <div class="glass rounded-xl p-4 border {% if message.tags == 'success' %}border-green-500/30 bg-green-500/10{% elif message.tags == 'error' %}border-red-500/30 bg-red-500/10{% else %}border-sky-500/30 bg-sky-500/10{% endif %} backdrop-blur-sm animate-slide-in">
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if message.tags == 'success' %}bg-green-500/20{% elif message.tags == 'error' %}bg-red-500/20{% else %}bg-sky-500/20{% endif %}">
-            {% if message.tags == 'success' %}
-            <i class="ri-checkbox-circle-line text-xl text-green-400"></i>
-            {% elif message.tags == 'error' %}
-            <i class="ri-error-warning-line text-xl text-red-400"></i>
-            {% else %}
-            <i class="ri-information-line text-xl text-sky-400"></i>
-            {% endif %}
-          </div>
-          <p class="{% if message.tags == 'success' %}text-green-300{% elif message.tags == 'error' %}text-red-300{% else %}text-sky-300{% endif %} font-medium">{{ message }}</p>
-        </div>
+      <div class="rounded-xl border px-4 py-3 text-sm {% if message.tags == 'success' %}border-emerald-400/40 bg-emerald-500/10 text-emerald-200{% elif message.tags == 'error' %}border-red-400/40 bg-red-500/10 text-red-200{% else %}border-sky-400/40 bg-sky-500/10 text-sky-200{% endif %}">
+        {{ message }}
       </div>
       {% endfor %}
-    </div>
+    </section>
     {% endif %}
 
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-      <!-- Aptitude Stats -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Aptitude Problems</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">
-              {{ aptitude_stats.total_problems }}
-            </p>
-            <p class="text-xs text-slate-500 mt-2">{{ aptitude_stats.total_categories }} categories</p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-questionnaire-line text-3xl text-sky-400"></i>
-          </div>
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <article class="dark-card rounded-xl border border-white/10 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Aptitude Problems</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ aptitude_stats.total_problems }}</p>
+        <p class="mt-1 text-xs text-slate-400">{{ aptitude_stats.total_categories }} categories</p>
+      </article>
+      <article class="dark-card rounded-xl border border-white/10 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Coding Problems</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ practice_stats.total_problems }}</p>
+        <p class="mt-1 text-xs text-slate-400">{{ practice_stats.active_problems }} active</p>
+      </article>
+      <article class="dark-card rounded-xl border border-white/10 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Inactive Problems</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ practice_stats.inactive_problems }}</p>
+        <p class="mt-1 text-xs text-slate-400">Needs quality review</p>
+      </article>
+      <article class="dark-card rounded-xl border border-white/10 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Interview Pending</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ review_stats.pending }}</p>
+        <p class="mt-1 text-xs text-slate-400">Tutor review queue</p>
+      </article>
+      <article class="dark-card rounded-xl border border-white/10 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Reviewed Sessions</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ review_stats.reviewed }}</p>
+        <p class="mt-1 text-xs text-slate-400">Completed by tutors</p>
+      </article>
+    </section>
+
+    <section class="dark-card rounded-2xl border border-white/10 p-5">
+      <form method="get" class="grid grid-cols-1 gap-3 lg:grid-cols-12 lg:items-end">
+        <input type="hidden" name="tab" value="{{ selected_tab }}">
+        <div class="lg:col-span-4">
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Search</label>
+          <input type="text" name="q" value="{{ search_query }}" placeholder="Search problems, topics, students..." class="w-full rounded-xl border border-slate-600/60 bg-slate-900/60 px-4 py-2.5 text-sm text-white placeholder-slate-400 focus:border-sky-400 focus:outline-none">
         </div>
-      </div>
-
-      <!-- Coding Problems Stats -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Coding Problems</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-              {{ practice_stats.total_problems }}
-            </p>
-            <p class="text-xs text-slate-500 mt-2">{{ practice_stats.active_problems }} active</p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-code-s-slash-line text-3xl text-green-400"></i>
-          </div>
+        <div class="lg:col-span-2">
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Coding Status</label>
+          <select name="coding_status" class="w-full rounded-xl border border-slate-600/60 bg-slate-900/60 px-3 py-2.5 text-sm text-white focus:border-sky-400 focus:outline-none">
+            <option value="all" {% if coding_status == 'all' %}selected{% endif %}>All</option>
+            <option value="active" {% if coding_status == 'active' %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if coding_status == 'inactive' %}selected{% endif %}>Inactive</option>
+          </select>
         </div>
-      </div>
-
-      <!-- Topics Stats -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Coding Topics</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
-              {{ practice_stats.total_topics }}
-            </p>
-            <p class="text-xs text-slate-500 mt-2">Algorithm categories</p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-stack-line text-3xl text-teal-400"></i>
-          </div>
+        <div class="lg:col-span-2">
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Difficulty</label>
+          <select name="coding_difficulty" class="w-full rounded-xl border border-slate-600/60 bg-slate-900/60 px-3 py-2.5 text-sm text-white focus:border-sky-400 focus:outline-none">
+            <option value="all" {% if coding_difficulty == 'all' %}selected{% endif %}>All</option>
+            <option value="easy" {% if coding_difficulty == 'easy' %}selected{% endif %}>Easy</option>
+            <option value="medium" {% if coding_difficulty == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="hard" {% if coding_difficulty == 'hard' %}selected{% endif %}>Hard</option>
+          </select>
         </div>
-      </div>
-
-      <!-- Companies Stats -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Companies</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-emerald-400">
-              {{ practice_stats.total_companies }}
-            </p>
-            <p class="text-xs text-slate-500 mt-2">Tech companies</p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-building-line text-3xl text-orange-400"></i>
-          </div>
+        <div class="lg:col-span-2">
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Review Status</label>
+          <select name="review_status" class="w-full rounded-xl border border-slate-600/60 bg-slate-900/60 px-3 py-2.5 text-sm text-white focus:border-sky-400 focus:outline-none">
+            <option value="all" {% if review_status == 'all' %}selected{% endif %}>All</option>
+            <option value="REVIEW_PENDING" {% if review_status == 'REVIEW_PENDING' %}selected{% endif %}>Pending</option>
+            <option value="REVIEWED" {% if review_status == 'REVIEWED' %}selected{% endif %}>Reviewed</option>
+            <option value="COMPLETED" {% if review_status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+            <option value="STARTED" {% if review_status == 'STARTED' %}selected{% endif %}>Started</option>
+          </select>
         </div>
+        <div class="lg:col-span-2 flex gap-2">
+          <button type="submit" class="w-full rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 transition">Apply</button>
+          <a href="?tab={{ selected_tab }}" class="rounded-xl border border-slate-600 px-4 py-2.5 text-sm font-semibold text-slate-200 hover:bg-slate-800/60 transition">Reset</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="dark-card rounded-2xl border border-white/10 p-2">
+      <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
+        <a href="?tab=overview" class="rounded-xl px-4 py-3 text-center text-sm font-semibold transition {% if selected_tab == 'overview' %}bg-sky-500/20 text-sky-200 border border-sky-400/40{% else %}text-slate-300 hover:bg-slate-800/60{% endif %}">Overview</a>
+        <a href="?tab=aptitude" class="rounded-xl px-4 py-3 text-center text-sm font-semibold transition {% if selected_tab == 'aptitude' %}bg-sky-500/20 text-sky-200 border border-sky-400/40{% else %}text-slate-300 hover:bg-slate-800/60{% endif %}">Aptitude</a>
+        <a href="?tab=coding" class="rounded-xl px-4 py-3 text-center text-sm font-semibold transition {% if selected_tab == 'coding' %}bg-sky-500/20 text-sky-200 border border-sky-400/40{% else %}text-slate-300 hover:bg-slate-800/60{% endif %}">Coding</a>
+        <a href="?tab=reviews" class="rounded-xl px-4 py-3 text-center text-sm font-semibold transition {% if selected_tab == 'reviews' %}bg-sky-500/20 text-sky-200 border border-sky-400/40{% else %}text-slate-300 hover:bg-slate-800/60{% endif %}">Interview Reviews</a>
       </div>
-    </div>
+    </section>
 
-    <!-- Quick Actions -->
-    <div class="mb-12">
-      <h2 class="text-3xl font-bold text-slate-100 mb-6 brand-font">Quick Actions</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        
-        <!-- Aptitude Category -->
-        <a href="?show=category" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-folder-add-line text-2xl text-sky-400"></i>
-            </div>
-            <span class="text-sm font-semibold text-slate-200">Add Category</span>
-            <span class="text-xs text-slate-500 mt-1">Aptitude</span>
-          </div>
-        </a>
-
-        <!-- Aptitude Topic -->
-        <a href="?show=topic" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-price-tag-3-line text-2xl text-green-400"></i>
-            </div>
-            <span class="text-sm font-semibold text-slate-200">Add Topic</span>
-            <span class="text-xs text-slate-500 mt-1">Aptitude</span>
-          </div>
-        </a>
-
-        <!-- Aptitude Problem -->
-        <a href="?show=problem" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-question-answer-line text-2xl text-teal-400"></i>
-            </div>
-            <span class="text-sm font-semibold text-slate-200">Aptitude Problem</span>
-            <span class="text-xs text-slate-500 mt-1">Create new</span>
-          </div>
-        </a>
-
-        <!-- Coding Problem -->
-        <a href="?show=practice_problem" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-code-box-line text-2xl text-emerald-400"></i>
-            </div>
-            <span class="text-sm font-semibold text-slate-200">Coding Problem</span>
-            <span class="text-xs text-slate-500 mt-1">Create new</span>
-          </div>
-        </a>
-
-        <!-- Coding Topic -->
-        <a href="?show=coding_topic" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-sky-500/20 to-teal-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-stack-line text-2xl text-sky-400"></i>
-            </div>
-            <span class="text-sm font-semibold text-slate-200">Coding Topic</span>
-            <span class="text-xs text-slate-500 mt-1">Algorithm</span>
-          </div>
-        </a>
-
-        <!-- Company -->
-        <a href="?show=coding_company" class="dark-card rounded-xl p-5 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex flex-col items-center text-center">
-            <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-              <i class="ri-building-line text-2xl text-orange-400"></i>
-            </div>
-            <span class="text-sm font-semibold text-slate-200">Add Company</span>
-            <span class="text-xs text-slate-500 mt-1">Tech firms</span>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Form Sections (conditionally shown based on 'show' parameter) -->
     {% if show %}
-    <div class="mb-12 dark-theme-forms">
+    <section>
       {% include 'tutor/forms/content_forms.html' %}
-    </div>
+    </section>
     {% endif %}
 
-    <!-- Content Lists -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      
-      <!-- Aptitude Problems List -->
-      <div class="dark-card rounded-2xl p-8 hover-lift">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-questionnaire-line text-2xl text-sky-400"></i>
-            </div>
-            <div>
-              <h3 class="text-2xl font-bold text-slate-100 brand-font">Aptitude Problems</h3>
-              <p class="text-sm text-slate-400">Recent submissions</p>
-            </div>
-          </div>
+    {% if selected_tab == 'overview' %}
+    <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <article class="dark-card rounded-2xl border border-white/10 p-6 xl:col-span-1">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Aptitude (Recent)</h2>
+          <a href="?tab=aptitude&show=problem" class="text-xs font-semibold text-sky-300 hover:text-sky-200">New Problem</a>
         </div>
+        <div class="space-y-3">
+          {% for problem in aptitude_problems|slice:':6' %}
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
+            <p class="text-sm text-slate-100">{{ problem.question_text|truncatechars:75 }}</p>
+            <p class="mt-2 text-xs text-slate-400">{{ problem.topic.name }} • {{ problem.difficulty }}</p>
+          </div>
+          {% empty %}
+          <p class="text-sm text-slate-400">No aptitude problems found.</p>
+          {% endfor %}
+        </div>
+      </article>
 
-        {% if aptitude_problems %}
-          <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {% for problem in aptitude_problems %}
-            <div class="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-200 border border-slate-700/50 group">
-              <div class="flex items-start justify-between">
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-slate-200 truncate mb-2 group-hover:text-sky-400 transition-colors">
-                    {{ problem.question_text|truncatechars:60 }}
-                  </p>
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg
-                      {% if problem.difficulty == 'Easy' %}bg-green-500/20 text-green-400 border border-green-500/30
-                      {% elif problem.difficulty == 'Medium' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
-                      {% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
-                      {{ problem.difficulty }}
-                    </span>
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                      {{ problem.topic.name }}
-                    </span>
-                  </div>
-                </div>
-                <a href="?edit_problem={{ problem.id }}" class="ml-4 px-4 py-2 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium hover-lift whitespace-nowrap">
-                  <i class="ri-edit-line mr-1"></i>Edit
-                </a>
-              </div>
+      <article class="dark-card rounded-2xl border border-white/10 p-6 xl:col-span-1">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Coding (Recent)</h2>
+          <a href="?tab=coding&show=practice_problem" class="text-xs font-semibold text-sky-300 hover:text-sky-200">New Problem</a>
+        </div>
+        <div class="space-y-3">
+          {% for problem in practice_problems|slice:':6' %}
+          <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-3">
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-semibold text-slate-100">{{ problem.problem_number }}. {{ problem.title }}</p>
+              <span class="text-xs {% if problem.is_active %}text-emerald-300{% else %}text-amber-300{% endif %}">{{ problem.is_active|yesno:"Active,Inactive" }}</span>
             </div>
-            {% endfor %}
+            <p class="mt-2 text-xs text-slate-400">{{ problem.get_difficulty_display }}</p>
           </div>
-        {% else %}
-          <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-sky-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-questionnaire-line text-5xl text-sky-400/50"></i>
+          {% empty %}
+          <p class="text-sm text-slate-400">No coding problems found.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="dark-card rounded-2xl border border-white/10 p-6 xl:col-span-1">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Review Queue</h2>
+          <a href="{% url 'tutor:mock_interview_review_list' %}" class="text-xs font-semibold text-sky-300 hover:text-sky-200">Open Full Queue</a>
+        </div>
+        <div class="space-y-3">
+          {% for item in recent_review_sessions|slice:':6' %}
+          <a href="{% url 'tutor:mock_interview_review_detail' item.id %}" class="block rounded-xl border border-slate-700/60 bg-slate-900/40 p-3 hover:border-sky-400/50 transition">
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-semibold text-slate-100">{{ item.user.username }}</p>
+              <span class="text-xs text-slate-300">{{ item.get_status_display }}</span>
             </div>
-            <p class="text-slate-400 font-medium">No aptitude problems yet</p>
-            <p class="text-sm text-slate-500 mt-2">Create your first aptitude problem</p>
-          </div>
-        {% endif %}
+            <p class="mt-1 text-xs text-slate-400">{{ item.job_role|default:"Role not set" }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ item.answered_count }}/{{ item.turn_count }} answered</p>
+          </a>
+          {% empty %}
+          <p class="text-sm text-slate-400">No interview sessions found.</p>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+    {% endif %}
+
+    {% if selected_tab == 'aptitude' %}
+    <section class="space-y-6">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <a href="?tab=aptitude&show=category" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Add Category</a>
+        <a href="?tab=aptitude&show=topic" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Add Topic</a>
+        <a href="?tab=aptitude&show=problem" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Add Problem</a>
+        <a href="?tab=aptitude&show=practice_set" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Create Practice Set</a>
       </div>
 
-      <!-- Coding Problems List -->
-      <div class="dark-card rounded-2xl p-8 hover-lift">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-code-s-slash-line text-2xl text-green-400"></i>
-            </div>
-            <div>
-              <h3 class="text-2xl font-bold text-slate-100 brand-font">Coding Problems</h3>
-              <p class="text-sm text-slate-400">Recent submissions</p>
-            </div>
-          </div>
+      <div class="dark-card rounded-2xl border border-white/10 p-6">
+        <h2 class="mb-4 text-lg font-semibold text-white">Aptitude Problem Bank</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-700/70">
+            <thead>
+              <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
+                <th class="py-3 pr-3">Question</th>
+                <th class="py-3 pr-3">Topic</th>
+                <th class="py-3 pr-3">Difficulty</th>
+                <th class="py-3 pr-3">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80 text-sm text-slate-200">
+              {% for problem in aptitude_problems %}
+              <tr>
+                <td class="py-3 pr-3">{{ problem.question_text|truncatechars:80 }}</td>
+                <td class="py-3 pr-3">{{ problem.topic.name }}</td>
+                <td class="py-3 pr-3">{{ problem.difficulty }}</td>
+                <td class="py-3 pr-3"><a href="?tab=aptitude&edit_problem={{ problem.id }}" class="text-sky-300 hover:text-sky-200">Edit</a></td>
+              </tr>
+              {% empty %}
+              <tr><td class="py-4 text-slate-400" colspan="4">No aptitude problems available.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
+    </section>
+    {% endif %}
 
-        {% if practice_problems %}
-          <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {% for problem in practice_problems %}
-            <div class="glass rounded-xl p-4 hover:bg-white/10 transition-all duration-200 border border-slate-700/50 group">
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-slate-200 mb-2 group-hover:text-green-400 transition-colors">
-                    <span class="text-slate-500">{{ problem.problem_number }}.</span> {{ problem.title }}
-                  </p>
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg
-                      {% if problem.difficulty == 'easy' %}bg-green-500/20 text-green-400 border border-green-500/30
-                      {% elif problem.difficulty == 'medium' %}bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
-                      {% else %}bg-red-500/20 text-red-400 border border-red-500/30{% endif %}">
-                      {{ problem.get_difficulty_display }}
-                    </span>
-                    {% if not problem.is_active %}
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-700/50 text-slate-400 border border-slate-600/50">
-                      <i class="ri-eye-off-line mr-1"></i>Inactive
-                    </span>
-                    {% else %}
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      <i class="ri-eye-line mr-1"></i>Active
-                    </span>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <a href="?edit_practice_problem={{ problem.id }}" class="flex-1 px-4 py-2 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium text-center hover-lift">
-                  <i class="ri-edit-line mr-1"></i>Edit
-                </a>
-                <button onclick="toggleStatus({{ problem.id }})" class="px-4 py-2 {% if problem.is_active %}bg-orange-500/20 text-orange-400 hover:bg-orange-500/30{% else %}bg-green-500/20 text-green-400 hover:bg-green-500/30{% endif %} rounded-lg transition-all text-sm font-medium hover-lift border {% if problem.is_active %}border-orange-500/30{% else %}border-green-500/30{% endif %}">
-                  <i class="{% if problem.is_active %}ri-eye-off-line{% else %}ri-eye-line{% endif %} mr-1"></i>
-                  {{ problem.is_active|yesno:"Deactivate,Activate" }}
-                </button>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-code-s-slash-line text-5xl text-green-400/50"></i>
-            </div>
-            <p class="text-slate-400 font-medium">No coding problems yet</p>
-            <p class="text-sm text-slate-500 mt-2">Create your first coding challenge</p>
-          </div>
-        {% endif %}
+    {% if selected_tab == 'coding' %}
+    <section class="space-y-6">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <a href="?tab=coding&show=practice_problem" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Add Coding Problem</a>
+        <a href="?tab=coding&show=coding_topic" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Add Coding Topic</a>
+        <a href="?tab=coding&show=coding_company" class="rounded-xl border border-slate-600/60 bg-slate-900/40 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:border-sky-400/40 transition">Add Company</a>
       </div>
 
-    </div>
+      <div class="dark-card rounded-2xl border border-white/10 p-6">
+        <h2 class="mb-4 text-lg font-semibold text-white">Coding Problem Bank</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-700/70">
+            <thead>
+              <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
+                <th class="py-3 pr-3">Problem</th>
+                <th class="py-3 pr-3">Difficulty</th>
+                <th class="py-3 pr-3">Status</th>
+                <th class="py-3 pr-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80 text-sm text-slate-200">
+              {% for problem in practice_problems %}
+              <tr>
+                <td class="py-3 pr-3">{{ problem.problem_number }}. {{ problem.title }}</td>
+                <td class="py-3 pr-3">{{ problem.get_difficulty_display }}</td>
+                <td class="py-3 pr-3">
+                  <span class="rounded-full px-2.5 py-1 text-xs {% if problem.is_active %}bg-emerald-500/20 text-emerald-200{% else %}bg-amber-500/20 text-amber-200{% endif %}">
+                    {{ problem.is_active|yesno:"Active,Inactive" }}
+                  </span>
+                </td>
+                <td class="py-3 pr-3">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <a href="?tab=coding&edit_practice_problem={{ problem.id }}" class="text-sky-300 hover:text-sky-200">Edit</a>
+                    <button type="button" onclick="toggleStatus({{ problem.id }})" class="text-amber-300 hover:text-amber-200">Toggle</button>
+                    <a href="{% url 'tutor:export_practice_problem' problem.id %}" class="text-emerald-300 hover:text-emerald-200">Export</a>
+                    <form method="post" action="{% url 'tutor:delete_practice_problem' problem.id %}" onsubmit="return confirm('Delete this coding problem?');" class="inline">
+                      {% csrf_token %}
+                      <button type="submit" class="text-red-300 hover:text-red-200">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td class="py-4 text-slate-400" colspan="4">No coding problems available.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    {% endif %}
 
+    {% if selected_tab == 'reviews' %}
+    <section class="dark-card rounded-2xl border border-white/10 p-6">
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white">Interview Review Queue</h2>
+        <a href="{% url 'tutor:mock_interview_review_list' %}" class="text-sm font-semibold text-sky-300 hover:text-sky-200">Open Dedicated Page</a>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-700/70">
+          <thead>
+            <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
+              <th class="py-3 pr-3">Student</th>
+              <th class="py-3 pr-3">Role</th>
+              <th class="py-3 pr-3">Status</th>
+              <th class="py-3 pr-3">Answered</th>
+              <th class="py-3 pr-3">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/80 text-sm text-slate-200">
+            {% for item in recent_review_sessions %}
+            <tr>
+              <td class="py-3 pr-3">{{ item.user.username }}</td>
+              <td class="py-3 pr-3">{{ item.job_role|default:'N/A' }}</td>
+              <td class="py-3 pr-3">{{ item.get_status_display }}</td>
+              <td class="py-3 pr-3">{{ item.answered_count }}/{{ item.turn_count }}</td>
+              <td class="py-3 pr-3"><a href="{% url 'tutor:mock_interview_review_detail' item.id %}" class="text-sky-300 hover:text-sky-200">Review</a></td>
+            </tr>
+            {% empty %}
+            <tr><td class="py-4 text-slate-400" colspan="5">No sessions available for review.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
   </div>
 </div>
 
-<style>
-  /* Custom scrollbar for the overflow sections */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, #6366f1, #8b5cf6);
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, #4f46e5, #7c3aed);
-  }
-
-  /* Slide in animation for messages */
-  @keyframes slide-in {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-slide-in {
-    animation: slide-in 0.3s ease-out;
-  }
-</style>
-
 <script>
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+}
+
 function toggleStatus(problemId) {
-  if (!confirm('Are you sure you want to toggle this problem status?')) return;
-  
+  const confirmed = confirm('Toggle problem active/inactive status?');
+  if (!confirmed) return;
+
   fetch(`/tutor/practice-problem/${problemId}/toggle-status/`, {
     method: 'POST',
     headers: {
-      'X-CSRFToken': '{{ csrf_token }}',
-      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+      'Content-Type': 'application/json'
     }
   })
-  .then(response => response.json())
-  .then(data => {
+  .then((response) => response.json())
+  .then((data) => {
     if (data.success) {
-      location.reload();
-    } else {
-      alert('Error: ' + data.error);
+      window.location.reload();
+      return;
     }
+    alert(data.error || 'Could not update problem status.');
   })
-  .catch(error => {
-    alert('Error: ' + error);
-  });
+  .catch(() => alert('Request failed while updating status.'));
 }
 </script>
-
 {% endblock %}

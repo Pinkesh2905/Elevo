@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Tutor Application | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-screen px-4 py-10 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-5xl space-y-6">
+    {% if messages %}
+      <div class="space-y-3">
+        {% for message in messages %}
+          <div class="rounded-xl border px-4 py-3 text-sm {% if message.tags == 'success' %}border-emerald-500/35 bg-emerald-500/15 text-emerald-100{% elif message.tags == 'error' %}border-red-500/35 bg-red-500/15 text-red-100{% else %}border-cyan-500/35 bg-cyan-500/15 text-cyan-100{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="dark-card rounded-2xl border border-white/10 p-6 sm:p-8">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Tutor Onboarding</p>
+          <h1 class="mt-2 text-3xl font-bold text-white brand-font">Tutor Application</h1>
+          <p class="mt-2 text-sm text-slate-300">Complete your details for admin verification and tutor dashboard access.</p>
+        </div>
+        <span class="rounded-full px-4 py-2 text-xs font-semibold {% if status_tone == 'emerald' %}bg-emerald-500/20 text-emerald-200 border border-emerald-400/40{% elif status_tone == 'amber' %}bg-amber-500/20 text-amber-200 border border-amber-400/40{% elif status_tone == 'sky' %}bg-sky-500/20 text-sky-200 border border-sky-400/40{% elif status_tone == 'red' %}bg-red-500/20 text-red-200 border border-red-400/40{% else %}bg-slate-500/20 text-slate-200 border border-slate-400/40{% endif %}">
+          {{ application.get_status_display }}
+        </span>
+      </div>
+
+      {% if application.status == 'APPROVED' %}
+        <div class="mt-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+          Your tutor application is approved. You can now access the Tutor Dashboard.
+          <a href="{% url 'tutor:dashboard' %}" class="ml-2 font-semibold underline">Open dashboard</a>
+        </div>
+      {% elif application.status == 'REJECTED' %}
+        <div class="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
+          Your last application was rejected. Update details and submit again.
+          {% if application.admin_notes %}
+            <p class="mt-2 text-red-200"><strong>Admin notes:</strong> {{ application.admin_notes }}</p>
+          {% endif %}
+        </div>
+      {% elif application.status == 'SUBMITTED' or application.status == 'UNDER_REVIEW' %}
+        <div class="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+          Your application is in review. You can still update and resubmit if needed.
+        </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="mt-8 space-y-6">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Headline</label>
+            {{ form.headline }}
+            {% if form.headline.errors %}<p class="mt-1 text-xs text-red-300">{{ form.headline.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Years of Experience</label>
+            {{ form.years_experience }}
+            {% if form.years_experience.errors %}<p class="mt-1 text-xs text-red-300">{{ form.years_experience.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Expertise Areas</label>
+          {{ form.expertise_areas }}
+          {% if form.expertise_areas.errors %}<p class="mt-1 text-xs text-red-300">{{ form.expertise_areas.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Current Organization</label>
+          {{ form.current_organization }}
+          {% if form.current_organization.errors %}<p class="mt-1 text-xs text-red-300">{{ form.current_organization.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">LinkedIn</label>
+            {{ form.linkedin_url }}
+            {% if form.linkedin_url.errors %}<p class="mt-1 text-xs text-red-300">{{ form.linkedin_url.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">GitHub</label>
+            {{ form.github_url }}
+            {% if form.github_url.errors %}<p class="mt-1 text-xs text-red-300">{{ form.github_url.errors.0 }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Portfolio</label>
+            {{ form.portfolio_url }}
+            {% if form.portfolio_url.errors %}<p class="mt-1 text-xs text-red-300">{{ form.portfolio_url.errors.0 }}</p>{% endif %}
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Motivation</label>
+          {{ form.motivation }}
+          {% if form.motivation.errors %}<p class="mt-1 text-xs text-red-300">{{ form.motivation.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Teaching Experience</label>
+          {{ form.teaching_experience }}
+          {% if form.teaching_experience.errors %}<p class="mt-1 text-xs text-red-300">{{ form.teaching_experience.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div>
+          <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-400">Resume (PDF / DOC / DOCX)</label>
+          {{ form.resume }}
+          {% if application.resume %}
+            <p class="mt-2 text-xs text-slate-400">Current file: <a href="{{ application.resume.url }}" target="_blank" class="text-sky-300 underline">{{ application.resume.name }}</a></p>
+          {% endif %}
+          {% if form.resume.errors %}<p class="mt-1 text-xs text-red-300">{{ form.resume.errors.0 }}</p>{% endif %}
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button type="submit" name="submit_action" value="save_draft" class="rounded-xl border border-slate-500/60 px-4 py-2.5 text-sm font-semibold text-slate-100 hover:bg-slate-800/60">
+            Save Draft
+          </button>
+          <button type="submit" name="submit_action" value="submit" class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:from-emerald-600 hover:to-teal-700">
+            Submit for Review
+          </button>
+          {% if application.status == 'APPROVED' %}
+          <a href="{% url 'tutor:dashboard' %}" class="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2.5 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/20">
+            Open Tutor Dashboard
+          </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

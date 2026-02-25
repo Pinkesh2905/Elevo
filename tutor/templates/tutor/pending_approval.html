@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-xl mx-auto mt-10 text-center">
-  <h1 class="text-2xl font-bold text-yellow-600">Approval Pending</h1>
-  <p class="mt-4 text-gray-700">
-    Your tutor account is not yet approved by the admin. You will get access once it's approved.
+<div class="max-w-xl mx-auto mt-10 text-center rounded-2xl border border-amber-500/30 bg-amber-500/10 px-6 py-10">
+  <h1 class="text-2xl font-bold text-amber-200">Tutor Approval Pending</h1>
+  <p class="mt-4 text-sm text-amber-100">
+    Your tutor account is not approved yet. Please complete or review your tutor application.
   </p>
+  <a href="{% url 'users:tutor_application' %}" class="mt-6 inline-flex rounded-lg bg-amber-400/20 px-4 py-2 text-sm font-semibold text-amber-100 hover:bg-amber-400/30">
+    Open Tutor Application
+  </a>
 </div>
 {% endblock %}

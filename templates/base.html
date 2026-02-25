@@ -490,9 +490,36 @@
           <i class="ri-chat-3-line mr-4 text-teal-400 text-lg"></i> 
           <span class="font-medium">Posts</span>
         </a>
+        <a href="{% url 'chat:inbox' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-message-3-line mr-4 text-violet-400 text-lg"></i>
+          <span class="font-medium">Messages</span>
+          <span id="mobileUnreadBadge" class="ml-auto hidden min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-r from-sky-500 to-teal-500 text-white text-xs font-bold flex items-center justify-center"></span>
+        </a>
+        <a href="{% url 'organizations:my_org' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-building-line mr-4 text-amber-400 text-lg"></i>
+          <span class="font-medium">Organization</span>
+          {% if request.is_premium %}<span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25">PRO</span>{% endif %}
+        </a>
         <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
           <i class="ri-robot-line mr-4 text-emerald-400 text-lg"></i> 
           <span class="font-medium">Mock Interviews</span>
+        </a>
+      {% elif user.is_authenticated and user.profile.role == 'TUTOR' %}
+        {% if user.profile.is_approved_tutor %}
+          <a href="{% url 'tutor:dashboard' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+            <i class="ri-dashboard-line mr-4 text-emerald-400 text-lg"></i>
+            <span class="font-medium">Tutor Dashboard</span>
+          </a>
+        {% else %}
+          <a href="{% url 'users:tutor_application' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-amber-300 hover:bg-amber-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+            <i class="ri-file-list-3-line mr-4 text-amber-300 text-lg"></i>
+            <span class="font-medium">Tutor Application</span>
+          </a>
+        {% endif %}
+      {% elif user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'users:admin_dashboard' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
+          <i class="ri-admin-line mr-4 text-red-400 text-lg"></i>
+          <span class="font-medium">Admin Dashboard</span>
         </a>
       {% endif %}
       
@@ -544,9 +571,15 @@
       <nav class="hidden md:flex items-center space-x-1 text-base font-medium">
         {% if user.is_authenticated %}
           {% if user.profile.role == 'TUTOR' %}
-            <a href="{% url 'tutor:dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
-              <i class="ri-dashboard-line mr-2"></i>Tutor Dashboard
-            </a>
+            {% if user.profile.is_approved_tutor %}
+              <a href="{% url 'tutor:dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
+                <i class="ri-dashboard-line mr-2"></i>Tutor Dashboard
+              </a>
+            {% else %}
+              <a href="{% url 'users:tutor_application' %}" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
+                <i class="ri-file-list-3-line mr-2"></i>Tutor Application
+              </a>
+            {% endif %}
           {% elif user.is_superuser or user.profile.role == 'ADMIN' %}
             <a href="{% url 'users:admin_dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-full font-semibold hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
               <i class="ri-admin-line mr-2"></i>Admin Dashboard
@@ -584,6 +617,14 @@
         </form>
         {% endif %}
 
+        <!-- Chat/Messages Icon (Desktop) -->
+        {% if user.is_authenticated %}
+        <a href="{% url 'chat:inbox' %}" class="relative hidden md:flex items-center justify-center w-10 h-10 rounded-full hover:bg-sky-500/10 transition-all duration-200 text-slate-300 hover:text-sky-400" title="Messages">
+          <i class="ri-message-3-line text-xl"></i>
+          <span id="navUnreadBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-sky-500 to-teal-500 text-white text-[10px] font-bold flex items-center justify-center shadow-lg shadow-sky-500/30"></span>
+        </a>
+        {% endif %}
+
         <!-- User Menu / Auth Buttons -->
         {% if user.is_authenticated %}
           <div class="relative">
@@ -602,6 +643,13 @@
               <div class="py-2">
                 <a href="{% url 'users:profile' %}" class="block px-5 py-3 text-slate-300 hover:bg-sky-500/10 hover:text-sky-400 transition-all duration-200 hover-scale font-medium">
                   <i class="ri-user-line mr-3 text-sky-400"></i> Profile
+                </a>
+                <a href="{% url 'chat:inbox' %}" class="block px-5 py-3 text-slate-300 hover:bg-violet-500/10 hover:text-violet-400 transition-all duration-200 hover-scale font-medium">
+                  <i class="ri-message-3-line mr-3 text-violet-400"></i> Messages
+                </a>
+                <a href="{% url 'organizations:my_org' %}" class="block px-5 py-3 text-slate-300 hover:bg-amber-500/10 hover:text-amber-400 transition-all duration-200 hover-scale font-medium">
+                  <i class="ri-building-line mr-3 text-amber-400"></i> Organization
+                  {% if request.is_premium %}<span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25">PRO</span>{% endif %}
                 </a>
                 {% if user.profile.role == 'STUDENT' %}
                   <a href="{% url 'mock_interview:my_mock_interviews' %}" class="block px-5 py-3 text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale font-medium">
@@ -750,9 +798,15 @@
                   <i class="ri-admin-line mr-3 text-red-400 group-hover:scale-110 transition-transform"></i> Admin Dashboard
                 </a></li>
               {% elif user.profile.role == 'TUTOR' %}
-                <li><a href="{% url 'tutor:dashboard' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                  <i class="ri-dashboard-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Tutor Dashboard
-                </a></li>
+                {% if user.profile.is_approved_tutor %}
+                  <li><a href="{% url 'tutor:dashboard' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+                    <i class="ri-dashboard-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Tutor Dashboard
+                  </a></li>
+                {% else %}
+                  <li><a href="{% url 'users:tutor_application' %}" class="text-slate-400 hover:text-amber-300 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
+                    <i class="ri-file-list-3-line mr-3 text-amber-300 group-hover:scale-110 transition-transform"></i> Tutor Application
+                  </a></li>
+                {% endif %}
               {% endif %}
             {% else %}
               <li><a href="{% url 'login' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
@@ -936,6 +990,38 @@
     // Initialize everything when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
       initCodingBackground();
+
+      // Poll for unread message count (for navbar badge)
+      {% if user.is_authenticated %}
+      function updateUnreadBadge() {
+        fetch('/chat/unread-count/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(r => r.json())
+          .then(data => {
+            const count = data.unread_count || 0;
+            const navBadge = document.getElementById('navUnreadBadge');
+            const mobileBadge = document.getElementById('mobileUnreadBadge');
+            if (navBadge) {
+              if (count > 0) {
+                navBadge.textContent = count > 99 ? '99+' : count;
+                navBadge.classList.remove('hidden');
+              } else {
+                navBadge.classList.add('hidden');
+              }
+            }
+            if (mobileBadge) {
+              if (count > 0) {
+                mobileBadge.textContent = count > 99 ? '99+' : count;
+                mobileBadge.classList.remove('hidden');
+              } else {
+                mobileBadge.classList.add('hidden');
+              }
+            }
+          })
+          .catch(() => {});
+      }
+      updateUnreadBadge();
+      setInterval(updateUnreadBadge, 30000);
+      {% endif %}
     });
   </script>
 </body>

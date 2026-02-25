@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Subscription — {{ org.name }} | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+  .plan-card { border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s ease; }
+  .plan-card:hover { transform: translateY(-4px); box-shadow: 0 12px 35px -5px rgba(0,0,0,0.4); }
+  .plan-card.active { border-color: rgba(14,165,233,0.4); box-shadow: 0 0 30px rgba(14,165,233,0.08); }
+  .plan-card.pro { border-color: rgba(139,92,246,0.3); }
+  .plan-card.pro:hover { box-shadow: 0 12px 35px -5px rgba(139,92,246,0.2); }
+  .plan-card.enterprise { border-color: rgba(245,158,11,0.3); }
+  .plan-card.enterprise:hover { box-shadow: 0 12px 35px -5px rgba(245,158,11,0.2); }
+  .feature-check { color: #34d399; }
+  .feature-x { color: #64748b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-8 px-4">
+  <div class="mx-auto max-w-5xl">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-8">
+      <a href="{% url 'organizations:dashboard' %}" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
+        <i class="ri-arrow-left-s-line text-lg"></i>
+      </a>
+      <div>
+        <h1 class="text-xl font-bold text-slate-100 brand-font">Subscription & Plans</h1>
+        <p class="text-sm text-slate-500">{{ org.name }}</p>
+      </div>
+    </div>
+
+    <!-- Current Plan Banner -->
+    {% if subscription %}
+    <div class="rounded-2xl border border-sky-500/20 bg-sky-500/5 backdrop-blur-xl p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-500/25 flex items-center justify-center">
+          <i class="ri-vip-crown-line text-sky-400 text-xl"></i>
+        </div>
+        <div>
+          <p class="text-sm text-slate-400">Current Plan</p>
+          <p class="text-lg font-bold text-slate-100">{{ subscription.plan.display_name }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="text-right">
+          <p class="text-sm text-slate-400">Expires</p>
+          <p class="text-sm font-medium {% if subscription.days_remaining < 7 %}text-rose-400{% else %}text-slate-200{% endif %}">
+            {{ subscription.end_date|date:"M d, Y" }} ({{ subscription.days_remaining }} days)
+          </p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase
+          {% if subscription.is_valid %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/25
+          {% else %}bg-rose-500/15 text-rose-400 border border-rose-500/25{% endif %}">
+          {{ subscription.status }}
+        </span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Plans Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {% for plan in plans %}
+      <div class="plan-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6 flex flex-col
+        {% if current_plan and current_plan.id == plan.id %}active{% endif %}
+        {% if plan.name == 'PRO' %}pro{% elif plan.name == 'ENTERPRISE' %}enterprise{% endif %}">
+
+        <!-- Plan Header -->
+        <div class="mb-5">
+          {% if plan.name == 'FREE' %}
+            <div class="w-10 h-10 rounded-xl bg-slate-500/15 border border-slate-500/25 flex items-center justify-center mb-3">
+              <i class="ri-seedling-line text-slate-400 text-lg"></i>
+            </div>
+          {% elif plan.name == 'PRO' %}
+            <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center mb-3">
+              <i class="ri-flashlight-line text-violet-400 text-lg"></i>
+            </div>
+          {% else %}
+            <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center mb-3">
+              <i class="ri-vip-crown-2-line text-amber-400 text-lg"></i>
+            </div>
+          {% endif %}
+          <h3 class="text-lg font-bold text-slate-100">{{ plan.display_name }}</h3>
+          <div class="flex items-baseline gap-1 mt-1">
+            <span class="text-3xl font-bold text-slate-100">₹{{ plan.price_monthly|floatformat:0 }}</span>
+            <span class="text-sm text-slate-500">/month</span>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <ul class="space-y-2.5 text-sm flex-1 mb-6">
+          <li class="flex items-center gap-2">
+            <i class="ri-checkbox-circle-fill feature-check"></i>
+            <span class="text-slate-300">{% if plan.max_students == -1 %}Unlimited{% else %}{{ plan.max_students }}{% endif %} students</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="ri-checkbox-circle-fill feature-check"></i>
+            <span class="text-slate-300">{% if plan.max_problems == -1 %}All{% else %}{{ plan.max_problems }}{% endif %} coding problems</span>
+          </li>
+          <li class="flex items-center gap-2">
+            {% if plan.max_aptitude_daily == -1 %}
+              <i class="ri-checkbox-circle-fill feature-check"></i>
+              <span class="text-slate-300">Unlimited aptitude quizzes</span>
+            {% elif plan.max_aptitude_daily > 0 %}
+              <i class="ri-checkbox-circle-fill feature-check"></i>
+              <span class="text-slate-300">{{ plan.max_aptitude_daily }}/day aptitude quizzes</span>
+            {% else %}
+              <i class="ri-close-circle-fill feature-x"></i>
+              <span class="text-slate-500">No aptitude quizzes</span>
+            {% endif %}
+          </li>
+          <li class="flex items-center gap-2">
+            {% if plan.max_interviews_monthly == -1 %}
+              <i class="ri-checkbox-circle-fill feature-check"></i>
+              <span class="text-slate-300">Unlimited mock interviews</span>
+            {% elif plan.max_interviews_monthly > 0 %}
+              <i class="ri-checkbox-circle-fill feature-check"></i>
+              <span class="text-slate-300">{{ plan.max_interviews_monthly }}/mo mock interviews</span>
+            {% else %}
+              <i class="ri-close-circle-fill feature-x"></i>
+              <span class="text-slate-500">No mock interviews</span>
+            {% endif %}
+          </li>
+          <li class="flex items-center gap-2">
+            {% if plan.has_editorials %}
+              <i class="ri-checkbox-circle-fill feature-check"></i>
+              <span class="text-slate-300">Editorials & solutions</span>
+            {% else %}
+              <i class="ri-close-circle-fill feature-x"></i>
+              <span class="text-slate-500">Editorials & solutions</span>
+            {% endif %}
+          </li>
+          <li class="flex items-center gap-2">
+            {% if plan.has_priority_support %}
+              <i class="ri-checkbox-circle-fill feature-check"></i>
+              <span class="text-slate-300">Priority support</span>
+            {% else %}
+              <i class="ri-close-circle-fill feature-x"></i>
+              <span class="text-slate-500">Priority support</span>
+            {% endif %}
+          </li>
+        </ul>
+
+        <!-- Action Button -->
+        {% if current_plan and current_plan.id == plan.id %}
+          <div class="px-4 py-2.5 rounded-xl bg-sky-500/15 border border-sky-500/25 text-sky-400 text-sm font-medium text-center">
+            Current Plan
+          </div>
+        {% elif plan.price_monthly == 0 %}
+          <div class="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 text-sm text-center">
+            Free Tier
+          </div>
+        {% else %}
+          <button class="px-4 py-2.5 rounded-xl text-white text-sm font-semibold text-center transition-all shadow-lg
+            {% if plan.name == 'PRO' %}bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 shadow-violet-500/15
+            {% else %}bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/15{% endif %}">
+            Upgrade to {{ plan.display_name }}
+          </button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

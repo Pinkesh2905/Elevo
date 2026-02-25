@@ -92,6 +92,14 @@
             <div class="flex justify-between text-slate-400"><span>Email</span><span class="text-slate-200">{{ user.email }}</span></div>
             <div class="flex justify-between text-slate-400"><span>Joined</span><span class="text-slate-200">{{ user.date_joined|date:"M d, Y" }}</span></div>
             <div class="flex justify-between text-slate-400"><span>Last active</span><span class="text-slate-200">{{ user.last_login|naturaltime|default:"Never" }}</span></div>
+            {% if user.profile.role == 'TUTOR' and tutor_application %}
+              <div class="flex justify-between text-slate-400"><span>Tutor Application</span><span class="text-slate-200">{{ tutor_application.get_status_display }}</span></div>
+              <div class="pt-2">
+                <a href="{% url 'users:tutor_application' %}" class="inline-flex items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/20">
+                  Manage Tutor Application
+                </a>
+              </div>
+            {% endif %}
           </div>
         </div>
 

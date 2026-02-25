@@ -1,391 +1,236 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block title %}Admin Dashboard | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto">
-    
-    <!-- Header Section -->
-    <div class="mb-12">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-400 to-emerald-400 brand-font mb-3">
-            Admin Dashboard
-          </h1>
-          <p class="text-slate-400 text-lg font-medium">Manage tutors, problems, and platform content</p>
+<div class="min-h-screen bg-slate-950 py-10">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white sm:text-4xl">Admin Operations Dashboard</h1>
+        <p class="mt-2 text-sm text-slate-300">Platform health, moderation queues, and recent activity in one place.</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="{% url 'users:admin_users' %}" class="rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-sky-500 hover:text-sky-300">Manage Users</a>
+        <a href="/admin/" class="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500">Django Admin</a>
+      </div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Total Users</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ platform_metrics.total_users }}</p>
+        <p class="mt-1 text-xs text-slate-400">{{ platform_metrics.active_users }} active, {{ platform_metrics.inactive_users }} inactive</p>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Pending Actions</p>
+        <p class="mt-2 text-3xl font-bold text-amber-300">{{ platform_metrics.total_pending_actions }}</p>
+        <p class="mt-1 text-xs text-slate-400">Tutor reviews, inactive problems, interview reviews</p>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Problems</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ platform_metrics.total_problems }}</p>
+        <p class="mt-1 text-xs text-slate-400">{{ platform_metrics.active_problems }} active, {{ platform_metrics.inactive_problems }} inactive</p>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Submissions (7 Days)</p>
+        <p class="mt-2 text-3xl font-bold text-white">{{ platform_metrics.weekly_submissions }}</p>
+        <p class="mt-1 text-xs text-slate-400">{{ platform_metrics.weekly_acceptance_rate }}% accepted</p>
+      </div>
+    </div>
+
+    <div class="mt-8 grid gap-6 lg:grid-cols-3">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Tutor Approval Queue</h2>
+          <span class="rounded-full bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-300">{{ platform_metrics.pending_tutor_reviews }}</span>
         </div>
-        <div class="hidden md:flex items-center space-x-4">
-          <a href="/admin/" class="px-6 py-3 bg-gradient-to-r from-slate-700 to-slate-800 text-white rounded-xl hover:from-slate-600 hover:to-slate-700 transition-all duration-200 font-medium shadow-lg hover-lift">
-            <i class="ri-settings-3-line mr-2"></i>Django Admin
-          </a>
+        <div class="mt-4 space-y-3">
+          {% for application in pending_tutor_applications|slice:":5" %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold text-white">{{ application.user.username }}</p>
+                  <p class="text-xs text-slate-400">{{ application.get_status_display }} • {{ application.updated_at|timesince }} ago</p>
+                </div>
+                <a href="{% url 'users:public_profile' application.user.username %}" class="text-xs font-semibold text-sky-300 hover:text-sky-200">Profile</a>
+              </div>
+              <div class="mt-2 flex gap-2">
+                <form method="post" action="{% url 'users:approve_tutor' application.user.id %}" class="flex-1">
+                  {% csrf_token %}
+                  <button type="submit" class="w-full rounded-md bg-emerald-600 px-2 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">Approve</button>
+                </form>
+                <form method="post" action="{% url 'users:reject_tutor' application.user.id %}" class="flex-1">
+                  {% csrf_token %}
+                  <button type="submit" class="w-full rounded-md bg-rose-600 px-2 py-1.5 text-xs font-semibold text-white hover:bg-rose-500">Reject</button>
+                </form>
+              </div>
+            </div>
+          {% empty %}
+            <p class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-300">No tutor reviews pending.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Problem Activation Queue</h2>
+          <span class="rounded-full bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-300">{{ platform_metrics.inactive_problems }}</span>
+        </div>
+        <div class="mt-4 space-y-3">
+          {% for problem in pending_problems|slice:":5" %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <p class="text-sm font-semibold text-white">{{ problem.title }}</p>
+              <p class="mt-1 text-xs text-slate-400">#{{ problem.problem_number }} • {{ problem.get_difficulty_display }}</p>
+              <div class="mt-2 flex gap-2">
+                <a href="{% url 'practice:problem_detail' problem.slug %}" class="rounded-md border border-slate-700 px-2 py-1.5 text-xs font-semibold text-slate-200 hover:border-sky-500 hover:text-sky-300">View</a>
+                <a href="{% url 'practice:admin_activate_problem' problem.slug %}" class="rounded-md bg-emerald-600 px-2 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">Activate</a>
+              </div>
+            </div>
+          {% empty %}
+            <p class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-300">No inactive problems.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white">Interview Review Queue</h2>
+          <span class="rounded-full bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-300">{{ platform_metrics.pending_interview_reviews }}</span>
+        </div>
+        <div class="mt-4 space-y-3">
+          {% for interview in pending_interview_reviews|slice:":5" %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <p class="text-sm font-semibold text-white">{{ interview.user.username }}</p>
+              <p class="mt-1 text-xs text-slate-400">{{ interview.job_role|default:"Role not set" }} • {{ interview.updated_at|timesince }} ago</p>
+              <a href="/admin/mock_interview/mockinterviewsession/{{ interview.id }}/change/" class="mt-2 inline-block rounded-md border border-slate-700 px-2 py-1.5 text-xs font-semibold text-slate-200 hover:border-sky-500 hover:text-sky-300">Open Review</a>
+            </div>
+          {% empty %}
+            <p class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-300">No interview reviews pending.</p>
+          {% endfor %}
         </div>
       </div>
     </div>
 
-    <!-- Stats Overview Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <!-- Pending Tutors Stat -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Pending Tutors</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">
-              {{ pending_tutors.count }}
-            </p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-user-add-line text-3xl text-sky-400"></i>
-          </div>
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <h2 class="text-lg font-semibold text-white">Platform Distribution</h2>
+        <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Students: <span class="font-semibold text-white">{{ role_counts.STUDENT }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Tutors: <span class="font-semibold text-white">{{ role_counts.TUTOR }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Admins: <span class="font-semibold text-white">{{ role_counts.ADMIN }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">New Users (7d): <span class="font-semibold text-white">{{ platform_metrics.recent_signups }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Approved Tutors: <span class="font-semibold text-white">{{ platform_metrics.approved_tutors }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Dormant Users (30d): <span class="font-semibold text-white">{{ platform_metrics.stale_users_count }}</span></div>
         </div>
       </div>
 
-      <!-- Pending Problems Stat -->
-      <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Inactive Problems</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
-              {{ pending_problems.count }}
-            </p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-code-box-line text-3xl text-yellow-400"></i>
-          </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <h2 class="text-lg font-semibold text-white">Tutor Pipeline</h2>
+        <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Draft: <span class="font-semibold text-white">{{ tutor_status_counts.DRAFT }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Submitted: <span class="font-semibold text-white">{{ tutor_status_counts.SUBMITTED }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Under Review: <span class="font-semibold text-white">{{ tutor_status_counts.UNDER_REVIEW }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Approved: <span class="font-semibold text-white">{{ tutor_status_counts.APPROVED }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Rejected: <span class="font-semibold text-white">{{ tutor_status_counts.REJECTED }}</span></div>
+          <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-slate-300">Total Interviews: <span class="font-semibold text-white">{{ platform_metrics.total_interviews }}</span></div>
         </div>
       </div>
-
-      <!-- Pending Articles Stat -->
-      {% comment %} <div class="dark-card rounded-2xl p-6 hover-lift">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-slate-400 text-sm font-medium uppercase tracking-wide mb-1">Pending Articles</p>
-            <p class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
-              {{ pending_articles.count }}
-            </p>
-          </div>
-          <div class="w-16 h-16 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center">
-            <i class="ri-article-line text-3xl text-teal-400"></i>
-          </div>
-        </div>
-      </div> {% endcomment %}
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-      
-      <!-- Pending Tutors Section -->
-      <div class="dark-card rounded-2xl p-8 hover-lift">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-user-add-line text-2xl text-sky-400"></i>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-slate-100 brand-font">Pending Tutors</h2>
-              <p class="text-sm text-slate-400">Awaiting approval</p>
-            </div>
-          </div>
-        </div>
-
-        {% if pending_tutors %}
-          <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {% for user_profile in pending_tutors %}
-              <div class="glass rounded-xl p-5 hover:bg-white/10 transition-all duration-200 border border-slate-700/50">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex items-center space-x-3">
-                    {% if user_profile.avatar %}
-                      <img src="{{ user_profile.avatar.url }}" alt="{{ user_profile.user.username }}" class="w-12 h-12 rounded-full object-cover ring-2 ring-sky-400/30">
+    <div class="mt-8 grid gap-6 xl:grid-cols-3">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5 xl:col-span-2">
+        <h2 class="text-lg font-semibold text-white">Recent User Registrations</h2>
+        <div class="mt-4 overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="text-slate-400">
+              <tr>
+                <th class="pb-2 pr-4">User</th>
+                <th class="pb-2 pr-4">Role</th>
+                <th class="pb-2 pr-4">Joined</th>
+                <th class="pb-2 pr-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in recent_users %}
+                <tr class="border-t border-slate-800">
+                  <td class="py-2 pr-4 text-white">{{ user.username }}</td>
+                  <td class="py-2 pr-4 text-slate-300">{{ user.profile.get_role_display|default:"Unknown" }}</td>
+                  <td class="py-2 pr-4 text-slate-300">{{ user.date_joined|date:"M d, Y H:i" }}</td>
+                  <td class="py-2 pr-4">
+                    {% if user.is_active %}
+                      <span class="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-300">Active</span>
                     {% else %}
-                      <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-bold text-lg">
-                        {{ user_profile.user.username|slice:":1"|upper }}
-                      </div>
+                      <span class="rounded bg-rose-500/20 px-2 py-0.5 text-xs font-semibold text-rose-300">Inactive</span>
                     {% endif %}
-                    <div>
-                      <p class="font-semibold text-slate-100 text-lg">{{ user_profile.user.username }}</p>
-                      <p class="text-sm text-slate-400">{{ user_profile.user.email }}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {% if user_profile.bio %}
-                  <p class="text-sm text-slate-300 mb-4 line-clamp-2">{{ user_profile.bio }}</p>
-                {% endif %}
-
-                <div class="flex items-center space-x-2 mb-4">
-                  {% if user_profile.github %}
-                    <a href="{{ user_profile.github }}" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">
-                      <i class="ri-github-fill text-lg"></i>
-                    </a>
-                  {% endif %}
-                  {% if user_profile.linkedin %}
-                    <a href="{{ user_profile.linkedin }}" target="_blank" class="text-slate-400 hover:text-sky-400 transition-colors">
-                      <i class="ri-linkedin-fill text-lg"></i>
-                    </a>
-                  {% endif %}
-                  <span class="text-xs text-slate-500 ml-auto">
-                    <i class="ri-time-line mr-1"></i>{{ user_profile.created_at|timesince }} ago
-                  </span>
-                </div>
-
-                <div class="flex space-x-2">
-                  <a href="{% url 'users:approve_tutor' user_profile.user.id %}"
-                     class="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-sm font-semibold text-center shadow-md hover-lift">
-                    <i class="ri-check-line mr-1"></i>Approve
-                  </a>
-                  <a href="{% url 'users:public_profile' user_profile.user.username %}"
-                     class="px-4 py-2.5 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium hover-lift">
-                    <i class="ri-eye-line"></i>
-                  </a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-sky-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-user-add-line text-5xl text-sky-400/50"></i>
-            </div>
-            <p class="text-slate-400 font-medium">No tutor accounts pending approval</p>
-            <p class="text-sm text-slate-500 mt-2">New tutor registrations will appear here</p>
-          </div>
-        {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4" class="py-3 text-slate-300">No users found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Pending Problems Section -->
-      <div class="dark-card rounded-2xl p-8 hover-lift">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-code-box-line text-2xl text-yellow-400"></i>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-slate-100 brand-font">Inactive Problems</h2>
-              <p class="text-sm text-slate-400">Need activation</p>
-            </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <h2 class="text-lg font-semibold text-white">Social Snapshot</h2>
+        <div class="mt-4 space-y-3 text-sm">
+          <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+            <span class="text-slate-300">Posts</span>
+            <span class="font-semibold text-white">{{ social_stats.posts }}</span>
+          </div>
+          <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+            <span class="text-slate-300">Comments</span>
+            <span class="font-semibold text-white">{{ social_stats.comments }}</span>
+          </div>
+          <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+            <span class="text-slate-300">Follow Links</span>
+            <span class="font-semibold text-white">{{ social_stats.follows }}</span>
+          </div>
+          <div class="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+            <span class="text-slate-300">Interviews (7d)</span>
+            <span class="font-semibold text-white">{{ platform_metrics.interviews_this_week }}</span>
           </div>
         </div>
-
-        {% if pending_problems %}
-          <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {% for problem in pending_problems %}
-              <div class="glass rounded-xl p-5 hover:bg-white/10 transition-all duration-200 border border-slate-700/50">
-                <div class="flex items-start justify-between mb-3">
-                  <div class="flex-1">
-                    <a href="{% url 'practice:problem_detail' problem.slug %}" 
-                       class="font-semibold text-sky-400 hover:text-sky-300 text-lg line-clamp-2 transition-colors">
-                      {{ problem.title }}
-                    </a>
-                    <div class="flex items-center space-x-3 mt-2">
-                      <span class="px-2 py-1 text-xs font-medium rounded-lg
-                        {% if problem.difficulty == 'EASY' %}bg-green-500/20 text-green-400
-                        {% elif problem.difficulty == 'MEDIUM' %}bg-yellow-500/20 text-yellow-400
-                        {% else %}bg-red-500/20 text-red-400{% endif %}">
-                        {{ problem.get_difficulty_display }}
-                      </span>
-                      <span class="text-xs text-slate-500">
-                        #{{ problem.problem_number }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="flex items-center text-sm text-slate-400 mb-4">
-                  <i class="ri-user-line mr-2"></i>
-                  <span>{{ problem.created_by.username }}</span>
-                  <span class="mx-2">•</span>
-                  <i class="ri-calendar-line mr-2"></i>
-                  <span>{{ problem.created_at|date:"M d, Y" }}</span>
-                </div>
-
-                {% if problem.topics.exists %}
-                  <div class="flex flex-wrap gap-2 mb-4">
-                    {% for topic in problem.topics.all|slice:":3" %}
-                      <span class="px-2 py-1 bg-sky-500/10 text-sky-400 text-xs rounded-lg border border-sky-500/20">
-                        {{ topic.name }}
-                      </span>
-                    {% endfor %}
-                    {% if problem.topics.count > 3 %}
-                      <span class="px-2 py-1 bg-slate-700/50 text-slate-400 text-xs rounded-lg">
-                        +{{ problem.topics.count|add:"-3" }}
-                      </span>
-                    {% endif %}
-                  </div>
-                {% endif %}
-
-                <div class="flex space-x-2">
-                  <a href="{% url 'practice:admin_activate_problem' problem.slug %}"
-                     class="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-sm font-semibold text-center shadow-md hover-lift">
-                    <i class="ri-check-line mr-1"></i>Activate
-                  </a>
-                  <a href="{% url 'practice:problem_detail' problem.slug %}"
-                     class="px-4 py-2.5 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium hover-lift">
-                    <i class="ri-eye-line"></i>
-                  </a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-code-box-line text-5xl text-yellow-400/50"></i>
-            </div>
-            <p class="text-slate-400 font-medium">No inactive problems</p>
-            <p class="text-sm text-slate-500 mt-2">All problems are currently active</p>
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- Pending Articles Section -->
-      {% comment %} <div class="dark-card rounded-2xl p-8 hover-lift">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-gradient-to-br from-teal-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
-              <i class="ri-article-line text-2xl text-teal-400"></i>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-slate-100 brand-font">Pending Articles</h2>
-              <p class="text-sm text-slate-400">Awaiting review</p>
-            </div>
-          </div>
-        </div>
-
-        {% if pending_articles %}
-          <div class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {% for article in pending_articles %}
-              <div class="glass rounded-xl p-5 hover:bg-white/10 transition-all duration-200 border border-slate-700/50">
-                <div class="flex items-start justify-between mb-3">
-                  <div class="flex-1">
-                    <a href="{% url 'articles:article_detail' article.slug %}" 
-                       class="font-semibold text-teal-400 hover:text-teal-300 text-lg line-clamp-2 transition-colors">
-                      {{ article.title }}
-                    </a>
-                  </div>
-                </div>
-
-                <div class="flex items-center text-sm text-slate-400 mb-4">
-                  <i class="ri-user-line mr-2"></i>
-                  <span>{{ article.created_by.username }}</span>
-                  <span class="mx-2">•</span>
-                  <i class="ri-calendar-line mr-2"></i>
-                  <span>{{ article.created_at|date:"M d, Y" }}</span>
-                </div>
-
-                <div class="flex space-x-2">
-                  <a href="{% url 'articles:admin_article_approval' article.slug 'publish' %}"
-                     class="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-sm font-semibold text-center shadow-md hover-lift">
-                    <i class="ri-check-line mr-1"></i>Publish
-                  </a>
-                  <a href="{% url 'articles:admin_article_approval' article.slug 'reject' %}"
-                     class="px-4 py-2.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-all text-sm font-medium hover-lift">
-                    <i class="ri-close-line"></i>
-                  </a>
-                  <a href="{% url 'articles:article_detail' article.slug %}"
-                     class="px-4 py-2.5 glass border border-slate-600 text-slate-300 rounded-lg hover:bg-white/10 transition-all text-sm font-medium hover-lift">
-                    <i class="ri-eye-line"></i>
-                  </a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="text-center py-12">
-            <div class="w-24 h-24 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="ri-article-line text-5xl text-teal-400/50"></i>
-            </div>
-            <p class="text-slate-400 font-medium">No articles pending approval</p>
-            <p class="text-sm text-slate-500 mt-2">New article submissions will appear here</p>
-          </div>
-        {% endif %}
-      </div> {% endcomment %}
-
-    </div>
-
-    <!-- Quick Actions Section -->
-    <div class="mt-12">
-      <h3 class="text-2xl font-bold text-slate-100 mb-6 brand-font">Quick Actions</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a href="/admin/auth/user/" class="dark-card rounded-xl p-6 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-sky-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <i class="ri-group-line text-2xl text-sky-400"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-100">Manage Users</p>
-              <p class="text-sm text-slate-400">View all users</p>
-            </div>
-          </div>
-        </a>
-
-        <a href="/admin/practice/problem/" class="dark-card rounded-xl p-6 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <i class="ri-code-s-slash-line text-2xl text-yellow-400"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-100">All Problems</p>
-              <p class="text-sm text-slate-400">Manage problems</p>
-            </div>
-          </div>
-        </a>
-
-        <a href="/admin/" class="dark-card rounded-xl p-6 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-red-500/20 to-rose-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <i class="ri-settings-3-line text-2xl text-red-400"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-100">Admin Panel</p>
-              <p class="text-sm text-slate-400">Full control</p>
-            </div>
-          </div>
-        </a>
-
-        <a href="{% url 'users:admin_users' %}" class="dark-card rounded-xl p-6 hover:bg-white/10 transition-all duration-200 hover-lift group">
-          <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <i class="ri-user-settings-line text-2xl text-emerald-400"></i>
-            </div>
-            <div>
-              <p class="font-semibold text-slate-100">User Settings</p>
-              <p class="text-sm text-slate-400">Configure users</p>
-            </div>
-          </div>
-        </a>
       </div>
     </div>
 
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <h2 class="text-lg font-semibold text-white">Recent Code Submissions</h2>
+        <div class="mt-4 space-y-3">
+          {% for submission in recent_submissions %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-semibold text-white">{{ submission.user.username }} • {{ submission.problem.title }}</p>
+                <span class="text-xs text-slate-400">{{ submission.created_at|timesince }} ago</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-300">Language: {{ submission.language }} • Status: {{ submission.get_status_display }}</p>
+            </div>
+          {% empty %}
+            <p class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-300">No submissions found.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
+        <h2 class="text-lg font-semibold text-white">Recent Mock Interviews</h2>
+        <div class="mt-4 space-y-3">
+          {% for interview in recent_interviews %}
+            <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-semibold text-white">{{ interview.user.username }}</p>
+                <span class="text-xs text-slate-400">{{ interview.created_at|timesince }} ago</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-300">{{ interview.job_role|default:"Role not set" }} • {{ interview.get_status_display }}</p>
+            </div>
+          {% empty %}
+            <p class="rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-300">No interview sessions found.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-
-<style>
-  /* Custom scrollbar for the overflow sections */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, #6366f1, #8b5cf6);
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, #4f46e5, #7c3aed);
-  }
-
-  /* Line clamp utility */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>
 {% endblock %}

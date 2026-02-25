@@ -25,9 +25,14 @@
         <p class="mt-2 text-xs text-slate-500">Joined {{ user_profile.created_at|date:"F Y" }}</p>
 
         {% if user.is_authenticated and not is_own_profile %}
-          <button id="follow-btn" type="button" onclick="toggleFollow('{{ user_profile.user.username }}')" class="mt-4 w-full py-2 rounded-lg border border-cyan-500/40 {% if is_following %}bg-cyan-500/20 text-cyan-300{% else %}bg-transparent text-cyan-300{% endif %}">
-            {% if is_following %}Following{% else %}Follow{% endif %}
-          </button>
+          <div class="mt-4 flex gap-2">
+            <button id="follow-btn" type="button" onclick="toggleFollow('{{ user_profile.user.username }}')" class="flex-1 py-2 rounded-lg border border-cyan-500/40 {% if is_following %}bg-cyan-500/20 text-cyan-300{% else %}bg-transparent text-cyan-300{% endif %} transition-all duration-200 hover:bg-cyan-500/30 text-sm font-medium">
+              {% if is_following %}Following{% else %}Follow{% endif %}
+            </button>
+            <a href="{% url 'chat:start_chat' user_profile.user.username %}" class="flex-1 py-2 rounded-lg border border-violet-500/40 bg-violet-500/15 text-violet-300 hover:bg-violet-500/30 transition-all duration-200 text-sm font-medium text-center flex items-center justify-center gap-1.5">
+              <i class="ri-message-3-line"></i> Message
+            </a>
+          </div>
         {% endif %}
       </div>
 

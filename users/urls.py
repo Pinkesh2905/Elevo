@@ -21,6 +21,7 @@ urlpatterns = [
     
     # Profile URLs
     path('profile/', views.profile, name='profile'),
+    path('tutor-application/', views.tutor_application, name='tutor_application'),
     
     # Account Management URLs
     path('settings/', views.account_settings, name='account_settings'),
@@ -33,6 +34,7 @@ urlpatterns = [
     path('admin/users/', views.admin_users, name='admin_users'),
     path('admin/toggle-status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
     path('admin/approve-tutor/<int:user_id>/', views.admin_approve_tutor, name='approve_tutor'),
+    path('admin/reject-tutor/<int:user_id>/', views.admin_reject_tutor, name='reject_tutor'),
 
     # Public profile URL (keep last so it does not swallow specific routes)
     path('<str:username>/', views.public_profile, name='public_profile'),

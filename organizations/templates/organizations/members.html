@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Members — {{ org.name }} | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+  .member-card { border: 1px solid rgba(255,255,255,0.06); transition: all 0.2s ease; }
+  .member-card:hover { border-color: rgba(14,165,233,0.2); background: rgba(14,165,233,0.03); }
+  .invite-input:focus { border-color: rgba(14,165,233,0.5); box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-8 px-4">
+  <div class="mx-auto max-w-4xl">
+
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-6">
+      <a href="{% url 'organizations:dashboard' %}" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
+        <i class="ri-arrow-left-s-line text-lg"></i>
+      </a>
+      <div>
+        <h1 class="text-xl font-bold text-slate-100 brand-font">Manage Members</h1>
+        <p class="text-sm text-slate-500">{{ org.name }} · {{ members.count }} member{{ members.count|pluralize }}</p>
+      </div>
+    </div>
+
+    <!-- Invite Section -->
+    <div class="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl p-6 mb-6">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <i class="ri-user-add-line text-sky-400"></i> Invite Student
+      </h2>
+      {% if can_add %}
+      <form method="post" action="{% url 'organizations:invite_student' %}" class="flex gap-3">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="student@email.com" required
+               class="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-slate-900/75 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none invite-input transition-all">
+        <button type="submit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white text-sm font-semibold hover:from-sky-600 hover:to-teal-600 transition-all shadow-lg shadow-sky-500/15 flex-shrink-0">
+          <i class="ri-send-plane-line mr-1"></i> Send Invite
+        </button>
+      </form>
+      {% else %}
+      <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+        <i class="ri-error-warning-line text-amber-400"></i>
+        <p class="text-sm text-amber-300">Student limit reached ({{ max_students }}). <a href="{% url 'organizations:subscription' %}" class="underline hover:text-amber-200">Upgrade your plan</a> to add more.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Pending Invites -->
+    {% if pending_invites %}
+    <div class="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl p-6 mb-6">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <i class="ri-mail-send-line text-amber-400"></i> Pending Invites
+        <span class="text-xs text-amber-400/70">({{ pending_invites.count }})</span>
+      </h2>
+      <div class="space-y-2">
+        {% for inv in pending_invites %}
+        <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-white/6 bg-white/[0.02]">
+          <div>
+            <p class="text-sm text-slate-300">{{ inv.email }}</p>
+            <p class="text-xs text-slate-600">Expires {{ inv.expires_at|timesince }} from now</p>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/25">Pending</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Active Members -->
+    <div class="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl p-6">
+      <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <i class="ri-group-line text-cyan-400"></i> Active Members
+      </h2>
+      <div class="space-y-2">
+        {% for m in members %}
+        <div class="member-card flex items-center gap-4 px-4 py-3 rounded-xl">
+          {% if m.user.profile.avatar %}
+            <img src="{{ m.user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover border border-white/15">
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 text-white font-bold flex items-center justify-center text-sm">
+              {{ m.user.username|first|upper }}
+            </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-200 truncate">{{ m.user.get_full_name|default:m.user.username }}</p>
+            <p class="text-xs text-slate-500">@{{ m.user.username }} · Joined {{ m.joined_at|timesince }} ago</p>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
+            {% if m.role == 'ORG_ADMIN' %}bg-violet-500/15 text-violet-400 border border-violet-500/25
+            {% else %}bg-slate-500/15 text-slate-400 border border-slate-500/25{% endif %}">
+            {{ m.get_role_display }}
+          </span>
+          {% if m.user != org.admin %}
+          <form method="post" action="{% url 'organizations:remove_member' m.id %}" class="flex-shrink-0"
+                onsubmit="return confirm('Remove {{ m.user.username }} from the organization?')">
+            {% csrf_token %}
+            <button type="submit" class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all flex items-center justify-center">
+              <i class="ri-close-line"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-sm text-slate-500 text-center py-8">No members yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

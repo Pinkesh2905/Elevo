@@ -23,12 +23,15 @@ urlpatterns = [
          views.export_practice_problem, 
          name='export_practice_problem'),
 
-    # ========== MOCK INTERVIEW REVIEW (Optional - uncomment if needed) ==========
-    # path('mock-interviews/reviews/', 
-    #      mock_views.tutor_interview_review_list, 
-    #      name='mock_interview_review_list'),
-    #      
-    # path('mock-interviews/reviews/<int:session_id>/', 
-    #      mock_views.tutor_review_interview_detail, 
-    #      name='mock_interview_review_detail'),
+    # ========== MOCK INTERVIEW REVIEW ==========
+    path(
+        "mock-interviews/reviews/",
+        views.tutor_interview_review_list,
+        name="mock_interview_review_list",
+    ),
+    path(
+        "mock-interviews/reviews/<int:session_id>/",
+        views.tutor_review_interview_detail,
+        name="mock_interview_review_detail",
+    ),
 ]

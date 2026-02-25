@@ -10,14 +10,21 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Avg, Count, Prefetch
+from django.db.models import Avg, Count, Prefetch, Q
 from django.conf import settings
+from django.views.decorators.http import require_POST
 
-from .models import UserProfile, EmailVerificationToken, PasswordResetToken, EmailChangeToken
+from .models import (
+    EmailChangeToken,
+    EmailVerificationToken,
+    PasswordResetToken,
+    TutorApplication,
+    UserProfile,
+)
 from .forms import (
     SignupForm, UserUpdateForm, UserProfileUpdateForm, CustomLoginForm,
     ForgotPasswordForm, OTPVerificationForm, PasswordResetForm, 
-    ResendVerificationForm, EmailChangeForm
+    ResendVerificationForm, EmailChangeForm, TutorApplicationForm
 )
 from posts.models import Comment, Follow, Post, Repost
 
@@ -31,6 +38,18 @@ def is_tutor(user):
 
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
+
+
+def get_or_create_tutor_application(user):
+    """
+    Fetch tutor application or create an initial draft.
+    """
+    defaults = {
+        'linkedin_url': getattr(user.profile, 'linkedin', '') or '',
+        'github_url': getattr(user.profile, 'github', '') or '',
+    }
+    application, _ = TutorApplication.objects.get_or_create(user=user, defaults=defaults)
+    return application
 
 
 # --- Signup View (Email Verification Removed) ---
@@ -67,11 +86,22 @@ def signup(request):
 
                 # Log the user in immediately
                 auth_login(request, user)
-                
-                messages.success(
-                    request, 
-                    f"Welcome to Elevo, {user.username}! Your account has been created successfully."
-                )
+
+                if selected_role == 'TUTOR':
+                    get_or_create_tutor_application(user)
+                    messages.success(
+                        request,
+                        (
+                            f"Welcome to Elevo, {user.username}. "
+                            "Complete your tutor application to start the review process."
+                        )
+                    )
+                    return redirect('users:tutor_application')
+                else:
+                    messages.success(
+                        request,
+                        f"Welcome to Elevo, {user.username}! Your account has been created successfully."
+                    )
                 return redirect('dashboard_redirect')
         else:
             messages.error(request, "Please correct the errors below.")
@@ -79,6 +109,70 @@ def signup(request):
         form = SignupForm()
 
     return render(request, 'users/signup.html', {'form': form})
+
+
+@login_required
+def tutor_application(request):
+    """
+    Tutor onboarding flow for submitting/resubmitting tutor application details.
+    """
+    if request.user.profile.role != 'TUTOR':
+        messages.info(request, "Tutor application is only available for tutor accounts.")
+        return redirect('users:profile')
+
+    application = get_or_create_tutor_application(request.user)
+
+    if application.status == TutorApplication.STATUS_APPROVED and not request.user.profile.is_approved_tutor:
+        request.user.profile.is_approved_tutor = True
+        request.user.profile.save(update_fields=['is_approved_tutor', 'updated_at'])
+
+    if request.method == 'POST':
+        form = TutorApplicationForm(request.POST, request.FILES, instance=application)
+        submit_action = request.POST.get('submit_action', 'submit')
+        if form.is_valid():
+            app = form.save(commit=False)
+            app.user = request.user
+
+            if submit_action == 'save_draft':
+                app.status = TutorApplication.STATUS_DRAFT
+                messages.success(request, "Tutor application saved as draft.")
+            else:
+                app.status = TutorApplication.STATUS_SUBMITTED
+                app.submitted_at = timezone.now()
+                app.admin_notes = ""
+                app.reviewed_at = None
+                app.reviewed_by = None
+                request.user.profile.is_approved_tutor = False
+                request.user.profile.save(update_fields=['is_approved_tutor', 'updated_at'])
+                messages.success(request, "Tutor application submitted for admin review.")
+
+            app.save()
+
+            # Keep profile links in sync.
+            request.user.profile.linkedin = app.linkedin_url
+            request.user.profile.github = app.github_url
+            request.user.profile.save(update_fields=['linkedin', 'github', 'updated_at'])
+            return redirect('users:tutor_application')
+    else:
+        form = TutorApplicationForm(instance=application)
+
+    status_tone = {
+        TutorApplication.STATUS_DRAFT: "slate",
+        TutorApplication.STATUS_SUBMITTED: "amber",
+        TutorApplication.STATUS_UNDER_REVIEW: "sky",
+        TutorApplication.STATUS_APPROVED: "emerald",
+        TutorApplication.STATUS_REJECTED: "red",
+    }.get(application.status, "slate")
+
+    return render(
+        request,
+        'users/tutor_application.html',
+        {
+            'application': application,
+            'form': form,
+            'status_tone': status_tone,
+        },
+    )
 
 
 # --- Email Verification Views (Keep for manual verification if needed) ---
@@ -517,6 +611,10 @@ def profile(request):
     except Exception:
         pass
 
+    tutor_application = None
+    if request.user.profile.role == 'TUTOR':
+        tutor_application = TutorApplication.objects.filter(user=request.user).first()
+
     context = {
         'user_profile': user_profile,
         'user_form': user_form,
@@ -532,6 +630,7 @@ def profile(request):
         'aptitude_quizzes': aptitude_quizzes,
         'aptitude_avg': aptitude_avg,
         'is_own_profile': True,
+        'tutor_application': tutor_application,
     }
 
     return render(request, 'users/profile.html', context)
@@ -747,8 +846,20 @@ def approve_tutor(request, user_id):
     
     user_profile = get_object_or_404(UserProfile, user__id=user_id)
     user_profile.is_approved_tutor = not user_profile.is_approved_tutor
-    user_profile.save()
-    
+    user_profile.save(update_fields=['is_approved_tutor', 'updated_at'])
+
+    application = TutorApplication.objects.filter(user=user_profile.user).first()
+    if application:
+        if user_profile.is_approved_tutor:
+            application.status = TutorApplication.STATUS_APPROVED
+            application.reviewed_at = timezone.now()
+            application.reviewed_by = request.user
+        else:
+            application.status = TutorApplication.STATUS_REJECTED
+            application.reviewed_at = timezone.now()
+            application.reviewed_by = request.user
+        application.save(update_fields=['status', 'reviewed_at', 'reviewed_by', 'updated_at'])
+
     status = "approved" if user_profile.is_approved_tutor else "revoked"
     messages.success(request, f"Tutor status {status} for {user_profile.user.username}.")
     
@@ -759,32 +870,102 @@ def approve_tutor(request, user_id):
 @staff_member_required
 def admin_dashboard(request):
     """
-    Admin dashboard showing pending approvals for tutors, problems, and articles.
+    Admin operations dashboard with approvals, platform metrics, and recent activity.
     """
-    # Get pending tutors (tutors who registered but not yet approved)
-    pending_tutors = UserProfile.objects.filter(
-        role='TUTOR',
-        is_approved_tutor=False
-    ).select_related('user').order_by('-created_at')
-    
-    # Initialize empty lists for problems and articles
+    now = timezone.now()
+    week_ago = now - timezone.timedelta(days=7)
+    month_ago = now - timezone.timedelta(days=30)
+
+    user_qs = User.objects.select_related('profile')
+    profile_qs = UserProfile.objects.select_related('user')
+
+    pending_tutor_applications = TutorApplication.objects.filter(
+        status__in=[TutorApplication.STATUS_SUBMITTED, TutorApplication.STATUS_UNDER_REVIEW]
+    ).select_related('user', 'reviewed_by').order_by('-submitted_at', '-updated_at')
+
+    tutor_status_counts_qs = TutorApplication.objects.values('status').annotate(total=Count('id'))
+    tutor_status_counts = {
+        TutorApplication.STATUS_DRAFT: 0,
+        TutorApplication.STATUS_SUBMITTED: 0,
+        TutorApplication.STATUS_UNDER_REVIEW: 0,
+        TutorApplication.STATUS_APPROVED: 0,
+        TutorApplication.STATUS_REJECTED: 0,
+    }
+    for row in tutor_status_counts_qs:
+        tutor_status_counts[row['status']] = row['total']
+
+    role_counts = {'STUDENT': 0, 'TUTOR': 0, 'ADMIN': 0}
+    for row in profile_qs.values('role').annotate(total=Count('id')):
+        role_counts[row['role']] = row['total']
+
+    recent_users = user_qs.order_by('-date_joined')[:8]
+    stale_users_count = user_qs.filter(
+        is_active=True
+    ).filter(
+        Q(last_login__lt=month_ago) | Q(last_login__isnull=True)
+    ).count()
+
+    # Initialize empty defaults for optional app metrics.
     pending_problems = []
+    total_problems = active_problems = inactive_problems = 0
+    recent_submissions = []
+    weekly_submissions = weekly_acceptance_rate = 0
+    submission_status_counts = {}
+
+    pending_interview_reviews = []
+    pending_interview_reviews_count = 0
+    recent_interviews = []
+    total_interviews = interviews_this_week = 0
+    interview_status_counts = {}
+
     pending_articles = []
-    
-    # Try to import and get inactive problems from practice app
+
+    # Practice app metrics
     try:
-        from practice.models import Problem
+        from practice.models import Problem, Submission
         pending_problems = Problem.objects.filter(
             is_active=False
         ).select_related('created_by').prefetch_related('topics', 'companies').order_by('-created_at')
-    except (ImportError, AttributeError) as e:
-        # Practice app or Problem model doesn't exist or doesn't have expected fields
+        total_problems = Problem.objects.count()
+        active_problems = Problem.objects.filter(is_active=True).count()
+        inactive_problems = Problem.objects.filter(is_active=False).count()
+
+        recent_submissions = Submission.objects.select_related(
+            'user', 'problem'
+        ).order_by('-created_at')[:8]
+        weekly_submission_qs = Submission.objects.filter(created_at__gte=week_ago)
+        weekly_submissions = weekly_submission_qs.count()
+        weekly_accepted = weekly_submission_qs.filter(status='accepted').count()
+        weekly_acceptance_rate = round((weekly_accepted / weekly_submissions) * 100, 1) if weekly_submissions else 0
+        submission_status_counts = {
+            row['status']: row['total']
+            for row in weekly_submission_qs.values('status').annotate(total=Count('id'))
+        }
+    except (ImportError, AttributeError):
         pass
-    
-    # Try to import and get pending articles from articles app
+
+    # Mock interview metrics
+    try:
+        from mock_interview.models import MockInterviewSession
+        pending_interview_reviews = MockInterviewSession.objects.filter(
+            status='REVIEW_PENDING'
+        ).select_related('user').order_by('-updated_at')
+        pending_interview_reviews_count = pending_interview_reviews.count()
+        recent_interviews = MockInterviewSession.objects.select_related(
+            'user'
+        ).order_by('-created_at')[:8]
+        total_interviews = MockInterviewSession.objects.count()
+        interviews_this_week = MockInterviewSession.objects.filter(created_at__gte=week_ago).count()
+        interview_status_counts = {
+            row['status']: row['total']
+            for row in MockInterviewSession.objects.values('status').annotate(total=Count('id'))
+        }
+    except (ImportError, AttributeError):
+        pass
+
+    # Article moderation metrics (if app exists)
     try:
         from articles.models import Article
-        # Check what field the Article model uses for status
         if hasattr(Article, 'status'):
             pending_articles = Article.objects.filter(status='PENDING').select_related('created_by').order_by('-created_at')
         elif hasattr(Article, 'is_active'):
@@ -792,32 +973,103 @@ def admin_dashboard(request):
         elif hasattr(Article, 'is_published'):
             pending_articles = Article.objects.filter(is_published=False).select_related('created_by').order_by('-created_at')
         else:
-            # If no status field, show recent articles
             pending_articles = Article.objects.all().select_related('created_by').order_by('-created_at')[:10]
-    except (ImportError, AttributeError) as e:
-        # Articles app doesn't exist or Article model doesn't have expected fields
+    except (ImportError, AttributeError):
         pass
-    
+
+    total_pending_actions = (
+        pending_tutor_applications.count()
+        + inactive_problems
+        + pending_interview_reviews_count
+    )
+
+    social_stats = {
+        'posts': Post.objects.count(),
+        'comments': Comment.objects.count(),
+        'follows': Follow.objects.count(),
+    }
+
     context = {
-        'pending_tutors': pending_tutors,
+        'pending_tutor_applications': pending_tutor_applications,
         'pending_problems': pending_problems,
         'pending_articles': pending_articles,
+        'recent_users': recent_users,
+        'recent_submissions': recent_submissions,
+        'recent_interviews': recent_interviews,
+        'pending_interview_reviews': pending_interview_reviews,
+        'social_stats': social_stats,
+        'role_counts': role_counts,
+        'tutor_status_counts': tutor_status_counts,
+        'submission_status_counts': submission_status_counts,
+        'interview_status_counts': interview_status_counts,
+        'platform_metrics': {
+            'total_users': user_qs.count(),
+            'active_users': user_qs.filter(is_active=True).count(),
+            'inactive_users': user_qs.filter(is_active=False).count(),
+            'staff_users': user_qs.filter(is_staff=True).count(),
+            'recent_signups': user_qs.filter(date_joined__gte=week_ago).count(),
+            'stale_users_count': stale_users_count,
+            'approved_tutors': profile_qs.filter(role='TUTOR', is_approved_tutor=True).count(),
+            'total_tutors': profile_qs.filter(role='TUTOR').count(),
+            'total_problems': total_problems,
+            'active_problems': active_problems,
+            'inactive_problems': inactive_problems,
+            'weekly_submissions': weekly_submissions,
+            'weekly_acceptance_rate': weekly_acceptance_rate,
+            'total_interviews': total_interviews,
+            'interviews_this_week': interviews_this_week,
+            'pending_interview_reviews': pending_interview_reviews_count,
+            'pending_tutor_reviews': pending_tutor_applications.count(),
+            'total_pending_actions': total_pending_actions,
+        },
     }
-    
+
     return render(request, 'users/admin_dashboard.html', context)
 
 
 @staff_member_required
+@require_POST
 def admin_approve_tutor(request, user_id):
     """
     Approve a tutor account.
     """
     user = get_object_or_404(User, id=user_id)
     user_profile = user.profile
-    
-    # Toggle approval status
+    application = TutorApplication.objects.filter(user=user).first()
+
     user_profile.is_approved_tutor = True
-    user_profile.save()
-    
+    user_profile.save(update_fields=['is_approved_tutor', 'updated_at'])
+
+    if application:
+        application.status = TutorApplication.STATUS_APPROVED
+        application.admin_notes = (request.POST.get('admin_notes') or '').strip()
+        application.reviewed_at = timezone.now()
+        application.reviewed_by = request.user
+        application.save()
+
     messages.success(request, f'Tutor {user.username} has been approved successfully!')
+    return redirect('users:admin_dashboard')
+
+
+@staff_member_required
+@require_POST
+def admin_reject_tutor(request, user_id):
+    """
+    Reject tutor application and keep tutor account unapproved.
+    """
+    user = get_object_or_404(User, id=user_id)
+    user_profile = user.profile
+    application = TutorApplication.objects.filter(user=user).first()
+
+    user_profile.is_approved_tutor = False
+    user_profile.save(update_fields=['is_approved_tutor', 'updated_at'])
+
+    if application:
+        application.status = TutorApplication.STATUS_REJECTED
+        application.admin_notes = (request.POST.get('admin_notes') or '').strip()
+        application.reviewed_at = timezone.now()
+        application.reviewed_by = request.user
+        application.save()
+
+    messages.success(request, f'Tutor application for {user.username} has been rejected.')
     return redirect('users:admin_dashboard')

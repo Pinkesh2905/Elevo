@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}My Organization | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-8 px-4">
+  <div class="mx-auto max-w-2xl">
+
+    <div class="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl p-6">
+      <div class="flex items-center gap-4 mb-6">
+        {% if org.logo %}
+          <img src="{{ org.logo.url }}" class="w-14 h-14 rounded-2xl object-cover border border-white/15">
+        {% else %}
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-violet-500 flex items-center justify-center text-white text-xl font-bold">
+            {{ org.name|first|upper }}
+          </div>
+        {% endif %}
+        <div>
+          <h1 class="text-xl font-bold text-slate-100">{{ org.name }}</h1>
+          <p class="text-sm text-slate-500">Member since {{ membership.joined_at|date:"M d, Y" }}</p>
+        </div>
+      </div>
+
+      {% if subscription %}
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="px-4 py-3 rounded-xl border border-white/8 bg-white/[0.02]">
+          <p class="text-xs text-slate-500">Plan</p>
+          <p class="text-sm font-semibold text-slate-200">{{ subscription.plan.display_name }}</p>
+        </div>
+        <div class="px-4 py-3 rounded-xl border border-white/8 bg-white/[0.02]">
+          <p class="text-xs text-slate-500">Status</p>
+          <p class="text-sm font-semibold {% if subscription.is_valid %}text-emerald-400{% else %}text-rose-400{% endif %}">
+            {{ subscription.status }}
+          </p>
+        </div>
+        <div class="px-4 py-3 rounded-xl border border-white/8 bg-white/[0.02]">
+          <p class="text-xs text-slate-500">Valid Until</p>
+          <p class="text-sm font-semibold text-slate-200">{{ subscription.end_date|date:"M d, Y" }}</p>
+        </div>
+        <div class="px-4 py-3 rounded-xl border border-white/8 bg-white/[0.02]">
+          <p class="text-xs text-slate-500">Days Left</p>
+          <p class="text-sm font-semibold {% if subscription.days_remaining < 7 %}text-rose-400{% else %}text-slate-200{% endif %}">
+            {{ subscription.days_remaining }} days
+          </p>
+        </div>
+      </div>
+      {% else %}
+      <div class="px-4 py-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-6">
+        <p class="text-sm text-rose-300"><i class="ri-error-warning-line mr-1"></i> Your organization's subscription has expired. Contact your admin.</p>
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'organizations:leave_org' %}"
+            onsubmit="return confirm('Are you sure you want to leave {{ org.name }}? You will lose premium access.')">
+        {% csrf_token %}
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-medium hover:bg-rose-500/20 transition-all">
+          <i class="ri-logout-box-line mr-1"></i> Leave Organization
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

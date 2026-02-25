@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Chat with {{ other_user.get_full_name|default:other_user.username }} | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Sidebar thread list */
+  .sidebar-thread { transition: all 0.2s ease; }
+  .sidebar-thread:hover { background: rgba(14, 165, 233, 0.08); }
+  .sidebar-thread.active { background: rgba(14, 165, 233, 0.14); border-left: 3px solid #0ea5e9; }
+  .unread-dot { width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; }
+
+  /* Chat bubbles */
+  .bubble-sent {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(20, 184, 166, 0.2));
+    border: 1px solid rgba(14, 165, 233, 0.25);
+    border-radius: 18px 18px 4px 18px;
+  }
+  .bubble-received {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px 18px 18px 4px;
+  }
+
+  /* Message area */
+  .messages-container {
+    height: calc(100vh - 280px);
+    min-height: 400px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+  .messages-container::-webkit-scrollbar { width: 4px; }
+  .messages-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  /* Input bar */
+  .chat-input:focus { border-color: rgba(14, 165, 233, 0.5); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+  .send-btn { transition: all 0.2s ease; }
+  .send-btn:hover { transform: scale(1.05); }
+  .send-btn:active { transform: scale(0.95); }
+
+  /* Typing indicator dots */
+  @keyframes typingDot { 0%,60%,100% { opacity: 0.3; } 30% { opacity: 1; } }
+  .typing-dot { animation: typingDot 1.4s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* Sidebar */
+  .chat-sidebar {
+    height: calc(100vh - 180px);
+    min-height: 500px;
+    overflow-y: auto;
+  }
+  .chat-sidebar::-webkit-scrollbar { width: 3px; }
+  .chat-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-6 px-4">
+  <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- Sidebar: Thread List -->
+    <aside class="lg:col-span-3 hidden lg:block">
+      <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl overflow-hidden">
+        <div class="p-4 border-b border-white/10 flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <i class="ri-message-3-line text-sky-400"></i> Chats
+          </h2>
+          <a href="{% url 'chat:inbox' %}" class="text-xs text-sky-400 hover:text-sky-300 transition-colors">View all</a>
+        </div>
+        <div class="chat-sidebar divide-y divide-white/5">
+          {% for item in thread_list %}
+            <a href="{% url 'chat:thread' item.thread.id %}"
+               class="sidebar-thread flex items-center gap-2.5 px-4 py-3 {% if item.thread.id == thread.id %}active{% endif %}">
+              {% if item.other_user.profile.avatar %}
+                <img src="{{ item.other_user.profile.avatar.url }}" class="w-9 h-9 rounded-full object-cover border border-white/20 flex-shrink-0">
+              {% else %}
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
+                  {{ item.other_user.username|first|upper }}
+                </div>
+              {% endif %}
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-medium text-slate-200 truncate">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
+                <div class="text-xs text-slate-500 truncate">
+                  {% if item.last_message %}
+                    {{ item.last_message.content|truncatechars:30 }}
+                  {% else %}
+                    No messages
+                  {% endif %}
+                </div>
+              </div>
+              {% if item.unread > 0 %}
+                <span class="unread-dot flex-shrink-0"></span>
+              {% endif %}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="lg:col-span-9">
+      <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl overflow-hidden flex flex-col">
+
+        <!-- Chat Header -->
+        <div class="px-5 py-4 border-b border-white/10 flex items-center gap-3">
+          <a href="{% url 'chat:inbox' %}" class="lg:hidden text-slate-400 hover:text-sky-400 transition-colors mr-1">
+            <i class="ri-arrow-left-line text-xl"></i>
+          </a>
+          {% if other_user.profile.avatar %}
+            <img src="{{ other_user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover border border-white/20">
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-lg font-bold flex items-center justify-center">
+              {{ other_user.username|first|upper }}
+            </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <a href="{% url 'users:public_profile' other_user.username %}" class="font-semibold text-slate-100 hover:text-sky-400 transition-colors text-sm">
+              {{ other_user.get_full_name|default:other_user.username }}
+            </a>
+            <p class="text-xs text-slate-500">@{{ other_user.username }}</p>
+          </div>
+          <a href="{% url 'users:public_profile' other_user.username %}" class="text-slate-400 hover:text-sky-400 transition-colors" title="View profile">
+            <i class="ri-user-line text-lg"></i>
+          </a>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-container px-5 py-4 space-y-3" id="messagesContainer">
+          {% if messages %}
+            {% for msg in messages %}
+              <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-msg-id="{{ msg.id }}">
+                <div class="max-w-[75%] {% if msg.sender == request.user %}bubble-sent{% else %}bubble-received{% endif %} px-4 py-2.5">
+                  <p class="text-sm text-slate-200 whitespace-pre-wrap break-words">{{ msg.content }}</p>
+                  <p class="text-[10px] mt-1 {% if msg.sender == request.user %}text-sky-400/60{% else %}text-slate-500{% endif %}">
+                    {{ msg.created_at|date:"M d, h:i A" }}
+                  </p>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-16" id="emptyState">
+              <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-sky-500/10 to-teal-500/10 border border-sky-500/20 flex items-center justify-center mb-3">
+                <i class="ri-chat-smile-2-line text-2xl text-sky-400/60"></i>
+              </div>
+              <p class="text-sm text-slate-400">Start the conversation with <strong class="text-sky-400">{{ other_user.get_full_name|default:other_user.username }}</strong></p>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Input Bar -->
+        <div class="px-5 py-4 border-t border-white/10 bg-slate-900/50">
+          <form id="messageForm" class="flex items-end gap-3">
+            {% csrf_token %}
+            <div class="flex-1 relative">
+              <textarea id="messageInput" name="content" rows="1" placeholder="Type a message..."
+                        class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-input transition-all resize-none"
+                        style="max-height: 120px;"></textarea>
+            </div>
+            <button type="submit" class="send-btn w-11 h-11 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white flex items-center justify-center hover:from-sky-600 hover:to-teal-600 flex-shrink-0 shadow-lg shadow-sky-500/20">
+              <i class="ri-send-plane-fill text-lg"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+</section>
+
+<script>
+(function() {
+  const threadId = {{ thread.id }};
+  const currentUser = '{{ request.user.username }}';
+  const container = document.getElementById('messagesContainer');
+  const form = document.getElementById('messageForm');
+  const input = document.getElementById('messageInput');
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  let lastMessageId = 0;
+
+  // Get last message ID from DOM
+  function initLastId() {
+    const msgs = container.querySelectorAll('[data-msg-id]');
+    if (msgs.length > 0) {
+      lastMessageId = parseInt(msgs[msgs.length - 1].dataset.msgId) || 0;
+    }
+  }
+
+  // Scroll to bottom
+  function scrollToBottom() {
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Append a message bubble
+  function appendMessage(msg) {
+    // Remove empty state if present
+    const empty = document.getElementById('emptyState');
+    if (empty) empty.remove();
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `flex ${msg.is_mine ? 'justify-end' : 'justify-start'}`;
+    wrapper.dataset.msgId = msg.id;
+
+    const bubble = document.createElement('div');
+    bubble.className = `max-w-[75%] ${msg.is_mine ? 'bubble-sent' : 'bubble-received'} px-4 py-2.5`;
+    bubble.innerHTML = `
+      <p class="text-sm text-slate-200 whitespace-pre-wrap break-words">${escapeHtml(msg.content)}</p>
+      <p class="text-[10px] mt-1 ${msg.is_mine ? 'text-sky-400/60' : 'text-slate-500'}">${msg.created_at}</p>
+    `;
+
+    wrapper.appendChild(bubble);
+    container.appendChild(wrapper);
+    lastMessageId = Math.max(lastMessageId, msg.id);
+    scrollToBottom();
+  }
+
+  function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+  }
+
+  // Send message
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const content = input.value.trim();
+    if (!content) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+
+    try {
+      const resp = await fetch(`/chat/${threadId}/send/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: new URLSearchParams({ content }),
+      });
+      const data = await resp.json();
+      if (data.success) {
+        appendMessage(data.message);
+      }
+    } catch(err) {
+      console.error('Send failed:', err);
+    }
+  });
+
+  // Auto-resize textarea
+  input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  // Enter to send (Shift+Enter for newline)
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form.dispatchEvent(new Event('submit'));
+    }
+  });
+
+  // Poll for new messages every 5 seconds
+  async function pollMessages() {
+    try {
+      const resp = await fetch(`/chat/${threadId}/fetch/?after=${lastMessageId}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await resp.json();
+      if (data.messages && data.messages.length > 0) {
+        data.messages.forEach(msg => {
+          // Only append if not already in DOM
+          if (!container.querySelector(`[data-msg-id="${msg.id}"]`)) {
+            appendMessage(msg);
+          }
+        });
+      }
+    } catch(err) {
+      console.error('Poll failed:', err);
+    }
+  }
+
+  // Initialize
+  initLastId();
+  scrollToBottom();
+  setInterval(pollMessages, 5000);
+})();
+</script>
+{% endblock %}
