@@ -25,3 +25,5 @@ python manage.py collectstatic --no-input
 echo "---> Applying database migrations..."
 python manage.py migrate
 
+echo "---> Seeding coding problems..."
+python manage.py seed_problems
