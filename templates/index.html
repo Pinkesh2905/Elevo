@@ -5,46 +5,158 @@
 {% block content %}
 <style>
   .home-shell {
-    background:
-      radial-gradient(1200px 600px at 10% 0%, rgba(56, 189, 248, 0.12), transparent 60%),
-      radial-gradient(1000px 500px at 90% 15%, rgba(16, 185, 129, 0.14), transparent 60%);
+    position: relative;
+    overflow: hidden;
   }
 
   .hero-title {
     font-family: 'Outfit', sans-serif;
-    letter-spacing: -0.03em;
-    line-height: 0.95;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    font-weight: 900;
   }
 
   .eyebrow {
     font-family: 'Fira Code', monospace;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
 
   .home-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    backdrop-filter: blur(14px);
-    border-radius: 18px;
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-primary);
   }
 
   .home-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(45, 212, 191, 0.45);
-    box-shadow: 0 14px 34px rgba(8, 47, 73, 0.35);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.2);
+    background: rgba(30, 41, 59, 0.7);
   }
 
   .cta-primary {
-    background: linear-gradient(90deg, #0ea5e9, #14b8a6);
+    background: var(--primary-gradient);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
   }
 
-  .cta-primary:hover {
-    background: linear-gradient(90deg, #0284c7, #0f766e);
+  .cta-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+    z-index: -1;
+  }
+
+  .cta-primary:hover::before {
+    transform: translateX(100%);
   }
 
   .accent-line {
-    background: linear-gradient(90deg, rgba(56, 189, 248, 0.9), rgba(45, 212, 191, 0.9));
+    background: var(--primary-gradient);
+    box-shadow: var(--accent-glow);
+  }
+
+  /* Career Console Styles */
+  .console-wrapper {
+    background: #000;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    font-family: 'Fira Code', monospace;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  .console-header {
+    background: #1e293b;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .console-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .console-body {
+    padding: 16px;
+    color: #4ade80;
+    font-size: 14px;
+    min-height: 200px;
+    line-height: 1.6;
+  }
+
+  .console-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #4ade80;
+    margin-left: 4px;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Company Marquee */
+  .marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    background: rgba(2, 6, 23, 0.4);
+    padding: 20px 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .marquee-content {
+    display: inline-block;
+    animation: marquee 30s linear infinite;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .company-logo {
+    display: inline-block;
+    margin: 0 40px;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 18px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+
+  .company-logo:hover {
+    opacity: 1;
+  }
+
+  .reveal-text {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .reveal-card {
+    opacity: 0;
+    transform: scale(0.9);
   }
 </style>
 
@@ -52,13 +164,13 @@
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 lg:pt-24 lg:pb-20">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
       <div>
-        <p class="eyebrow text-sky-300 text-xs sm:text-sm mb-5 uppercase">career prep operating system</p>
-        <h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl text-white mb-6">
+        <p class="eyebrow text-sky-400 text-xs sm:text-sm mb-5 reveal-text">career prep operating system</p>
+        <h1 class="hero-title text-6xl sm:text-7xl lg:text-8xl text-white mb-8 reveal-text">
           From Practice
-          <span class="block text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-emerald-300">To Placement</span>
+          <span class="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400">To Placement</span>
         </h1>
-        <p class="text-slate-300 text-lg sm:text-xl leading-relaxed max-w-xl mb-8">
-          Elevo combines coding drills, aptitude training, social learning, and AI interviews in one focused workflow for real hiring outcomes.
+        <p class="text-slate-400 text-xl sm:text-2xl leading-relaxed max-w-xl mb-10 reveal-text">
+          Elevo combines coding drills, aptitude training, and AI interviews in one focused workflow for real hiring outcomes.
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 mb-8">
@@ -86,36 +198,43 @@
         </div>
       </div>
 
-      <div class="space-y-4">
-        <div class="home-card p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-white text-xl font-semibold">Weekly Momentum</h3>
-            <i class="ri-bar-chart-box-line text-teal-300 text-2xl"></i>
+      <div class="space-y-6">
+        <!-- Career Console -->
+        <div class="console-wrapper reveal-card">
+          <div class="console-header border-b border-slate-800">
+            <div class="console-dot bg-red-500"></div>
+            <div class="console-dot bg-amber-500"></div>
+            <div class="console-dot bg-emerald-500"></div>
+            <span class="text-slate-400 text-xs ml-2 font-mono">career_vitals.sh</span>
           </div>
-          <div class="space-y-3 text-sm">
-            <div>
-              <div class="flex justify-between text-slate-300 mb-1"><span>Coding Streak</span><span>6 / 7 days</span></div>
-              <div class="w-full h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full accent-line" style="width: 86%;"></div></div>
-            </div>
-            <div>
-              <div class="flex justify-between text-slate-300 mb-1"><span>Aptitude Coverage</span><span>74%</span></div>
-              <div class="w-full h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full accent-line" style="width: 74%;"></div></div>
-            </div>
-            <div>
-              <div class="flex justify-between text-slate-300 mb-1"><span>Mock Interviews</span><span>3 completed</span></div>
-              <div class="w-full h-2 rounded-full bg-slate-800"><div class="h-2 rounded-full accent-line" style="width: 60%;"></div></div>
-            </div>
+          <div class="console-body" id="careerConsole">
+            <div class="console-line">> Initializing Career Protocol...</div>
+            <div class="console-line">> Loading user trajectory...</div>
+            <div class="console-line">> <span class="text-sky-400">Status:</span> Elevating</div>
           </div>
         </div>
 
+        <!-- Real Stats -->
         <div class="grid grid-cols-2 gap-4">
-          <div class="home-card p-5">
-            <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Active Learners</p>
-            <p class="text-2xl font-bold text-white">25K+</p>
+          <div class="home-card p-5 reveal-card">
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Practice Pool</p>
+            <p class="text-3xl font-bold text-white">{{ stats.total_problems }}<span class="text-sky-400 text-sm ml-1">+</span></p>
+            <p class="text-[10px] text-slate-500 mt-1 uppercase">Live Problems</p>
           </div>
-          <div class="home-card p-5">
-            <p class="text-slate-400 text-xs uppercase tracking-wide mb-1">Practice Problems</p>
-            <p class="text-2xl font-bold text-white">1200+</p>
+          <div class="home-card p-5 reveal-card">
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Partner Firms</p>
+            <p class="text-3xl font-bold text-white">{{ stats.total_companies }}<span class="text-teal-400 text-sm ml-1">+</span></p>
+            <p class="text-[10px] text-slate-500 mt-1 uppercase">Inc. FAANG</p>
+          </div>
+          <div class="home-card p-5 reveal-card">
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Interviews</p>
+            <p class="text-3xl font-bold text-white">{{ stats.total_sessions }}<span class="text-emerald-400 text-sm ml-1">+</span></p>
+            <p class="text-[10px] text-slate-500 mt-1 uppercase">AI Transcripts</p>
+          </div>
+          <div class="home-card p-5 reveal-card">
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Candidates</p>
+            <p class="text-3xl font-bold text-white">{{ stats.active_users }}<span class="text-purple-400 text-sm ml-1">+</span></p>
+            <p class="text-[10px] text-slate-500 mt-1 uppercase">Active Now</p>
           </div>
         </div>
       </div>
@@ -153,6 +272,29 @@
       </a>
     </div>
   </section>
+
+  <!-- Company Marquee -->
+  <div class="marquee reveal-text overflow-hidden">
+    <div class="marquee-content whitespace-nowrap">
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">GOOGLE</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">AMAZON</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">META</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">APPLE</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">MICROSOFT</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">NETFLIX</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">NVIDIA</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">ADOBE</span>
+      <!-- Repeated for seamless loop -->
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">GOOGLE</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">AMAZON</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">META</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">APPLE</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">MICROSOFT</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">NETFLIX</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">NVIDIA</span>
+      <span class="company-logo inline-block mx-10 text-slate-500 font-bold opacity-60">ADOBE</span>
+    </div>
+  </div>
 
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
     <div class="home-card p-8 lg:p-10">
@@ -204,4 +346,75 @@
     </div>
   </section>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // GSAP Timeline for Hero section
+    const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.2 }});
+    
+    tl.to(".reveal-text", {
+      opacity: 1,
+      y: 0,
+      stagger: 0.2
+    })
+    .to(".reveal-card", {
+      opacity: 1,
+      scale: 1,
+      stagger: 0.1,
+      duration: 1
+    }, "-=0.8");
+
+    // Scroll Trigger for cards
+    gsap.utils.toArray(".home-card").forEach(card => {
+      gsap.to(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: "top 90%",
+          toggleActions: "play none none reverse"
+        },
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        ease: "power2.out"
+      });
+    });
+
+    // Career Console Typing Effect
+    const consoleElement = document.getElementById('careerConsole');
+    const messages = [
+      "> Scanning active problems...",
+      "> Found {{ stats.total_problems }} challenges.",
+      "> Checking target companies...",
+      "> Analysis complete: Optimize for Recursion.",
+      "> System ready. Awaiting user input."
+    ];
+    let msgIndex = 0;
+    
+    function typeConsole() {
+      if (msgIndex < messages.length) {
+        const line = document.createElement('div');
+        line.className = 'console-line mb-1';
+        consoleElement.appendChild(line);
+        
+        let charIndex = 0;
+        const speed = 40;
+        
+        function typeChar() {
+          if (charIndex < messages[msgIndex].length) {
+            line.textContent += messages[msgIndex].charAt(charIndex);
+            charIndex++;
+            setTimeout(typeChar, speed);
+          } else {
+            msgIndex++;
+            setTimeout(typeConsole, 1000);
+          }
+        }
+        typeChar();
+      }
+    }
+    
+    setTimeout(typeConsole, 2500);
+  });
+</script>
 {% endblock %}

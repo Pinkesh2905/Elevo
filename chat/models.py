@@ -50,12 +50,30 @@ class ChatThread(models.Model):
 class Message(models.Model):
     """
     A single message within a chat thread.
+    Supports text, images, videos, files, and replies.
     """
+    MESSAGE_TYPES = [
+        ('text', 'Text'),
+        ('image', 'Image'),
+        ('video', 'Video'),
+        ('file', 'File'),
+    ]
+
     thread = models.ForeignKey(ChatThread, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    content = models.TextField()
+    content = models.TextField(blank=True, null=True)
+    message_type = models.CharField(max_length=10, choices=MESSAGE_TYPES, default='text')
+
+    # Media Fields
+    image = models.ImageField(upload_to='chat/images/', blank=True, null=True)
+    file = models.FileField(upload_to='chat/files/', blank=True, null=True)
+
+    # Reply Feature
+    parent_message = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
+
     created_at = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['created_at']
@@ -66,4 +84,20 @@ class Message(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.sender.username}: {self.content[:40]}"
+        return f"{self.sender.username}: {self.content[:40] if self.content else self.message_type}"
+
+
+class MessageReaction(models.Model):
+    """
+    Emoji reactions to a message.
+    """
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    emoji = models.CharField(max_length=20)  # Character or emoji
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('message', 'user', 'emoji')
+
+    def __str__(self):
+        return f"{self.user.username} reacted {self.emoji} to message {self.message.id}"

@@ -609,7 +609,7 @@ def _build_interview_plan(session):
     }
 
 
-def _build_question_prompt(session, turns, user_response):
+def _build_question_prompt(session, turns, user_response, time_remaining=None):
     next_q = turns.count() + 1
     parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
     track = _strip(parsed.get("interview_track")) or "technical"
@@ -632,31 +632,24 @@ def _build_question_prompt(session, turns, user_response):
             history.append(f"Interviewer: {t.ai_question}")
         if t.user_answer:
             history.append(f"Candidate: {t.user_answer}")
+    time_str = f"{time_remaining // 60}m {time_remaining % 60}s" if time_remaining is not None else "15m 00s"
     return (
-        "You are Elevo, a warm and professional interviewer speaking simple, clear English.\n"
-        f"Role: {session.job_role}\nTrack: {track}\nSkills: {session.key_skills}\n"
-        f"Question number now: {next_q}/{MAX_INTERVIEW_QUESTIONS}\n"
-        f"Current stage: {stage}\n"
-        f"Question style target now: {question_style}\n"
-        f"Candidate name from resume: {candidate_name or 'Candidate'}\n"
-        f"Primary focus skills: {focus_skills or session.key_skills or 'general'}\n"
-        f"Resume projects: {resume_projects or 'Not available'}\n"
-        f"Resume experience highlights: {resume_exp or 'Not available'}\n"
-        f"Resume HR signals: {resume_hr or 'Not available'}\n"
-        f"Latest answer: {user_response or '(start)'}\n"
-        f"History:\n{chr(10).join(history) if history else 'None'}\n"
-        "Instructions:\n"
-        "- Start with one short appreciation/acknowledgement sentence.\n"
-        "- Then ask one non-repetitive, realistic next question.\n"
-        "- Keep total response under 75 words.\n"
-        "- Use easy, natural human wording. No robotic phrasing.\n"
-        "- If candidate asks clarification, clarify briefly and continue.\n"
-        "- Never use meta lines like 'when I asked' or 'as mentioned earlier'.\n"
-        "- STRICT: Ask based on resume details only.\n"
-        "- If track is technical and question_number > 1: ask only technical questions.\n"
-        "- In technical mode, mix resume-based questions with core fundamentals from skills (e.g., Python list vs tuple, SQL joins, ML metrics).\n"
-        "- If current question style target is fundamental, ask a direct technical concept question from candidate skills.\n"
-        "- If track is hr and question_number > 1: ask only HR/behavioral/situational question.\n"
+        "You are Elevo, a friendly, warm, and professional AI interviewer. Speak naturally as if having a real conversation.\n"
+        f"Target Role: {session.job_role}\n"
+        f"Session Track: {track}\n"
+        f"Time Remaining: {time_str}\n"
+        f"Current Progress: {next_q}/{MAX_INTERVIEW_QUESTIONS}\n"
+        f"Candidate Name: {candidate_name or 'Friend'}\n"
+        f"Skills Focus: {focus_skills or session.key_skills or 'general'}\n"
+        f"Resume Context:\n- Projects: {resume_projects or 'None'}\n- Highlights: {resume_exp or 'None'}\n"
+        f"Latest Response: {user_response or '(Start)'}\n"
+        f"History:\n{chr(10).join(history) if history else 'None'}\n\n"
+        "INSTRUCTIONS:\n"
+        "- Be encouraging, supportive, and human-like.\n"
+        "- Strictly use resume and role context for questions.\n"
+        "- Acknowledge their response warmly but briefly.\n"
+        "- Ask ONE high-quality leading question.\n"
+        "- Keep it concise (35-60 words) to ensure fast turn-around.\n"
         "- Return plain text only."
     )
 
@@ -919,7 +912,7 @@ def _generate_feedback(session):
         return _default_feedback(session)
 
 
-def _next_question(session, turns, user_response):
+def _next_question(session, turns, user_response, time_remaining=None):
     next_q = turns.count() + 1
     parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
     track = _strip(parsed.get("interview_track")) or "technical"
@@ -927,34 +920,16 @@ def _next_question(session, turns, user_response):
         track = "technical"
     stage = _question_stage(next_q, track=track)
     recent_questions = [t.ai_question for t in turns.order_by("-turn_number")[:4] if t.ai_question]
-    prompt = _build_question_prompt(session, turns, user_response)
+    prompt = _build_question_prompt(session, turns, user_response, time_remaining=time_remaining)
     try:
-        text, provider, model = AI.text(prompt, temperature=0.7, max_tokens=220)
+        # Reduced max_tokens and streamlined logic for faster analysis
+        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=150)
         question = _strip(text)
-        if question and not _is_incomplete_turn(question) and not _is_repetitive_question(question, turns):
+        if question and not _is_incomplete_turn(question):
             return question, {"provider": provider, "model": model, "stage": stage}
-
-        # One repair pass if model returned truncated/weak output.
-        try:
-            repair_prompt = _repair_turn_prompt(session, stage, question or "", user_response)
-            repaired_text, r_provider, r_model = AI.text(repair_prompt, temperature=0.55, max_tokens=220)
-            repaired = _strip(repaired_text)
-            if repaired and not _is_incomplete_turn(repaired) and not _is_repetitive_question(repaired, turns):
-                return repaired, {"provider": r_provider, "model": r_model, "stage": stage}
-        except Exception as repair_exc:
-            logger.warning("Question repair fallback: %s", repair_exc)
-
-        # Second pass: generate a targeted fresh follow-up anchored in latest answer.
-        try:
-            followup_prompt = _targeted_followup_prompt(session, stage, user_response, recent_questions)
-            follow_text, f_provider, f_model = AI.text(followup_prompt, temperature=0.65, max_tokens=220)
-            followup = _strip(follow_text)
-            if followup and not _is_incomplete_turn(followup) and not _is_repetitive_question(followup, turns):
-                return followup, {"provider": f_provider, "model": f_model, "stage": stage}
-        except Exception as followup_exc:
-            logger.warning("Targeted follow-up fallback: %s", followup_exc)
     except Exception as exc:
-        logger.warning("Question generation fallback: %s", exc)
+        logger.warning("Question generation error: %s", exc)
+    
     choice = _fallback_followup_question(stage, user_response, turns, session)
     return choice, {"provider": "fallback", "model": "static", "stage": stage}
 
@@ -987,6 +962,12 @@ def interview_setup(request):
         action = request.POST.get("action", "start")
         form = InterviewSetupForm(request.POST, request.FILES)
         resume = request.FILES.get("resume_file")
+        use_profile_resume = request.POST.get("use_profile_resume") == "true"
+        
+        # If user chose to use profile resume and didn't upload a new one
+        if use_profile_resume and not resume and request.user.profile.resume:
+            resume = request.user.profile.resume
+
         parsed = None
         requested_track = _strip(request.POST.get("interview_track")) or "technical"
         if requested_track not in INTERVIEW_TRACKS:
@@ -994,6 +975,10 @@ def interview_setup(request):
 
         if resume:
             try:
+                # Handle both uploaded files and FileField objects
+                if hasattr(resume, 'open'):
+                    resume.open()
+                
                 text = _resume_text(resume, resume.name)
                 lowered = text.lower()
                 detected_skills = [s for s in ["python", "django", "react", "sql", "aws", "docker"] if s in lowered]
@@ -1150,6 +1135,7 @@ def ai_interaction_api(request, session_id):
         return JsonResponse({"error": "Invalid JSON payload."}, status=400)
 
     user_response = _strip(payload.get("user_response"))
+    time_remaining = payload.get("time_remaining")
     if not user_response:
         return JsonResponse({"error": "No user response provided."}, status=400)
 
@@ -1215,7 +1201,7 @@ def ai_interaction_api(request, session_id):
             status=400,
         )
 
-    question, meta = _next_question(session, refreshed, user_response)
+    question, meta = _next_question(session, refreshed, user_response, time_remaining=time_remaining)
     InterviewTurn.objects.create(
         session=session,
         turn_number=refreshed.count() + 1,

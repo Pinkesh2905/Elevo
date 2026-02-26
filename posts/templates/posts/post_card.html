@@ -1,137 +1,233 @@
-<div class="{% if post.is_repost %}border-l-4 border-teal-400 bg-teal-50{% else %}bg-white{% endif %} rounded-xl shadow-sm border border-gray-200 mb-6 p-5">
+<!-- posts/templates/posts/post_card.html -->
+<style>
+  .post-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-  <!-- Reposted Badge -->
+  .post-card:hover {
+    transform: translateY(-4px);
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.1);
+  }
+
+  .action-btn {
+    transition: all 0.2s ease;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.05);
+  }
+
+  .action-btn.liked {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.2);
+  }
+
+  .repost-badge {
+    font-family: 'Fira Code', monospace;
+    letter-spacing: 0.1em;
+  }
+</style>
+
+<div class="post-card rounded-3xl p-6 mb-6 group reveal-card" data-post-id="{{ post.id }}">
+  <!-- Repost Header -->
   {% if post.is_repost %}
-    <div class="text-sm text-teal-600 font-semibold mb-2">
-      🔁 Reposted
+    <div class="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 w-fit">
+      <i class="ri-repeat-2-line text-teal-400"></i>
+      <span class="text-xs font-bold text-teal-300 uppercase tracking-widest repost-badge">Reposted</span>
       {% if post.reposted_by %}
-        by <a href="{% url 'posts:user_profile' post.reposted_by.username %}" class="underline hover:text-teal-800">
+        <span class="text-[10px] text-slate-400 font-medium">by</span>
+        <a href="{% url 'users:public_profile' post.reposted_by.username %}" class="text-[11px] font-bold text-teal-200 hover:text-teal-100 transition-colors">
           {{ post.reposted_by.get_full_name|default:post.reposted_by.username }}
         </a>
       {% endif %}
     </div>
   {% endif %}
 
-  <!-- Author and Timestamp -->
-  <div class="flex items-center mb-4">
-    {% if post.author.profile.avatar %}
-      <img src="{{ post.author.profile.avatar.url }}" alt="{{ post.author.username }}"
-           class="w-10 h-10 rounded-full object-cover mr-3">
-    {% else %}
-      <img src="https://ui-avatars.com/api/?name={{ post.author.username }}" alt="{{ post.author.username }}"
-           class="w-10 h-10 rounded-full object-cover mr-3">
-    {% endif %}
-
-    <div>
-      <a href="{% url 'posts:user_profile' post.author.username %}" class="font-semibold text-gray-800 hover:underline">
-        {{ post.author.get_full_name|default:post.author.username }}
-      </a>
-      <p class="text-sm text-gray-500">{{ post.created_at|timesince }} ago</p>
+  <!-- Author Info -->
+  <div class="flex items-center justify-between mb-5">
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        {% if post.author.profile.avatar %}
+          <img src="{{ post.author.profile.avatar.url }}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/10" alt="{{ post.author.username }}">
+        {% else %}
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg ring-2 ring-white/10">
+            {{ post.author.username|first|upper }}
+          </div>
+        {% endif %}
+        <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
+      </div>
+      <div>
+        <a href="{% url 'users:public_profile' post.author.username %}" class="block font-black text-slate-100 hover:text-sky-400 transition-colors text-base leading-tight">
+          {{ post.author.get_full_name|default:post.author.username }}
+        </a>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">@{{ post.author.username }}</span>
+          <span class="text-slate-700 font-bold">•</span>
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{{ post.created_at|timesince }} ago</span>
+        </div>
+      </div>
     </div>
+    
+    <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all">
+      <i class="ri-more-2-fill text-xl"></i>
+    </button>
   </div>
 
-  <!-- Post Content -->
-  <div class="text-gray-800 text-base mb-3 whitespace-pre-line">
+  <!-- Post Body -->
+  <div class="text-slate-200 text-[15px] leading-relaxed mb-5 whitespace-pre-wrap font-medium">
     {{ post.content }}
   </div>
 
   {% if post.image %}
-    <div class="mb-4">
-      <img src="{{ post.image.url }}" alt="Post Image" class="w-full rounded-lg border border-gray-300">
+    <div class="relative mb-5 rounded-2xl overflow-hidden border border-white/5 shadow-2xl group/img">
+      <img src="{{ post.image.url }}" alt="Post content" class="w-full h-auto max-h-[500px] object-cover transition-transform duration-700 group-hover/img:scale-105">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity"></div>
     </div>
   {% endif %}
 
-  <!-- Action Buttons -->
-  <div class="flex items-center justify-between text-sm text-gray-600 mt-2">
-    <div class="flex items-center space-x-4">
-
+  <!-- Post Controls -->
+  <div class="flex items-center justify-between pt-4 border-t border-white/5">
+    <div class="flex items-center gap-3">
       <!-- Like -->
-      <form method="post" action="{% url 'posts:toggle_like' post.id %}">
-        {% csrf_token %}
-        <button type="button" onclick="toggleLike('{{ post.id }}')" class="flex items-center hover:text-sky-600">
-          <i class="ri-heart-3-line mr-1 text-lg"></i> Like
-        </button>
-        <span id="like-count-{{ post.id }}">❤️ {{ post.likes.count }}</span>
-      </form>
+      <button type="button" 
+              onclick="handleLike('{{ post.id }}', this)" 
+              class="action-btn flex items-center gap-2 text-slate-400 hover:text-rose-400 transition-all {% if post.id in liked_post_ids %}liked{% endif %}">
+        <i class="ri-heart-3-{% if post.id in liked_post_ids %}fill{% else %}line{% endif %} text-lg"></i>
+        <span class="text-xs font-black uppercase tracking-widest like-count">{{ post.like_count|default:0 }}</span>
+      </button>
 
       <!-- Comment Toggle -->
-      <button type="button" onclick="toggleComment('{{ post.id }}')" class="flex items-center hover:text-green-600">
-        <i class="ri-chat-3-line mr-1 text-lg"></i> Comment
+      <button type="button" 
+              onclick="toggleCommentSection('{{ post.id }}')" 
+              class="action-btn flex items-center gap-2 text-slate-400 hover:text-sky-400 transition-all">
+        <i class="ri-chat-3-line text-lg"></i>
+        <span class="text-xs font-black uppercase tracking-widest">{{ post.comment_count|default:0 }}</span>
       </button>
 
       <!-- Repost -->
-      <form method="post" action="{% url 'posts:repost' post.id %}">
+      <form method="post" action="{% url 'posts:repost' post.id %}" class="inline">
         {% csrf_token %}
-        <button type="submit" class="flex items-center hover:text-teal-600">
-          <i class="ri-repeat-line mr-1 text-lg"></i> Repost
+        <button type="submit" class="action-btn flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-all">
+          <i class="ri-repeat-line text-lg"></i>
+          <span class="text-xs font-black uppercase tracking-widest">{{ post.repost_count|default:0 }}</span>
         </button>
       </form>
 
-      <!-- Share (Placeholder) -->
-      <button class="flex items-center hover:text-gray-800">
-        <i class="ri-share-forward-line mr-1 text-lg"></i> Share
+      <!-- Share -->
+      <button onclick="copyPostLink(event)" 
+              data-detail-url="{% url 'posts:post_detail' post.id %}"
+              class="action-btn flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-all">
+        <i class="ri-share-forward-line text-lg"></i>
       </button>
-
-      <!-- Edit/Delete (Only if original author) -->
-      {% if post.author == request.user %}
-        <div class="flex space-x-3 text-sm mt-2">
-          <a href="{% url 'posts:edit_post' post.id %}" class="text-sky-600 hover:underline">Edit</a>
-          <form method="post" action="{% url 'posts:delete_post' post.id %}" onsubmit="return confirm('Delete this post?');">
-            {% csrf_token %}
-            <button type="submit" class="text-red-600 hover:underline">Delete</button>
-          </form>
-        </div>
-      {% endif %}
-
     </div>
 
-    <div>
-      ❤️ {{ post.likes.count }} · 💬 {{ post.comments.count }}
-    </div>
+    <!-- Edit/Delete -->
+    {% if post.author == request.user %}
+      <div class="flex items-center gap-2">
+        <a href="{% url 'posts:edit_post' post.id %}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-all" title="Edit">
+          <i class="ri-edit-line"></i>
+        </a>
+        <form method="post" action="{% url 'posts:delete_post' post.id %}" onsubmit="return confirm('Delete this post?');" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all" title="Delete">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        </form>
+      </div>
+    {% endif %}
   </div>
 
-  <!-- Comment Form (Hidden by default) -->
-  <div id="comment-box-{{ post.id }}" class="mt-4 hidden">
-    {% if user.is_authenticated %}
-      <form method="post" action="{% url 'posts:add_comment' post.id %}">
-        {% csrf_token %}
-        <textarea name="content" rows="2" required
-                  class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring focus:border-sky-300"
-                  placeholder="Write a comment..."></textarea>
-        <button type="submit"
-                class="mt-2 px-4 py-1 bg-gray-800 text-white rounded hover:bg-gray-700 text-sm">
-          Comment
-        </button>
-      </form>
-    {% else %}
-      <p class="text-sm text-gray-500">Please <a href="{% url 'login' %}" class="underline">log in</a> to comment.</p>
-    {% endif %}
+  <!-- Comment Box (Hidden) -->
+  <div id="comment-section-{{ post.id }}" class="hidden mt-6 animate-in slide-in-from-top-2 duration-300">
+    <div class="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+      <div class="flex-1">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'posts:add_comment' post.id %}" class="flex gap-3">
+            {% csrf_token %}
+            <textarea name="content" required 
+                      class="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500/50 transition-all resize-none" 
+                      placeholder="Add a comment..."></textarea>
+            <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-sky-500 text-white shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all self-end">
+              <i class="ri-send-plane-2-fill"></i>
+            </button>
+          </form>
+        {% else %}
+           <p class="text-xs text-slate-400 font-bold uppercase tracking-widest text-center py-2">
+             Please <a href="{% url 'login' %}" class="text-sky-400 hover:underline">login</a> to join the conversation
+           </p>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-  function toggleComment(postId) {
-    const box = document.getElementById('comment-box-' + postId);
-    if (box) {
-      box.classList.toggle('hidden');
+  if (typeof toggleCommentSection === 'undefined') {
+    function toggleCommentSection(postId) {
+      const section = document.getElementById(`comment-section-${postId}`);
+      if (section) {
+        section.classList.toggle('hidden');
+        if (!section.classList.contains('hidden')) {
+          section.querySelector('textarea')?.focus();
+        }
+      }
     }
   }
 
-  function toggleLike(postId) {
-    fetch(`/posts/like/${postId}/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
-    })
-    .then(res => res.json())
-    .then(data => {
-      const countEl = document.getElementById(`like-count-${postId}`);
-      if (countEl) {
-        countEl.innerText = `❤️ ${data.like_count}`;
-      }
-    });
+  if (typeof handleLike === 'undefined') {
+    async function handleLike(postId, button) {
+      try {
+        const response = await fetch(`/posts/like/${postId}/`, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+        const data = await response.json();
+        if (data.success) {
+          const count = button.querySelector('.like-count');
+          count.textContent = data.like_count;
+          const icon = button.querySelector('i');
+          if (data.liked) {
+            button.classList.add('liked');
+            icon.classList.remove('ri-heart-3-line');
+            icon.classList.add('ri-heart-3-fill');
+          } else {
+            button.classList.remove('liked');
+            icon.classList.remove('ri-heart-3-fill');
+            icon.classList.add('ri-heart-3-line');
+          }
+        }
+      } catch (err) { console.error('Like error:', err); }
+    }
+  }
+
+  if (typeof copyPostLink === 'undefined') {
+    function copyPostLink(e) {
+      const btn = e.currentTarget;
+      const detailUrl = btn.getAttribute('data-detail-url');
+      const fullUrl = window.location.origin + detailUrl;
+      navigator.clipboard.writeText(fullUrl).then(() => {
+        // Simple visual feedback
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="ri-check-line text-emerald-400"></i>';
+        setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+      });
+    }
   }
 </script>
+

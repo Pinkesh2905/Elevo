@@ -36,6 +36,16 @@ class UserProfile(models.Model):
     bio = models.TextField(blank=True, null=True, max_length=500, help_text="A short biography about the user.")
     github = models.URLField(blank=True, null=True, help_text="Link to GitHub profile")
     linkedin = models.URLField(blank=True, null=True, help_text="Link to LinkedIn profile")
+
+    # Resume
+    resume = models.FileField(
+        upload_to='resumes/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'docx'])],
+        help_text="Upload your resume (PDF or DOCX)."
+    )
+    resume_uploaded_at = models.DateTimeField(blank=True, null=True, help_text="When the resume was last uploaded.")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -46,6 +56,16 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s profile"
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old_profile = UserProfile.objects.filter(pk=self.pk).first()
+            if old_profile and self.resume and old_profile.resume != self.resume:
+                self.resume_uploaded_at = timezone.now()
+        elif self.resume:
+            self.resume_uploaded_at = timezone.now()
+            
+        super().save(*args, **kwargs)
 
     def get_role_display(self):
         """Returns the human-readable role."""

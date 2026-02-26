@@ -3,98 +3,278 @@
 {% block title %}Aptitude Dashboard | Elevo{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-    <div>
-      <p class="text-xs uppercase tracking-[0.16em] text-sky-300 font-semibold">Aptitude Prep</p>
-      <h1 class="text-3xl sm:text-4xl font-bold text-white">Timed Quiz Engine</h1>
-      <p class="text-slate-300 mt-2">Random {{ quiz_question_count }} questions in {{ quiz_duration_minutes }} minutes. Results, insights, and achievements are saved automatically.</p>
-    </div>
-    {% if user.is_authenticated %}
-      <form method="post" action="{% url 'aptitude:start_quiz' %}">
-        {% csrf_token %}
-        <button type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-semibold shadow-lg">
-          Start {{ quiz_question_count }}Q / {{ quiz_duration_minutes }}m Quiz
-        </button>
-      </form>
-    {% else %}
-      <a href="{% url 'login' %}" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 text-white font-semibold">Login to Start Quiz</a>
-    {% endif %}
-  </div>
+<style>
+  .hero-gradient-text {
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Question Pool</p><p class="text-2xl font-bold text-white">{{ total_questions_pool }}</p></div>
-    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Attempts</p><p class="text-2xl font-bold text-white">{{ attempts_count|default:0 }}</p></div>
-    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Average Score</p><p class="text-2xl font-bold text-white">{{ avg_score|default:0 }}%</p></div>
-    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Best Score</p><p class="text-2xl font-bold text-white">{{ best_score|default:0 }}%</p></div>
-    <div class="rounded-xl border border-slate-700 bg-slate-900/65 p-4"><p class="text-xs text-slate-400">Correct / Attempted</p><p class="text-2xl font-bold text-white">{{ total_correct|default:0 }}/{{ total_answered|default:0 }}</p></div>
-  </div>
+  .premium-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
-    <div class="xl:col-span-2 rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-semibold text-white">Recent Quiz Attempts</h2>
-        {% if user.is_authenticated %}<a href="{% url 'aptitude:quiz_history' %}" class="text-sm text-teal-300 hover:text-teal-200">View all</a>{% endif %}
-      </div>
-      {% if recent_attempts %}
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[620px] text-sm">
-          <thead class="text-slate-400 border-b border-slate-700">
-            <tr>
-              <th class="py-2 text-left">Attempt</th>
-              <th class="py-2 text-left">Score</th>
-              <th class="py-2 text-left">Correct</th>
-              <th class="py-2 text-left">Achievement</th>
-              <th class="py-2 text-left">Status</th>
-              <th class="py-2 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for a in recent_attempts %}
-            <tr class="border-b border-slate-800/70">
-              <td class="py-3 text-slate-300">#{{ a.id }} · {{ a.started_at|date:"M d, H:i" }}</td>
-              <td class="py-3 text-white font-semibold">{{ a.score_percent }}%</td>
-              <td class="py-3 text-slate-300">{{ a.correct_answers }}/{{ a.total_questions }}</td>
-              <td class="py-3 text-teal-300">{{ a.achievement_label }}</td>
-              <td class="py-3">
-                {% if a.status == 'completed' %}
-                  <span class="px-2 py-1 rounded-lg text-xs bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">Completed</span>
-                {% else %}
-                  <span class="px-2 py-1 rounded-lg text-xs bg-yellow-500/15 border border-yellow-500/30 text-yellow-300">Expired</span>
-                {% endif %}
-              </td>
-              <td class="py-3 text-right"><a href="{% url 'aptitude:quiz_result' a.id %}" class="text-sky-300 hover:text-sky-200">Details</a></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <p class="text-slate-400 text-sm">No attempts yet. Start your first timed quiz.</p>
-      {% endif %}
-    </div>
+  .premium-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  }
 
-    <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-      <h2 class="text-xl font-semibold text-white mb-4">Category Insights</h2>
-      {% if category_accuracy %}
-        <div class="space-y-3">
-          {% for c in category_accuracy %}
-            <div class="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
-              <div class="flex items-center justify-between mb-1">
-                <p class="text-sm text-slate-200 font-medium">{{ c.name }}</p>
-                <p class="text-xs text-slate-400">{{ c.correct }}/{{ c.attempted }}</p>
-              </div>
-              <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div class="h-2 bg-gradient-to-r from-sky-500 to-teal-500" style="width: {{ c.accuracy }}%"></div>
-              </div>
-              <p class="text-xs text-teal-300 mt-1">{{ c.accuracy }}%</p>
-            </div>
-          {% endfor %}
+  .stat-glow {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-glow::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .progress-ring-bar {
+    transition: width 1s ease-out;
+  }
+  
+  .pulse-border {
+    animation: pulseBorder 3s infinite;
+  }
+  
+  @keyframes pulseBorder {
+    0%, 100% { border-color: rgba(56, 189, 248, 0.2); }
+    50% { border-color: rgba(56, 189, 248, 0.5); }
+  }
+</style>
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <!-- Hero Section -->
+  <div class="relative overflow-hidden rounded-3xl bg-slate-900/40 border border-slate-800 p-8 mb-10">
+    <div class="absolute top-0 right-0 -tr-1/4 w-96 h-96 bg-sky-500/10 blur-[100px] rounded-full"></div>
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+      <div class="max-w-2xl">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-widest">Training Module</span>
+          <span class="h-1 w-8 bg-slate-700 rounded-full"></span>
         </div>
-      {% else %}
-        <p class="text-sm text-slate-400">Insights appear after your first completed quiz.</p>
-      {% endif %}
+        <h1 class="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight">
+          Master the <span class="hero-gradient-text text-glow-sky">Aptitude</span> Gate
+        </h1>
+        <p class="text-slate-400 text-lg leading-relaxed mb-6">
+          Sharpen your cognitive speed with our timed MCQ engine. Cover Quants, Logical Reasoning, and Verbal Ability patterns used by top MNCs and high-growth startups.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <div class="flex items-center gap-3 text-slate-300 text-sm">
+            <i class="ri-checkbox-circle-fill text-teal-400"></i> Adaptive Difficulty
+          </div>
+          <div class="flex items-center gap-3 text-slate-300 text-sm">
+            <i class="ri-checkbox-circle-fill text-teal-400"></i> Detailed Explanations
+          </div>
+          <div class="flex items-center gap-3 text-slate-300 text-sm">
+            <i class="ri-checkbox-circle-fill text-teal-400"></i> Performance Analytics
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex-shrink-0">
+        {% if user.is_authenticated %}
+          <form method="post" action="{% url 'aptitude:start_quiz' %}">
+            {% csrf_token %}
+            <button type="submit" class="group relative px-8 py-4 rounded-2xl bg-white text-slate-950 font-bold overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+              <span class="relative z-10 flex items-center gap-2">
+                Launch Quiz Engine <i class="ri-rocket-2-line transition-transform group-hover:translate-x-1"></i>
+              </span>
+            </button>
+          </form>
+          <p class="text-center text-slate-500 text-xs mt-3">{{ quiz_question_count }}Q · {{ quiz_duration_minutes }}m · Random Pool</p>
+        {% else %}
+          <a href="{% url 'login' %}" class="px-8 py-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold inline-flex items-center gap-2 shadow-lg transition-all">
+            Unlock Full Access <i class="ri-lock-unlock-line"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-10">
+    <div class="premium-card p-5 rounded-2xl stat-glow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400">
+          <i class="ri-database-2-line text-xl"></i>
+        </div>
+        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Pool</span>
+      </div>
+      <p class="text-3xl font-black text-white">{{ total_questions_pool }}</p>
+      <p class="text-[10px] text-slate-500 mt-1">Questions Prepared</p>
+    </div>
+    
+    <div class="premium-card p-5 rounded-2xl stat-glow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+          <i class="ri-history-line text-xl"></i>
+        </div>
+        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Attempts</span>
+      </div>
+      <p class="text-3xl font-black text-white">{{ attempts_count|default:0 }}</p>
+      <p class="text-[10px] text-slate-500 mt-1">Full Sessions</p>
+    </div>
+
+    <div class="premium-card p-5 rounded-2xl stat-glow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+          <i class="ri-percent-line text-xl"></i>
+        </div>
+        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Avg Score</span>
+      </div>
+      <p class="text-3xl font-black text-white">{{ avg_score|default:0 }}%</p>
+      <div class="w-full bg-slate-800 h-1 rounded-full mt-2">
+        <div class="bg-indigo-400 h-1 rounded-full" style="width: {{ avg_score|default:0 }}%"></div>
+      </div>
+    </div>
+
+    <div class="premium-card p-5 rounded-2xl stat-glow pulse-border">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+          <i class="ri-medal-line text-xl"></i>
+        </div>
+        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Best Run</span>
+      </div>
+      <p class="text-3xl font-black text-white">{{ best_score|default:0 }}%</p>
+      <p class="text-[10px] text-slate-500 mt-1">Highest Accuracy</p>
+    </div>
+
+    <div class="premium-card p-5 rounded-2xl stat-glow">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+          <i class="ri-check-double-line text-xl"></i>
+        </div>
+        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Precision</span>
+      </div>
+      <p class="text-3xl font-black text-white">{{ total_correct|default:0 }}<span class="text-slate-500 text-lg">/{{ total_answered|default:0 }}</span></p>
+      <p class="text-[10px] text-slate-500 mt-1">Total Solved</p>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <!-- Recent Activity -->
+    <div class="xl:col-span-2 premium-card rounded-3xl overflow-hidden flex flex-col">
+      <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/40">
+        <div class="flex items-center gap-3">
+          <i class="ri-time-line text-sky-400 text-lg"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Recent Sessions</h2>
+        </div>
+        {% if user.is_authenticated %}
+          <a href="{% url 'aptitude:quiz_history' %}" class="text-xs font-bold text-slate-500 hover:text-sky-400 transition-colors uppercase tracking-widest">View Archives</a>
+        {% endif %}
+      </div>
+      
+      <div class="p-0 overflow-x-auto flex-grow">
+        {% if recent_attempts %}
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-slate-500 border-b border-slate-800/50">
+                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter text-[11px]">Timestamp</th>
+                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter text-[11px]">Score</th>
+                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter text-[11px]">Acc.</th>
+                <th class="px-6 py-4 text-left font-bold uppercase tracking-tighter text-[11px]">Badge</th>
+                <th class="px-6 py-4 text-right font-bold uppercase tracking-tighter text-[11px]">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/30">
+              {% for a in recent_attempts %}
+                <tr class="hover:bg-slate-800/20 transition-colors">
+                  <td class="px-6 py-4">
+                    <p class="text-white font-medium">Session #{{ a.id }}</p>
+                    <p class="text-slate-500 text-xs">{{ a.started_at|date:"M d, H:i" }}</p>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                       <span class="text-lg font-bold text-white">{{ a.score_percent }}%</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-slate-400 font-medium">
+                    {{ a.correct_answers }}/{{ a.total_questions }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                      {{ a.achievement_label|default:"Competitor" }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <a href="{% url 'aptitude:quiz_result' a.id %}" class="w-10 h-10 inline-flex items-center justify-center rounded-xl bg-slate-800 text-slate-400 hover:bg-sky-500 hover:text-white transition-all shadow-sm">
+                      <i class="ri-arrow-right-line"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="p-20 text-center">
+            <div class="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 text-slate-600">
+              <i class="ri-ghost-line text-3xl"></i>
+            </div>
+            <p class="text-slate-500 font-medium">No performance data captured yet.</p>
+            <p class="text-slate-600 text-sm mt-1">Start your first quiz to see analytics.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Category Insights -->
+    <div class="premium-card rounded-3xl overflow-hidden flex flex-col">
+      <div class="p-6 border-b border-slate-800 bg-slate-900/40">
+        <div class="flex items-center gap-3">
+          <i class="ri-radar-line text-indigo-400 text-lg"></i>
+          <h2 class="text-xl font-bold text-white tracking-tight">Skill Accuracy</h2>
+        </div>
+      </div>
+      
+      <div class="p-6 flex-grow">
+        {% if category_accuracy %}
+          <div class="space-y-6">
+            {% for c in category_accuracy %}
+              <div class="group">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ c.name }}</span>
+                    <span class="text-[10px] text-slate-500">{{ c.correct }} of {{ c.attempted }} correct</span>
+                  </div>
+                  <span class="text-sm font-black text-white group-hover:text-sky-400 transition-colors">{{ c.accuracy }}%</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div class="progress-ring-bar h-2 bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500" style="width: {{ c.accuracy }}%"></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="h-full flex flex-col items-center justify-center text-center p-8">
+            <div class="w-full aspect-square max-w-[150px] mb-4 opacity-20 filter grayscale">
+               <i class="ri-pie-chart-2-line text-8xl text-slate-400"></i>
+            </div>
+            <p class="text-slate-500 text-sm italic">Category-wise data will manifest after your first assessment.</p>
+          </div>
+        {% endif %}
+      </div>
+      
+      <div class="p-4 bg-slate-900/20 mt-auto">
+        <div class="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+          <p class="text-xs text-indigo-300/80 leading-relaxed italic">
+            "Speed is as critical as accuracy. Try to maintain < 45s per quant question."
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 {% endblock %}
+

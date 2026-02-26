@@ -60,6 +60,37 @@
         </div>
       </div>
 
+      <!-- Public Resume Section -->
+      <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-slate-200">Resume</h3>
+          {% if user_profile.resume %}
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-full">Available</span>
+          {% endif %}
+        </div>
+        {% if user_profile.resume %}
+          <div class="p-4 rounded-xl border border-white/10 bg-white/5 group hover:bg-white/10 transition-colors">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <i class="ri-file-pdf-2-line text-2xl"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-200 truncate">{{ user_profile.resume.name|slice:"8:" }}</p>
+                <p class="text-[10px] text-slate-500 font-medium uppercase mt-0.5">Updated {{ user_profile.resume_uploaded_at|date:"M d, Y" }}</p>
+              </div>
+            </div>
+            <a href="{{ user_profile.resume.url }}" download class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-emerald-500/10 text-[11px] font-black uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/20 transition-all active:scale-95">
+              <i class="ri-download-cloud-2-line text-sm"></i> Download Portfolio
+            </a>
+          </div>
+        {% else %}
+          <div class="p-6 rounded-xl border border-dashed border-white/10 bg-white/5 text-center">
+            <i class="ri-file-close-line text-2xl text-slate-600 block mb-2"></i>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">No resume uploaded to this profile</p>
+          </div>
+        {% endif %}
+      </div>
+
       <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-5">
         <h3 class="text-sm font-semibold text-slate-200 mb-3">Recent Achievements</h3>
         <div class="space-y-3">

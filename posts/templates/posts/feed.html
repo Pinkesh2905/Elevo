@@ -4,242 +4,246 @@
 {% block title %}Elevo Community{% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-8 px-4">
-  <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <div class="lg:col-span-8 space-y-6">
-      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+<style>
+  .feed-header {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(99, 102, 241, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .sidebar-card {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px;
+  }
+
+  .nav-pill {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+
+  .nav-pill.active {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: rgba(14, 165, 233, 0.25);
+    color: #38bdf8;
+  }
+</style>
+
+<section class="min-h-screen py-10 px-4">
+  <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Main Feed -->
+    <div class="lg:col-span-8 space-y-8">
+      <!-- Header -->
+      <div class="feed-header rounded-3xl p-8 backdrop-blur-xl reveal-card">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-slate-100">Elevo Social</h1>
-            <p class="text-sm text-slate-400">Share progress, ask questions, and learn from peers.</p>
+            <h1 class="text-3xl font-black text-white tracking-tight brand-font">Elevo Social</h1>
+            <p class="text-slate-400 font-medium mt-1">Connect, share, and grow with the community.</p>
           </div>
           {% if discover_mode %}
-            <span class="text-xs font-medium px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-              Discover mode
-            </span>
+            <div class="px-4 py-1.5 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-[10px] font-black uppercase tracking-widest">
+              Discover Mode
+            </div>
           {% endif %}
         </div>
       </div>
 
-      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
+      <!-- Create Post -->
+      <div class="rounded-3xl border border-white/10 bg-slate-900/40 backdrop-blur-xl p-6 reveal-card">
         <form method="post" enctype="multipart/form-data" action="{% url 'posts:feed' %}" class="space-y-4">
           {% csrf_token %}
-          <textarea name="content" rows="3" required class="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none" placeholder="Share what you solved today, what you learned, or what you need help with..."></textarea>
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-white/20 bg-white/5 text-slate-300 cursor-pointer hover:bg-white/10 transition">
-              <i class="ri-image-line"></i>
-              <span class="text-sm">Attach image</span>
-              <input type="file" name="image" accept="image/*" class="hidden">
-            </label>
-            <button type="submit" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold hover:opacity-90">
-              Post
+          <div class="flex gap-4">
+            {% if user.profile.avatar %}
+              <img src="{{ user.profile.avatar.url }}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/10" alt="Me">
+            {% else %}
+               <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
+                {{ user.username|first|upper }}
+              </div>
+            {% endif %}
+            <div class="flex-1">
+              <textarea name="content" rows="3" required 
+                        class="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all resize-none shadow-inner text-[15px] font-medium" 
+                        placeholder="Share your breakthrough today..."></textarea>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-white/5">
+            <div id="image-preview-container" class="hidden relative">
+              <img id="image-preview" src="#" class="h-16 w-16 object-cover rounded-xl border border-white/20">
+              <button type="button" onclick="clearImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-lg"><i class="ri-close-line"></i></button>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              <label class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 cursor-pointer hover:bg-white/10 hover:text-sky-400 transition-all">
+                <i class="ri-image-add-line text-xl"></i>
+                <input type="file" name="image" accept="image/*" class="hidden" onchange="previewFile(this)">
+              </label>
+              <button type="button" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-emerald-400 transition-all">
+                <i class="ri-at-line text-xl"></i>
+              </button>
+            </div>
+            
+            <button type="submit" class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all">
+              Post Status
             </button>
           </div>
         </form>
       </div>
 
-      <div class="space-y-4">
+      <!-- Feed Items -->
+      <div class="space-y-6">
         {% for item in activity_items %}
-          <article class="rounded-2xl border border-white/15 bg-slate-900/65 backdrop-blur-xl p-5">
-            {% if item.type == 'repost' %}
-              <div class="mb-3 flex items-center gap-2 text-xs text-emerald-300">
-                <i class="ri-repeat-line"></i>
-                <a href="{% url 'users:public_profile' item.actor.username %}" class="font-semibold hover:underline">{{ item.actor.get_full_name|default:item.actor.username }}</a>
-                <span>reposted</span>
-                <span class="text-slate-500">{{ item.timestamp|naturaltime }}</span>
-              </div>
-              {% if item.repost.comment %}
-                <div class="mb-4 text-sm text-slate-300 bg-white/5 border border-white/10 rounded-lg p-3">{{ item.repost.comment }}</div>
-              {% endif %}
-            {% endif %}
-
-            <div class="flex items-start gap-3">
-              <a href="{% url 'users:public_profile' item.post.author.username %}">
-                {% if item.post.author.profile.avatar %}
-                  <img src="{{ item.post.author.profile.avatar.url }}" alt="{{ item.post.author.username }}" class="w-11 h-11 rounded-full object-cover border border-white/20">
-                {% else %}
-                  <div class="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white font-bold flex items-center justify-center">
-                    {{ item.post.author.username|first|upper }}
-                  </div>
-                {% endif %}
-              </a>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <a href="{% url 'users:public_profile' item.post.author.username %}" class="font-semibold text-slate-100 hover:text-cyan-300">{{ item.post.author.get_full_name|default:item.post.author.username }}</a>
-                    <span class="ml-2 text-xs text-slate-500">@{{ item.post.author.username }}</span>
-                  </div>
-                  <a href="{% url 'posts:post_detail' item.post.id %}" class="text-xs text-slate-500 hover:text-slate-300">
-                    {% if item.type == 'repost' %}{{ item.timestamp|naturaltime }}{% else %}{{ item.post.created_at|naturaltime }}{% endif %}
-                  </a>
-                </div>
-
-                <div class="mt-2 text-slate-200 whitespace-pre-line">{{ item.post.content }}</div>
-                {% if item.post.image %}
-                  <img src="{{ item.post.image.url }}" alt="Post image" class="mt-3 rounded-xl border border-white/10 max-h-[420px] w-full object-cover">
-                {% endif %}
-
-                <div class="mt-4 flex flex-wrap items-center gap-2">
-                  <button type="button" onclick="toggleLike('{{ item.post.id }}', this)" data-liked="{% if item.post.id in liked_post_ids %}1{% else %}0{% endif %}" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
-                    <i class="ri-heart-3-{% if item.post.id in liked_post_ids %}fill text-red-400{% else %}line{% endif %}"></i>
-                    <span class="ml-1 like-count">{{ item.post.like_count }}</span>
-                  </button>
-
-                  <button type="button" onclick="toggleCommentBox('{{ item.post.id }}')" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
-                    <i class="ri-chat-3-line"></i>
-                    <span class="ml-1">{{ item.post.comment_count }}</span>
-                  </button>
-
-                  {% if item.post.author != user %}
-                    <form method="post" action="{% url 'posts:repost' item.post.id %}" class="inline-flex items-center gap-2">
-                      {% csrf_token %}
-                      <input type="hidden" name="next" value="{{ request.path }}">
-                      <input type="text" name="comment" maxlength="280" placeholder="Add note (optional)" class="hidden md:inline-block px-2 py-1 text-xs rounded border border-white/20 bg-white/5 text-slate-300 placeholder-slate-500">
-                      <button type="submit" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
-                        <i class="ri-repeat-line"></i>
-                        <span class="ml-1">{{ item.post.repost_count }}</span>
-                      </button>
-                    </form>
-                  {% endif %}
-
-                  <button type="button" onclick="sharePost('{{ item.post.id }}', this)" class="px-3 py-1.5 rounded-full text-sm border border-white/20 bg-white/5 hover:bg-white/10 text-slate-300">
-                    <i class="ri-share-forward-line"></i>
-                    <span class="ml-1 share-count">{{ item.post.share_count }}</span>
-                  </button>
-                </div>
-
-                <div id="comment-box-{{ item.post.id }}" class="hidden mt-4">
-                  <form method="post" action="{% url 'posts:add_comment' item.post.id %}" class="space-y-2">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.path }}">
-                    <textarea name="content" rows="2" required class="w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Write a comment..."></textarea>
-                    <div class="text-right">
-                      <button type="submit" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-white text-sm">Comment</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </article>
+          {% include 'posts/post_card.html' with post=item.post liked_post_ids=liked_post_ids %}
         {% empty %}
-          <div class="rounded-2xl border border-dashed border-white/20 bg-slate-900/65 p-10 text-center text-slate-400">
-            No posts yet. Start by sharing your first progress update.
+          <div class="rounded-3xl border border-dashed border-white/10 bg-slate-900/20 p-20 text-center reveal-card">
+            <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+              <i class="ri-ghost-line text-4xl text-slate-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-400 tracking-tight">The feed is remarkably quiet.</h3>
+            <p class="text-slate-500 mt-2">Start the conversation by sharing your first update!</p>
           </div>
         {% endfor %}
       </div>
     </div>
 
-    <aside class="lg:col-span-4 space-y-5">
-      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
-        <h3 class="text-sm font-semibold text-slate-200">Network</h3>
-        <div class="mt-3 grid grid-cols-2 gap-3 text-center">
-          <div class="rounded-lg bg-white/5 border border-white/10 p-3">
-            <div class="text-lg font-bold text-cyan-300">{{ following_count }}</div>
-            <div class="text-xs text-slate-400">Following</div>
+    <!-- Sidebar -->
+    <aside class="lg:col-span-4 space-y-8">
+      <!-- Network Stats -->
+      <div class="sidebar-card p-6 reveal-card">
+        <h3 class="text-base font-black text-slate-100 flex items-center gap-2 tracking-tight mb-6">
+          <i class="ri-pulse-fill text-sky-400"></i> Network Vitals
+        </h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+            <div class="text-2xl font-black text-white">{{ following_count }}</div>
+            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Following</div>
           </div>
-          <div class="rounded-lg bg-white/5 border border-white/10 p-3">
-            <div class="text-lg font-bold text-emerald-300">{{ suggested_users|length }}</div>
-            <div class="text-xs text-slate-400">Suggestions</div>
+          <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+             <div class="text-2xl font-black text-sky-400">{{ suggested_users|length }}</div>
+             <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Suggested</div>
           </div>
         </div>
       </div>
 
-      <div class="rounded-2xl border border-white/15 bg-slate-900/70 backdrop-blur-xl p-5">
-        <h3 class="text-sm font-semibold text-slate-200">People to Follow</h3>
-        <div class="mt-4 space-y-3">
+      <!-- Suggested Friends -->
+      <div class="sidebar-card p-6 reveal-card">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-base font-black text-slate-100 flex items-center gap-2 tracking-tight">
+            <i class="ri-compass-3-fill text-teal-400"></i> Discover
+          </h3>
+          <button class="text-[10px] font-black text-sky-400 uppercase tracking-widest hover:text-white transition-colors">See All</button>
+        </div>
+        
+        <div class="space-y-4">
           {% for u in suggested_users %}
-            <div class="flex items-center justify-between gap-2">
-              <a href="{% url 'users:public_profile' u.username %}" class="flex items-center gap-2 min-w-0">
-                {% if u.profile.avatar %}
-                  <img src="{{ u.profile.avatar.url }}" alt="{{ u.username }}" class="w-9 h-9 rounded-full object-cover border border-white/20">
-                {% else %}
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-sm font-bold flex items-center justify-center">{{ u.username|first|upper }}</div>
-                {% endif %}
+            <div class="flex items-center justify-between gap-3 group">
+              <a href="{% url 'users:public_profile' u.username %}" class="flex items-center gap-3 overflow-hidden">
+                <div class="relative flex-shrink-0">
+                  {% if u.profile.avatar %}
+                    <img src="{{ u.profile.avatar.url }}" class="w-10 h-10 rounded-xl object-cover ring-2 ring-white/5 group-hover:ring-sky-400/30 transition-all" alt="{{ u.username }}">
+                  {% else %}
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-lg ring-2 ring-white/5 group-hover:ring-sky-400/30 transition-all">
+                      {{ u.username|first|upper }}
+                    </div>
+                  {% endif %}
+                  <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
+                </div>
                 <div class="min-w-0">
-                  <div class="text-sm text-slate-200 truncate">{{ u.get_full_name|default:u.username }}</div>
-                  <div class="text-xs text-slate-500 truncate">@{{ u.username }}</div>
+                  <div class="text-sm font-black text-slate-200 truncate group-hover:text-sky-400 transition-colors">{{ u.get_full_name|default:u.username }}</div>
+                  <div class="text-[10px] text-slate-500 font-bold uppercase group-hover:text-slate-400 transition-colors">@{{ u.username }}</div>
                 </div>
               </a>
-              <button type="button" onclick="toggleFollow('{{ u.username }}', this)" class="px-3 py-1 rounded-full text-xs border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/15">
-                Follow
+              <button onclick="toggleSidebarFollow('{{ u.username }}', this)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all">
+                <i class="ri-user-add-line"></i>
               </button>
             </div>
           {% empty %}
-            <p class="text-sm text-slate-500">No suggestions right now.</p>
+             <p class="text-[11px] text-slate-600 font-bold uppercase tracking-widest text-center py-4 italic">Everyone is following you!</p>
           {% endfor %}
         </div>
+      </div>
+
+      <!-- Trending/Info -->
+      <div class="sidebar-card p-6 reveal-card">
+         <div class="space-y-4">
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-sky-500/10 to-indigo-600/10 border border-sky-500/20">
+               <h4 class="text-xs font-black text-white uppercase tracking-widest mb-2 flex items-center gap-2">
+                 <i class="ri-flashlight-fill text-amber-400"></i> Pro Tip
+               </h4>
+               <p class="text-xs text-slate-400 leading-relaxed">Sharing your daily code snippets and problems solved increases your visibility by 4x.</p>
+            </div>
+         </div>
+         <div class="mt-8 pt-6 border-t border-white/5 flex flex-wrap gap-x-4 gap-y-2">
+            <a href="#" class="text-[10px] font-bold text-slate-600 uppercase hover:text-slate-400">Privacy</a>
+            <a href="#" class="text-[10px] font-bold text-slate-600 uppercase hover:text-slate-400">Terms</a>
+            <a href="#" class="text-[10px] font-bold text-slate-600 uppercase hover:text-slate-400">Help</a>
+            <span class="text-[10px] font-bold text-slate-700 uppercase">© 2026 Elevo</span>
+         </div>
       </div>
     </aside>
   </div>
 </section>
 
 <script>
-  function getCsrfToken() {
-    const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
-    return tokenInput ? tokenInput.value : '';
-  }
+  function previewFile(input) {
+    const preview = document.getElementById('image-preview');
+    const container = document.getElementById('image-preview-container');
+    const file = input.files[0];
+    const reader = new FileReader();
 
-  function toggleCommentBox(postId) {
-    const box = document.getElementById(`comment-box-${postId}`);
-    if (box) box.classList.toggle('hidden');
-  }
+    reader.onloadend = function () {
+      preview.src = reader.result;
+      container.classList.remove('hidden');
+    }
 
-  async function toggleLike(postId, button) {
-    const response = await fetch(`/posts/like/${postId}/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': getCsrfToken(),
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
-    });
-    const data = await response.json();
-    if (!data.success) return;
-    const icon = button.querySelector('i');
-    const count = button.querySelector('.like-count');
-    count.textContent = data.like_count;
-    if (data.liked) {
-      icon.className = 'ri-heart-3-fill text-red-400';
+    if (file) {
+      reader.readAsDataURL(file);
     } else {
-      icon.className = 'ri-heart-3-line';
+      preview.src = "";
     }
   }
 
-  async function sharePost(postId, button) {
-    const response = await fetch(`/posts/share/${postId}/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': getCsrfToken(),
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
-    });
-    const data = await response.json();
-    if (!data.success) return;
-    const count = button.querySelector('.share-count');
-    count.textContent = data.share_count;
-    if (navigator.share) {
-      navigator.share({ title: 'Elevo Post', url: data.share_url }).catch(() => {});
-      return;
-    }
-    await navigator.clipboard.writeText(data.share_url);
+  function clearImage() {
+    const input = document.querySelector('input[type="file"]');
+    const container = document.getElementById('image-preview-container');
+    input.value = "";
+    container.classList.add('hidden');
   }
 
-  async function toggleFollow(username, button) {
-    const response = await fetch(`/posts/follow/${username}/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': getCsrfToken(),
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({})
-    });
-    const data = await response.json();
-    if (!data.success) return;
-    button.textContent = data.following ? 'Following' : 'Follow';
+  async function toggleSidebarFollow(username, button) {
+    try {
+      const response = await fetch(`/posts/follow/${username}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      if (data.success) {
+        if (data.following) {
+          button.innerHTML = '<i class="ri-user-check-line text-emerald-400"></i>';
+          button.classList.add('bg-emerald-500/10');
+        } else {
+          button.innerHTML = '<i class="ri-user-add-line"></i>';
+          button.classList.remove('bg-emerald-500/10');
+        }
+      }
+    } catch (err) { console.error('Follow error:', err); }
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    gsap.to(".reveal-card", {
+      opacity: 1,
+      y: 0,
+      stagger: 0.1,
+      duration: 0.8,
+      ease: "power2.out"
+    });
+  });
 </script>
 {% endblock %}
+

@@ -6,84 +6,119 @@
 
 {% block extra_css %}
 <style>
-  .thread-item { transition: all 0.2s ease; }
-  .thread-item:hover { background: rgba(14, 165, 233, 0.08); border-color: rgba(14, 165, 233, 0.25); }
-  .thread-item.active { background: rgba(14, 165, 233, 0.12); border-color: rgba(14, 165, 233, 0.35); }
+  .thread-item { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .thread-item:hover { background: rgba(14, 165, 233, 0.08); transform: translateX(4px); }
+  .thread-item.active { background: rgba(14, 165, 233, 0.12); border-left: 4px solid #0ea5e9; }
   .unread-badge {
     min-width: 20px; height: 20px;
-    background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
     border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white; padding: 0 6px;
+    font-size: 10px; font-weight: 900; color: white; padding: 0 6px;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
   }
-  .chat-search:focus { border-color: rgba(14, 165, 233, 0.5); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+  .chat-search:focus { border-color: rgba(14, 165, 233, 0.5); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+  .avatar-ring { position: relative; }
+  .avatar-ring::after {
+    content: ''; position: absolute; inset: -2px;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    border-radius: inherit; z-index: -1; opacity: 0.5;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-6 px-4">
-  <div class="mx-auto max-w-6xl">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+<section class="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-5xl">
+    
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
       <div>
-        <h1 class="text-2xl font-bold text-slate-100 brand-font flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500/20 to-teal-500/20 border border-sky-500/30 flex items-center justify-center">
-            <i class="ri-message-3-line text-sky-400 text-lg"></i>
-          </div>
-          Messages
+        <h1 class="text-4xl font-black text-slate-100 tracking-tight flex items-center gap-4">
+          <span class="bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent italic">SOCIAL</span> 
+          <span>CENTER</span>
         </h1>
-        <p class="text-sm text-slate-500 mt-1 ml-13">Your private conversations</p>
+        <p class="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-2 ml-1">Connect • Collaborate • Elevate</p>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <div class="h-10 px-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[10px] font-black text-slate-300 uppercase letter-spacing-wide">Network Online</span>
+        </div>
       </div>
     </div>
 
-    <!-- Thread List -->
-    <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl overflow-hidden">
-      <!-- Search -->
-      <div class="p-4 border-b border-white/10">
-        <div class="relative">
-          <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-          <input type="text" id="threadSearch" placeholder="Search conversations..."
-                 class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-search transition-all">
+    <!-- Main Container -->
+    <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/40 backdrop-blur-3xl overflow-hidden shadow-2xl">
+      
+      <!-- Search & Controls Bar -->
+      <div class="p-6 border-b border-white/5 bg-slate-900/20 flex flex-col sm:flex-row gap-4">
+        <div class="relative flex-1">
+          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+          <input type="text" id="threadSearch" placeholder="Search for conversations..."
+                 class="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-white/5 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-search transition-all shadow-inner">
         </div>
+        <button class="px-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase">
+          <i class="ri-user-add-line"></i> New Message
+        </button>
       </div>
 
+      <!-- Thread List -->
       {% if thread_list %}
         <div class="divide-y divide-white/5" id="threadListContainer">
           {% for item in thread_list %}
             <a href="{% url 'chat:thread' item.thread.id %}"
-               class="thread-item flex items-center gap-3 px-5 py-4 cursor-pointer" data-username="{{ item.other_user.username|lower }}" data-fullname="{{ item.other_user.get_full_name|lower }}">
-              <!-- Avatar -->
-              {% if item.other_user.profile.avatar %}
-                <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}"
-                     class="w-12 h-12 rounded-full object-cover border border-white/20 flex-shrink-0">
-              {% else %}
-                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-lg font-bold flex items-center justify-center flex-shrink-0">
-                  {{ item.other_user.username|first|upper }}
-                </div>
-              {% endif %}
+               class="thread-item flex items-center gap-5 px-8 py-6 cursor-pointer" 
+               data-username="{{ item.other_user.username|lower }}" 
+               data-fullname="{{ item.other_user.get_full_name|lower }}">
+              
+              <!-- Avatar Block -->
+              <div class="relative flex-shrink-0">
+                {% if item.other_user.profile.avatar %}
+                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}"
+                       class="w-16 h-16 rounded-[1.5rem] object-cover border-2 border-white/10 shadow-lg">
+                {% else %}
+                  <div class="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-2xl font-black flex items-center justify-center border-2 border-white/10 shadow-lg">
+                    {{ item.other_user.username|first|upper }}
+                  </div>
+                {% endif %}
+                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-4 border-slate-900 shadow-sm"></span>
+              </div>
 
-              <!-- Info -->
+              <!-- Info Block -->
               <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-semibold text-slate-100 truncate text-sm">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-black text-slate-100 text-lg tracking-tight truncate">
                     {{ item.other_user.get_full_name|default:item.other_user.username }}
                   </span>
                   {% if item.last_message %}
-                    <span class="text-xs text-slate-500 flex-shrink-0 ml-2">{{ item.last_message.created_at|naturaltime }}</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">{{ item.last_message.created_at|naturaltime }}</span>
                   {% endif %}
                 </div>
-                <div class="flex items-center justify-between mt-0.5">
-                  <p class="text-xs text-slate-400 truncate pr-2">
+                
+                <div class="flex items-center justify-between">
+                  <div class="text-sm text-slate-400 truncate flex items-center gap-2 pr-4">
                     {% if item.last_message %}
                       {% if item.last_message.sender == request.user %}
-                        <span class="text-slate-500">You: </span>
+                        <i class="ri-check-double-line text-sky-400 text-base"></i>
                       {% endif %}
-                      {{ item.last_message.content|truncatechars:50 }}
+                      
+                      {% if item.last_message.message_type == 'image' %}
+                        <span class="flex items-center gap-1.5 text-sky-400 font-bold italic"><i class="ri-image-line"></i> Photo</span>
+                      {% elif item.last_message.message_type == 'video' %}
+                        <span class="flex items-center gap-1.5 text-indigo-400 font-bold italic"><i class="ri-video-line"></i> Video</span>
+                      {% elif item.last_message.message_type == 'file' %}
+                        <span class="flex items-center gap-1.5 text-teal-400 font-bold italic"><i class="ri-file-line"></i> Document</span>
+                      {% else %}
+                        {{ item.last_message.content|truncatechars:60 }}
+                      {% endif %}
                     {% else %}
-                      <span class="text-slate-600 italic">No messages yet</span>
+                      <span class="text-slate-600 italic font-medium">New connection – say hi!</span>
                     {% endif %}
-                  </p>
+                  </div>
+                  
                   {% if item.unread > 0 %}
-                    <span class="unread-badge flex-shrink-0">{{ item.unread }}</span>
+                    <span class="unread-badge flex-shrink-0 animate-in zoom-in duration-300">{{ item.unread }}</span>
                   {% endif %}
                 </div>
               </div>
@@ -91,12 +126,15 @@
           {% endfor %}
         </div>
       {% else %}
-        <div class="py-20 text-center">
-          <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-sky-500/10 to-teal-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
-            <i class="ri-message-3-line text-3xl text-sky-400/60"></i>
+        <div class="py-32 text-center">
+          <div class="w-24 h-24 mx-auto rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner">
+            <i class="ri-chat-smile-2-line text-5xl text-sky-500/40"></i>
           </div>
-          <h3 class="text-lg font-semibold text-slate-300 brand-font">No conversations yet</h3>
-          <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">Visit someone's profile and click <strong>Message</strong> to start chatting!</p>
+          <h3 class="text-2xl font-black text-slate-200 tracking-tight">Quiet in here...</h3>
+          <p class="text-sm text-slate-500 mt-2 max-w-xs mx-auto font-medium">Start a conversation with developers and mentors from around the globe.</p>
+          <a href="/" class="mt-8 inline-flex items-center px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all">
+            Find People
+          </a>
         </div>
       {% endif %}
     </div>
@@ -111,7 +149,7 @@
       const q = this.value.toLowerCase().trim();
       document.querySelectorAll('.thread-item').forEach(item => {
         const name = (item.dataset.username || '') + ' ' + (item.dataset.fullname || '');
-        item.style.display = name.includes(q) ? '' : 'none';
+        item.style.display = name.includes(q) ? 'flex' : 'none';
       });
     });
   }

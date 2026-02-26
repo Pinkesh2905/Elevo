@@ -23,10 +23,13 @@ def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
 
+from practice.models import Problem, Company
+from mock_interview.models import MockInterviewSession
+
 # --- Homepage View ---
 def home(request):
     """
-    Role-based homepage:
+    Role-based homepage with real statistics:
     - STUDENTS see index.html (homepage)
     - TUTORS and ADMINS are redirected to their dashboards
     """
@@ -42,7 +45,15 @@ def home(request):
         elif role == 'ADMIN':
             return redirect('practice:admin_dashboard')
 
-    return render(request, 'index.html')
+    # Fetch real statistics for the landing page
+    stats = {
+        'total_problems': Problem.objects.filter(is_active=True).count(),
+        'total_companies': Company.objects.count(),
+        'total_sessions': MockInterviewSession.objects.filter(status='COMPLETED').count(),
+        'active_users': User.objects.count(),
+    }
+
+    return render(request, 'index.html', {'stats': stats})
 
 
 def landing(request):

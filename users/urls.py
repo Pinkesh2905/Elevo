@@ -21,6 +21,7 @@ urlpatterns = [
     
     # Profile URLs
     path('profile/', views.profile, name='profile'),
+    path('profile/analyze-resume/', views.analyze_profile_resume, name='analyze_resume'),
     path('tutor-application/', views.tutor_application, name='tutor_application'),
     
     # Account Management URLs

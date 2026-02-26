@@ -117,12 +117,39 @@ def outputs_match(output, expected, problem=None, test_input=None):
     return left == right
 
 
+def _extract_python_function_info(code):
+    """
+    Return (class_name, function_name) from user code.
+    Detects both standalone functions and class-based (LeetCode-style) code.
+    """
+    text = code or ""
+    # Check for class-based code (e.g., class Solution:)
+    class_match = re.search(r"^\s*class\s+(\w+)", text, re.MULTILINE)
+    if class_match:
+        class_name = class_match.group(1)
+        # Find the first non-dunder method inside the class
+        method_match = re.search(
+            r"^\s+def\s+(?!__(?:init|str|repr|del)__)([A-Za-z_]\w*)\s*\(",
+            text, re.MULTILINE
+        )
+        if method_match:
+            return (class_name, method_match.group(1))
+
+    # Standalone function
+    fn_match = re.search(r"^\s*def\s+([A-Za-z_]\w*)\s*\(", text, re.MULTILINE)
+    if fn_match:
+        return (None, fn_match.group(1))
+
+    return (None, None)
+
+
 def _extract_python_function_name(code):
     """
     Return first top-level function name from user code.
+    Backward-compatible wrapper.
     """
-    match = re.search(r"^\s*def\s+([A-Za-z_]\w*)\s*\(", code or "", re.MULTILINE)
-    return match.group(1) if match else None
+    _, fn_name = _extract_python_function_info(code)
+    return fn_name
 
 
 def _should_wrap_python_function(code):
@@ -142,10 +169,17 @@ def _build_python_harness(code, stdin):
     """
     Wrap function-only Python submissions so students only fill the placeholder.
     Reads each stdin line as one argument and prints normalized output.
+    Supports both standalone functions and class-based (LeetCode-style) code.
     """
-    fn_name = _extract_python_function_name(code)
+    class_name, fn_name = _extract_python_function_info(code)
     if not fn_name:
         return code
+
+    # Build the function reference
+    if class_name:
+        fn_ref = f"{class_name}().{fn_name}"
+    else:
+        fn_ref = fn_name
 
     stdin_literal = repr(stdin or "")
     harness = f"""
@@ -175,7 +209,7 @@ def __parse_arg(__line):
 
 __raw = {stdin_literal}
 __args = [__parse_arg(__ln) for __ln in __raw.splitlines() if __ln.strip() != ""]
-__fn = {fn_name}
+__fn = {fn_ref}
 
 try:
     __result = __fn(*__args)

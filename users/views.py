@@ -6,8 +6,9 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.models import User
 from django.urls import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
+from mock_interview.views import _resume_text, _extract_resume_profile, _compute_resume_ats_insights
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Avg, Count, Prefetch, Q
@@ -436,6 +437,41 @@ def verify_email_change(request, token):
     except EmailChangeToken.DoesNotExist:
         messages.error(request, "Invalid email change link.")
         return redirect('users:profile')
+
+
+@login_required
+def analyze_profile_resume(request):
+    """
+    AJAX view to analyze the user's profile resume and return ATS insights.
+    """
+    user_profile = request.user.profile
+    if not user_profile.resume:
+        return JsonResponse({'success': False, 'error': 'No resume uploaded to profile.'}, status=400)
+
+    try:
+        # 1. Extract text from the resume file
+        resume_file = user_profile.resume
+        text = _resume_text(resume_file, resume_file.name)
+        
+        # 2. Extract profile data using AI
+        profile_data = _extract_resume_profile(text)
+        
+        # 3. Compute ATS insights
+        insights = _compute_resume_ats_insights(profile_data, resume_text=text)
+        
+        return JsonResponse({
+            'success': True,
+            'role': profile_data.get('preferred_role', ''),
+            'skills': ', '.join(profile_data.get('skills', [])),
+            'ats_score': insights.get('ats_score', 0),
+            'band': insights.get('band', 'average'),
+            'summary': insights.get('summary', ''),
+            'highlights': insights.get('detected_highlights', []),
+            'suggestions': insights.get('suggestions', []),
+            'breakdown': insights.get('breakdown', {})
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 # --- Enhanced Login View (Email Verification Check Removed) ---

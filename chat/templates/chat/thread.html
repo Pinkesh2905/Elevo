@@ -14,22 +14,23 @@
 
   /* Chat bubbles */
   .bubble-sent {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(20, 184, 166, 0.2));
-    border: 1px solid rgba(14, 165, 233, 0.25);
-    border-radius: 18px 18px 4px 18px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(20, 184, 166, 0.25));
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    border-radius: 20px 20px 4px 20px;
   }
   .bubble-received {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 18px 18px 18px 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px 20px 20px 4px;
   }
 
   /* Message area */
   .messages-container {
-    height: calc(100vh - 280px);
-    min-height: 400px;
+    height: calc(100vh - 300px);
+    min-height: 450px;
     overflow-y: auto;
     scroll-behavior: smooth;
+    padding-bottom: 20px;
   }
   .messages-container::-webkit-scrollbar { width: 4px; }
   .messages-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
@@ -54,6 +55,32 @@
   }
   .chat-sidebar::-webkit-scrollbar { width: 3px; }
   .chat-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+  /* Reply UI */
+  .reply-preview {
+    border-left: 4px solid #0ea5e9;
+    background: rgba(14, 165, 233, 0.08);
+  }
+  .quote-bubble {
+    border-left: 3px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* Reactions */
+  .reaction-badge {
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .reaction-badge:hover { transform: scale(1.1); background: rgba(14, 165, 233, 0.2); }
+  .reaction-picker {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .msg-wrapper:hover .reaction-trigger { opacity: 1; }
 </style>
 {% endblock %}
 
@@ -63,37 +90,42 @@
 
     <!-- Sidebar: Thread List -->
     <aside class="lg:col-span-3 hidden lg:block">
-      <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl overflow-hidden">
-        <div class="p-4 border-b border-white/10 flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <i class="ri-message-3-line text-sky-400"></i> Chats
+      <div class="rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-2xl overflow-hidden">
+        <div class="p-6 border-b border-white/5 flex items-center justify-between">
+          <h2 class="text-base font-black text-slate-100 flex items-center gap-2 tracking-tight">
+            <i class="ri-message-3-fill text-sky-400"></i> Channels
           </h2>
-          <a href="{% url 'chat:inbox' %}" class="text-xs text-sky-400 hover:text-sky-300 transition-colors">View all</a>
+          <a href="{% url 'chat:inbox' %}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-slate-400 hover:text-white transition-all">
+            <i class="ri-settings-4-line"></i>
+          </a>
         </div>
         <div class="chat-sidebar divide-y divide-white/5">
           {% for item in thread_list %}
             <a href="{% url 'chat:thread' item.thread.id %}"
-               class="sidebar-thread flex items-center gap-2.5 px-4 py-3 {% if item.thread.id == thread.id %}active{% endif %}">
-              {% if item.other_user.profile.avatar %}
-                <img src="{{ item.other_user.profile.avatar.url }}" class="w-9 h-9 rounded-full object-cover border border-white/20 flex-shrink-0">
-              {% else %}
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
-                  {{ item.other_user.username|first|upper }}
-                </div>
-              {% endif %}
+               class="sidebar-thread flex items-center gap-3 px-5 py-4 {% if item.thread.id == thread.id %}active{% endif %}">
+              <div class="relative">
+                {% if item.other_user.profile.avatar %}
+                  <img src="{{ item.other_user.profile.avatar.url }}" class="w-11 h-11 rounded-2xl object-cover border border-white/10">
+                {% else %}
+                  <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-lg font-black flex items-center justify-center">
+                    {{ item.other_user.username|first|upper }}
+                  </div>
+                {% endif %}
+                {% if item.unread > 0 %}
+                   <span class="absolute -top-1 -right-1 unread-dot"></span>
+                {% endif %}
+              </div>
               <div class="min-w-0 flex-1">
-                <div class="text-sm font-medium text-slate-200 truncate">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
-                <div class="text-xs text-slate-500 truncate">
+                <div class="text-sm font-bold text-slate-200 truncate">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
+                <div class="text-[11px] text-slate-500 truncate flex items-center gap-1">
                   {% if item.last_message %}
-                    {{ item.last_message.content|truncatechars:30 }}
+                     {% if item.last_message.sender == request.user %}<i class="ri-check-double-line text-sky-400"></i>{% endif %}
+                     {{ item.last_message.content|truncatechars:25|default:item.last_message.message_type }}
                   {% else %}
-                    No messages
+                    New connection
                   {% endif %}
                 </div>
               </div>
-              {% if item.unread > 0 %}
-                <span class="unread-dot flex-shrink-0"></span>
-              {% endif %}
             </a>
           {% endfor %}
         </div>
@@ -102,66 +134,176 @@
 
     <!-- Main Chat Area -->
     <main class="lg:col-span-9">
-      <div class="rounded-2xl border border-white/15 bg-slate-900/75 backdrop-blur-xl overflow-hidden flex flex-col">
+      <div class="rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-2xl overflow-hidden flex flex-col h-full shadow-2xl">
 
         <!-- Chat Header -->
-        <div class="px-5 py-4 border-b border-white/10 flex items-center gap-3">
-          <a href="{% url 'chat:inbox' %}" class="lg:hidden text-slate-400 hover:text-sky-400 transition-colors mr-1">
-            <i class="ri-arrow-left-line text-xl"></i>
+        <div class="px-6 py-4 border-b border-white/5 flex items-center gap-4 bg-slate-900/40">
+          <a href="{% url 'chat:inbox' %}" class="lg:hidden text-slate-400 hover:text-sky-400 mr-2">
+            <i class="ri-arrow-left-s-line text-2xl"></i>
           </a>
-          {% if other_user.profile.avatar %}
-            <img src="{{ other_user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover border border-white/20">
-          {% else %}
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-emerald-500 text-white text-lg font-bold flex items-center justify-center">
-              {{ other_user.username|first|upper }}
-            </div>
-          {% endif %}
-          <div class="flex-1 min-w-0">
-            <a href="{% url 'users:public_profile' other_user.username %}" class="font-semibold text-slate-100 hover:text-sky-400 transition-colors text-sm">
-              {{ other_user.get_full_name|default:other_user.username }}
-            </a>
-            <p class="text-xs text-slate-500">@{{ other_user.username }}</p>
+          <div class="relative">
+            {% if other_user.profile.avatar %}
+              <img src="{{ other_user.profile.avatar.url }}" class="w-11 h-11 rounded-2xl object-cover border border-white/20">
+            {% else %}
+              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-lg font-black flex items-center justify-center">
+                {{ other_user.username|first|upper }}
+              </div>
+            {% endif %}
+            <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
           </div>
-          <a href="{% url 'users:public_profile' other_user.username %}" class="text-slate-400 hover:text-sky-400 transition-colors" title="View profile">
-            <i class="ri-user-line text-lg"></i>
-          </a>
+          <div class="flex-1 min-w-0">
+            <h1 class="font-black text-slate-100 text-base leading-tight">
+              {{ other_user.get_full_name|default:other_user.username }}
+            </h1>
+            <div id="typingIndicator" class="hidden flex items-center gap-1 mt-0.5">
+               <div class="flex gap-0.5">
+                 <span class="typing-dot w-1 h-1 rounded-full bg-sky-400"></span>
+                 <span class="typing-dot w-1 h-1 rounded-full bg-sky-400"></span>
+                 <span class="typing-dot w-1 h-1 rounded-full bg-sky-400"></span>
+               </div>
+               <span class="text-[10px] font-bold text-sky-400 uppercase tracking-widest">typing...</span>
+            </div>
+            <p id="participantStatus" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Active Now</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all"><i class="ri-phone-fill text-lg"></i></button>
+            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all"><i class="ri-vidicon-fill text-lg"></i></button>
+            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all"><i class="ri-more-2-fill text-lg"></i></button>
+          </div>
         </div>
 
-        <!-- Messages -->
-        <div class="messages-container px-5 py-4 space-y-3" id="messagesContainer">
-          {% if messages %}
-            {% for msg in messages %}
-              <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-msg-id="{{ msg.id }}">
-                <div class="max-w-[75%] {% if msg.sender == request.user %}bubble-sent{% else %}bubble-received{% endif %} px-4 py-2.5">
-                  <p class="text-sm text-slate-200 whitespace-pre-wrap break-words">{{ msg.content }}</p>
-                  <p class="text-[10px] mt-1 {% if msg.sender == request.user %}text-sky-400/60{% else %}text-slate-500{% endif %}">
-                    {{ msg.created_at|date:"M d, h:i A" }}
-                  </p>
+        <!-- Messages Area -->
+        <div class="messages-container px-6 py-6 space-y-6" id="messagesContainer" data-thread-id="{{ thread.id }}">
+          {% for msg in messages %}
+            <div class="msg-wrapper flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %} group" data-msg-id="{{ msg.id }}">
+              <div class="flex flex-col {% if msg.sender == request.user %}items-end{% else %}items-start{% endif %} max-w-[80%] relative">
+                
+                <!-- Reply Context -->
+                {% if msg.parent_message %}
+                <div class="quote-bubble px-3 py-1.5 rounded-t-xl mb-1 text-[11px] text-slate-400 max-w-full truncate">
+                   <span class="font-black text-white/40 block uppercase text-[8px]">Replying to {{ msg.parent_message.sender.username }}</span>
+                   {{ msg.parent_message.content|truncatechars:100 }}
+                </div>
+                {% endif %}
+
+                <!-- Content Bubble -->
+                <div class="{% if msg.sender == request.user %}bubble-sent{% else %}bubble-received{% endif %} px-5 py-3 relative shadow-lg">
+                  
+                  <!-- Media Rendering -->
+                  {% if msg.message_type == 'image' and msg.image %}
+                    <a href="{{ msg.image.url }}" target="_blank" class="block mb-3 rounded-xl overflow-hidden border border-white/5">
+                      <img src="{{ msg.image.url }}" class="max-w-full h-auto max-h-64 object-contain">
+                    </a>
+                  {% elif msg.message_type == 'video' and msg.file %}
+                    <video controls class="max-w-full h-auto max-h-64 mb-3 rounded-xl border border-white/5">
+                      <source src="{{ msg.file.url }}">
+                    </video>
+                  {% elif msg.message_type == 'file' and msg.file %}
+                    <a href="{{ msg.file.url }}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 mb-3 hover:bg-white/10 transition-all">
+                      <i class="ri-file-text-line text-2xl text-sky-400"></i>
+                      <div class="min-w-0">
+                         <p class="text-[11px] font-bold text-slate-200 truncate">{{ msg.file.name|slice:"12:" }}</p>
+                         <p class="text-[9px] text-slate-500 uppercase font-black">Download Asset</p>
+                      </div>
+                    </a>
+                  {% endif %}
+
+                  {% if msg.content %}
+                    <p class="text-[13px] text-slate-100 font-medium leading-relaxed whitespace-pre-wrap break-words">{{ msg.content }}</p>
+                  {% endif %}
+
+                  <!-- Reactions Row -->
+                  <div class="flex flex-wrap gap-1 mt-2 reactions-row" id="reactions-{{ msg.id }}">
+                    {% for r in msg.grouped_reactions %}
+                      <span class="px-2 py-0.5 rounded-full {% if r.reacted %}bg-sky-500/20 border-sky-500/30{% else %}bg-slate-800/80 border-white/5{% endif %} border text-[10px] reaction-badge flex items-center gap-1 transition-all hover:scale-105 cursor-pointer" 
+                            data-emoji="{{ r.emoji }}" data-id="{{ msg.id }}">
+                        <span>{{ r.emoji }}</span>
+                        {% if r.count > 1 %}
+                          <span class="font-bold text-slate-400">{{ r.count }}</span>
+                        {% endif %}
+                      </span>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <!-- Footer: Time & Seen Status -->
+                <div class="flex items-center gap-2 mt-1.5">
+                   <button type="button" 
+                           class="reply-btn opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-sky-400 font-black uppercase transition-all"
+                           data-id="{{ msg.id }}" 
+                           data-user="{{ msg.sender.username }}" 
+                           data-content="{{ msg.content|escapejs }}">
+                     Reply
+                   </button>
+                   <span class="text-[10px] text-slate-500 font-bold">{{ msg.created_at|date:"h:i A" }}</span>
+                   {% if msg.sender == request.user %}
+                     {% if msg.is_read %}
+                        <i class="ri-double-check-line text-sky-400 text-xs" title="Seen at {{ msg.read_at|date:'h:i A' }}"></i>
+                     {% else %}
+                        <i class="ri-check-line text-slate-600 text-xs"></i>
+                     {% endif %}
+                   {% endif %}
+                </div>
+
+                <!-- Action: React Button -->
+                <button type="button" 
+                        class="reaction-trigger opacity-0 absolute top-2 {% if msg.sender == request.user %}-left-8{% else %}-right-8{% endif %} w-6 h-6 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-yellow-400 transition-all"
+                        data-id="{{ msg.id }}">
+                  <i class="ri-emotion-happy-line text-sm"></i>
+                </button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Input Section -->
+        <div class="px-6 py-6 border-t border-white/5 bg-slate-900/40 relative">
+          
+          <!-- Reply Preview Bar -->
+          <div id="replyBar" class="hidden absolute bottom-full left-0 right-0 p-4 bg-slate-800/90 backdrop-blur-md border-t border-white/5 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-200">
+             <div class="flex items-center gap-3 min-w-0">
+               <div class="w-1 h-8 bg-sky-500 rounded-full"></div>
+               <div class="min-w-0">
+                 <p class="text-[10px] font-black text-sky-400 uppercase">Replying to <span id="replyUser"></span></p>
+                 <p id="replyContent" class="text-xs text-slate-300 truncate"></p>
+               </div>
+             </div>
+             <button type="button" id="cancelReplyBtn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-slate-400"><i class="ri-close-line"></i></button>
+          </div>
+
+          <form id="messageForm" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <input type="hidden" name="parent_id" id="parentInput">
+            <input type="file" id="fileAttachment" class="hidden">
+            
+            <!-- File Preview -->
+            <div id="filePreview" class="hidden flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 w-fit">
+               <div class="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400"><i class="ri-attachment-line text-lg"></i></div>
+               <div class="pr-6">
+                 <p id="previewName" class="text-[11px] font-bold text-slate-200"></p>
+                 <p id="previewSize" class="text-[9px] text-slate-500 uppercase"></p>
+               </div>
+               <button type="button" id="clearFileBtn" class="text-rose-400 hover:text-rose-300"><i class="ri-delete-bin-line"></i></button>
+            </div>
+
+            <div class="flex items-end gap-3">
+              <button type="button" id="attachBtn" class="w-12 h-12 rounded-2xl bg-white/5 text-slate-400 hover:text-sky-400 flex items-center justify-center transition-all flex-shrink-0">
+                <i class="ri-add-line text-2xl"></i>
+              </button>
+              
+              <div class="flex-1 relative">
+                <textarea id="messageInput" name="content" rows="1" placeholder="Type a message..."
+                          class="w-full px-5 py-3.5 rounded-2xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500/50 transition-all resize-none shadow-inner"
+                          style="max-height: 150px;"></textarea>
+                <div class="absolute right-3 bottom-3 flex items-center gap-2">
+                   <button type="button" class="text-slate-500 hover:text-yellow-400"><i class="ri-emotion-line text-lg"></i></button>
                 </div>
               </div>
-            {% endfor %}
-          {% else %}
-            <div class="text-center py-16" id="emptyState">
-              <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-sky-500/10 to-teal-500/10 border border-sky-500/20 flex items-center justify-center mb-3">
-                <i class="ri-chat-smile-2-line text-2xl text-sky-400/60"></i>
-              </div>
-              <p class="text-sm text-slate-400">Start the conversation with <strong class="text-sky-400">{{ other_user.get_full_name|default:other_user.username }}</strong></p>
+              
+              <button type="submit" class="send-btn w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all flex-shrink-0">
+                <i class="ri-send-plane-fill text-xl"></i>
+              </button>
             </div>
-          {% endif %}
-        </div>
-
-        <!-- Input Bar -->
-        <div class="px-5 py-4 border-t border-white/10 bg-slate-900/50">
-          <form id="messageForm" class="flex items-end gap-3">
-            {% csrf_token %}
-            <div class="flex-1 relative">
-              <textarea id="messageInput" name="content" rows="1" placeholder="Type a message..."
-                        class="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-input transition-all resize-none"
-                        style="max-height: 120px;"></textarea>
-            </div>
-            <button type="submit" class="send-btn w-11 h-11 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white flex items-center justify-center hover:from-sky-600 hover:to-teal-600 flex-shrink-0 shadow-lg shadow-sky-500/20">
-              <i class="ri-send-plane-fill text-lg"></i>
-            </button>
           </form>
         </div>
 
@@ -169,125 +311,302 @@
     </main>
 
   </div>
+
+  <!-- Global Reaction Picker Template (hidden) -->
+  <div id="globalEmojiPicker" class="hidden fixed z-50 bg-slate-900 border border-white/10 rounded-3xl p-4 shadow-2xl flex flex-wrap gap-2 ring-1 ring-white/10 max-w-[280px]">
+     <button type="button" data-emoji="👍" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">👍</button>
+     <button type="button" data-emoji="❤️" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">❤️</button>
+     <button type="button" data-emoji="🔥" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🔥</button>
+     <button type="button" data-emoji="😂" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">😂</button>
+     <button type="button" data-emoji="😮" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">😮</button>
+     <button type="button" data-emoji="👏" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">👏</button>
+     <button type="button" data-emoji="🚀" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🚀</button>
+     <button type="button" data-emoji="✨" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">✨</button>
+     <button type="button" data-emoji="💯" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">💯</button>
+     <button type="button" data-emoji="🤩" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🤩</button>
+     <button type="button" data-emoji="💡" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">💡</button>
+     <button type="button" data-emoji="😢" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">😢</button>
+     <button type="button" data-emoji="✅" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">✅</button>
+     <button type="button" data-emoji="❌" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">❌</button>
+     <button type="button" data-emoji="🎉" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🎉</button>
+     <button type="button" data-emoji="🙌" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🙌</button>
+     <button type="button" data-emoji="🤔" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🤔</button>
+     <button type="button" data-emoji="👀" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">👀</button>
+  </div>
 </section>
 
 <script>
 (function() {
-  const threadId = {{ thread.id }};
-  const currentUser = '{{ request.user.username }}';
   const container = document.getElementById('messagesContainer');
+  const threadId = container.dataset.threadId;
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const typingIndicator = document.getElementById('typingIndicator');
+  const threadStatus = document.getElementById('participantStatus');
+  const picker = document.getElementById('globalEmojiPicker');
+  let lastId = 0;
+  let activeReactionMsgId = null;
+  let isTyping = false;
+  let typingTimeout = null;
+
+  function scrollToBottom() { container.scrollTop = container.scrollHeight; }
+  scrollToBottom();
+
+  const msgElements = container.querySelectorAll('[data-msg-id]');
+  if(msgElements.length) lastId = Math.max(...Array.from(msgElements).map(el => parseInt(el.dataset.msgId)));
+
   const form = document.getElementById('messageForm');
   const input = document.getElementById('messageInput');
-  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  let lastMessageId = 0;
+  const fileInput = document.getElementById('fileAttachment');
 
-  // Get last message ID from DOM
-  function initLastId() {
-    const msgs = container.querySelectorAll('[data-msg-id]');
-    if (msgs.length > 0) {
-      lastMessageId = parseInt(msgs[msgs.length - 1].dataset.msgId) || 0;
+  // Event Delegation ──────────────────────────────────────────
+  document.addEventListener('click', (e) => {
+    // Reply Button
+    const replyBtn = e.target.closest('.reply-btn');
+    if(replyBtn) {
+      const { id, user, content } = replyBtn.dataset;
+      document.getElementById('parentInput').value = id;
+      document.getElementById('replyUser').innerText = user;
+      document.getElementById('replyContent').innerText = content;
+      document.getElementById('replyBar').classList.remove('hidden');
+      input.focus();
+      return;
     }
-  }
 
-  // Scroll to bottom
-  function scrollToBottom() {
-    container.scrollTop = container.scrollHeight;
-  }
+    // Reaction Badge Click (from Row)
+    const badge = e.target.closest('.reaction-badge');
+    if(badge) {
+      sendReaction(badge.dataset.emoji, badge.dataset.id);
+      return;
+    }
 
-  // Append a message bubble
-  function appendMessage(msg) {
-    // Remove empty state if present
-    const empty = document.getElementById('emptyState');
-    if (empty) empty.remove();
+    // Reaction Trigger (the happy face button)
+    const reactTrigger = e.target.closest('.reaction-trigger');
+    if(reactTrigger) {
+      const rect = reactTrigger.getBoundingClientRect();
+      activeReactionMsgId = reactTrigger.dataset.id;
+      picker.style.top = (rect.top - 55) + 'px';
+      picker.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
+      picker.classList.toggle('hidden');
+      return;
+    }
 
-    const wrapper = document.createElement('div');
-    wrapper.className = `flex ${msg.is_mine ? 'justify-end' : 'justify-start'}`;
-    wrapper.dataset.msgId = msg.id;
+    // Emoji Selection
+    const emojiBtn = e.target.closest('.emoji-btn');
+    if(emojiBtn) {
+      sendReaction(emojiBtn.dataset.emoji);
+      return;
+    }
 
-    const bubble = document.createElement('div');
-    bubble.className = `max-w-[75%] ${msg.is_mine ? 'bubble-sent' : 'bubble-received'} px-4 py-2.5`;
-    bubble.innerHTML = `
-      <p class="text-sm text-slate-200 whitespace-pre-wrap break-words">${escapeHtml(msg.content)}</p>
-      <p class="text-[10px] mt-1 ${msg.is_mine ? 'text-sky-400/60' : 'text-slate-500'}">${msg.created_at}</p>
-    `;
+    // Attachment Button
+    if(e.target.closest('#attachBtn')) {
+      fileInput.click();
+      return;
+    }
 
-    wrapper.appendChild(bubble);
-    container.appendChild(wrapper);
-    lastMessageId = Math.max(lastMessageId, msg.id);
-    scrollToBottom();
-  }
+    // Cancel Reply
+    if(e.target.closest('#cancelReplyBtn')) {
+      cancelReply();
+      return;
+    }
 
-  function escapeHtml(text) {
-    const d = document.createElement('div');
-    d.textContent = text;
-    return d.innerHTML;
-  }
+    // Clear File
+    if(e.target.closest('#clearFileBtn')) {
+      clearAttachment();
+      return;
+    }
 
-  // Send message
-  form.addEventListener('submit', async function(e) {
+    // Close picker when clicking outside
+    if(!picker.contains(e.target)) picker.classList.add('hidden');
+  });
+
+  // 1. Sending ──────────────────────────────────────────────────
+  form.onsubmit = async (e) => {
     e.preventDefault();
     const content = input.value.trim();
-    if (!content) return;
+    const file = fileInput.files[0];
+    const parentId = document.getElementById('parentInput').value;
+
+    if(!content && !file) return;
+
+    const fd = new FormData();
+    fd.append('content', content);
+    if(parentId) fd.append('parent_id', parentId);
+    if(file) {
+      if(file.type.startsWith('image/')) fd.append('image', file);
+      else fd.append('file', file);
+    }
 
     input.value = '';
     input.style.height = 'auto';
+    cancelReply();
+    clearAttachment();
 
     try {
-      const resp = await fetch(`/chat/${threadId}/send/`, {
+      const r = await fetch(`/chat/${threadId}/send/`, {
         method: 'POST',
-        headers: {
-          'X-CSRFToken': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: new URLSearchParams({ content }),
+        headers: { 'X-CSRFToken': csrfToken },
+        body: fd
       });
-      const data = await resp.json();
-      if (data.success) {
-        appendMessage(data.message);
-      }
-    } catch(err) {
-      console.error('Send failed:', err);
-    }
-  });
+      const data = await r.json();
+      if(data.success && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) appendMessage(data.message);
+    } catch(err) { console.error(err); }
+  };
 
-  // Auto-resize textarea
-  input.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-  });
-
-  // Enter to send (Shift+Enter for newline)
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      form.dispatchEvent(new Event('submit'));
-    }
-  });
-
-  // Poll for new messages every 5 seconds
-  async function pollMessages() {
+  // 2. Real-time Polling ───────────────────────────────────────
+  async function poll() {
     try {
-      const resp = await fetch(`/chat/${threadId}/fetch/?after=${lastMessageId}`, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      const r = await fetch(`/chat/${threadId}/fetch/?after=${lastId}`);
+      const data = await r.json();
+      (data.messages || []).forEach(m => {
+        if(!container.querySelector(`[data-msg-id="${m.id}"]`)) appendMessage(m);
       });
-      const data = await resp.json();
-      if (data.messages && data.messages.length > 0) {
-        data.messages.forEach(msg => {
-          // Only append if not already in DOM
-          if (!container.querySelector(`[data-msg-id="${msg.id}"]`)) {
-            appendMessage(msg);
-          }
+
+      // 2b. Thread Status (Seen/Typing/Reactions)
+      const rs = await fetch(`/chat/${threadId}/status/`);
+      const sdata = await rs.json();
+      
+      if(sdata.is_typing) {
+        typingIndicator.classList.remove('hidden');
+        threadStatus.classList.add('hidden');
+      } else {
+        typingIndicator.classList.add('hidden');
+        threadStatus.classList.remove('hidden');
+      }
+
+      // Update seen icons
+      if(sdata.seen_status.is_read) {
+        container.querySelectorAll('.ri-check-line').forEach(icon => {
+           icon.className = 'ri-double-check-line text-sky-400 text-xs';
+           icon.title = 'Seen at ' + sdata.seen_status.read_at;
         });
       }
-    } catch(err) {
-      console.error('Poll failed:', err);
+
+      // Update Reactions
+      (sdata.reaction_updates || []).forEach(update => {
+        updateMessageReactions(update.id, update.reactions);
+      });
+    } catch(err) { console.error('Poll error', err); }
+  }
+  setInterval(poll, 3000);
+
+  // 3. Typing Notification ────────────────────────────────────
+  input.oninput = () => {
+    if(!isTyping) {
+      isTyping = true;
+      fetch(`/chat/${threadId}/typing/`);
     }
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => { isTyping = false; }, 3000);
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 150) + 'px';
+  };
+
+  // 4. Utils ──────────────────────────────────────────────────
+  function appendMessage(m) {
+    const div = document.createElement('div');
+    div.className = `msg-wrapper flex ${m.is_mine ? 'justify-end' : 'justify-start'} group`;
+    div.dataset.msgId = m.id;
+    
+    div.innerHTML = `
+      <div class="flex flex-col ${m.is_mine ? 'items-end' : 'items-start'} max-w-[80%] relative">
+        ${m.parent ? `
+          <div class="quote-bubble px-3 py-1.5 rounded-t-xl mb-1 text-[11px] text-slate-400 max-w-full truncate">
+             <span class="font-black text-white/40 block uppercase text-[8px]">Replying to ${m.parent.sender}</span>
+             ${m.parent.content}
+          </div>
+        ` : ''}
+        <div class="${m.is_mine ? 'bubble-sent' : 'bubble-received'} px-5 py-3 relative shadow-lg">
+          ${m.message_type === 'image' ? `
+            <a href="${m.image_url}" target="_blank" class="block mb-3 rounded-xl overflow-hidden border border-white/5">
+              <img src="${m.image_url}" class="max-w-full h-auto max-h-64 object-contain">
+            </a>
+          ` : ''}
+          ${m.message_type === 'video' ? `<video controls class="max-w-full h-auto max-h-64 mb-3 rounded-xl border border-white/5"><source src="${m.file_url}"></video>` : ''}
+          ${m.message_type === 'file' ? `
+            <a href="${m.file_url}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 mb-3 hover:bg-white/10 transition-all">
+              <i class="ri-file-text-line text-2xl text-sky-400"></i>
+              <div class="min-w-0">
+                 <p class="text-[11px] font-bold text-slate-200 truncate">${m.file_name}</p>
+                 <p class="text-[9px] text-slate-500 uppercase font-black">Download Asset</p>
+              </div>
+            </a>
+          ` : ''}
+          ${m.content ? `<p class="text-[13px] text-slate-100 font-medium leading-relaxed whitespace-pre-wrap break-words">${m.content}</p>` : ''}
+          <div class="flex flex-wrap gap-1 mt-2 reactions-row" id="reactions-${m.id}">
+             ${(m.reactions || []).map(r => `
+               <span class="px-2 py-0.5 rounded-full ${r.reacted ? 'bg-sky-500/20 border-sky-500/30' : 'bg-slate-800/80 border-white/5'} border text-[10px] reaction-badge flex items-center gap-1 transition-all hover:scale-105 cursor-pointer"
+                     onclick="sendReaction('${r.emoji}', ${m.id})">
+                 <span>${r.emoji}</span>
+                 ${r.count > 1 ? `<span class="font-bold text-slate-400">${r.count}</span>` : ''}
+               </span>
+             `).join('')}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mt-1.5">
+           <button type="button" class="reply-btn opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-sky-400 font-black uppercase transition-all" data-id="${m.id}" data-user="${m.sender}" data-content="${m.content}">Reply</button>
+           <span class="text-[10px] text-slate-500 font-bold">${m.created_at}</span>
+           ${m.is_mine ? `<i class="${m.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs"></i>` : ''}
+        </div>
+        <button type="button" class="reaction-trigger opacity-0 absolute top-2 ${m.is_mine ? '-left-8' : '-right-8'} w-6 h-6 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-yellow-400 transition-all" data-id="${m.id}">
+          <i class="ri-emotion-happy-line text-sm"></i>
+        </button>
+      </div>
+    `;
+    
+    container.appendChild(div);
+    lastId = Math.max(lastId, m.id);
+    scrollToBottom();
   }
 
-  // Initialize
-  initLastId();
-  scrollToBottom();
-  setInterval(pollMessages, 5000);
+  window.cancelReply = () => {
+    document.getElementById('parentInput').value = '';
+    document.getElementById('replyBar').classList.add('hidden');
+  };
+
+  fileInput.onchange = () => {
+    const file = fileInput.files[0];
+    if(!file) return;
+    document.getElementById('previewName').innerText = file.name;
+    document.getElementById('previewSize').innerText = (file.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('filePreview').classList.remove('hidden');
+  };
+
+  window.clearAttachment = () => {
+    fileInput.value = '';
+    document.getElementById('filePreview').classList.add('hidden');
+  };
+
+  function updateMessageReactions(msgId, reactions) {
+    const row = document.getElementById(`reactions-${msgId}`);
+    if(!row) return;
+    
+    row.innerHTML = (reactions || []).map(r => `
+      <span class="px-2 py-0.5 rounded-full ${r.reacted ? 'bg-sky-500/20 border-sky-500/30' : 'bg-slate-800/80 border-white/5'} border text-[10px] reaction-badge flex items-center gap-1 transition-all hover:scale-105 cursor-pointer"
+            onclick="sendReaction('${r.emoji}', ${msgId})">
+        <span>${r.emoji}</span>
+        ${r.count > 1 ? `<span class="font-bold text-slate-400">${r.count}</span>` : ''}
+      </span>
+    `).join('');
+  }
+
+  window.sendReaction = async (emoji, forceMsgId = null) => {
+    const msgId = forceMsgId || activeReactionMsgId;
+    if(!msgId) return;
+    
+    picker.classList.add('hidden');
+    try {
+      const r = await fetch(`/chat/message/${msgId}/react/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken },
+        body: new URLSearchParams({ emoji })
+      });
+      const data = await r.json();
+      if(data.status === 'ok') {
+        updateMessageReactions(msgId, data.reactions);
+      } 
+    } catch(err) { console.error(err); }
+  }
+
 })();
 </script>
 {% endblock %}
