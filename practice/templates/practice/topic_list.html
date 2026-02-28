@@ -3,25 +3,78 @@
 {% block title %}Topics | Practice | Elevo{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6">
-    <h1 class="text-3xl font-bold text-white">Browse by Topics</h1>
-    <p class="text-slate-300 mt-2">Choose a topic and jump straight to relevant problems.</p>
-  </div>
+<div class="min-h-screen relative overflow-hidden py-12">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    {% for topic in topics %}
-      <a href="{% url 'practice:problem-list' %}?topic={{ topic.id }}" class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5 hover:border-teal-400 transition-colors">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white">{{ topic.name }}</h2>
-          <span class="px-2.5 py-1 rounded-lg text-xs bg-sky-500/10 border border-sky-500/30 text-sky-300">{{ topic.problem_count }}</span>
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <!-- Header -->
+        <div class="mb-12 animate-reveal">
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-sky-400 mb-2">Knowledge Domains</p>
+            <h1 class="text-4xl sm:text-5xl font-black text-white brand-font tracking-tight mb-4">Browse by Topics</h1>
+            <p class="text-slate-400 font-medium max-w-2xl">Target specific programming domains and master the underlying algorithms and data structures.</p>
         </div>
-        <p class="text-sm text-slate-400 mt-2">{{ topic.description|default:"No description available."|truncatechars:110 }}</p>
-        <div class="mt-4 text-sm text-teal-300 font-medium inline-flex items-center gap-1">Explore <i class="ri-arrow-right-line"></i></div>
-      </a>
-    {% empty %}
-      <div class="col-span-full rounded-2xl border border-slate-700 bg-slate-900/65 p-8 text-center text-slate-400">No topics available yet.</div>
-    {% endfor %}
-  </div>
-</section>
+
+        <!-- Topics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for topic in topics %}
+            <div class="topic-card group animate-reveal" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                <a href="{% url 'practice:problem-list' %}?topic={{ topic.id }}" class="block h-full">
+                    <div class="glass-elevated h-full rounded-3xl border border-white/5 hover:border-sky-500/30 p-8 transition-all duration-500 group-hover:-translate-y-2 relative overflow-hidden">
+                        <!-- BG Accent -->
+                        <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-sky-500/5 rounded-full blur-3xl group-hover:bg-sky-500/10 transition-colors"></div>
+
+                        <div class="relative z-10 flex flex-col h-full">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:border-sky-500/30 transition-all duration-500">
+                                    <i class="ri-braces-line text-2xl text-sky-400"></i>
+                                </div>
+                                <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    {{ topic.problem_count }} Challenges
+                                </div>
+                            </div>
+
+                            <h2 class="text-2xl font-black text-white brand-font tracking-tight mb-3 group-hover:text-sky-400 transition-colors">{{ topic.name }}</h2>
+                            <p class="text-sm text-slate-500 font-medium leading-relaxed mb-8 line-clamp-3">
+                                {{ topic.description|default:"Deep dive into specialized algorithmic patterns and implementation strategies for this domain." }}
+                            </p>
+
+                            <div class="mt-auto flex items-center gap-2 text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] group-hover:gap-4 transition-all">
+                                Explore Domain <i class="ri-arrow-right-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-span-full glass-elevated rounded-3xl border border-dashed border-white/10 p-20 text-center animate-reveal">
+                <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+                    <i class="ri-bubble-chart-line text-4xl text-slate-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-400 tracking-tight">No domains found in the archive.</h3>
+                <p class="text-slate-500 mt-2">Check back later for new programming topics.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+    .animate-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        gsap.to(".animate-reveal", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+    });
+</script>
 {% endblock %}

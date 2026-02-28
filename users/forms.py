@@ -9,33 +9,22 @@ from .models import TutorApplication, UserProfile
 
 class SignupForm(UserCreationForm):
     """
-    Custom signup form for user registration, including email and role selection.
+    Simplified signup form for user registration.
+    Roles are assigned automatically in the backend.
     """
     email = forms.EmailField(
         required=True,
         widget=forms.EmailInput(attrs={
-            'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
             'placeholder': 'Enter your email address'
         })
-    )
-    
-    role = forms.ChoiceField(
-        choices=[('STUDENT', 'Student'), ('TUTOR', 'Tutor')],
-        widget=forms.RadioSelect(attrs={'class': 'form-radio h-4 w-4 text-blue-600'}),
-        initial='STUDENT',
-        help_text="Select your primary role on the platform."
     )
 
     class Meta:
         model = User
-        # CORRECTED: Removed 'password1' and 'password2' from this list.
-        # UserCreationForm handles password fields automatically.
-        # This list should only contain fields that exist on the User model.
         fields = ['username', 'email']
         widgets = {
             'username': forms.TextInput(attrs={
-                'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                'placeholder': 'Choose a username'
+                'placeholder': 'Choose a unique username'
             }),
         }
     

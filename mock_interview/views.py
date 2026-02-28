@@ -957,6 +957,35 @@ def start_mock_interview(request):
 @login_required
 @user_passes_test(is_student, login_url="/login/")
 def interview_setup(request):
+    """
+    Step 1: Onboarding for mock interview.
+    Collect job role, skills, and optionally a resume (file or profile-based).
+    """
+    # --- Subscription Limit Check ---
+    now = timezone.now()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    interviews_this_month = MockInterviewSession.objects.filter(
+        user=request.user,
+        created_at__gte=month_start
+    ).count()
+
+    # Determine limit (from org plan or default free tier)
+    monthly_limit = 2 # Default for individual free users
+    if hasattr(request, 'premium_plan') and request.premium_plan:
+        monthly_limit = request.premium_plan.max_interviews_monthly
+    
+    if monthly_limit != -1 and interviews_this_month >= monthly_limit:
+        messages.warning(
+            request, 
+            f"You've reached your monthly limit of {monthly_limit} AI Mock Interviews. "
+            "Get 'Elevo Pro' through your institution for unlimited interviews!"
+        )
+        return render(request, 'aptitude/limit_reached.html', {
+            'limit': monthly_limit,
+            'feature': 'Mock Interviews (Monthly)',
+            'is_individual': not getattr(request, 'is_premium', False)
+        })
+
     insights = None
     if request.method == "POST":
         action = request.POST.get("action", "start")

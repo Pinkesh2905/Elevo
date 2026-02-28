@@ -28,6 +28,7 @@ from .forms import (
     ResendVerificationForm, EmailChangeForm, TutorApplicationForm
 )
 from posts.models import Comment, Follow, Post, Repost
+from practice.models import Problem
 
 
 # --- Role helper functions ---
@@ -58,10 +59,15 @@ def signup(request):
     """
     Handles user registration without email verification.
     Users can login immediately after signup.
+    Supports invitation bypass via invite_token.
     """
     if request.user.is_authenticated:
         return redirect('dashboard_redirect')
     
+    # Get invitation data from URL
+    invite_email = request.GET.get('email', '')
+    invite_token = request.GET.get('invite_token', '')
+
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -71,45 +77,80 @@ def signup(request):
                 user.is_active = True  # Account active immediately
                 user.save()
 
-                selected_role = form.cleaned_data.get('role', 'STUDENT')
+                # Process invitation logic if token exists
+                is_invited = False
+                if invite_token:
+                    from organizations.models import OrgInvitation
+                    invite = OrgInvitation.objects.filter(token=invite_token, status='PENDING').first()
+                    if invite:
+                        is_invited = True
 
-                # Set up user profile
-                if hasattr(user, 'profile'):
-                    user.profile.role = selected_role
-                    user.profile.is_email_verified = True  # Mark as verified
-                    user.profile.save()
+                # Setup profile
+                profile, created = UserProfile.objects.get_or_create(user=user)
+                profile.role = 'STUDENT'
+                
+                if is_invited:
+                    profile.onboarded = True
                 else:
-                    UserProfile.objects.create(
-                        user=user, 
-                        role=selected_role,
-                        is_email_verified=True  # Mark as verified
-                    )
+                    profile.onboarded = False
+                
+                profile.save()
 
                 # Log the user in immediately
                 auth_login(request, user)
 
-                if selected_role == 'TUTOR':
-                    get_or_create_tutor_application(user)
-                    messages.success(
-                        request,
-                        (
-                            f"Welcome to Elevo, {user.username}. "
-                            "Complete your tutor application to start the review process."
-                        )
-                    )
-                    return redirect('users:tutor_application')
-                else:
-                    messages.success(
-                        request,
-                        f"Welcome to Elevo, {user.username}! Your account has been created successfully."
-                    )
+                if is_invited:
+                    messages.success(request, f"Welcome to Elevo! You've successfully joined via invitation.")
+                    return redirect('organizations:join_org', token=invite_token)
+                
+                messages.success(
+                    request,
+                    f"Welcome to Elevo, {user.username}! Let's set up your account."
+                )
                 return redirect('dashboard_redirect')
         else:
             messages.error(request, "Please correct the errors below.")
     else:
-        form = SignupForm()
+        # Pre-fill email if coming from an invitation link
+        initial_data = {}
+        if invite_email:
+            initial_data['email'] = invite_email
+        form = SignupForm(initial=initial_data)
 
-    return render(request, 'users/signup.html', {'form': form})
+    return render(request, 'users/signup.html', {
+        'form': form,
+        'invite_token': invite_token,
+        'invite_email': invite_email
+    })
+
+
+@login_required
+def onboarding_wizard(request):
+    """
+    Onboarding wizard for new users to choose their career goal or institutional role.
+    """
+    profile = request.user.profile
+    if profile.onboarded:
+        return redirect('dashboard_redirect')
+
+    if request.method == 'POST':
+        goal = request.POST.get('goal')
+        if goal == 'student':
+            profile.role = 'STUDENT'
+            profile.onboarded = True
+            profile.save()
+            messages.success(request, "Welcome! Let's start your career journey.")
+            return redirect('home')
+        elif goal == 'org_admin':
+            profile.role = 'ORG_ADMIN'
+            profile.onboarded = True
+            profile.save()
+            messages.success(request, "Welcome, Admin! Let's set up your organization.")
+            return redirect('organizations:create_org')
+        else:
+            messages.error(request, "Please select an option to continue.")
+
+    return render(request, 'users/onboarding.html')
 
 
 @login_required
@@ -631,8 +672,9 @@ def profile(request):
         coding_solved = UserProblemProgress.objects.filter(
             user=request.user, status='solved'
         ).count()
+        coding_percent = (coding_solved / coding_total * 100) if coding_total > 0 else 0
     except Exception:
-        pass
+        coding_percent = 0
 
     try:
         from aptitude.models import AptitudeQuizAttempt
@@ -663,6 +705,7 @@ def profile(request):
         'following_count': following_count,
         'coding_total': coding_total,
         'coding_solved': coding_solved,
+        'coding_percent': coding_percent,
         'aptitude_quizzes': aptitude_quizzes,
         'aptitude_avg': aptitude_avg,
         'is_own_profile': True,

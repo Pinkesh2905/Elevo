@@ -47,3 +47,12 @@ class PremiumAccessMiddleware(MiddlewareMixin):
                 request.user_org = membership.organization
                 request.premium_plan = sub.plan
                 request.is_premium = True
+        else:
+            # Check for personal subscription
+            try:
+                sub = request.user.personal_subscription
+                if sub.is_valid:
+                    request.premium_plan = sub.plan
+                    request.is_premium = True
+            except Exception:
+                pass

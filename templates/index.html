@@ -227,9 +227,9 @@
             <p class="text-[10px] text-slate-500 mt-1 uppercase">Inc. FAANG</p>
           </div>
           <div class="home-card p-5 reveal-card">
-            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Interviews</p>
-            <p class="text-3xl font-bold text-white">{{ stats.total_sessions }}<span class="text-emerald-400 text-sm ml-1">+</span></p>
-            <p class="text-[10px] text-slate-500 mt-1 uppercase">AI Transcripts</p>
+            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Aptitude Pool</p>
+            <p class="text-3xl font-bold text-white">{{ stats.total_questions }}<span class="text-emerald-400 text-sm ml-1">+</span></p>
+            <p class="text-[10px] text-slate-500 mt-1 uppercase">Logic Questions</p>
           </div>
           <div class="home-card p-5 reveal-card">
             <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Candidates</p>
@@ -384,7 +384,7 @@
     const consoleElement = document.getElementById('careerConsole');
     const messages = [
       "> Scanning active problems...",
-      "> Found {{ stats.total_problems }} challenges.",
+      "> Found {{ stats.total_problems }} code + {{ stats.total_questions }} logic challenges.",
       "> Checking target companies...",
       "> Analysis complete: Optimize for Recursion.",
       "> System ready. Awaiting user input."

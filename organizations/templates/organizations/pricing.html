@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pricing | Elevo{% endblock %}
+
+{% block content %}
+<section class="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Ambient backgrounds -->
+    <div class="absolute top-1/4 -right-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 -left-20 w-96 h-96 bg-violet-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16">
+            <h1 class="text-5xl font-black text-white brand-font mb-6">
+                Choose Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Power Level</span>
+            </h1>
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+                Whether you're practicing solo or managing a massive batch, we have the perfect protocol for your growth.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Solo Free -->
+            <div class="glass-elevated rounded-[2.5rem] p-8 border border-white/10 bg-slate-900/40 backdrop-blur-xl flex flex-col hover:border-cyan-500/30 transition-all group">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-slate-300 uppercase tracking-widest mb-2">Solo Practice</h3>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-4xl font-black text-white">Free</span>
+                    </div>
+                </div>
+                <ul class="space-y-4 mb-10 flex-grow">
+                    <li class="flex items-center gap-3 text-slate-400">
+                        <i class="ri-checkbox-circle-fill text-cyan-400"></i>
+                        <span>3 Aptitude Quizzes / Day</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-400">
+                        <i class="ri-checkbox-circle-fill text-cyan-400"></i>
+                        <span>10 Coding Problems / Day</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-500 line-through">
+                        <i class="ri-close-circle-line"></i>
+                        <span>AI Mock Interviews</span>
+                    </li>
+                </ul>
+                <button class="w-full py-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all">Current Plan</button>
+            </div>
+
+            <!-- Personal Pro -->
+            <div class="glass-elevated rounded-[2.5rem] p-8 border-2 border-cyan-500/50 bg-slate-950/60 backdrop-blur-2xl flex flex-col shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)] relative transform lg:-translate-y-4">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-slate-950 text-xs font-black uppercase tracking-widest">Recommended</div>
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-cyan-400 uppercase tracking-widest mb-2">Personal Pro</h3>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-4xl font-black text-white">₹499</span>
+                        <span class="text-slate-500 font-medium">/month</span>
+                    </div>
+                </div>
+                <ul class="space-y-4 mb-10 flex-grow">
+                    <li class="flex items-center gap-3 text-slate-200">
+                        <i class="ri-checkbox-circle-fill text-emerald-400"></i>
+                        <span>Unlimited Aptitude</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-200">
+                        <i class="ri-checkbox-circle-fill text-emerald-400"></i>
+                        <span>Unlimited Coding Problems</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-200">
+                        <i class="ri-checkbox-circle-fill text-emerald-400"></i>
+                        <span>10 AI Mock Interviews / Mo</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-200">
+                        <i class="ri-checkbox-circle-fill text-emerald-400"></i>
+                        <span>Access Editorials & Solutions</span>
+                    </li>
+                </ul>
+                <form method="POST" action="{% url 'organizations:checkout_individual' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="plan_name" value="PERSONAL_PRO">
+                    <button type="submit" class="w-full py-4 rounded-xl bg-cyan-500 text-slate-950 font-black text-lg hover:bg-cyan-400 hover:scale-[1.02] transition-all shadow-lg shadow-cyan-500/20">Upgrade Now</button>
+                </form>
+            </div>
+
+            <!-- Organization -->
+            <div class="glass-elevated rounded-[2.5rem] p-8 border border-white/10 bg-slate-900/40 backdrop-blur-xl flex flex-col hover:border-violet-500/30 transition-all group">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-slate-300 uppercase tracking-widest mb-2">Institutional</h3>
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-4xl font-black text-white">Custom</span>
+                    </div>
+                </div>
+                <ul class="space-y-4 mb-10 flex-grow">
+                    <li class="flex items-center gap-3 text-slate-400">
+                        <i class="ri-checkbox-circle-fill text-violet-400"></i>
+                        <span>Batch Analytics & Heatmaps</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-400">
+                        <i class="ri-checkbox-circle-fill text-violet-400"></i>
+                        <span>Sponsor Full Class Rooms</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-400">
+                        <i class="ri-checkbox-circle-fill text-violet-400"></i>
+                        <span>Custom Branding</span>
+                    </li>
+                </ul>
+                <a href="{% url 'organizations:create_org' %}" class="w-full py-4 rounded-xl border border-violet-500/30 text-violet-400 font-bold hover:bg-violet-500/10 text-center transition-all">Setup Organization</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .glass-elevated {
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+</style>
+{% endblock %}

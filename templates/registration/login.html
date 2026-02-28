@@ -4,136 +4,163 @@
 {% block title %}Login | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-  <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="hidden lg:flex flex-col justify-between rounded-3xl p-8 border border-slate-700/60 bg-gradient-to-br from-slate-900/90 to-slate-800/70 backdrop-blur-xl">
-      <div>
-        <p class="text-xs uppercase tracking-[0.18em] text-sky-300 font-semibold mb-3">Elevo Access</p>
-        <h1 class="text-4xl font-bold text-white leading-tight">Sign in and continue your interview prep flow.</h1>
-        <p class="text-slate-300 mt-4 text-base leading-relaxed">Pick up coding practice, run AI interviews, and keep your learning streak active from one workspace.</p>
-      </div>
-      <div class="grid grid-cols-2 gap-3 mt-8">
-        <div class="rounded-xl border border-sky-400/25 bg-sky-500/10 p-4">
-          <p class="text-sky-200 text-xs uppercase tracking-wide">Problems</p>
-          <p class="text-white text-2xl font-bold mt-1">1200+</p>
-        </div>
-        <div class="rounded-xl border border-emerald-400/25 bg-emerald-500/10 p-4">
-          <p class="text-emerald-200 text-xs uppercase tracking-wide">Active Learners</p>
-          <p class="text-white text-2xl font-bold mt-1">25K+</p>
-        </div>
-      </div>
-    </div>
+<section class="min-h-[90vh] py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative overflow-hidden">
+    <!-- Ambient Background Elements -->
+    <div class="absolute top-1/4 -left-20 w-80 h-80 bg-sky-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-    <div class="glass-elevated rounded-3xl p-7 sm:p-9 border border-slate-700/50 bg-slate-900/90 backdrop-blur-xl">
-      <div class="mb-7">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 mb-4 shadow-lg">
-          <i class="ri-login-box-line text-white text-xl"></i>
-        </div>
-        <h2 class="text-3xl font-bold text-white">Welcome Back</h2>
-        <p class="text-slate-400 mt-2">Use your Elevo account credentials to sign in.</p>
-      </div>
-
-      {% if messages %}
-        <div class="mb-5 space-y-3">
-          {% for message in messages %}
-            <div class="text-sm px-4 py-3 rounded-xl border
-              {% if message.tags == 'success' %}bg-emerald-500/10 text-emerald-200 border-emerald-500/30
-              {% elif message.tags == 'error' %}bg-red-500/10 text-red-200 border-red-500/30
-              {% elif message.tags == 'warning' %}bg-yellow-500/10 text-yellow-200 border-yellow-500/30
-              {% else %}bg-sky-500/10 text-sky-200 border-sky-500/30{% endif %}">
-              {{ message }}
+    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10" id="loginContainer">
+        <!-- Brand Side -->
+        <div class="hidden lg:flex flex-col justify-center space-y-8" id="loginInfo">
+            <div>
+                <p class="text-xs uppercase tracking-[0.25em] text-cyan-400 font-bold mb-4 opacity-0" id="loginSub">Engineering Excellence</p>
+                <h1 class="text-5xl font-black text-white leading-[1.1] brand-font opacity-0" id="loginTitle">
+                    Master the Tech<br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Interview Cycle.</span>
+                </h1>
+                <p class="text-slate-400 mt-6 text-lg leading-relaxed max-w-md opacity-0" id="loginDesc">
+                    Access high-fidelity mock interviews, optimized coding tracks, and real-time performance analytics 
+                    within a premium engineering environment.
+                </p>
             </div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <form method="POST" action="{% url 'login' %}" class="space-y-5" novalidate autocomplete="off">
-        {% csrf_token %}
-        <input type="text" name="fake_username" autocomplete="username" class="hidden" tabindex="-1" aria-hidden="true">
-        <input type="password" name="fake_password" autocomplete="current-password" class="hidden" tabindex="-1" aria-hidden="true">
-
-        {% if form.non_field_errors %}
-          <div class="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
-          </div>
-        {% endif %}
-
-        <div>
-          <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Username or Email</label>
-          <div class="relative">
-            <i class="ri-user-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-            <input
-              type="text"
-              name="{{ form.username.name }}"
-              id="{{ form.username.id_for_label }}"
-              value="{{ form.username.value|default:'' }}"
-              placeholder="you@example.com"
-              autocomplete="off"
-              autocapitalize="none"
-              spellcheck="false"
-              readonly
-              onfocus="this.removeAttribute('readonly');"
-              class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 {% if form.username.errors %}border-red-500 focus:ring-red-500{% endif %}"
-              {% if form.username.field.required %}required{% endif %}
-            >
-          </div>
-          {% for error in form.username.errors %}<p class="text-red-300 text-xs mt-2">{{ error }}</p>{% endfor %}
+            
         </div>
 
-        <div>
-          <label for="{{ form.password.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">Password</label>
-          <div class="relative">
-            <i class="ri-lock-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-            <input
-              type="password"
-              name="{{ form.password.name }}"
-              id="{{ form.password.id_for_label }}"
-              placeholder="Enter your password"
-              autocomplete="off"
-              readonly
-              onfocus="this.removeAttribute('readonly');"
-              class="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 {% if form.password.errors %}border-red-500 focus:ring-red-500{% endif %}"
-              {% if form.password.field.required %}required{% endif %}
-            >
-            <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-300" onclick="togglePassword('{{ form.password.id_for_label }}')">
-              <i class="ri-eye-line" id="password-toggle-icon"></i>
-            </button>
-          </div>
-          {% for error in form.password.errors %}<p class="text-red-300 text-xs mt-2">{{ error }}</p>{% endfor %}
+        <!-- Form Side -->
+        <div class="glass-elevated rounded-[2.5rem] p-10 sm:p-12 border border-white/10 bg-slate-950/40 backdrop-blur-3xl shadow-2xl opacity-0" id="loginCard">
+            <div class="mb-10 text-center lg:text-left">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 border border-cyan-500/20 mb-6 shadow-glow-sm">
+                    <i class="ri-shield-user-line text-cyan-400 text-2xl"></i>
+                </div>
+                <h2 class="text-3xl font-black text-white brand-font">Welcome Back</h2>
+                <p class="text-slate-400 mt-2">Authenticate to access your workspace.</p>
+            </div>
+
+            {% if messages %}
+                <div class="mb-8 space-y-3">
+                    {% for message in messages %}
+                        <div class="text-sm px-5 py-4 rounded-2xl border backdrop-blur-md animate-in fade-in slide-in-from-top-4
+                            {% if message.tags == 'success' %}bg-emerald-500/10 text-emerald-300 border-emerald-500/20
+                            {% elif message.tags == 'error' %}bg-red-500/10 text-red-300 border-red-500/20
+                            {% else %}bg-cyan-500/10 text-cyan-300 border-cyan-500/20{% endif %}">
+                            <div class="flex items-center gap-3">
+                                <i class="{% if message.tags == 'success' %}ri-checkbox-circle-line{% elif message.tags == 'error' %}ri-error-warning-line{% else %}ri-information-line{% endif %} text-lg"></i>
+                                <span class="font-medium">{{ message }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'login' %}" class="space-y-6" novalidate autocomplete="off">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="rounded-2xl border border-red-500/20 bg-red-500/5 px-5 py-4 text-sm text-red-300 backdrop-blur-md">
+                        {% for error in form.non_field_errors %}<div class="flex items-center gap-2"><i class="ri-error-warning-fill"></i> {{ error }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="space-y-2">
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-bold text-slate-300 uppercase tracking-widest ml-1">Identity</label>
+                    <div class="relative group">
+                        <i class="ri-at-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors"></i>
+                        <input
+                            type="text"
+                            name="{{ form.username.name }}"
+                            id="{{ form.username.id_for_label }}"
+                            value="{{ form.username.value|default:'' }}"
+                            placeholder="username or email"
+                            class="w-full pl-12 pr-4 py-4 rounded-2xl border border-white/5 bg-white/[0.03] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all {% if form.username.errors %}border-red-500/50 focus:ring-red-500/50{% endif %}"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between ml-1">
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-bold text-slate-300 uppercase tracking-widest">Access Key</label>
+                        <a href="{% url 'users:forgot_password' %}" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors">Lost Access?</a>
+                    </div>
+                    <div class="relative group">
+                        <i class="ri-lock-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors"></i>
+                        <input
+                            type="password"
+                            name="{{ form.password.name }}"
+                            id="{{ form.password.id_for_label }}"
+                            placeholder="••••••••"
+                            class="w-full pl-12 pr-12 py-4 rounded-2xl border border-white/5 bg-white/[0.03] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all {% if form.password.errors %}border-red-500/50 focus:ring-red-500/50{% endif %}"
+                            required
+                        >
+                        <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors" onclick="togglePassword('{{ form.password.id_for_label }}')">
+                            <i class="ri-eye-line" id="password-toggle-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center pt-2">
+                    <label class="relative flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="remember_me" class="peer sr-only">
+                        <div class="w-6 h-6 rounded-lg border border-white/10 bg-white/5 peer-checked:bg-cyan-500 peer-checked:border-cyan-400 transition-all flex items-center justify-center">
+                            <i class="ri-check-line text-white scale-0 peer-checked:scale-100 transition-transform"></i>
+                        </div>
+                        <span class="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Maintain active session</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full group relative py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black text-lg transition-all hover:scale-[1.02] hover:shadow-cyan-500/20 active:scale-[0.98] overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:animate-shimmer"></div>
+                    <span class="relative flex items-center justify-center gap-3">
+                        <i class="ri-key-fill"></i> Authorized Access
+                    </span>
+                </button>
+            </form>
+
+            <div class="mt-10 text-center">
+                <span class="text-slate-500 text-sm font-medium">New to the platform?</span>
+                <a href="{% url 'users:signup' %}" class="ml-2 py-2 px-4 rounded-xl bg-white/5 text-cyan-400 font-bold text-sm hover:bg-white/10 transition-colors">Initialize Account</a>
+            </div>
         </div>
-
-        <div class="flex items-center justify-between">
-          <label class="inline-flex items-center gap-2 text-sm text-slate-400">
-            <input type="checkbox" name="remember_me" class="rounded border-slate-500 bg-slate-800 text-sky-500 focus:ring-sky-500">
-            Remember me
-          </label>
-          <a href="{% url 'users:forgot_password' %}" class="text-sm font-medium text-teal-300 hover:text-teal-200">Forgot password?</a>
-        </div>
-
-        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-semibold text-base shadow-lg transition-all">
-          <span class="inline-flex items-center gap-2"><i class="ri-arrow-right-line"></i> Sign In</span>
-        </button>
-      </form>
-
-      <p class="text-center text-sm text-slate-400 mt-6">
-        New to Elevo?
-        <a href="{% url 'users:signup' %}" class="text-sky-300 hover:text-teal-300 font-semibold">Create your account</a>
-      </p>
     </div>
-  </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
-function togglePassword(fieldId) {
-  const passwordField = document.getElementById(fieldId);
-  const toggleIcon = document.getElementById('password-toggle-icon');
-  if (passwordField.type === 'password') {
-    passwordField.type = 'text';
-    toggleIcon.className = 'ri-eye-off-line';
-  } else {
-    passwordField.type = 'password';
-    toggleIcon.className = 'ri-eye-line';
-  }
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.2 }});
+        
+        tl.to("#loginCard", { opacity: 1, y: 0, from: { y: 40 }})
+          .to("#loginSub", { opacity: 1, x: 0, from: { x: -20 }, duration: 0.8 }, "-=0.8")
+          .to("#loginTitle", { opacity: 1, y: 0, from: { y: 20 } }, "-=0.6")
+          .to("#loginDesc", { opacity: 1, y: 0, from: { y: 20 } }, "-=0.8")
+          .to("#loginStats", { opacity: 1, y: 0, from: { y: 20 } }, "-=0.6");
+    });
+
+    function togglePassword(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        const toggleIcon = document.getElementById('password-toggle-icon');
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.className = 'ri-eye-off-line text-emerald-400';
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.className = 'ri-eye-line';
+        }
+    }
 </script>
+
+<style>
+    .glass-elevated {
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+    .shadow-glow-sm {
+        box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+    }
+    @keyframes shimmer {
+        100% { transform: translateX(100%); }
+    }
+    .animate-shimmer {
+        animation: shimmer 1.5s infinite;
+    }
+</style>
 {% endblock %}

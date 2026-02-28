@@ -1,179 +1,191 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load form_filters %}
 
 {% block title %}Create Account | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen px-4 py-10 sm:px-6 lg:px-8">
-  <div class="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-5">
-    <aside class="dark-card rounded-2xl border border-white/10 p-6 lg:col-span-2">
-      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-300">Welcome to Elevo</p>
-      <h1 class="mt-3 text-3xl font-bold text-white brand-font">Build interview confidence, step by step.</h1>
-      <p class="mt-3 text-sm leading-6 text-slate-300">
-        Join as a student to practice coding, aptitude, and AI interviews. Join as a tutor to manage question banks and review interview sessions.
-      </p>
+<section class="min-h-[90vh] py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center relative overflow-hidden">
+    <!-- Ambient Background Elements -->
+    <div class="absolute top-1/4 -right-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 -left-20 w-96 h-96 bg-violet-500/10 rounded-full blur-[130px] pointer-events-none"></div>
 
-      <div class="mt-6 space-y-3">
-        <div class="rounded-xl border border-slate-700/60 bg-slate-900/40 p-4">
-          <p class="text-sm font-semibold text-slate-100">Student Account</p>
-          <p class="mt-1 text-xs text-slate-400">Access coding practice, aptitude tracks, and mock interviews.</p>
-        </div>
-        <div class="rounded-xl border border-amber-400/30 bg-amber-500/10 p-4">
-          <p class="text-sm font-semibold text-amber-100">Tutor Account</p>
-          <p class="mt-1 text-xs text-amber-200">Requires admin approval before tutor dashboard access is enabled.</p>
-        </div>
-      </div>
-
-      <div class="mt-8 rounded-xl border border-sky-400/30 bg-sky-500/10 p-4">
-        <p class="text-xs font-semibold uppercase tracking-wide text-sky-200">Security</p>
-        <p class="mt-1 text-xs text-sky-100">Use a strong password with upper/lowercase letters, numbers, and symbols.</p>
-      </div>
-    </aside>
-
-    <main class="dark-card rounded-2xl border border-white/10 p-6 sm:p-8 lg:col-span-3">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-white">Create Your Account</h2>
-        <p class="mt-1 text-sm text-slate-400">Start in less than a minute.</p>
-      </div>
-
-      {% if form.non_field_errors %}
-      <div class="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-        {% for error in form.non_field_errors %}
-          <p>{{ error }}</p>
-        {% endfor %}
-      </div>
-      {% endif %}
-
-      {% if form.errors %}
-      <div class="mb-4 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-        <p class="font-semibold">Please correct the highlighted fields.</p>
-      </div>
-      {% endif %}
-
-      <form method="post" class="space-y-5" autocomplete="off" novalidate>
-        {% csrf_token %}
-
-        <div>
-          <label class="mb-2 block text-sm font-semibold text-slate-200">Username</label>
-          <div class="relative">
-            <i class="ri-at-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-            {{ form.username|add_attr:"autocomplete=off,autocapitalize=none,spellcheck=false"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
-          </div>
-          {% if form.username.errors %}
-            <p class="mt-1 text-xs text-red-300">{{ form.username.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <div>
-          <label class="mb-2 block text-sm font-semibold text-slate-200">Email</label>
-          <div class="relative">
-            <i class="ri-mail-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-            {{ form.email|add_attr:"autocomplete=email"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
-          </div>
-          {% if form.email.errors %}
-            <p class="mt-1 text-xs text-red-300">{{ form.email.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <div>
-          <label class="mb-2 block text-sm font-semibold text-slate-200">Choose Your Role</label>
-          <div class="grid gap-3 sm:grid-cols-2" id="roleCards">
-            {% for radio in form.role %}
-            <label for="{{ radio.id_for_label }}" class="role-card cursor-pointer rounded-xl border border-slate-600/70 bg-slate-900/50 p-4 transition hover:border-sky-400/60">
-              <div class="flex items-start gap-3">
-                {{ radio.tag }}
-                <div>
-                  <p class="text-sm font-semibold text-slate-100">{{ radio.choice_label }}</p>
-                  <p class="mt-1 text-xs text-slate-400">
-                    {% if radio.choice_label == 'Student' %}
-                      Practice and track your placement preparation.
-                    {% else %}
-                      Create and review learning content after admin approval.
-                    {% endif %}
-                  </p>
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-5 gap-12 items-center relative z-10">
+        <!-- Vision Side -->
+        <div class="lg:col-span-2 space-y-10" id="signupVision">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-6 opacity-0" id="badge">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    </span>
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest">Public Beta Access</span>
                 </div>
-              </div>
-            </label>
-            {% endfor %}
-          </div>
-          {% if form.role.errors %}
-            <p class="mt-1 text-xs text-red-300">{{ form.role.errors.0 }}</p>
-          {% endif %}
-          <p class="mt-2 text-xs text-amber-200">Tutor accounts are created immediately but remain pending until approved by admin.</p>
+                <h1 class="text-5xl font-black text-white leading-tight brand-font opacity-0" id="signupTitle">
+                    Your Engineering<br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400">Evolution Starts.</span>
+                </h1>
+                <p class="text-slate-400 mt-6 text-lg leading-relaxed opacity-0" id="signupDesc">
+                    Join the elite circle of prepared developers. One unified account for everything Elevo.
+                </p>
+            </div>
+
+            <div class="space-y-4 opacity-0" id="signupFeatures">
+                <div class="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-cyan-500/30 transition-colors group">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                        <i class="ri-terminal-box-line text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold">Unified Practice</h4>
+                        <p class="text-slate-500 text-sm">Coding, Aptitude, and AI Mock Interviews in one dashboard.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition-colors group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                        <i class="ri-organization-chart text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold">Organization Ready</h4>
+                        <p class="text-slate-500 text-sm">Seamlessly connect with your college or company campus.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-200">Password</label>
-            <div class="relative">
-              <i class="ri-lock-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              {{ form.password1|add_attr:"autocomplete=new-password"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-10 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
-              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200" data-toggle-password="id_password1">
-                <i class="ri-eye-line"></i>
-              </button>
+        <!-- Registration Card -->
+        <div class="lg:col-span-3 glass-elevated rounded-[2.5rem] p-10 sm:p-12 border border-white/10 bg-slate-950/40 backdrop-blur-3xl shadow-2xl opacity-0" id="signupCard">
+            <div class="mb-10">
+                {% if invite_token %}
+                    <h2 class="text-3xl font-black text-white brand-font">Join Your Org</h2>
+                    <p class="text-slate-400 mt-2">Finish setting up your profile for <span class="text-cyan-400 font-bold">{{ invite_email }}</span>.</p>
+                {% else %}
+                    <h2 class="text-3xl font-black text-white brand-font">Create Account</h2>
+                    <p class="text-slate-400 mt-2">No roles to choose. Just one powerful profile.</p>
+                {% endif %}
             </div>
-            {% if form.password1.errors %}
-              <p class="mt-1 text-xs text-red-300">{{ form.password1.errors.0 }}</p>
-            {% endif %}
-          </div>
 
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-200">Confirm Password</label>
-            <div class="relative">
-              <i class="ri-shield-check-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              {{ form.password2|add_attr:"autocomplete=new-password"|add_class:"w-full rounded-xl border border-slate-600 bg-slate-900/70 py-3 pl-10 pr-10 text-sm text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" }}
-              <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200" data-toggle-password="id_password2">
-                <i class="ri-eye-line"></i>
-              </button>
-            </div>
-            {% if form.password2.errors %}
-              <p class="mt-1 text-xs text-red-300">{{ form.password2.errors.0 }}</p>
+            {% if messages %}
+                <div class="mb-8 space-y-3">
+                    {% for message in messages %}
+                        <div class="text-sm px-5 py-4 rounded-2xl border backdrop-blur-md {% if message.tags == 'error' %}bg-red-500/10 text-red-300 border-red-500/20{% else %}bg-cyan-500/10 text-cyan-300 border-cyan-500/20{% endif %}">
+                            <div class="flex items-center gap-3">
+                                <i class="{% if message.tags == 'error' %}ri-error-warning-line{% else %}ri-information-line{% endif %} text-lg"></i>
+                                <span class="font-medium">{{ message }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
-          </div>
+
+            <form method="post" class="space-y-6" autocomplete="off" novalidate id="signupForm">
+                {% csrf_token %}
+                {% if invite_token %}
+                    <input type="hidden" name="invite_token" value="{{ invite_token }}">
+                {% endif %}
+                {% if invite_email %}
+                    <input type="hidden" name="invite_email" value="{{ invite_email }}">
+                {% endif %}
+
+                <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-300 uppercase tracking-widest ml-1">Username</label>
+                        <div class="relative group">
+                            <i class="ri-user-smile-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors"></i>
+                            {{ form.username|add_attr:"autocomplete=off,autocapitalize=none,spellcheck=false"|add_class:"w-full pl-12 pr-4 py-4 rounded-2xl border border-white/5 bg-white/[0.03] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all" }}
+                        </div>
+                        {% if form.username.errors %}<p class="mt-1 text-xs text-red-400 ml-1">{{ form.username.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-300 uppercase tracking-widest ml-1">Email Node</label>
+                        <div class="relative group">
+                            <i class="ri-mail-send-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal-400 transition-colors"></i>
+                            {{ form.email|add_attr:"autocomplete=email"|add_class:"w-full pl-12 pr-4 py-4 rounded-2xl border border-white/5 bg-white/[0.03] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all" }}
+                        </div>
+                        {% if form.email.errors %}<p class="mt-1 text-xs text-red-400 ml-1">{{ form.email.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-300 uppercase tracking-widest ml-1">Security Key</label>
+                        <div class="relative group">
+                            <i class="ri-lock-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors"></i>
+                            {{ form.password1|add_attr:"autocomplete=new-password"|add_class:"w-full pl-12 pr-12 py-4 rounded-2xl border border-white/5 bg-white/[0.03] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all" }}
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors" data-toggle-password="id_password1">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                        </div>
+                        {% if form.password1.errors %}<p class="mt-1 text-xs text-red-400 ml-1">{{ form.password1.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-300 uppercase tracking-widest ml-1">Verify Key</label>
+                        <div class="relative group">
+                            <i class="ri-shield-keyhole-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-violet-400 transition-colors"></i>
+                            {{ form.password2|add_attr:"autocomplete=new-password"|add_class:"w-full pl-12 pr-12 py-4 rounded-2xl border border-white/5 bg-white/[0.03] text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all" }}
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors" data-toggle-password="id_password2">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                        </div>
+                        {% if form.password2.errors %}<p class="mt-1 text-xs text-red-400 ml-1">{{ form.password2.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full group relative py-4 rounded-2xl bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 text-white font-black text-lg transition-all hover:scale-[1.01] hover:shadow-cyan-500/20 active:scale-[0.99] overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-shimmer"></div>
+                        <span class="relative flex items-center justify-center gap-3">
+                            <i class="ri-user-add-fill"></i> Initialize Protocol
+                        </span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-10 text-center">
+                <span class="text-slate-500 text-sm font-medium">Already recognized?</span>
+                <a href="{% url 'login' %}" class="ml-2 py-2 px-4 rounded-xl bg-white/5 text-cyan-400 font-bold text-sm hover:bg-white/10 transition-colors">Authorized Sign In</a>
+            </div>
         </div>
-
-        <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white hover:from-sky-700 hover:to-teal-700 transition">
-          Create Account
-        </button>
-      </form>
-
-      <p class="mt-5 text-center text-sm text-slate-400">
-        Already have an account?
-        <a href="{% url 'login' %}" class="font-semibold text-sky-300 hover:text-sky-200">Sign in</a>
-      </p>
-    </main>
-  </div>
+    </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
-(function () {
-  const passwordToggles = document.querySelectorAll('[data-toggle-password]');
-  passwordToggles.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.togglePassword);
-      if (!target) return;
-      const icon = btn.querySelector('i');
-      const isPassword = target.type === 'password';
-      target.type = isPassword ? 'text' : 'password';
-      icon.className = isPassword ? 'ri-eye-off-line' : 'ri-eye-line';
-    });
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+        const tl = gsap.timeline({ defaults: { ease: "power4.out", duration: 1.2 }});
+        
+        tl.to("#signupCard", { opacity: 1, x: 0, from: { x: 40 }})
+          .to("#badge", { opacity: 1, y: 0, from: { y: -10 }, duration: 0.6 }, "-=0.8")
+          .to("#signupTitle", { opacity: 1, y: 0, from: { y: 20 } }, "-=0.6")
+          .to("#signupDesc", { opacity: 1, y: 0, from: { y: 20 } }, "-=0.8")
+          .to("#signupFeatures", { opacity: 1, y: 0, from: { y: 20 } }, "-=0.6");
 
-  const roleCards = document.querySelectorAll('.role-card');
-  const roleInputs = document.querySelectorAll('input[name="role"]');
-  function refreshRoleUI() {
-    roleCards.forEach((card) => card.classList.remove('border-emerald-400/70', 'bg-emerald-500/10'));
-    roleInputs.forEach((input) => {
-      if (input.checked) {
-        const card = input.closest('.role-card');
-        if (card) {
-          card.classList.add('border-emerald-400/70', 'bg-emerald-500/10');
-        }
-      }
+        const passwordToggles = document.querySelectorAll('[data-toggle-password]');
+        passwordToggles.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-toggle-password');
+                const target = document.getElementById(targetId);
+                if (!target) return;
+                const icon = btn.querySelector('i');
+                const isPassword = target.type === 'password';
+                target.type = isPassword ? 'text' : 'password';
+                icon.className = isPassword ? 'ri-eye-off-line' : 'ri-eye-line';
+                if (isPassword) icon.classList.add('text-cyan-400');
+                else icon.classList.remove('text-cyan-400');
+            });
+        });
     });
-  }
-  roleInputs.forEach((input) => input.addEventListener('change', refreshRoleUI));
-  refreshRoleUI();
-})();
 </script>
+
+<style>
+    .glass-elevated {
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    }
+    @keyframes shimmer {
+        100% { transform: translateX(100%); }
+    }
+    .animate-shimmer {
+        animation: shimmer 2s infinite;
+    }
+</style>
 {% endblock %}

@@ -1,45 +1,140 @@
 ﻿{% extends 'base.html' %}
 
-{% block title %}Submission #{{ submission.id }} | Practice | Elevo{% endblock %}
+{% block title %}Submission Analysis #{{ submission.id }} | Elevo{% endblock %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <a href="{% url 'practice:user_submissions' %}" class="text-sm text-slate-400 hover:text-teal-300 inline-flex items-center gap-1 mb-2"><i class="ri-arrow-left-line"></i> Back to submissions</a>
-      <h1 class="text-2xl sm:text-3xl font-bold text-white">Submission #{{ submission.id }}</h1>
-      <p class="text-slate-300 mt-1">{{ submission.problem.problem_number }}. {{ submission.problem.title }}</p>
-    </div>
-    <a href="{% url 'practice:problem_detail' submission.problem.slug %}" class="px-4 py-2 rounded-xl border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Open Problem</a>
-  </div>
+<div class="min-h-screen relative overflow-hidden py-12">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-    <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-4">
-      <p class="text-slate-400 text-xs uppercase">Status</p>
-      <p class="text-white font-semibold mt-1">{{ submission.get_status_display }}</p>
-    </div>
-    <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-4">
-      <p class="text-slate-400 text-xs uppercase">Passed</p>
-      <p class="text-white font-semibold mt-1">{{ submission.passed_test_cases }}/{{ submission.total_test_cases }}</p>
-    </div>
-    <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-4">
-      <p class="text-slate-400 text-xs uppercase">Language</p>
-      <p class="text-white font-semibold mt-1">{{ submission.language }}</p>
-    </div>
-  </div>
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <!-- Top Navigation -->
+        <div class="mb-8 animate-reveal">
+            <a href="{% url 'practice:user_submissions' %}" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-sky-400 transition-colors mb-3 group">
+                <i class="ri-arrow-left-line text-xs group-hover:-translate-x-1 transition-transform"></i>
+                Back to Archive
+            </a>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <h1 class="text-3xl sm:text-4xl font-black text-white brand-font tracking-tight">
+                    <span class="text-slate-600">Runtime ID</span> #{{ submission.id }}
+                </h1>
+                <a href="{% url 'practice:problem_detail' submission.problem.slug %}" class="h-11 px-8 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 font-black uppercase tracking-widest text-[10px] hover:bg-sky-500 hover:text-white transition-all">
+                    Re-Solve Problem
+                </a>
+            </div>
+        </div>
 
-  {% if submission.error_message %}
-  <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 mb-5">
-    <h2 class="text-red-200 font-semibold mb-2">Error Output</h2>
-    <pre class="text-sm text-red-100 whitespace-pre-wrap">{{ submission.error_message }}</pre>
-  </div>
-  {% endif %}
+        <!-- Meta Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-reveal" style="animation-delay: 100ms;">
+            <div class="glass-elevated border border-white/5 rounded-3xl p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 
+                    {% if submission.status == 'accepted' %}bg-emerald-500/10 text-emerald-400{% else %}bg-rose-500/10 text-rose-400{% endif %}">
+                    <i class="{% if submission.status == 'accepted' %}ri-verified-badge-line{% else %}ri-error-warning-line{% endif %} text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Final Status</p>
+                    <p class="text-base font-black text-white brand-font uppercase tracking-tight">{{ submission.get_status_display }}</p>
+                </div>
+            </div>
 
-  <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-    <h2 class="text-lg font-semibold text-white mb-3">Submitted Code</h2>
-    <pre class="text-sm text-slate-200 bg-slate-950 border border-slate-700 rounded-xl p-4 overflow-x-auto"><code>{{ submission.code }}</code></pre>
-  </div>
+            <div class="glass-elevated border border-white/5 rounded-3xl p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 bg-sky-500/10 text-sky-400">
+                    <i class="ri-flask-line text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Tests Passed</p>
+                    <p class="text-base font-black text-white brand-font uppercase tracking-tight">{{ submission.passed_test_cases }} / {{ submission.total_test_cases }}</p>
+                </div>
+            </div>
 
-  <p class="text-xs text-slate-500 mt-4">Submitted at {{ submission.created_at|date:"M d, Y H:i:s" }}</p>
-</section>
+            <div class="glass-elevated border border-white/5 rounded-3xl p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 bg-indigo-500/10 text-indigo-400">
+                    <i class="ri-code-box-line text-2xl"></i>
+                </div>
+                <div>
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Language</p>
+                    <p class="text-base font-black text-white brand-font uppercase tracking-tight">{{ submission.language }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="space-y-8">
+            {% if submission.error_message %}
+            <!-- Error Output -->
+            <div class="glass-elevated rounded-3xl border border-rose-500/30 bg-rose-500/5 p-8 animate-reveal" style="animation-delay: 200ms;">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
+                        <i class="ri-alert-fill text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-black text-white uppercase tracking-widest mb-1.5">Excution Error Stream</h2>
+                        <pre class="text-xs text-rose-300 font-mono leading-relaxed bg-black/40 p-6 rounded-2xl border border-rose-500/10 whitespace-pre-wrap">{{ submission.error_message }}</pre>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Code Display -->
+            <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 300ms;">
+                <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="ri-braces-line text-sky-400 text-lg"></i>
+                        <h2 class="text-xs font-black text-white uppercase tracking-widest">Submitted Logic</h2>
+                    </div>
+                    <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                        Read Only Mode
+                    </div>
+                </div>
+                <div class="p-0">
+                    <pre class="p-8 bg-slate-950/40 text-sm font-mono leading-relaxed text-slate-300 custom-scrollbar overflow-x-auto"><code>{{ submission.code }}</code></pre>
+                </div>
+            </div>
+
+            <!-- Footer Details -->
+            <div class="flex items-center justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest animate-reveal" style="animation-delay: 400ms;">
+                <div class="flex items-center gap-2">
+                    <i class="ri-time-line"></i>
+                    Timestamp: {{ submission.created_at|date:"M d, Y · H:i:s" }}
+                </div>
+                <div>
+                    Elevo Practice Module v2.0
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .animate-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.1);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        gsap.to(".animate-reveal", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+    });
+</script>
 {% endblock %}

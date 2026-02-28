@@ -1,0 +1,9 @@
+﻿aptitude/templates/aptitude/limit_reached.html
+git_status.txt
+modified_files.txt
+organizations/migrations/0002_organizationinterest.py
+organizations/migrations/0003_subscription_user_subscriptionplan_target_type_and_more.py
+organizations/templates/organizations/pricing.html
+untracked_files.txt
+users/migrations/0006_userprofile_onboarded_alter_userprofile_role.py
+users/templates/users/onboarding.html

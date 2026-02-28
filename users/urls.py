@@ -8,6 +8,7 @@ urlpatterns = [
     # Authentication URLs
     path('signup/', views.signup, name='signup'),
     path('login/', views.custom_login, name='login'),
+    path('onboarding/', views.onboarding_wizard, name='onboarding_wizard'),
     
     # Email Verification URLs
     path('verify-email-sent/', views.verify_email_sent, name='verify_email_sent'),

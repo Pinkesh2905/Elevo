@@ -11,10 +11,21 @@ class SubscriptionPlan(models.Model):
     PLAN_CHOICES = [
         ('FREE', 'Free'),
         ('PRO', 'Pro'),
+        ('PERSONAL_PRO', 'Personal Pro'),
         ('ENTERPRISE', 'Enterprise'),
     ]
 
+    TARGET_CHOICES = [
+        ('INDIVIDUAL', 'Individual'),
+        ('ORGANIZATION', 'Organization'),
+    ]
+
     name = models.CharField(max_length=20, choices=PLAN_CHOICES, unique=True)
+    target_type = models.CharField(
+        max_length=20, 
+        choices=TARGET_CHOICES, 
+        default='ORGANIZATION'
+    )
     display_name = models.CharField(max_length=50, help_text="Human-readable plan name")
     description = models.TextField(blank=True, help_text="Plan description for marketing")
     price_monthly = models.DecimalField(
@@ -116,6 +127,20 @@ class Organization(models.Model):
             return True
         return self.member_count < plan.max_students
 
+    def has_feature_access(self, feature_field):
+        """Check if the active plan has a specific feature flag enabled."""
+        sub = self.active_subscription
+        if not sub or not sub.is_valid:
+            return False
+        return getattr(sub.plan, feature_field, False)
+
+    def get_limit(self, limit_field):
+        """Get the numeric limit for a specific field from the active plan."""
+        sub = self.active_subscription
+        if not sub or not sub.is_valid:
+            return 0
+        return getattr(sub.plan, limit_field, 0)
+
 
 class Subscription(models.Model):
     """
@@ -129,7 +154,12 @@ class Subscription(models.Model):
     ]
 
     organization = models.OneToOneField(
-        Organization, on_delete=models.CASCADE, related_name='subscription'
+        Organization, on_delete=models.CASCADE, related_name='subscription',
+        null=True, blank=True
+    )
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='personal_subscription',
+        null=True, blank=True
     )
     plan = models.ForeignKey(
         SubscriptionPlan, on_delete=models.PROTECT, related_name='subscriptions'
@@ -149,12 +179,24 @@ class Subscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.organization and self.user:
+            raise ValidationError("A subscription cannot be linked to both an organization and a user.")
+        if not self.organization and not self.user:
+            raise ValidationError("A subscription must be linked to either an organization or a user.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Subscription"
         verbose_name_plural = "Subscriptions"
 
     def __str__(self):
-        return f"{self.organization.name} — {self.plan.display_name} ({self.status})"
+        target = self.organization.name if self.organization else self.user.username
+        return f"{target} — {self.plan.display_name} ({self.status})"
 
     @property
     def is_valid(self):
@@ -250,3 +292,17 @@ class OrgInvitation(models.Model):
         if not self.expires_at:
             self.expires_at = timezone.now() + timezone.timedelta(days=7)
         super().save(*args, **kwargs)
+
+
+class OrganizationInterest(models.Model):
+    """Tracks students requesting their institution to provide pro access."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    feature = models.CharField(max_length=100)
+    institution_domain = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'institution_domain', 'feature')
+
+    def __str__(self):
+        return f"{self.user.email} interest for {self.institution_domain}"

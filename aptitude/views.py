@@ -148,8 +148,32 @@ def aptitude_dashboard(request):
 @login_required
 def start_quiz(request):
     """
-    Start a fresh timed random quiz.
+    Initializes a new aptitude quiz attempt.
     """
+    # --- Subscription Limit Check ---
+    today = timezone.now().date()
+    attempts_today = AptitudeQuizAttempt.objects.filter(
+        user=request.user,
+        started_at__date=today
+    ).count()
+
+    # Determine limit (from org plan or default free tier)
+    daily_limit = 3 # Default for individual free users
+    if hasattr(request, 'premium_plan') and request.premium_plan:
+        daily_limit = request.premium_plan.max_aptitude_daily
+
+    if daily_limit != -1 and attempts_today >= daily_limit:
+        messages.warning(
+            request,
+            f"You've reached your daily limit of {daily_limit} quizzes. "
+            "Get 'Elevo Pro' through your institution for unlimited practice!"
+        )
+        return render(request, 'aptitude/limit_reached.html', {
+            'limit': daily_limit,
+            'feature': 'Aptitude Quizzes',
+            'is_individual': not getattr(request, 'is_premium', False)
+        })
+
     if request.method != "POST":
         return redirect("aptitude:dashboard")
 

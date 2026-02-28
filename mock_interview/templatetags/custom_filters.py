@@ -21,3 +21,27 @@ def multiply(value, arg):
         return float(value) * float(arg)
     except (TypeError, ValueError):
         return 0
+
+
+@register.filter(name="subtract_percentage")
+def subtract_percentage(total, score):
+    try:
+        total = float(total)
+        score = float(score)
+        return total * (1 - score / 100)
+    except (TypeError, ValueError):
+        return total
+
+
+@register.filter(name="replace")
+def replace(value, arg):
+    """
+    Usage: {{ my_string|replace:"old,new" }}
+    """
+    if not value:
+        return ""
+    try:
+        old, new = arg.split(",")
+        return str(value).replace(old, new)
+    except ValueError:
+        return value

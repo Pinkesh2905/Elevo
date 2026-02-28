@@ -3,151 +3,313 @@
 {% block title %}{{ problem.title }} | Practice | Elevo{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-    <div>
-      <a href="{% url 'practice:problem-list' %}" class="text-sm text-slate-400 hover:text-teal-300 inline-flex items-center gap-1 mb-2"><i class="ri-arrow-left-line"></i> Back to list</a>
-      <h1 class="text-3xl font-bold text-white">{{ problem.problem_number }}. {{ problem.title }}</h1>
-      <div class="mt-3 flex flex-wrap items-center gap-2">
-        {% if problem.difficulty == 'easy' %}
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Easy</span>
-        {% elif problem.difficulty == 'medium' %}
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">Medium</span>
-        {% else %}
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-500/30">Hard</span>
-        {% endif %}
-        <span class="px-2.5 py-1 rounded-full text-xs bg-slate-800 border border-slate-600 text-slate-300">Acceptance {{ problem.acceptance_rate }}%</span>
-        {% if user_progress %}
-          {% if user_progress.status == 'solved' %}
-            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Solved</span>
-          {% elif user_progress.status == 'attempted' %}
-            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">Attempted</span>
-          {% endif %}
-        {% endif %}
-      </div>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <a href="{% url 'practice:user_submissions' %}" class="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">My Submissions</a>
-      <a href="{% url 'practice:editorial' problem.slug %}" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-200 hover:border-emerald-400 hover:text-emerald-300">Editorial</a>
-    </div>
-  </div>
+<div class="min-h-screen relative overflow-hidden py-10">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-    <div class="space-y-5">
-      <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h2 class="text-lg font-semibold text-white mb-3">Problem Statement</h2>
-        <div class="prose prose-invert prose-sm max-w-none text-slate-200 leading-relaxed">{{ problem.description|safe }}</div>
-      </div>
-
-      {% if problem.constraints %}
-      <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h3 class="text-base font-semibold text-white mb-2">Constraints</h3>
-        <div class="text-slate-300 text-sm whitespace-pre-line">{{ problem.constraints }}</div>
-      </div>
-      {% endif %}
-
-      {% if sample_test_cases %}
-      <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h3 class="text-base font-semibold text-white mb-3">Sample Test Cases</h3>
-        <div class="space-y-3">
-          {% for tc in sample_test_cases %}
-          <div class="rounded-xl border border-slate-700 bg-slate-800/70 p-3">
-            <p class="text-xs uppercase text-slate-400 mb-1">Input</p>
-            <pre class="text-sm text-slate-200 whitespace-pre-wrap">{{ tc.input_data }}</pre>
-            <p class="text-xs uppercase text-slate-400 mb-1 mt-3">Output</p>
-            <pre class="text-sm text-slate-200 whitespace-pre-wrap">{{ tc.expected_output }}</pre>
-            {% if tc.explanation %}
-              <p class="text-xs text-slate-400 mt-2">{{ tc.explanation }}</p>
-            {% endif %}
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-
-      <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h3 class="text-base font-semibold text-white mb-2">Tags</h3>
-        <div class="flex flex-wrap gap-2">
-          {% for topic in problem.topics.all %}
-            <span class="px-2.5 py-1 rounded-lg text-xs bg-slate-800 border border-slate-600 text-slate-300">{{ topic.name }}</span>
-          {% empty %}<span class="text-slate-500 text-sm">No topics tagged</span>{% endfor %}
-        </div>
-        <div class="mt-3 flex flex-wrap gap-2">
-          {% for company in problem.companies.all %}
-            <span class="px-2.5 py-1 rounded-lg text-xs bg-slate-800 border border-slate-600 text-slate-300">{{ company.name }}</span>
-          {% empty %}<span class="text-slate-500 text-sm">No companies tagged</span>{% endfor %}
-        </div>
-      </div>
-    </div>
-
-    <div class="space-y-5">
-      <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
-          <div class="flex-1">
-            <label for="language" class="block text-xs text-slate-400 mb-1">Language</label>
-            <select id="language" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-600 text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500">
-              {% for value,label in available_languages %}
-                <option value="{{ value }}" {% if code_template and code_template.language == value %}selected{% endif %}>{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="sm:pt-5">
-            <button id="load-template" type="button" class="px-4 py-2 rounded-xl border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Reload Template</button>
-          </div>
-        </div>
-
-        <label for="code" class="block text-xs text-slate-400 mb-1">Code</label>
-        <textarea id="code" class="w-full h-72 rounded-xl border border-slate-600 bg-slate-950 text-slate-100 p-4 font-mono text-sm leading-6 focus:outline-none focus:ring-2 focus:ring-sky-500">{% if code_template %}{{ code_template.template_code }}{% endif %}</textarea>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          {% if user.is_authenticated %}
-            <button id="run-btn" class="px-4 py-2 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-200 hover:bg-sky-500/20">Run Code</button>
-            <button id="submit-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-semibold">Submit</button>
-          {% else %}
-            <a href="{% url 'login' %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 text-white font-semibold">Login to Run/Submit</a>
-          {% endif %}
-        </div>
-      </div>
-
-      <div id="result-card" class="hidden rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h3 class="text-base font-semibold text-white mb-3">Execution Result</h3>
-        <div id="result-summary" class="mb-3 text-sm"></div>
-        <div id="result-body" class="space-y-2"></div>
-      </div>
-
-      {% if user.is_authenticated %}
-      <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h3 class="text-base font-semibold text-white mb-3">Recent Submissions</h3>
-        <div class="space-y-2">
-          {% for s in user_submissions %}
-            <a href="{% url 'practice:submission_detail' s.id %}" class="block rounded-xl border border-slate-700 bg-slate-800/70 px-3 py-2 hover:border-teal-400 transition-colors">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-slate-200">{{ s.get_status_display }}</span>
-                <span class="text-slate-400">{{ s.created_at|date:"M d, H:i" }}</span>
-              </div>
-              <div class="text-xs text-slate-400 mt-1">{{ s.language }} | {{ s.passed_test_cases }}/{{ s.total_test_cases }}</div>
+    <section class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <!-- Top Navigation -->
+        <div class="mb-8 flex flex-wrap items-center gap-4 animate-reveal">
+            <a href="{% url 'practice:topic_list' %}" class="px-4 py-2 rounded-xl glass-elevated border border-white/5 hover:border-sky-500/30 flex items-center gap-2 group transition-all">
+                <div class="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-all text-xs">
+                    <i class="ri-braces-line"></i>
+                </div>
+                <span class="text-[9px] font-black text-white uppercase tracking-widest">Topics</span>
             </a>
-          {% empty %}
-            <p class="text-sm text-slate-500">No submissions yet for this problem.</p>
-          {% endfor %}
+            <a href="{% url 'practice:company_list' %}" class="px-4 py-2 rounded-xl glass-elevated border border-white/5 hover:border-teal-500/30 flex items-center gap-2 group transition-all">
+                <div class="w-6 h-6 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center group-hover:bg-teal-500 group-hover:text-white transition-all text-xs">
+                    <i class="ri-building-line"></i>
+                </div>
+                <span class="text-[9px] font-black text-white uppercase tracking-widest">Companies</span>
+            </a>
+            <a href="{% url 'practice:user_submissions' %}" class="px-4 py-2 rounded-xl glass-elevated border border-white/5 hover:border-indigo-500/30 flex items-center gap-2 group transition-all">
+                <div class="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all text-xs">
+                    <i class="ri-history-line"></i>
+                </div>
+                <span class="text-[9px] font-black text-white uppercase tracking-widest">History</span>
+            </a>
         </div>
-      </div>
-      {% endif %}
-    </div>
-  </div>
-</section>
+
+        <!-- Header -->
+        <div class="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-reveal" style="animation-delay: 100ms;">
+            <div>
+                <a href="{% url 'practice:problem-list' %}" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-sky-400 transition-colors mb-3 group">
+                    <i class="ri-arrow-left-line text-xs group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Challenges
+                </a>
+                <div class="flex flex-wrap items-center gap-4">
+                    <h1 class="text-3xl sm:text-4xl font-black text-white brand-font tracking-tight">
+                        <span class="text-slate-600">#{{ problem.problem_number }}</span> {{ problem.title }}
+                    </h1>
+                    <div class="flex items-center gap-2">
+                        {% if problem.difficulty == 'easy' %}
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Easy</span>
+                        {% elif problem.difficulty == 'medium' %}
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">Medium</span>
+                        {% else %}
+                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-400 border border-rose-500/20">Hard</span>
+                        {% endif %}
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-slate-400">Acceptance {{ problem.acceptance_rate }}%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="{% url 'practice:editorial' problem.slug %}" class="h-11 px-6 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-600/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-black uppercase tracking-widest text-[10px] hover:bg-emerald-500/20 transition-all">
+                    Editorial
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+            
+            <!-- Left Column: Problem Details -->
+            <div class="space-y-6 animate-reveal" style="animation-delay: 200ms;">
+                <!-- Problem Statement -->
+                <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden">
+                    <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center gap-3">
+                        <i class="ri-file-text-line text-sky-400 text-lg"></i>
+                        <h2 class="text-xs font-black text-white uppercase tracking-widest">Problem Description</h2>
+                    </div>
+                    <div class="p-8">
+                        <div class="prose prose-invert prose-slate max-w-none prose-sm leading-relaxed text-slate-300">
+                            {{ problem.description|safe }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Constraints & Examples -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if problem.constraints %}
+                    <div class="glass-elevated rounded-3xl border border-white/5 p-6">
+                        <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ri-list-check text-sky-400"></i> Constraints
+                        </h3>
+                        <div class="text-xs text-slate-300 font-mono leading-relaxed bg-black/20 p-4 rounded-2xl border border-white/5">
+                            {{ problem.constraints|linebreaksbr }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if sample_test_cases %}
+                    <div class="glass-elevated rounded-3xl border border-white/5 p-6">
+                        <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ri-flask-line text-amber-400"></i> Examples
+                        </h3>
+                        <div class="space-y-4">
+                            {% for tc in sample_test_cases %}
+                            <div class="space-y-2">
+                                <div class="bg-white/5 rounded-xl border border-white/5 p-3">
+                                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5 px-1">Case #{{ forloop.counter }}</p>
+                                    <div class="space-y-2 text-[11px] font-mono">
+                                        <div class="flex gap-2"><span class="text-slate-500">In:</span> <span class="text-slate-200">{{ tc.input_data }}</span></div>
+                                        <div class="flex gap-2"><span class="text-slate-500">Out:</span> <span class="text-emerald-400 font-bold">{{ tc.expected_output }}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tags -->
+                <div class="glass-elevated rounded-3xl border border-white/5 p-6 flex flex-wrap gap-6">
+                    <div class="space-y-2">
+                        <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Mastery Tags</h3>
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for topic in problem.topics.all %}
+                                <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 hover:text-sky-400 transition-colors">{{ topic.name }}</span>
+                            {% empty %}<span class="text-[10px] text-slate-600 italic">Universal</span>{% endfor %}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Hiring Companies</h3>
+                        <div class="flex flex-wrap gap-1.5">
+                            {% for company in problem.companies.all %}
+                                <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 hover:text-teal-400 transition-colors">{{ company.name }}</span>
+                            {% empty %}<span class="text-[10px] text-slate-600 italic">Open Season</span>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Editor & Console -->
+            <div class="space-y-6 animate-reveal" style="animation-delay: 300ms;">
+                
+                <!-- Editor Container -->
+                <div class="glass-elevated rounded-3xl border border-white/5 flex flex-col min-h-[500px] relative z-20">
+                    <div class="px-6 py-4 border-b border-white/5 bg-white/2 flex flex-wrap items-center justify-between gap-4 rounded-t-3xl overflow-hidden">
+                        <div class="flex items-center gap-3">
+                            <i class="ri-code-s-slash-line text-indigo-400 text-lg"></i>
+                            <h2 class="text-xs font-black text-white uppercase tracking-widest">Integrated IDE</h2>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                             <!-- Custom Language Dropdown -->
+                             <div class="relative min-w-[160px] custom-dropdown-container">
+                                <button type="button" class="dropdown-trigger w-full h-9 px-4 rounded-xl border border-white/10 bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider flex items-center justify-between hover:bg-slate-800 transition-all">
+                                    <span class="truncate selected-text">
+                                        {% if code_template %}{{ code_template.get_language_display }}{% else %}{{ available_languages.0.1 }}{% endif %}
+                                    </span>
+                                    <i class="ri-arrow-down-s-line text-slate-500 transition-transform dropdown-icon"></i>
+                                </button>
+                                <select id="language" class="hidden">
+                                    {% for value,label in available_languages %}
+                                        <option value="{{ value }}" {% if code_template and code_template.language == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="dropdown-menu absolute z-50 top-full right-0 min-w-full w-max mt-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden opacity-0 invisible scale-95 transition-all duration-200 origin-top-right">
+                                    <div class="max-h-64 overflow-y-auto custom-scrollbar">
+                                        {% for val, label in available_languages %}
+                                        <button type="button" class="dropdown-item w-full px-6 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0" data-value="{{ val }}">
+                                            {{ label }}
+                                        </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                             </div>
+
+                             <button id="load-template" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all" title="Reload Template">
+                                <i class="ri-refresh-line"></i>
+                             </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 relative">
+                        <textarea id="code" spellcheck="false" class="absolute inset-0 w-full h-full bg-slate-950/50 p-8 font-mono text-[13px] leading-relaxed text-slate-200 resize-none focus:outline-none focus:bg-slate-950 transition-colors custom-scrollbar">{% if code_template %}{{ code_template.template_code }}{% endif %}</textarea>
+                    </div>
+
+                    <div class="p-6 border-t border-white/5 flex items-center justify-between gap-4 rounded-b-3xl">
+                        <div class="flex items-center gap-4">
+                             {% if user.is_authenticated %}
+                                <button id="run-btn" class="h-11 px-6 rounded-xl border border-sky-500/30 bg-sky-500/10 text-sky-400 font-black uppercase tracking-widest text-[10px] hover:bg-sky-500 hover:text-white hover:shadow-lg hover:shadow-sky-500/20 transition-all">
+                                    Run Code
+                                </button>
+                                <button id="submit-btn" class="h-11 px-10 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-sky-500/20 hover:scale-[1.02] active:scale-95 transition-all">
+                                    Submit Final
+                                </button>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="h-11 px-8 rounded-xl bg-white text-slate-900 font-black uppercase tracking-widest text-[10px] hover:scale-105 transition-all">
+                                    Login to Compile
+                                </a>
+                            {% endif %}
+                        </div>
+                        
+                        <div id="status-indicator" class="hidden flex items-center gap-2">
+                             <div class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></div>
+                             <span class="text-[9px] font-black text-sky-400 uppercase tracking-widest">Processing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Debug Console -->
+                <div id="result-card" class="hidden glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal">
+                    <div class="px-6 py-3 border-b border-white/5 bg-slate-900/50 flex items-center gap-3">
+                        <i class="ri-terminal-box-line text-emerald-400"></i>
+                        <h3 class="text-[10px] font-black text-white uppercase tracking-widest">Debug Output</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="result-summary" class="mb-6"></div>
+                        <div id="result-body" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                <!-- History Feed -->
+                <div class="glass-elevated rounded-3xl border border-white/5 p-6">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <i class="ri-history-line text-indigo-400"></i> Performance History
+                    </h3>
+                    <div class="space-y-3">
+                        {% for s in user_submissions %}
+                        <a href="{% url 'practice:submission_detail' s.id %}" class="block group">
+                            <div class="glass-elevated border border-white/5 rounded-2xl p-4 flex items-center justify-between hover:border-sky-500/30 transition-all duration-300">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 transition-colors
+                                        {% if s.status == 'accepted' %}bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white{% else %}bg-rose-500/10 text-rose-400 group-hover:bg-rose-500 group-hover:text-white{% endif %}">
+                                        <i class="{% if s.status == 'accepted' %}ri-check-line{% else %}ri-close-line{% endif %} text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[11px] font-black text-white uppercase tracking-widest mb-0.5">{{ s.get_status_display }}</div>
+                                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">
+                                            {{ s.language }} · {{ s.passed_test_cases }}/{{ s.total_test_cases }} cases
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                                    {{ s.created_at|date:"M d, H:i" }}
+                                </div>
+                            </div>
+                        </a>
+                        {% empty %}
+                        <div class="text-center py-8">
+                            <div class="w-12 h-12 rounded-full border border-dashed border-white/10 flex items-center justify-center mx-auto mb-3">
+                                <i class="ri-code-box-line text-slate-600"></i>
+                            </div>
+                            <p class="text-[11px] text-slate-600 font-black uppercase tracking-widest">No previous attempts detected</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .animate-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    /* Dropdown Animation States */
+    .custom-dropdown-container.active .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+    }
+    .custom-dropdown-container.active .dropdown-icon {
+        transform: rotate(180deg);
+    }
+</style>
 
 {% if user.is_authenticated %}
 <script>
 function getCsrfToken() {
-  const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
-  return cookie ? cookie.split('=')[1] : '';
+  return '{{ csrf_token }}';
 }
 
-function setLoading(btn, loading, text) {
-  if (!btn) return;
-  btn.disabled = loading;
-  btn.textContent = loading ? text : btn.dataset.default;
+function setLoading(action, loading) {
+  const runBtn = document.getElementById('run-btn');
+  const submitBtn = document.getElementById('submit-btn');
+  const indicator = document.getElementById('status-indicator');
+  
+  if (loading) {
+      indicator.classList.remove('hidden');
+      if (action === 'run') runBtn.classList.add('opacity-50', 'pointer-events-none');
+      if (action === 'submit') submitBtn.classList.add('opacity-50', 'pointer-events-none');
+  } else {
+      indicator.classList.add('hidden');
+      runBtn.classList.remove('opacity-50', 'pointer-events-none');
+      submitBtn.classList.remove('opacity-50', 'pointer-events-none');
+  }
 }
 
 function showResult(summaryHtml, entriesHtml) {
@@ -156,6 +318,13 @@ function showResult(summaryHtml, entriesHtml) {
   document.getElementById('result-body').innerHTML = entriesHtml;
   card.classList.remove('hidden');
   card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  
+  gsap.from(card, {
+     opacity: 0,
+     y: 20,
+     duration: 0.6,
+     ease: "power2.out"
+  });
 }
 
 async function loadTemplate() {
@@ -171,18 +340,13 @@ async function loadTemplate() {
 async function runOrSubmit(action) {
   const code = document.getElementById('code').value;
   const language = document.getElementById('language').value;
-  const runBtn = document.getElementById('run-btn');
-  const submitBtn = document.getElementById('submit-btn');
 
   if (!code.trim()) {
-    showResult('<p class="text-red-300">Code is empty.</p>', '');
+    showResult('<p class="text-[10px] font-black text-rose-400 uppercase tracking-widest">Compiler Error: Null Buffer</p>', '');
     return;
   }
 
-  runBtn.dataset.default = runBtn.dataset.default || runBtn.textContent;
-  submitBtn.dataset.default = submitBtn.dataset.default || submitBtn.textContent;
-  setLoading(runBtn, action === 'run', 'Running...');
-  setLoading(submitBtn, action === 'submit', 'Submitting...');
+  setLoading(action, true);
 
   const form = new FormData();
   form.append('code', code);
@@ -201,56 +365,108 @@ async function runOrSubmit(action) {
     const data = await res.json();
 
     if (!res.ok) {
-      showResult(`<p class="text-red-300">${data.error || 'Request failed'}</p>`, '');
+      showResult(`<p class="text-rose-400 text-xs font-bold">${data.error || 'System Malfunction'}</p>`, '');
       return;
     }
 
     if (action === 'run') {
       const summary = data.all_passed
-        ? '<p class="text-emerald-300 font-semibold">All sample test cases passed.</p>'
-        : '<p class="text-yellow-300 font-semibold">Some sample test cases failed.</p>';
+        ? '<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20"><i class="ri-check-double-line text-xl"></i></div><div><p class="text-emerald-400 font-black uppercase tracking-widest text-[10px]">All Samples Passed</p><p class="text-slate-500 text-[10px] mt-0.5 font-bold">Your code performed correctly against the public test cases.</p></div></div>'
+        : '<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20"><i class="ri-error-warning-line text-xl"></i></div><div><p class="text-amber-400 font-black uppercase tracking-widest text-[10px]">Validation Failed</p><p class="text-slate-500 text-[10px] mt-0.5 font-bold">One or more sample cases returned unexpected results.</p></div></div>';
 
       let body = '';
       (data.results || []).forEach((r, i) => {
         body += `
-          <div class="rounded-lg border ${r.passed ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-red-500/30 bg-red-500/10'} p-3 text-sm">
-            <p class="font-semibold ${r.passed ? 'text-emerald-200' : 'text-red-200'}">Case ${i + 1}: ${r.passed ? 'Passed' : 'Failed'}</p>
-            <p class="text-slate-300 mt-1"><span class="text-slate-400">Input:</span> ${r.input}</p>
-            <p class="text-slate-300"><span class="text-slate-400">Expected:</span> ${r.expected}</p>
-            <p class="text-slate-300"><span class="text-slate-400">Output:</span> ${r.output}</p>
+          <div class="rounded-2xl border ${r.passed ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-rose-500/20 bg-rose-500/5'} p-4 text-[11px] group transition-all duration-300">
+            <p class="font-black uppercase tracking-widest mb-3 ${r.passed ? 'text-emerald-400' : 'text-rose-400'} flex items-center justify-between">
+                <span>Test Case ${i + 1}</span>
+                <i class="${r.passed ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'} text-sm"></i>
+            </p>
+            <div class="space-y-1.5 font-mono">
+                <div class="flex gap-2"><span class="text-slate-500">In:</span> <span class="text-slate-300">${r.input}</span></div>
+                <div class="flex gap-2"><span class="text-slate-500">Exp:</span> <span class="text-slate-300">${r.expected}</span></div>
+                <div class="flex gap-2"><span class="text-slate-500">Out:</span> <span class="${r.passed ? 'text-emerald-300' : 'text-rose-300'} font-bold">${r.output}</span></div>
+            </div>
           </div>`;
       });
       showResult(summary, body);
     } else {
       const ok = data.accepted;
       const summary = ok
-        ? `<p class="text-emerald-300 font-semibold">Accepted. ${data.passed_test_cases}/${data.total_test_cases} passed.</p>`
-        : `<p class="text-yellow-300 font-semibold">${data.status_display}. ${data.passed_test_cases}/${data.total_test_cases} passed.</p>`;
+        ? `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20"><i class="ri-award-line text-xl"></i></div><div><p class="text-emerald-400 font-black uppercase tracking-widest text-[10px]">Challenge Accepted</p><p class="text-slate-300 text-xs font-bold mt-0.5">${data.passed_test_cases}/${data.total_test_cases} Cases Decoded Correctly</p></div></div>`
+        : `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/20"><i class="ri-close-circle-line text-xl"></i></div><div><p class="text-rose-400 font-black uppercase tracking-widest text-[10px]">${data.status_display}</p><p class="text-slate-300 text-xs font-bold mt-0.5">${data.passed_test_cases}/${data.total_test_cases} Cases Passed</p></div></div>`;
 
-      let body = `<div class="text-sm text-slate-300">${data.message || ''}</div>`;
+      let body = `<div class="text-[11px] text-slate-400 font-medium leading-relaxed">${data.message || ''}</div>`;
       if (data.failed_test_case) {
         body += `
-          <div class="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
-            Failed at test case ${data.failed_test_case.test_case_number}
+          <div class="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-[10px] font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
+            <i class="ri-alert-fill"></i> Interrupted at Case #${data.failed_test_case.test_case_number}
           </div>`;
       }
       if (data.submission_id) {
         const submissionBase = "{% url 'practice:submission_detail' 0 %}".replace('/0/', '/');
-        body += `<a class="inline-flex mt-3 px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-200 hover:border-teal-400" href="${submissionBase}${data.submission_id}/">View submission</a>`;
+        body += `<div class="mt-6 flex gap-3"><a class="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10" href="${submissionBase}${data.submission_id}/">View Analysis</a><a class="px-5 py-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 font-black uppercase tracking-widest text-[10px] hover:bg-sky-500/20" href="{% url 'practice:problem-list' %}">Next Challenge</a></div>`;
       }
       showResult(summary, body);
     }
   } catch (err) {
-    showResult('<p class="text-red-300">Network error occurred.</p>', '');
+    showResult('<p class="text-rose-400 font-black uppercase tracking-widest text-[10px]">Network Failure</p>', '');
   } finally {
-    setLoading(runBtn, false);
-    setLoading(submitBtn, false);
+    setLoading(action, false);
   }
 }
 
 document.getElementById('load-template').addEventListener('click', loadTemplate);
 document.getElementById('run-btn').addEventListener('click', () => runOrSubmit('run'));
 document.getElementById('submit-btn').addEventListener('click', () => runOrSubmit('submit'));
+
+document.addEventListener('DOMContentLoaded', function() {
+    gsap.to(".animate-reveal", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "power2.out"
+    });
+
+    // Custom Dropdown Logic
+    const dropdowns = document.querySelectorAll('.custom-dropdown-container');
+    
+    dropdowns.forEach(container => {
+        const trigger = container.querySelector('.dropdown-trigger');
+        const menu = container.querySelector('.dropdown-menu');
+        const items = container.querySelectorAll('.dropdown-item');
+        const select = container.querySelector('select');
+        const selectedText = container.querySelector('.selected-text');
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdowns.forEach(other => {
+                if (other !== container) other.classList.remove('active');
+            });
+            container.classList.toggle('active');
+        });
+
+        items.forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.dataset.value;
+                select.value = value;
+                selectedText.textContent = item.textContent.trim();
+                container.classList.remove('active');
+                
+                // Trigger change to reload template if language selection changes
+                if (select.id === 'language') {
+                    loadTemplate();
+                }
+            });
+        });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', () => {
+        dropdowns.forEach(d => d.classList.remove('active'));
+    });
+});
 </script>
 {% endif %}
 {% endblock %}

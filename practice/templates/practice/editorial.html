@@ -3,51 +3,133 @@
 {% block title %}Editorial | {{ problem.title }} | Elevo{% endblock %}
 
 {% block content %}
-<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <a href="{% url 'practice:problem_detail' problem.slug %}" class="text-sm text-slate-400 hover:text-teal-300 inline-flex items-center gap-1 mb-2"><i class="ri-arrow-left-line"></i> Back to problem</a>
-      <h1 class="text-3xl font-bold text-white">Editorial: {{ problem.title }}</h1>
-      <p class="text-slate-300 mt-1">Unlock explanations after solving, or if you are staff.</p>
-    </div>
-  </div>
+<div class="min-h-screen relative overflow-hidden py-12">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
 
-  {% if can_view and editorial %}
-    <div class="space-y-5">
-      <article class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h2 class="text-lg font-semibold text-white mb-3">Approach</h2>
-        <div class="prose prose-invert prose-sm max-w-none text-slate-200">{{ editorial.approach|linebreaks }}</div>
-      </article>
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <!-- Header -->
+        <div class="mb-12 animate-reveal">
+            <a href="{% url 'practice:problem_detail' problem.slug %}" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-sky-400 transition-colors mb-3 group">
+                <i class="ri-arrow-left-line text-xs group-hover:-translate-x-1 transition-transform"></i>
+                Back to Challenge
+            </a>
+            <h1 class="text-4xl sm:text-5xl font-black text-white brand-font tracking-tight">
+                <span class="text-emerald-400">Editorial:</span> {{ problem.title }}
+            </h1>
+            <p class="text-slate-400 font-medium mt-2">Deep dive into the algorithmic strategy and optimized implementation.</p>
+        </div>
 
-      {% if editorial.complexity_analysis %}
-      <article class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h2 class="text-lg font-semibold text-white mb-3">Complexity Analysis</h2>
-        <div class="text-slate-200 whitespace-pre-line text-sm">{{ editorial.complexity_analysis }}</div>
-      </article>
-      {% endif %}
+        {% if can_view and editorial %}
+        <div class="space-y-8">
+            <!-- Approach Section -->
+            <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 100ms;">
+                <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center gap-3">
+                    <i class="ri-lightbulb-line text-amber-400 text-lg"></i>
+                    <h2 class="text-xs font-black text-white uppercase tracking-widest">Mastery Approach</h2>
+                </div>
+                <div class="p-8 prose prose-invert prose-slate max-w-none text-slate-300 leading-relaxed">
+                    {{ editorial.approach|linebreaks }}
+                </div>
+            </div>
 
-      {% if editorial.code_explanation %}
-      <article class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h2 class="text-lg font-semibold text-white mb-3">Code Explanation</h2>
-        <div class="text-slate-200 whitespace-pre-line text-sm">{{ editorial.code_explanation }}</div>
-      </article>
-      {% endif %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {% if editorial.complexity_analysis %}
+                <!-- Complexity -->
+                <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 200ms;">
+                    <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center gap-3">
+                        <i class="ri-ruler-2-line text-indigo-400 text-lg"></i>
+                        <h2 class="text-xs font-black text-white uppercase tracking-widest">Complexity Scaling</h2>
+                    </div>
+                    <div class="p-8 font-mono text-xs text-slate-300 whitespace-pre-line bg-black/20">
+                        {{ editorial.complexity_analysis }}
+                    </div>
+                </div>
+                {% endif %}
 
-      {% if editorial.video_url %}
-      <article class="rounded-2xl border border-slate-700 bg-slate-900/65 p-5">
-        <h2 class="text-lg font-semibold text-white mb-3">Video Walkthrough</h2>
-        <a href="{{ editorial.video_url }}" target="_blank" rel="noopener" class="text-teal-300 hover:text-teal-200 underline">Open explanation video</a>
-      </article>
-      {% endif %}
-    </div>
-  {% elif can_view and not editorial %}
-    <div class="rounded-2xl border border-slate-700 bg-slate-900/65 p-8 text-center text-slate-300">No editorial has been added for this problem yet.</div>
-  {% else %}
-    <div class="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-6">
-      <h2 class="text-yellow-200 font-semibold text-lg mb-2">Editorial Locked</h2>
-      <p class="text-yellow-100/90 text-sm">Solve this problem first to view the editorial, or ask an admin/tutor for access.</p>
-      <a href="{% url 'practice:problem_detail' problem.slug %}" class="inline-flex mt-4 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-teal-600 text-white font-semibold">Go Solve Problem</a>
-    </div>
-  {% endif %}
-</section>
+                {% if editorial.video_url %}
+                <!-- Video Link -->
+                <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 300ms;">
+                    <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center gap-3">
+                        <i class="ri-play-circle-line text-rose-400 text-lg"></i>
+                        <h2 class="text-xs font-black text-white uppercase tracking-widest">Video Deep Dive</h2>
+                    </div>
+                    <div class="p-8">
+                        <a href="{{ editorial.video_url }}" target="_blank" rel="noopener" class="group flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-rose-500/30 transition-all">
+                            <div class="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-all shadow-lg shadow-rose-500/10">
+                                <i class="ri-youtube-line text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-0.5">External Resource</p>
+                                <p class="text-sm font-black text-white brand-font tracking-tight">Open Explanation Stream <i class="ri-external-link-line ml-1"></i></p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if editorial.code_explanation %}
+            <!-- Logic Breakdown -->
+            <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 400ms;">
+                <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center gap-3">
+                    <i class="ri-code-box-line text-teal-400 text-lg"></i>
+                    <h2 class="text-xs font-black text-white uppercase tracking-widest">Implementation Detail</h2>
+                </div>
+                <div class="p-8 text-sm text-slate-300 font-medium whitespace-pre-line leading-relaxed">
+                    {{ editorial.code_explanation }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% elif can_view and not editorial %}
+        <!-- Empty State -->
+        <div class="glass-elevated rounded-3xl border border-dashed border-white/10 p-20 text-center animate-reveal">
+            <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+                <i class="ri-quill-pen-line text-4xl text-slate-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-400 tracking-tight">Drafting In Progress</h3>
+            <p class="text-slate-500 mt-2">The architects are currently documenting the solution for this challenge.</p>
+        </div>
+
+        {% else %}
+        <!-- Locked State -->
+        <div class="overflow-hidden glass-elevated border-2 border-rose-500/20 rounded-3xl p-10 text-center animate-reveal">
+            <div class="inline-flex w-20 h-20 rounded-3xl bg-rose-500/10 text-rose-400 items-center justify-center mb-6 shadow-xl shadow-rose-500/10">
+                <i class="ri-lock-star-line text-4xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white brand-font tracking-tight mb-3 uppercase">Mastery Challenge Required</h2>
+            <p class="text-slate-400 font-medium max-w-lg mx-auto mb-8">Editorial access is granted only to those who have successfully deciphered the problem, or have elevated administrative clearance.</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="{% url 'practice:problem_detail' problem.slug %}" class="h-12 px-10 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/20 hover:scale-[1.05] transition-all">
+                    Attempt Challenge
+                </a>
+                <a href="{% url 'practice:problem-list' context='all' %}" class="h-12 px-8 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all">
+                    Skip for Now
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    .animate-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        gsap.to(".animate-reveal", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+    });
+</script>
 {% endblock %}

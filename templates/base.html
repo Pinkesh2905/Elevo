@@ -1,1072 +1,540 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Elevo{% endblock %}</title>
-  {% load static %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Elevo{% endblock %}</title>
+    {% load static %}
+    {% load custom_filters %}
 
-  <!-- Modern, Fun & Professional Fonts: Outfit, Plus Jakarta Sans, Fira Code -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Premium Fonts: Outfit (Brand), Plus Jakarta Sans (UI), Fira Code (Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <meta name="description" content="Elevo: Master coding interviews with practice problems, aptitude tests, and AI-powered mock interviews." />
-  
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-  
-  <!-- Remixicon for icons -->
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
-  
-  <!-- GSAP for animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  
-  <!-- Three.js and Vanta.js for 3D effects -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
-  
-  <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #d946ef 100%);
-      --coding-bg-primary: #020617;
-      --coding-bg-secondary: #0f172a;
-      --coding-accent: #1e293b;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --border-color: rgba(148, 163, 184, 0.1);
-      --glass-bg: rgba(15, 23, 42, 0.6);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --shadow-primary: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-      --shadow-elevated: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      --code-green: #34d399;
-      --code-blue: #38bdf8;
-      --code-purple: #c084fc;
-      --code-yellow: #fbbf24;
-      --code-red: #f43f5e;
-      --code-pink: #f472b6;
-      --accent-glow: 0 0 20px rgba(99, 102, 241, 0.4);
-    }
+    <meta name="description" content="Elevo: Master coding interviews with practice problems, aptitude tests, and AI-powered mock interviews." />
     
-    body { 
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
-      background: var(--coding-bg-primary);
-      min-height: 100vh;
-      color: var(--text-primary);
-      font-feature-settings: "kern", "liga";
-      position: relative;
-      overflow-x: hidden;
-    }
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     
-    .brand-font { 
-      font-family: 'Outfit', sans-serif; 
-      font-weight: 800;
-      letter-spacing: -0.03em;
-    }
+    <!-- Remixicon for premium iconography -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
     
-    h1, h2, h3, h4 { 
-      font-family: 'Outfit', sans-serif; 
-      font-weight: 700; 
-      letter-spacing: -0.02em;
-    }
+    <!-- Animation Orchestration -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
-    .mono-font, code, pre {
-      font-family: 'Fira Code', monospace;
-      font-feature-settings: "liga" 1, "calt" 1;
-    }
+    <!-- Visual Depth -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
     
-    /* Enhanced Animated Background */
-    .coding-background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      overflow: hidden;
-      background: radial-gradient(circle at 18% 18%, rgba(14, 165, 233, 0.2), transparent 40%),
-                  radial-gradient(circle at 80% 30%, rgba(20, 184, 166, 0.18), transparent 42%),
-                  linear-gradient(135deg, #07111f 0%, #0b1d33 55%, #123457 100%);
-    }
-    
-    /* Enhanced Floating Elements Animation */
-    .floating-elements {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-    
-    .floating-element {
-      position: absolute;
-      font-family: 'Fira Code', monospace;
-      font-size: 18px;
-      font-weight: 500;
-      opacity: 0.2;
-      animation: floatUp 20s linear infinite;
-      color: var(--code-blue);
-      text-shadow: 0 0 10px currentColor;
-    }
-    
-    .floating-element:nth-child(2n) {
-      animation-delay: -2s;
-      animation-duration: 25s;
-      color: var(--code-purple);
-    }
-    
-    .floating-element:nth-child(3n) {
-      animation-delay: -4s;
-      animation-duration: 22s;
-      color: var(--code-green);
-    }
-    
-    .floating-element:nth-child(4n) {
-      animation-delay: -6s;
-      animation-duration: 28s;
-      color: var(--code-yellow);
-    }
-    
-    .floating-element:nth-child(5n) {
-      animation-delay: -8s;
-      animation-duration: 24s;
-      color: var(--code-pink);
-    }
-    
-    @keyframes floatUp {
-      0% { 
-        transform: translateY(100vh) translateX(0) rotate(0deg) scale(0.5); 
-        opacity: 0; 
-      }
-      5% { 
-        opacity: 0.3; 
-        transform: scale(1);
-      }
-      50% { 
-        opacity: 0.2; 
-        transform: translateY(50vh) translateX(30px) rotate(180deg) scale(1.1); 
-      }
-      95% { 
-        opacity: 0.3; 
-        transform: scale(0.8);
-      }
-      100% { 
-        transform: translateY(-20vh) translateX(-30px) rotate(360deg) scale(0.5); 
-        opacity: 0; 
-      }
-    }
-    
-    /* Subtle Grid Pattern */
-    .grid-pattern {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: 
-        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: gridMove 30s linear infinite;
-    }
-    
-    @keyframes gridMove {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(50px, 50px); }
-    }
-    
-    .reveal-card {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    
-    /* Glassmorphism effect */
-    .glass {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(16px);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--shadow-primary);
-    }
-    
-    .glass-elevated {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--shadow-elevated);
-    }
-    
-    /* Enhanced Dark theme cards */
-    .dark-card {
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    
-    .dark-card:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(99, 102, 241, 0.3);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
-    }
-    
-    /* Enhanced Professional dropdown - Reduced Transparency */
-    .dropdown-menu {
-      transform-origin: top right;
-      animation: dropdownAppear 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      background: rgba(26, 26, 46, 0.97) !important; /* Much less transparent */
-      backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid rgba(99, 102, 241, 0.2) !important;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 
-                  0 0 0 1px rgba(99, 102, 241, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-    
-    @keyframes dropdownAppear {
-      from { 
-        opacity: 0; 
-        transform: scale(0.95) translateY(-10px); 
-      }
-      to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
-      }
-    }
-    
-    /* Mobile menu animation */
-    .mobile-menu {
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-      background: rgba(15, 15, 35, 0.97);
-      backdrop-filter: blur(20px);
-    }
-    
-    .mobile-menu.open {
-      transform: translateX(0);
-    }
-    
-    /* Logo floating animation */
-    .logo-float {
-      animation: logoFloat 6s ease-in-out infinite;
-    }
-    
-    @keyframes logoFloat {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-4px) rotate(1deg); }
-    }
-    
-    /* Professional hover effects */
-    .hover-lift {
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-    
-    .hover-lift:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-elevated);
-    }
-    
-    .hover-scale {
-      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-    }
-    
-    .hover-scale:hover {
-      transform: scale(1.05);
-    }
-    
-    /* Professional glow effect */
-    .pro-glow {
-      box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.16), 
-                  0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                  0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      transition: box-shadow 0.3s ease;
-    }
-    
-    .pro-glow:hover {
-      box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.35), 
-                  0 12px 30px -5px rgba(20, 184, 166, 0.28), 
-                  0 8px 16px -5px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(45deg, #0ea5e9, #14b8a6);
-      border-radius: 6px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(45deg, #0284c7, #0f766e);
-    }
-    
-    /* Professional button animations */
-    .btn-professional {
-      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-      transform: translateZ(0);
-    }
-    
-    .btn-professional:hover {
-      transform: translateY(-2px) scale(1.02);
-    }
-    
-    .btn-professional:active {
-      transform: translateY(0) scale(0.98);
-    }
-    
-    /* Enhanced Navbar background */
-    .navbar-bg {
-      background: linear-gradient(90deg, rgba(7, 17, 31, 0.95), rgba(11, 29, 51, 0.95), rgba(18, 52, 87, 0.92));
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(20, 184, 166, 0.2);
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Footer gradient */
-    .footer-gradient {
-      background: linear-gradient(135deg, #07111f 0%, #0b1d33 45%, #123457 100%);
-    }
-    
-    /* Card hover effects */
-    .card-hover {
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .card-hover:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-elevated);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(20, 184, 166, 0.22);
-    }
+    <style>
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #22d3ee;
+            --accent-emerald: #34d399;
+            --accent-sky: #0ea5e9;
+        }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        .brand-font { font-family: 'Outfit', sans-serif; }
+        .mono-font { font-family: 'Fira Code', monospace; }
 
-    /* Enhanced Hamburger menu */
-    .hamburger {
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      padding: 6px;
-      transition: all 0.3s ease;
-      border-radius: 8px;
-    }
+        .glass-elevated {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
 
-    .hamburger:hover {
-      background: rgba(20, 184, 166, 0.14);
-    }
+        .navbar-blur {
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
-    .hamburger span {
-      width: 24px;
-      height: 2px;
-      background: currentColor;
-      margin: 3px 0;
-      transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-      border-radius: 2px;
-    }
+        /* Custom Dropdown Styling */
+        .dropdown-animate {
+            transform-origin: top right;
+            animation: dropdownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
 
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(-45deg) translate(-6px, 6px);
-    }
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
 
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
+        /* Animated Premium Logo */
+        .logo-pulse {
+            animation: logoPulse 4s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); filter: drop-shadow(0 0 0px rgba(34, 211, 238, 0)); }
+            50% { opacity: 1; transform: scale(1.05); filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.4)); }
+        }
 
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(45deg) translate(-6px, -6px);
-    }
+        .nav-link-active {
+            color: var(--accent-cyan);
+            position: relative;
+        }
+        .nav-link-active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+            border-radius: 2px;
+        }
 
-    /* Enhanced Navigation underline */
-    .nav-underline {
-      position: relative;
-      overflow: hidden;
-    }
+        /* Ambient Background Grid */
+        .ambient-grid {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -10;
+        }
 
-    .nav-underline::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, #0ea5e9, #14b8a6);
-      transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-      border-radius: 2px;
-    }
+        /* Floating Symbols */
+        .symbol-float {
+            position: absolute;
+            font-family: 'Fira Code', monospace;
+            opacity: 0.15;
+            pointer-events: none;
+            user-select: none;
+            z-index: -5;
+        }
 
-    .nav-underline:hover::after {
-      width: 100%;
-    }
-
-    /* Mobile responsiveness */
-    @media (max-width: 768px) {
-      .mobile-hidden {
-        display: none !important;
-      }
-      
-      .mobile-menu {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        z-index: 9999;
-        padding: 2rem;
-        padding-top: 5rem;
-      }
-      
-      .floating-element {
-        font-size: 14px;
-      }
-    }
-
-    /* Responsive grid adjustments */
-    @media (max-width: 640px) {
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-    }
-
-    /* Typography improvements */
-    .text-balance {
-      text-wrap: balance;
-    }
-
-    /* Professional focus states */
-    .focus-ring {
-      transition: all 0.2s ease;
-    }
-
-    .focus-ring:focus {
-      outline: none;
-      ring: 2px;
-      ring-color: #6366f1;
-      ring-offset: 2px;
-    }
-
-    /* Logo pulse effect */
-    .logo-pulse {
-      animation: logoPulse 3s ease-in-out infinite;
-    }
-
-    @keyframes logoPulse {
-      0%, 100% { 
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
-      }
-      50% { 
-        box-shadow: 0 0 0 8px rgba(99, 102, 241, 0);
-      }
-    }
-  </style>
-  
-  {% block extra_css %}{% endblock %}
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 10px;
+            border: 2px solid rgba(15, 23, 42, 1);
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 
-<body class="text-slate-100 antialiased">
-  <!-- 3D Background Container -->
-  <div id="vanta-bg" class="fixed inset-0 -z-50 overflow-hidden pointer-events-none opacity-40"></div>
+<body class="antialiased">
+    <!-- Ambient Visuals -->
+    <div id="vanta-bg" class="fixed inset-0 -z-20 opacity-40"></div>
+    <div class="ambient-grid"></div>
+    <div id="symbol-container" class="fixed inset-0 overflow-hidden pointer-events-none -z-10"></div>
 
-  <!-- Enhanced Animated Background (Fallback/Overlay) -->
-  <div class="coding-background">
-    <!-- Subtle Grid Pattern -->
-    <div class="grid-pattern"></div>
-    
-    <!-- Minimal Floating Elements -->
-    <div class="floating-elements" id="floatingElements"></div>
-  </div>
-
-  <!-- Mobile Menu Overlay -->
-  <div id="mobileMenu" class="mobile-menu md:hidden">
-    <div class="flex flex-col space-y-6">
-      <div class="flex justify-between items-center mb-8">
-        <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 brand-font">Menu</h3>
-        <button onclick="toggleMobileMenu()" class="text-slate-300 hover:text-red-400 transition-colors focus-ring rounded-lg p-2">
-          <i class="ri-close-line text-2xl"></i>
-        </button>
-      </div>
-      
-      {% if user.is_authenticated and user.profile.role == 'STUDENT' %}
-        <a href="{% url 'home' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-home-line mr-4 text-sky-400 text-lg"></i> 
-          <span class="font-medium">Home</span>
-        </a>
-        <a href="{% url 'practice:problem-list' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-code-line mr-4 text-sky-400 text-lg"></i> 
-          <span class="font-medium">Coding</span>
-        </a>
-        <a href="{% url 'aptitude:dashboard' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-brain-line mr-4 text-emerald-400 text-lg"></i> 
-          <span class="font-medium">Aptitude</span>
-        </a>
-        <a href="{% url 'posts:feed' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-teal-400 hover:bg-teal-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-chat-3-line mr-4 text-teal-400 text-lg"></i> 
-          <span class="font-medium">Posts</span>
-        </a>
-        <a href="{% url 'chat:inbox' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-message-3-line mr-4 text-violet-400 text-lg"></i>
-          <span class="font-medium">Messages</span>
-          <span id="mobileUnreadBadge" class="ml-auto hidden min-w-[20px] h-5 px-1.5 rounded-full bg-gradient-to-r from-sky-500 to-teal-500 text-white text-xs font-bold flex items-center justify-center"></span>
-        </a>
-        <a href="{% url 'organizations:my_org' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-amber-400 hover:bg-amber-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-building-line mr-4 text-amber-400 text-lg"></i>
-          <span class="font-medium">Organization</span>
-          {% if request.is_premium %}<span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25">PRO</span>{% endif %}
-        </a>
-        <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-robot-line mr-4 text-emerald-400 text-lg"></i> 
-          <span class="font-medium">Mock Interviews</span>
-        </a>
-      {% elif user.is_authenticated and user.profile.role == 'TUTOR' %}
-        {% if user.profile.is_approved_tutor %}
-          <a href="{% url 'tutor:dashboard' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-            <i class="ri-dashboard-line mr-4 text-emerald-400 text-lg"></i>
-            <span class="font-medium">Tutor Dashboard</span>
-          </a>
-        {% else %}
-          <a href="{% url 'users:tutor_application' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-amber-300 hover:bg-amber-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-            <i class="ri-file-list-3-line mr-4 text-amber-300 text-lg"></i>
-            <span class="font-medium">Tutor Application</span>
-          </a>
-        {% endif %}
-      {% elif user.is_authenticated and user.is_superuser %}
-        <a href="{% url 'users:admin_dashboard' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-admin-line mr-4 text-red-400 text-lg"></i>
-          <span class="font-medium">Admin Dashboard</span>
-        </a>
-      {% endif %}
-      
-      {% if not user.is_authenticated %}
-        <a href="{% url 'login' %}" class="flex items-center py-4 px-6 text-slate-300 hover:text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-login-box-line mr-4 text-sky-400 text-lg"></i> 
-          <span class="font-medium">Login</span>
-        </a>
-        <a href="{% url 'users:signup' %}" class="flex items-center py-4 px-6 bg-gradient-to-r from-sky-600 to-teal-600 text-white rounded-xl hover:from-sky-700 hover:to-teal-700 transition-all duration-200 hover-scale" onclick="toggleMobileMenu()">
-          <i class="ri-rocket-line mr-4 text-lg"></i> 
-          <span class="font-semibold">Get Started</span>
-        </a>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Header -->
-  <header class="sticky top-0 z-50 navbar-bg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-      <!-- Enhanced Logo -->
-      <a href="{% url 'home' %}" class="flex items-center gap-3 font-bold text-2xl text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-emerald-300 hover:from-sky-200 hover:to-emerald-200 transition-all duration-300 brand-font group">
-        <div class="relative">
-          <!-- Elevo Logo -->
-          <div class="relative w-11 h-11 logo-float group-hover:scale-110 transition-transform duration-300">
-            <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-sky-400 via-teal-400 to-emerald-400 p-0.5">
-              <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
-                <svg class="w-7 h-7" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <path d="M8 5H24L28 9V23L24 27H8L4 23V9L8 5Z" fill="url(#elevoHeaderShell)" stroke="#7dd3fc" stroke-width="1.2"/>
-                  <rect x="10" y="10" width="12" height="2.4" rx="1.2" fill="#a7f3d0"/>
-                  <rect x="10" y="15" width="9.5" height="2.4" rx="1.2" fill="#67e8f9"/>
-                  <rect x="10" y="20" width="12" height="2.4" rx="1.2" fill="#34d399"/>
-                  <defs>
-                    <linearGradient id="elevoHeaderShell" x1="4" y1="5" x2="28" y2="27" gradientUnits="userSpaceOnUse">
-                      <stop offset="0" stop-color="#0b1d33"/>
-                      <stop offset="1" stop-color="#123457"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-            <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-r from-teal-300 to-emerald-400 rounded-full animate-pulse"></div>
-            <div class="absolute -bottom-0.5 -left-0.5 w-2 h-2 bg-gradient-to-r from-sky-300 to-emerald-400 rounded-full animate-ping" style="animation-delay: 0.5s; animation-duration: 2s;"></div>
-          </div>
-        </div>
-        Elevo
-      </a>
-
-      <!-- Desktop Navigation -->
-      <nav class="hidden md:flex items-center space-x-1 text-base font-medium">
-        {% if user.is_authenticated %}
-          {% if user.profile.role == 'TUTOR' %}
-            {% if user.profile.is_approved_tutor %}
-              <a href="{% url 'tutor:dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
-                <i class="ri-dashboard-line mr-2"></i>Tutor Dashboard
-              </a>
-            {% else %}
-              <a href="{% url 'users:tutor_application' %}" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-full font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
-                <i class="ri-file-list-3-line mr-2"></i>Tutor Application
-              </a>
-            {% endif %}
-          {% elif user.is_superuser or user.profile.role == 'ADMIN' %}
-            <a href="{% url 'users:admin_dashboard' %}" class="px-6 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-full font-semibold hover:from-red-600 hover:to-rose-700 transition-all duration-200 shadow-md hover-lift btn-professional pro-glow">
-              <i class="ri-admin-line mr-2"></i>Admin Dashboard
+    <!-- Global Navigation -->
+    <header class="sticky top-0 z-[100] navbar-blur h-20 flex items-center">
+        <div class="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
+            
+            <!-- Branding -->
+            <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+                <div class="relative w-11 h-11 flex items-center justify-center">
+                    <!-- Premium Hexagon Logo: Luminous Hexagon with <> -->
+                    <svg class="w-10 h-10 logo-pulse" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 3L27.2583 9.5V22.5L16 29L4.74167 22.5V9.5L16 3Z" fill="url(#logoGlassBg)" stroke="url(#logoStroke)" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M13 12L9 16L13 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                        <path d="M19 12L23 16L19 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                        <defs>
+                            <linearGradient id="logoStroke" x1="4.74167" y1="3" x2="27.2583" y2="29" gradientUnits="userSpaceOnUse">
+                                <stop offset="0" stop-color="#22d3ee"/>
+                                <stop offset="1" stop-color="#34d399"/>
+                            </linearGradient>
+                            <radialGradient id="logoGlassBg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(16 16) rotate(90) scale(13)">
+                                <stop offset="0" stop-color="#164e63" stop-opacity="0.6"/>
+                                <stop offset="1" stop-color="#020617" stop-opacity="0.8"/>
+                            </radialGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="text-2xl font-black text-white brand-font tracking-tight group-hover:text-cyan-400 transition-colors">Elevo</span>
             </a>
-          {% else %}
-            <a href="{% url 'home' %}" class="px-4 py-2 text-slate-300 hover:text-sky-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
-              Home
-            </a>
-            <a href="{% url 'practice:problem-list' %}" class="px-4 py-2 text-slate-300 hover:text-sky-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
-              Coding
-            </a>
-            <a href="{% url 'aptitude:dashboard' %}" class="px-4 py-2 text-slate-300 hover:text-emerald-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
-              Aptitude
-            </a>
-            <a href="{% url 'posts:feed' %}" class="px-4 py-2 text-slate-300 hover:text-teal-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
-              Posts
-            </a>
-            <a href="{% url 'mock_interview:interview_setup' %}" class="px-4 py-2 text-slate-300 hover:text-emerald-400 transition-all duration-200 font-medium nav-underline rounded-lg hover-scale">
-              Interviews
-            </a>
-          {% endif %}
-        {% endif %}
-      </nav>
 
-      <!-- Right Side Controls -->
-      <div class="flex items-center space-x-4">
-        <!-- Search Bar (Desktop Only) -->
-        {% if user.is_authenticated and user.profile.role == 'STUDENT' %}
-        <form method="get" action="{% url 'search' %}" class="relative hidden lg:block">
-          <input type="text" name="q" placeholder="Search problems, posts..." 
-                class="w-64 px-4 py-2.5 rounded-full border border-slate-600 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:outline-none bg-slate-800/80 backdrop-blur-sm transition-all duration-200 text-sm font-medium placeholder:text-slate-400 text-slate-100">
-          <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-400 transition-colors">
-            <i class="ri-search-line text-lg"></i>
-          </button>
-        </form>
-        {% endif %}
-
-        <!-- Chat/Messages Icon (Desktop) -->
-        {% if user.is_authenticated %}
-        <a href="{% url 'chat:inbox' %}" class="relative hidden md:flex items-center justify-center w-10 h-10 rounded-full hover:bg-sky-500/10 transition-all duration-200 text-slate-300 hover:text-sky-400" title="Messages">
-          <i class="ri-message-3-line text-xl"></i>
-          <span id="navUnreadBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gradient-to-r from-sky-500 to-teal-500 text-white text-[10px] font-bold flex items-center justify-center shadow-lg shadow-sky-500/30"></span>
-        </a>
-        {% endif %}
-
-        <!-- User Menu / Auth Buttons -->
-        {% if user.is_authenticated %}
-          <div class="relative">
-            <button onclick="toggleDropdown()" class="focus:outline-none rounded-full ring-2 ring-sky-400/20 ring-offset-2 ring-offset-transparent transition-all duration-200 hover:ring-sky-400/40 hover:ring-4 pro-glow btn-professional">
-              {% if user.profile.avatar %}
-                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="w-10 h-10 rounded-full object-cover border-2 border-sky-400/50 shadow-md">
-              {% else %}
-                <img src="{% static 'default_avatar.png' %}" alt="Default avatar" class="w-10 h-10 rounded-full object-cover border-2 border-sky-400/50 shadow-md">
-              {% endif %}
-            </button>
-            <div id="dropdown" class="hidden absolute right-0 mt-3 w-56 rounded-2xl shadow-2xl z-50 overflow-hidden dropdown-menu">
-              <div class="px-5 py-4 text-sm border-b border-slate-700/50 bg-gradient-to-r from-sky-500/20 to-teal-500/20">
-                <div class="font-semibold text-slate-100">{{ user.username }}</div>
-                <div class="text-slate-400 truncate text-xs mt-1 font-medium">{{ user.email }}</div>
-              </div>
-              <div class="py-2">
-                <a href="{% url 'users:profile' %}" class="block px-5 py-3 text-slate-300 hover:bg-sky-500/10 hover:text-sky-400 transition-all duration-200 hover-scale font-medium">
-                  <i class="ri-user-line mr-3 text-sky-400"></i> Profile
-                </a>
-                <a href="{% url 'chat:inbox' %}" class="block px-5 py-3 text-slate-300 hover:bg-violet-500/10 hover:text-violet-400 transition-all duration-200 hover-scale font-medium">
-                  <i class="ri-message-3-line mr-3 text-violet-400"></i> Messages
-                </a>
-                <a href="{% url 'organizations:my_org' %}" class="block px-5 py-3 text-slate-300 hover:bg-amber-500/10 hover:text-amber-400 transition-all duration-200 hover-scale font-medium">
-                  <i class="ri-building-line mr-3 text-amber-400"></i> Organization
-                  {% if request.is_premium %}<span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25">PRO</span>{% endif %}
-                </a>
-                {% if user.profile.role == 'STUDENT' %}
-                  <a href="{% url 'mock_interview:my_mock_interviews' %}" class="block px-5 py-3 text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale font-medium">
-                    <i class="ri-robot-line mr-3 text-emerald-400"></i> My Interviews
-                  </a>
+            <!-- Desktop Links -->
+            <nav class="hidden md:flex items-center gap-2">
+                {% if user.is_authenticated %}
+                    {% if user.profile.role == 'STUDENT' %}
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
+                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Coding</a>
+                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Aptitude</a>
+                        <a href="{% url 'posts:feed' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Feed</a>
+                        <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center gap-2">
+                            <i class="ri-robot-line text-sm"></i> Mock Interviews
+                        </a>
+                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Pricing</a>
+                    {% elif user.profile.role == 'TUTOR' %}
+                        {% if user.profile.is_approved_tutor %}
+                            <a href="{% url 'tutor:dashboard' %}" class="h-11 px-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2">
+                                <i class="ri-dashboard-line"></i> Tutor Dashboard
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:tutor_application' %}" class="h-11 px-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all flex items-center gap-2">
+                                <i class="ri-file-list-3-line"></i> Application In Review
+                            </a>
+                        {% endif %}
+                    {% elif user.is_superuser %}
+                        <a href="{% url 'users:admin_dashboard' %}" class="h-11 px-8 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all flex items-center gap-2">
+                            <i class="ri-admin-line"></i> System Administration
+                        </a>
+                    {% endif %}
                 {% endif %}
-              </div>
-              <form method="POST" action="{% url 'logout' %}" class="border-t border-slate-700/50">
-                {% csrf_token %}
-                <button type="submit" class="w-full text-left px-5 py-3 text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale font-medium">
-                  <i class="ri-logout-box-line mr-3 text-red-400"></i> Logout
-                </button>
-              </form>
-            </div>
-          </div>
-        {% else %}
-          <a href="{% url 'login' %}" class="mobile-hidden hover:text-sky-400 text-base font-medium transition-all duration-200 hover-scale px-3 py-2 rounded-lg">Login</a>
-          <a href="{% url 'users:signup' %}" class="mobile-hidden bg-gradient-to-r from-sky-600 to-teal-600 text-white px-6 py-2.5 rounded-full hover:from-sky-700 hover:to-teal-700 transition-all duration-200 text-base font-semibold shadow-md hover-lift btn-professional pro-glow">
-            <i class="ri-rocket-line mr-2"></i>Get Started
-          </a>
-        {% endif %}
+            </nav>
 
-        <!-- Mobile Menu Button -->
-        <button class="md:hidden hamburger text-slate-300 hover:text-sky-400 transition-colors focus-ring rounded-lg p-2" onclick="toggleMobileMenu()" id="hamburgerBtn">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </div>
-  </header>
+            <!-- User Interactions -->
+            <div class="flex items-center gap-6">
+                {% if user.is_authenticated %}
+                <div class="hidden lg:flex items-center gap-6 pr-6 border-r border-white/10">
+                    <a href="{% url 'chat:inbox' %}" class="relative w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-cyan-400 transition-all group" title="Intelligence Inbox">
+                        <i class="ri-message-3-line text-xl"></i>
+                        <span id="navUnreadBadge" class="hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 text-[8px] font-black text-white items-center justify-center"></span>
+                    </a>
+                    <a href="{% url 'organizations:my_org' %}" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-emerald-400 transition-all group" title="Organization">
+                        <i class="ri-building-line text-xl"></i>
+                    </a>
+                </div>
 
-  <main class="min-h-screen">
-    {% block content %}{% endblock %}
-  </main>
-
-  <!-- Enhanced Footer -->
-  <footer class="footer-gradient text-slate-300 relative overflow-hidden">
-    <!-- Decorative elements -->
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500"></div>
-    <div class="absolute top-6 right-10 w-20 h-20 bg-sky-500 rounded-full opacity-5 animate-pulse"></div>
-    <div class="absolute bottom-10 left-10 w-16 h-16 bg-teal-500 rounded-full opacity-5 animate-bounce"></div>
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 footer-grid">
-        
-        <!-- Brand + Social -->
-        <div class="lg:col-span-2">
-          <div class="flex items-center gap-3 mb-6">
-            <!-- Footer Elevo Logo -->
-            <div class="w-12 h-12 bg-gradient-to-br from-sky-400 via-teal-400 to-emerald-400 p-0.5 rounded-2xl">
-              <div class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
-                <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                  <path d="M8 5H24L28 9V23L24 27H8L4 23V9L8 5Z" fill="url(#elevoFooterShell)" stroke="#7dd3fc" stroke-width="1.2"/>
-                  <rect x="10" y="10" width="12" height="2.4" rx="1.2" fill="#a7f3d0"/>
-                  <rect x="10" y="15" width="9.5" height="2.4" rx="1.2" fill="#67e8f9"/>
-                  <rect x="10" y="20" width="12" height="2.4" rx="1.2" fill="#34d399"/>
-                  <defs>
-                    <linearGradient id="elevoFooterShell" x1="4" y1="5" x2="28" y2="27" gradientUnits="userSpaceOnUse">
-                      <stop offset="0" stop-color="#0b1d33"/>
-                      <stop offset="1" stop-color="#123457"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-            <h3 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-teal-300 to-emerald-300 brand-font">Elevo</h3>
-          </div>
-          <p class="text-slate-400 text-base leading-relaxed mb-8 max-w-md font-medium">
-            Master coding interviews with comprehensive Coding problems, aptitude tests, and AI-powered mock interviews. Your pathway to tech success starts here.
-          </p>
-          <div class="flex space-x-6">
-            <a href="#" class="text-slate-400 hover:text-sky-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
-              <i class="ri-linkedin-fill text-2xl"></i>
-            </a>
-            <a href="#" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
-              <i class="ri-twitter-fill text-2xl"></i>
-            </a>
-            <a href="#" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
-              <i class="ri-github-fill text-2xl"></i>
-            </a>
-            <a href="#" class="text-slate-400 hover:text-rose-400 transition-all duration-200 hover:scale-125 hover:-translate-y-1">
-              <i class="ri-instagram-fill text-2xl"></i>
-            </a>
-          </div>
-        </div>
-
-        {% if user.is_authenticated and user.profile.role == 'STUDENT' %}
-        <!-- Practice & Learning (Students Only) -->
-        <div>
-          <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-sky-400 to-teal-400 bg-clip-text text-transparent">Practice & Learn</span>
-            <div class="absolute -bottom-2 left-0 w-16 h-0.5 bg-gradient-to-r from-sky-400 to-teal-400 rounded-full"></div>
-          </h4>
-          <ul class="space-y-4">
-            <li><a href="{% url 'practice:problem-list' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-code-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Coding Practice
-            </a></li>
-            <li><a href="{% url 'aptitude:dashboard' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-brain-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Aptitude Tests
-            </a></li>
-            <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-robot-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Mock Interviews
-            </a></li>
-            <li><a href="{% url 'posts:feed' %}" class="text-slate-400 hover:text-teal-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-chat-3-line mr-3 text-teal-400 group-hover:scale-110 transition-transform"></i> Community Posts
-            </a></li>
-          </ul>
-        </div>
-
-        <!-- Progress & Profile (Students Only) -->
-        <div>
-          <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Progress & Profile</span>
-            <div class="absolute -bottom-2 left-0 w-18 h-0.5 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"></div>
-          </h4>
-          <ul class="space-y-4">
-            <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-history-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> My Interviews
-            </a></li>
-            <li><a href="{% url 'users:profile' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-user-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Profile Settings
-            </a></li>
-            <li><a href="#" class="text-slate-400 hover:text-amber-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-trophy-line mr-3 text-amber-400 group-hover:scale-110 transition-transform"></i> Achievements
-            </a></li>
-            <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-medal-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Certificates
-            </a></li>
-          </ul>
-        </div>
-        {% else %}
-        <!-- Quick Links for non-students or unauthenticated users -->
-        <div>
-          <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-rose-400 to-emerald-400 bg-clip-text text-transparent">Quick Links</span>
-            <div class="absolute -bottom-2 left-0 w-14 h-0.5 bg-gradient-to-r from-rose-400 to-emerald-400 rounded-full"></div>
-          </h4>
-          <ul class="space-y-4">
-            {% if user.is_authenticated %}
-              <li><a href="{% url 'users:profile' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                <i class="ri-user-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Profile
-              </a></li>
-              {% if user.is_superuser %}
-                <li><a href="{% url 'users:admin_dashboard' %}" class="text-slate-400 hover:text-red-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                  <i class="ri-admin-line mr-3 text-red-400 group-hover:scale-110 transition-transform"></i> Admin Dashboard
-                </a></li>
-              {% elif user.profile.role == 'TUTOR' %}
-                {% if user.profile.is_approved_tutor %}
-                  <li><a href="{% url 'tutor:dashboard' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                    <i class="ri-dashboard-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Tutor Dashboard
-                  </a></li>
+                <div class="relative" id="user-menu-root">
+                    <button id="user-menu-btn" class="w-11 h-11 rounded-full border-2 border-white/5 overflow-hidden hover:border-cyan-500/50 transition-all p-0.5">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" class="w-full h-full rounded-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-slate-500">
+                            <i class="ri-user-fill"></i>
+                        </div>
+                        {% endif %}
+                    </button>
+                    <!-- Dropdown Content -->
+                    <div id="user-dropdown" class="hidden absolute right-0 mt-4 w-64 rounded-2xl dropdown-animate z-[200]">
+                        <div class="p-6 border-b border-white/5">
+                            <p class="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1">Active User</p>
+                            <p class="text-sm font-bold text-white truncate">{{ user.username }}</p>
+                            {% if request.is_premium %}
+                                <div class="mt-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 w-fit">
+                                    <i class="ri-vip-diamond-fill text-[10px] text-cyan-400"></i>
+                                    <span class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Premium Active</span>
+                                </div>
+                            {% endif %}
+                            <p class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ user.email }}</p>
+                        </div>
+                        <div class="p-2">
+                            <a href="{% url 'users:profile' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-slate-300 hover:text-white transition-all">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                                    <i class="ri-user-settings-line"></i>
+                                </div>
+                                Mastery Profile
+                            </a>
+                            <a href="{% url 'chat:inbox' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-slate-300 hover:text-white transition-all">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                                    <i class="ri-question-answer-line"></i>
+                                </div>
+                                Discussions
+                            </a>
+                            <a href="{% url 'mock_interview:my_mock_interviews' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-slate-300 hover:text-white transition-all">
+                                <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
+                                    <i class="ri-history-line"></i>
+                                </div>
+                                Session Archive
+                            </a>
+                        </div>
+                        <div class="p-2 border-t border-white/5">
+                            <form method="POST" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-sm font-bold text-slate-400 hover:text-rose-400 transition-all">
+                                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                        <i class="ri-logout-box-r-line"></i>
+                                    </div>
+                                    Sign Protocol Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 {% else %}
-                  <li><a href="{% url 'users:tutor_application' %}" class="text-slate-400 hover:text-amber-300 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                    <i class="ri-file-list-3-line mr-3 text-amber-300 group-hover:scale-110 transition-transform"></i> Tutor Application
-                  </a></li>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'login' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Login</a>
+                    <a href="{% url 'users:signup' %}" class="h-10 px-6 rounded-full bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center">
+                        Initiate Registration
+                    </a>
+                </div>
                 {% endif %}
-              {% endif %}
-            {% else %}
-              <li><a href="{% url 'login' %}" class="text-slate-400 hover:text-sky-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                <i class="ri-login-box-line mr-3 text-sky-400 group-hover:scale-110 transition-transform"></i> Login
-              </a></li>
-              <li><a href="{% url 'users:signup' %}" class="text-slate-400 hover:text-emerald-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-                <i class="ri-user-add-line mr-3 text-emerald-400 group-hover:scale-110 transition-transform"></i> Register
-              </a></li>
-            {% endif %}
-          </ul>
+                
+                <!-- Mobile Toggle -->
+                <button id="mobile-toggle" class="md:hidden w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center text-slate-100">
+                    <i class="ri-menu-5-line text-2xl"></i>
+                </button>
+            </div>
         </div>
+    </header>
 
-        <!-- Support & Resources -->
-        <div>
-          <h4 class="text-xl font-semibold text-white mb-6 relative brand-font">
-            <span class="bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">Support</span>
-            <div class="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full"></div>
-          </h4>
-          <ul class="space-y-4">
-            <li><a href="#" class="text-slate-400 hover:text-amber-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-question-line mr-3 text-amber-400 group-hover:scale-110 transition-transform"></i> Help Center
-            </a></li>
-            <li><a href="#" class="text-slate-400 hover:text-orange-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-mail-line mr-3 text-orange-400 group-hover:scale-110 transition-transform"></i> Contact Us
-            </a></li>
-            <li><a href="#" class="text-slate-400 hover:text-rose-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-feedback-line mr-3 text-rose-400 group-hover:scale-110 transition-transform"></i> Feedback
-            </a></li>
-            <li><a href="/admin" class="text-slate-400 hover:text-red-400 transition-all duration-200 flex items-center group hover:translate-x-2 font-medium">
-              <i class="ri-settings-line mr-3 text-red-400 group-hover:scale-110 transition-transform"></i> Admin Panel
-            </a></li>
-          </ul>
-        </div>
-        {% endif %}
-      </div>
+    <!-- Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
-      <!-- Footer Bottom -->
-      <div class="mt-16 pt-8 border-t border-slate-700/50 relative">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gradient-to-r from-sky-500 to-teal-500 rounded-full"></div>
-        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div class="text-center md:text-left">
-            <p class="text-slate-400 text-base font-medium">
-              © 2025 <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-400 font-semibold brand-font">Elevo</span>. All rights reserved.
-            </p>
-            <p class="text-sm text-slate-500 mt-2 font-medium">
-              Designed with ❤️ for aspiring tech professionals.
-            </p>
-          </div>
-          <div class="flex items-center space-x-8 text-sm text-slate-400 font-medium">
-            <a href="#" class="hover:text-sky-400 transition-colors">Privacy Policy</a>
-            <a href="#" class="hover:text-teal-400 transition-colors">Terms of Service</a>
-            <a href="#" class="hover:text-emerald-400 transition-colors">Cookie Policy</a>
-          </div>
+    <!-- Engineering Footer -->
+    <footer class="mt-20 border-t border-white/5 bg-slate-950/50 backdrop-blur-xl relative pb-12">
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+                
+                <!-- Brand Meta -->
+                <div class="md:col-span-4 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <svg class="w-8 h-8 opacity-80" viewBox="0 0 32 32" fill="none">
+                                <path d="M16 3L27.2583 9.5V22.5L16 29L4.74167 22.5V9.5L16 3Z" stroke="url(#footerLogoGrad)" stroke-width="2" stroke-linejoin="round"/>
+                                <path d="M13 12L9 16L13 20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M19 12L23 16L19 20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="footerLogoGrad" x1="10" y1="8" x2="22" y2="24" gradientUnits="userSpaceOnUse">
+                                        <stop offset="0" stop-color="#22d3ee"/>
+                                        <stop offset="1" stop-color="#34d399"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-black text-white brand-font tracking-tight">Elevo Mastery</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 font-medium leading-relaxed">
+                        The elite ecosystem for technical mastery. Real-world challenges, data-backed interview simulations, and a collective for high-performing architects.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="https://github.com" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"><i class="ri-github-fill text-lg"></i></a>
+                        <a href="https://linkedin.com" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"><i class="ri-linkedin-fill text-lg"></i></a>
+                        <a href="https://twitter.com" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"><i class="ri-twitter-x-fill text-lg"></i></a>
+                    </div>
+                </div>
+
+                <!-- Navigation Columns -->
+                <div class="md:col-span-8 grid grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="space-y-6">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Modules</h4>
+                        <ul class="space-y-4">
+                            <li><a href="{% url 'practice:problem-list' %}" class="text-sm font-bold text-slate-400 hover:text-cyan-400 transition-colors">Coding Challenges</a></li>
+                            <li><a href="{% url 'aptitude:dashboard' %}" class="text-sm font-bold text-slate-400 hover:text-emerald-400 transition-colors">Aptitude Logic</a></li>
+                            <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-sm font-bold text-slate-400 hover:text-violet-400 transition-colors">Mock Interviews</a></li>
+                            <li><a href="{% url 'posts:feed' %}" class="text-sm font-bold text-slate-400 hover:text-amber-400 transition-colors">Intelligence Feed</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-6">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Platform</h4>
+                        <ul class="space-y-4">
+                            <li><a href="{% url 'users:profile' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Mastery Profile</a></li>
+                            <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Session History</a></li>
+                            <li><a href="{% url 'chat:inbox' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Intelligence Inbox</a></li>
+                            <li><a href="/admin" class="text-sm font-bold text-slate-400 hover:text-rose-400 transition-colors">Hyper-Control</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-6 col-span-2 lg:col-span-1">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Status</h4>
+                        <div class="p-4 rounded-2xl border border-white/5 bg-white/2">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                <span class="text-[10px] font-black text-white uppercase tracking-widest">Systems Nominal</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-medium">Elevo Engine v1.0.0-Beta <br> Cluster: Local Main</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="mt-20 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                    &copy; 2026 ELEVO MASTERY COLLECTIVE. BUILT FOR ARCHITECTS.
+                </p>
+                <div class="flex items-center gap-8">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Crafted with Precision</span>
+                </div>
+            </div>
         </div>
-      </div>
+    </footer>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-drawer" class="fixed inset-0 z-[150] hidden">
+        <div id="mobile-overlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md opacity-0"></div>
+        <div id="mobile-content" class="absolute right-0 top-0 h-full w-4/5 max-w-sm bg-slate-900/90 border-l border-white/10 backdrop-blur-2xl p-8 transform translate-x-full">
+            <div class="flex items-center justify-between mb-10">
+                <span class="text-xl font-black text-white brand-font tracking-tight">Navigation</span>
+                <button id="mobile-close" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            
+            <nav class="space-y-6">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'home' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-home-4-line text-cyan-400"></i> Home
+                    </a>
+                    <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-code-s-slash-line text-emerald-400"></i> Coding
+                    </a>
+                    <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-brain-line text-violet-400"></i> Aptitude
+                    </a>
+                    <a href="{% url 'posts:feed' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-rss-2-line text-amber-400"></i> Intelligence
+                    </a>
+                    <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-robot-line text-cyan-500"></i> Mock Interviews
+                    </a>
+                    <a href="{% url 'organizations:pricing' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-price-tag-3-line text-emerald-500"></i> Pricing
+                    </a>
+                    <div class="pt-6 mt-6 border-t border-white/5 space-y-6">
+                        <a href="{% url 'users:profile' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                            <i class="ri-user-settings-line text-slate-400"></i> Mastery Profile
+                        </a>
+                        <form method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full flex items-center gap-4 text-lg font-bold text-rose-400 hover:text-rose-300 transition-all">
+                                <i class="ri-logout-box-r-line"></i> Sign Protocol Out
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block py-4 text-xl font-bold text-white border-b border-white/5">Login</a>
+                    <a href="{% url 'users:signup' %}" class="block py-4 text-xl font-bold text-cyan-400">Registration</a>
+                {% endif %}
+            </nav>
+        </div>
     </div>
-  </footer>
 
-  <script>
-    // Initialize enhanced animated background
-    function initCodingBackground() {
-      const floatingElements = document.getElementById('floatingElements');
-      
-      // Enhanced coding symbols and short keywords for floating animation
-      const symbols = [
-        '{', '}', '<>', '/>', '()', '[]', 
-        '==', '!=', '<=', '=>', '&&', '||', 
-        '++', '--', '+=', '!=', '??',
-        'if', 'for', 'let', 'const', 'var', 
-        'fn', 'def', 'int', 'str', 'bool',
-        'AI', 'ML', 'API', 'DOM', 'CSS',
-        '0x', '1s', '2d', '3d', 'px'
-      ];
-      
-      const colors = [
-        '#60a5fa', // blue
-        '#a78bfa', // purple  
-        '#22d3ee', // cyan
-        '#fbbf24', // yellow
-        '#fb7185', // rose
-        '#34d399', // emerald
-        '#f472b6'  // pink
-      ];
-      
-      // Create floating elements with proper animation
-      function createFloatingElement() {
-        const element = document.createElement('div');
-        element.className = 'floating-element';
-        
-        element.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        element.style.left = Math.random() * 100 + '%';
-        element.style.color = colors[Math.floor(Math.random() * colors.length)];
-        element.style.animationDelay = Math.random() * 5 + 's';
-        element.style.fontSize = (14 + Math.random() * 8) + 'px';
-        
-        floatingElements.appendChild(element);
-        
-        // Remove after animation completes
-        setTimeout(() => {
-          if (element.parentNode) {
-            element.parentNode.removeChild(element);
-          }
-        }, 30000); // Matches longest animation duration
-      }
-      
-      // Create elements at intervals
-      setInterval(createFloatingElement, 5000);
-      
-      // Create initial batch of elements
-      for (let i = 0; i < 4; i++) {
-        setTimeout(createFloatingElement, i * 1000);
-      }
-    }
+    <!-- Core Interactions Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // GSAP Reveal Sequence
+            gsap.from("header", { y: -80, opacity: 0, duration: 1.2, ease: "power4.out" });
+            
+            // User Menu Toggle
+            const userBtn = document.getElementById('user-menu-btn');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            if (userBtn && userDropdown) {
+                userBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => userDropdown.classList.add('hidden'));
+            }
 
-    // Mobile menu toggle
-    function toggleMobileMenu() {
-      const mobileMenu = document.getElementById('mobileMenu');
-      const hamburgerBtn = document.getElementById('hamburgerBtn');
-      mobileMenu.classList.toggle('open');
-      hamburgerBtn.classList.toggle('active');
-      document.body.classList.toggle('overflow-hidden');
-    }
+            // Mobile Drawer Logic
+            const mobileToggle = document.getElementById('mobile-toggle');
+            const mobileClose = document.getElementById('mobile-close');
+            const mobileDrawer = document.getElementById('mobile-drawer');
+            const mobileOverlay = document.getElementById('mobile-overlay');
+            const mobileContent = document.getElementById('mobile-content');
 
-    // Dropdown toggle
-    function toggleDropdown() {
-      document.getElementById("dropdown").classList.toggle("hidden");
-    }
+            function openMobile() {
+                mobileDrawer.classList.remove('hidden');
+                gsap.to(mobileOverlay, { opacity: 1, duration: 0.3 });
+                gsap.to(mobileContent, { x: 0, duration: 0.5, ease: "power3.out" });
+                document.body.style.overflow = 'hidden';
+            }
 
-    // Close dropdown when clicking outside
-    window.addEventListener('click', function(e) {
-      const dropdown = document.getElementById('dropdown');
-      const profileButton = e.target.closest('button[onclick="toggleDropdown()"]');
-      if (dropdown && !dropdown.contains(e.target) && !profileButton) {
-        dropdown.classList.add('hidden');
-      }
-    });
+            function closeMobile() {
+                gsap.to(mobileOverlay, { opacity: 0, duration: 0.3 });
+                gsap.to(mobileContent, { 
+                    x: '100%', 
+                    duration: 0.4, 
+                    ease: "power3.in",
+                    onComplete: () => {
+                        mobileDrawer.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
 
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', function(e) {
-      const mobileMenu = document.getElementById('mobileMenu');
-      const hamburgerBtn = document.getElementById('hamburgerBtn');
-      
-      if (mobileMenu.classList.contains('open') && 
-          !mobileMenu.contains(e.target) && 
-          !hamburgerBtn.contains(e.target)) {
-        toggleMobileMenu();
-      }
-    });
+            if (mobileToggle) mobileToggle.addEventListener('click', openMobile);
+            if (mobileClose) mobileClose.addEventListener('click', closeMobile);
+            if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobile);
 
-    // Close mobile menu on window resize
-    window.addEventListener('resize', function() {
-      if (window.innerWidth >= 768) {
-        const mobileMenu = document.getElementById('mobileMenu');
-        const hamburgerBtn = document.getElementById('hamburgerBtn');
-        
-        if (mobileMenu.classList.contains('open')) {
-          mobileMenu.classList.remove('open');
-          hamburgerBtn.classList.remove('active');
-          document.body.classList.remove('overflow-hidden');
-        }
-      }
-    });
+            // Vanta.js Initialization
+            if (document.getElementById('vanta-bg')) {
+                VANTA.NET({
+                    el: "#vanta-bg",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x0ea5e9,
+                    backgroundColor: 0x020617,
+                    points: 10.00,
+                    maxDistance: 20.00,
+                    spacing: 18.00
+                });
+            }
 
-    // Enhanced focus management for accessibility
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        // Close dropdown on Escape
-        const dropdown = document.getElementById('dropdown');
-        if (dropdown && !dropdown.classList.contains('hidden')) {
-          dropdown.classList.add('hidden');
-        }
-        
-        // Close mobile menu on Escape
-        const mobileMenu = document.getElementById('mobileMenu');
-        if (mobileMenu && mobileMenu.classList.contains('open')) {
-          toggleMobileMenu();
-        }
-      }
-    });
+            // Unread Handler
+            {% if user.is_authenticated %}
+            function checkIntelligence() {
+                fetch('/chat/unread-count/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(data => {
+                    const badge = document.getElementById('navUnreadBadge');
+                    if (badge) {
+                        if (data.unread_count > 0) {
+                            badge.textContent = data.unread_count > 99 ? '99' : data.unread_count;
+                            badge.classList.remove('hidden');
+                            badge.classList.add('flex');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                }).catch(() => {});
+            }
+            checkIntelligence();
+            setInterval(checkIntelligence, 60000);
+            {% endif %}
 
-    // Initialize everything when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      initCodingBackground();
-
-      // Initialize Vanta.js Net effect
-      if (document.getElementById('vanta-bg')) {
-        VANTA.NET({
-          el: "#vanta-bg",
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          scale: 1.00,
-          scaleMobile: 1.00,
-          color: 0x6366f1,
-          backgroundColor: 0x020617,
-          points: 12.00,
-          maxDistance: 22.00,
-          spacing: 16.00
+            // Symbol Generator
+            const container = document.getElementById('symbol-container');
+            const symbols = ['{', '}', '/>', '()', '=>', '&&', '||', '!=', '??', 'fn', 'def', '0x'];
+            
+            function spawnSymbol() {
+                if(!container) return;
+                const s = document.createElement('div');
+                s.className = 'symbol-float';
+                s.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                s.style.left = Math.random() * 100 + 'vw';
+                s.style.top = '110vh';
+                s.style.fontSize = Math.random() * 8 + 10 + 'px';
+                s.style.color = ['#22d3ee', '#34d399', '#818cf8'][Math.floor(Math.random() * 3)];
+                container.appendChild(s);
+                
+                gsap.to(s, {
+                    y: '-120vh',
+                    x: (Math.random() - 0.5) * 100,
+                    rotation: Math.random() * 360,
+                    duration: Math.random() * 15 + 15,
+                    ease: "none",
+                    onComplete: () => s.remove()
+                });
+            }
+            if(container) {
+                for(let i=0; i<10; i++) setTimeout(spawnSymbol, Math.random() * 20000);
+                setInterval(spawnSymbol, 4000);
+            }
         });
-      }
-
-      // GSAP Animations for global elements
-      gsap.from("header", {
-        y: -100,
-        opacity: 0,
-        duration: 1.2,
-        ease: "power4.out"
-      });
-
-      // Poll for unread message count (for navbar badge)
-      {% if user.is_authenticated %}
-      function updateUnreadBadge() {
-        fetch('/chat/unread-count/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-          .then(r => r.json())
-          .then(data => {
-            const count = data.unread_count || 0;
-            const navBadge = document.getElementById('navUnreadBadge');
-            const mobileBadge = document.getElementById('mobileUnreadBadge');
-            if (navBadge) {
-              if (count > 0) {
-                navBadge.textContent = count > 99 ? '99+' : count;
-                navBadge.classList.remove('hidden');
-              } else {
-                navBadge.classList.add('hidden');
-              }
-            }
-            if (mobileBadge) {
-              if (count > 0) {
-                mobileBadge.textContent = count > 99 ? '99+' : count;
-                mobileBadge.classList.remove('hidden');
-              } else {
-                mobileBadge.classList.add('hidden');
-              }
-            }
-          })
-          .catch(() => {});
-      }
-      updateUnreadBadge();
-      setInterval(updateUnreadBadge, 30000);
-      {% endif %}
-    });
-  </script>
+    </script>
 </body>
 </html>

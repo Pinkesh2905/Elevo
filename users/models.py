@@ -22,10 +22,12 @@ class UserProfile(models.Model):
         ('STUDENT', 'Student'),
         ('TUTOR', 'Tutor'),
         ('ADMIN', 'Admin'),
+        ('ORG_ADMIN', 'Organization Admin'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT', help_text="Role of the user on the platform.")
+    onboarded = models.BooleanField(default=False, help_text="Designates if the user has completed the onboarding flow.")
     is_approved_tutor = models.BooleanField(default=False, help_text="Designates if a tutor account has been approved by an admin.")
     
     # Email verification

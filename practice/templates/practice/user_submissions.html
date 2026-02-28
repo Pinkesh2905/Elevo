@@ -3,69 +3,130 @@
 {% block title %}My Submissions | Practice | Elevo{% endblock %}
 
 {% block content %}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="mb-6 flex items-center justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-white">My Submissions</h1>
-      <p class="text-slate-300 mt-2">Track attempt quality and revisit failed runs quickly.</p>
-    </div>
-    <a href="{% url 'practice:problem-list' %}" class="px-4 py-2 rounded-xl border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Go to Problems</a>
-  </div>
+<div class="min-h-screen relative overflow-hidden py-12">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
 
-  <div class="rounded-2xl border border-slate-700 overflow-hidden bg-slate-900/60">
-    <div class="overflow-x-auto">
-      <table class="w-full min-w-[760px]">
-        <thead class="bg-slate-800/80 text-slate-300 text-xs uppercase tracking-wide">
-          <tr>
-            <th class="px-4 py-3 text-left">Problem</th>
-            <th class="px-4 py-3 text-left">Language</th>
-            <th class="px-4 py-3 text-left">Status</th>
-            <th class="px-4 py-3 text-left">Passed</th>
-            <th class="px-4 py-3 text-left">Created</th>
-            <th class="px-4 py-3 text-right">Action</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-800 text-sm">
-          {% for submission in page_obj %}
-          <tr class="hover:bg-slate-800/40">
-            <td class="px-4 py-4 text-slate-100 font-medium">{{ submission.problem.problem_number }}. {{ submission.problem.title }}</td>
-            <td class="px-4 py-4 text-slate-300">{{ submission.language }}</td>
-            <td class="px-4 py-4">
-              {% if submission.status == 'accepted' %}
-                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Accepted</span>
-              {% elif submission.status == 'wrong_answer' %}
-                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">Wrong Answer</span>
-              {% else %}
-                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-300 border border-red-500/30">{{ submission.get_status_display }}</span>
-              {% endif %}
-            </td>
-            <td class="px-4 py-4 text-slate-300">{{ submission.passed_test_cases }}/{{ submission.total_test_cases }}</td>
-            <td class="px-4 py-4 text-slate-400">{{ submission.created_at|date:"M d, Y H:i" }}</td>
-            <td class="px-4 py-4 text-right">
-              <a href="{% url 'practice:submission_detail' submission.id %}" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 text-slate-200 hover:border-teal-400 hover:text-teal-300">
-                View <i class="ri-arrow-right-line"></i>
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="6" class="px-6 py-12 text-center text-slate-400">No submissions yet. Start solving problems to build history.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <!-- Header -->
+        <div class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-reveal">
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-2">Performance Archive</p>
+                <h1 class="text-4xl sm:text-5xl font-black text-white brand-font tracking-tight mb-3">My Submissions</h1>
+                <p class="text-slate-400 font-medium max-w-2xl">Revisit your historical attempts, analyze complexity, and track your progress through the challenges.</p>
+            </div>
+            <a href="{% url 'practice:problem-list' %}" class="h-12 px-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 hover:border-white/20 transition-all">
+                Continue Practicing
+            </a>
+        </div>
 
-  {% if page_obj.paginator.num_pages > 1 %}
-  <div class="mt-6 flex items-center justify-between text-sm">
-    <div class="text-slate-400">Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</div>
-    <div class="flex items-center gap-2">
-      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 rounded-lg border border-slate-600 text-slate-300">Previous</a>{% endif %}
-      <span class="px-3 py-2 rounded-lg bg-slate-800 text-slate-200">{{ page_obj.number }}</span>
-      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 rounded-lg border border-slate-600 text-slate-300">Next</a>{% endif %}
-    </div>
-  </div>
-  {% endif %}
-</section>
+        <!-- Submissions Grid -->
+        <div class="grid grid-cols-1 gap-4 mb-10">
+            {% for submission in page_obj %}
+            <div class="submission-card group animate-reveal" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                <div class="glass-elevated rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+                            <!-- Status Icon -->
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 transition-colors
+                                    {% if submission.status == 'accepted' %}bg-emerald-500/10 text-emerald-400{% elif submission.status == 'wrong_answer' %}bg-amber-500/10 text-amber-400{% else %}bg-rose-500/10 text-rose-400{% endif %}">
+                                    <i class="{% if submission.status == 'accepted' %}ri-check-line{% elif submission.status == 'wrong_answer' %}ri-error-warning-line{% else %}ri-close-line{% endif %} text-2xl"></i>
+                                </div>
+                            </div>
+
+                            <!-- Submission Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-3 mb-2">
+                                    <h2 class="text-lg font-black text-white brand-font tracking-tight">
+                                        <span class="text-slate-600">#{{ submission.problem.problem_number }}</span> {{ submission.problem.title }}
+                                    </h2>
+                                    {% if submission.status == 'accepted' %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Accepted</span>
+                                    {% elif submission.status == 'wrong_answer' %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">Wrong Answer</span>
+                                    {% else %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-rose-500/10 text-rose-400 border border-rose-500/20">{{ submission.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-y-2 gap-x-6 text-[10px] font-bold uppercase tracking-widest">
+                                    <div class="flex items-center gap-1.5 text-slate-500">
+                                        <i class="ri-code-s-slash-line text-sm"></i>
+                                        <span class="text-slate-400">{{ submission.language }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-slate-500 border-l border-white/5 pl-6">
+                                        <i class="ri-flask-line text-sm"></i>
+                                        <span class="text-slate-400">{{ submission.passed_test_cases }} / {{ submission.total_test_cases }} Passed</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-slate-500 border-l border-white/5 pl-6">
+                                        <i class="ri-calendar-event-line text-sm"></i>
+                                        <span class="text-slate-500">{{ submission.created_at|date:"M d, Y · H:i" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action -->
+                            <div class="flex-shrink-0">
+                                <a href="{% url 'practice:submission_detail' submission.id %}" class="h-10 px-6 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 font-black uppercase tracking-widest text-[10px] hover:text-white hover:bg-white/10 transition-all">
+                                    Analyze <i class="ri-arrow-right-line ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="glass-elevated rounded-3xl border border-dashed border-white/10 p-20 text-center animate-reveal">
+                <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+                    <i class="ri-inbox-line text-4xl text-slate-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-400 tracking-tight">Your submission archive is empty.</h3>
+                <p class="text-slate-500 mt-2">Start solving challenges to build your portfolio.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="flex items-center justify-between p-6 glass-elevated border border-white/10 rounded-3xl animate-reveal" style="animation-delay: 400ms;">
+            <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                Archive Segment <span class="text-white">{{ page_obj.number }}</span> of <span class="text-white">{{ page_obj.paginator.num_pages }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-slate-400 hover:text-white transition-all">
+                        <i class="ri-arrow-left-s-line"></i>
+                    </a>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-slate-400 hover:text-white transition-all">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    .animate-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        gsap.to(".animate-reveal", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
+    });
+</script>
 {% endblock %}

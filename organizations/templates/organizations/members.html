@@ -58,9 +58,17 @@
         <div class="flex items-center justify-between px-4 py-3 rounded-xl border border-white/6 bg-white/[0.02]">
           <div>
             <p class="text-sm text-slate-300">{{ inv.email }}</p>
-            <p class="text-xs text-slate-600">Expires {{ inv.expires_at|timesince }} from now</p>
+            <p class="text-xs text-slate-600">Expires {{ inv.expires_at|timeuntil }} from now</p>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/25">Pending</span>
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/25">Pending</span>
+            <form method="post" action="{% url 'organizations:cancel_invite' inv.id %}" onsubmit="return confirm('Cancel invitation for {{ inv.email }}?')">
+              {% csrf_token %}
+              <button type="submit" class="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all flex items-center justify-center">
+                <i class="ri-close-line text-sm"></i>
+              </button>
+            </form>
+          </div>
         </div>
         {% endfor %}
       </div>

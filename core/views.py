@@ -25,6 +25,7 @@ def is_admin(user):
 
 from practice.models import Problem, Company
 from mock_interview.models import MockInterviewSession
+from aptitude.models import AptitudeProblem
 
 # --- Homepage View ---
 def home(request):
@@ -49,7 +50,7 @@ def home(request):
     stats = {
         'total_problems': Problem.objects.filter(is_active=True).count(),
         'total_companies': Company.objects.count(),
-        'total_sessions': MockInterviewSession.objects.filter(status='COMPLETED').count(),
+        'total_questions': AptitudeProblem.objects.count(),
         'active_users': User.objects.count(),
     }
 
@@ -78,6 +79,12 @@ def dashboard_redirect(request):
     """
     Role-based redirect after login.
     """
+    profile = getattr(request.user, 'profile', None)
+    
+    # New users go to onboarding first
+    if profile and not profile.onboarded and not request.user.is_superuser:
+        return redirect('users:onboarding_wizard')
+
     if is_admin(request.user):
         return redirect('practice:admin_dashboard')
     elif is_approved_tutor(request.user):
@@ -86,6 +93,8 @@ def dashboard_redirect(request):
         return redirect('users:tutor_application')
     elif is_student(request.user):
         return redirect('home')
+    elif profile and profile.role == 'ORG_ADMIN':
+        return redirect('organizations:dashboard')
 
     messages.warning(request, "Your profile is not set up correctly. Contact support.")
     return redirect('home')

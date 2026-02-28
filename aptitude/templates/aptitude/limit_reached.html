@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Limit Reached | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-[80vh] py-16 px-4 flex items-center justify-center relative overflow-hidden">
+    <!-- Ambient Background -->
+    <div class="absolute top-1/4 -right-20 w-96 h-96 bg-red-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 -left-20 w-96 h-96 bg-amber-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+
+    <div class="w-full max-w-2xl relative z-10 text-center">
+        <div class="mb-10 inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
+            <i class="ri-alarm-warning-line text-5xl"></i>
+        </div>
+
+        <h1 class="text-4xl font-black text-white brand-font mb-4">
+            Daily Limit <span class="text-amber-500">Reached</span>
+        </h1>
+        
+        <p class="text-slate-400 text-lg mb-10 leading-relaxed">
+            You've reached your individual limit of <strong>{{ limit }} {{ feature }}</strong> per day. 
+            To continue practicing without limits, your institution can unlock the Pro tier for all students.
+        </p>
+
+        <div class="space-y-4">
+            <a href="{% url 'organizations:request_sponsorship' %}?feature={{ feature }}" class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black text-lg hover:scale-[1.02] transition-all shadow-lg shadow-cyan-500/20">
+                <i class="ri-government-line"></i> Request Institutional Sponsorship
+            </a>
+            
+            <p class="text-slate-500 text-sm italic">
+                45+ other students from your batch have already requested this.
+            </p>
+
+            <div class="pt-6 border-t border-white/5 mt-8">
+                <a href="{% url 'aptitude:aptitude_index' %}" class="text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-2 font-bold">
+                    <i class="ri-arrow-left-line"></i> Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,279 +1,527 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}Interview Setup | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 px-4 py-8">
-  <div class="mx-auto max-w-6xl grid grid-cols-1 xl:grid-cols-12 gap-6">
-    <div class="xl:col-span-7 space-y-6">
-      <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6 sm:p-8">
-        <div class="flex items-start justify-between gap-4 mb-6">
-          <div>
-            <p class="text-xs uppercase tracking-[0.15em] text-cyan-300 font-semibold">Interview Setup</p>
-            <h1 class="text-3xl sm:text-4xl font-bold text-slate-100 mt-1">Build Your Best First Impression</h1>
-            <p class="text-slate-400 mt-2">Upload your resume, review ATS readiness, then launch a focused Technical or HR mock interview.</p>
-          </div>
-          <div class="hidden sm:flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-200 text-sm">
-            <i class="ri-star-smile-line"></i>
-            <span>Resume-first coaching</span>
-          </div>
-        </div>
+<div class="min-h-screen relative overflow-hidden py-12">
+    <!-- Background overlay -->
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 pointer-events-none"></div>
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-        {% if messages %}
-          <div class="space-y-3 mb-5">
-            {% for message in messages %}
-              <div class="rounded-xl border px-4 py-3 text-sm {% if message.tags == 'success' %}border-emerald-500/35 bg-emerald-500/15 text-emerald-100{% elif message.tags == 'error' %}border-red-500/35 bg-red-500/15 text-red-100{% elif message.tags == 'warning' %}border-amber-500/35 bg-amber-500/15 text-amber-100{% else %}border-cyan-500/35 bg-cyan-500/15 text-cyan-100{% endif %}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Setup Form -->
+            <div class="xl:col-span-7 space-y-8">
+                
+                <!-- Page Header -->
+                <div class="animate-reveal">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-2">Architect Your Future</p>
+                    <h1 class="text-4xl sm:text-5xl font-black text-white brand-font tracking-tight mb-4">Build Your Best First Impression</h1>
+                    <p class="text-slate-400 font-medium max-w-2xl leading-relaxed">Personalize your journey. Upload your resume for ATS analysis, then launch a focused Technical or HR mock interview session.</p>
+                </div>
 
-        <form method="post" enctype="multipart/form-data" class="space-y-5">
-          {% csrf_token %}
+                {% if messages %}
+                <div class="space-y-4 animate-reveal" style="animation-delay: 100ms;">
+                    {% for message in messages %}
+                    <div class="glass-elevated rounded-2xl border px-6 py-4 flex items-center gap-4 {% if message.tags == 'success' %}border-emerald-500/20 bg-emerald-500/10 text-emerald-100{% elif message.tags == 'error' %}border-rose-500/20 bg-rose-500/10 text-rose-100{% else %}border-sky-500/20 bg-sky-500/10 text-sky-100{% endif %}">
+                        <i class="{% if message.tags == 'success' %}ri-checkbox-circle-line text-emerald-400{% elif message.tags == 'error' %}ri-error-warning-line text-rose-400{% else %}ri-information-line text-sky-400{% endif %} text-xl"></i>
+                        <span class="text-sm font-medium">{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
-          <div class="rounded-2xl border border-white/15 bg-white/5 p-4">
-            <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-semibold text-slate-200">Resume (Required)</label>
-                {% if user.profile.resume %}
-                <button type="button" id="use-profile-resume" class="text-xs text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1">
-                    <i class="ri-user-shared-2-line"></i>
-                    <span>Use Profile Resume</span>
-                </button>
+                <!-- Setup Card -->
+                <div class="glass-elevated rounded-[2.5rem] border border-white/5 p-8 sm:p-10 animate-reveal relative z-40" style="animation-delay: 200ms;">
+                    <form method="post" enctype="multipart/form-data" class="space-y-8">
+                        {% csrf_token %}
+
+                        <!-- Resume Section -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Resume Artifact (Required)</label>
+                                {% if user.profile.resume %}
+                                <button type="button" id="use-profile-resume" class="text-[10px] font-black uppercase tracking-widest text-cyan-400 hover:text-cyan-300 transition-all flex items-center gap-2 group">
+                                    <i class="ri-user-shared-2-line group-hover:-translate-y-0.5 transition-transform"></i>
+                                    <span>Sync Profile Resume</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="relative group">
+                                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-emerald-500/5 rounded-2xl blur-xl group-hover:from-cyan-500/10 group-hover:to-emerald-500/10 transition-all"></div>
+                                <div class="relative rounded-2xl border border-white/10 bg-white/5 p-4 hover:border-white/20 transition-all">
+                                    {{ form.resume_file }}
+                                    <div id="file-overlay" class="pointer-events-none absolute inset-0 flex items-center px-4 text-slate-400 text-sm italic">
+                                        Select PDF, DOCX, or TXT file...
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-500 font-medium ml-1">We utilize this data to hyper-personalize your interview and ATS performance insights.</p>
+                            
+                            <input type="hidden" name="use_profile_resume" id="id_use_profile_resume" value="false">
+                            
+                            <div id="profile-resume-badge" class="hidden animate-reveal group">
+                                <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                        <i class="ri-check-double-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest">Active Resume</p>
+                                        <p class="text-xs font-bold text-white truncate">{{ user.profile.resume.name|cut:"resumes/" }}</p>
+                                    </div>
+                                    <button type="button" id="clear-profile-resume" class="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                                        <i class="ri-close-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Track and Role -->
+                        <div class="grid sm:grid-cols-2 gap-6 relative z-50">
+                            <!-- Track Dropdown -->
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Interview Protocol</label>
+                                <div class="custom-dropdown relative" id="dropdown-track">
+                                    <button type="button" class="dropdown-toggle w-full h-12 px-5 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm font-bold flex items-center justify-between hover:border-cyan-500/30 transition-all" data-target="dropdown-menu-track">
+                                        <span class="selected-value">Select Track</span>
+                                        <i class="ri-arrow-down-s-line text-slate-500 group-data-[state=open]:rotate-180 transition-transform"></i>
+                                    </button>
+                                    <div id="dropdown-menu-track" class="dropdown-menu hidden absolute top-full left-0 w-full mt-2 rounded-xl border border-white/10 bg-slate-900 shadow-2xl overflow-hidden z-[100] backdrop-blur-xl">
+                                        <div class="p-1 max-h-60 overflow-y-auto custom-scrollbar">
+                                            {% for value, label in form.fields.interview_track.choices %}
+                                            <div class="dropdown-option px-4 py-3 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white cursor-pointer transition-colors" data-value="{{ value }}">
+                                                {{ label }}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="hidden-select hidden">
+                                        {{ form.interview_track }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Role Dropdown/Input fallback -->
+                            <div class="space-y-1.5">
+                                <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Target Job Role</label>
+                                <div class="relative">
+                                    {{ form.job_role }}
+                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
+                                        <i class="ri-briefcase-4-line"></i>
+                                    </div>
+                                </div>
+                                {% if form.job_role.errors %}
+                                <p class="text-[10px] text-rose-400 font-bold uppercase ml-1">{{ form.job_role.errors|striptags }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hyper-focus Skills (Optional)</label>
+                            <div class="relative">
+                                {{ form.key_skills }}
+                                <div class="absolute right-4 top-4 text-slate-500">
+                                    <i class="ri-terminal-window-line"></i>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-medium ml-1">Comma-separated skills (e.g. Django, React, AWS) for deeper probe.</p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap items-center gap-4 pt-4">
+                            <button type="submit" name="action" value="analyze" class="h-12 px-8 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-black uppercase tracking-widest text-[10px] hover:bg-cyan-500 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all flex items-center gap-3">
+                                <i class="ri-search-eye-line text-lg"></i>
+                                Analyze Artifact
+                            </button>
+                            <button type="submit" name="action" value="start" class="h-12 px-10 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-cyan-500/20 hover:scale-[1.03] transition-all flex items-center gap-3">
+                                <i class="ri-play-circle-line text-lg"></i>
+                                Launch Protocol
+                            </button>
+                            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5">
+                                <i class="ri-lightbulb-line text-amber-400"></i>
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Analyze first for tailored AI prompts</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {% if resume_insights %}
+                <!-- Insights Card -->
+                <div class="glass-elevated rounded-[2.5rem] border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 300ms;">
+                    <div class="px-8 py-6 border-b border-white/5 bg-white/2 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="ri-radar-line text-cyan-400 text-xl"></i>
+                            <h2 class="text-xs font-black text-white uppercase tracking-widest">Resume Intelligence Insights</h2>
+                        </div>
+                        <div class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest {% if resume_insights.band == 'excellent' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% elif resume_insights.band == 'good' %}bg-cyan-500/10 text-cyan-400 border border-cyan-500/20{% elif resume_insights.band == 'average' %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                            {{ resume_insights.band }}
+                        </div>
+                    </div>
+
+                    <div class="p-8 sm:p-10 space-y-10">
+                        <!-- Score Visualization -->
+                        <div class="relative group">
+                            <div class="absolute -inset-4 bg-cyan-500/5 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="relative flex flex-col sm:flex-row items-center gap-8">
+                                <div class="relative w-32 h-32 flex items-center justify-center">
+                                    <svg class="w-full h-full -rotate-90">
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-white/5" />
+                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" 
+                                            stroke-dasharray="364.4" 
+                                            stroke-dashoffset="{{ 364.4|subtract_percentage:resume_insights.ats_score }}"
+                                            class="{% if resume_insights.ats_score > 80 %}text-emerald-500{% elif resume_insights.ats_score > 60 %}text-cyan-500{% else %}text-amber-500{% endif %} transition-all duration-1000" />
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-3xl font-black text-white brand-font tracking-tight">{{ resume_insights.ats_score }}</span>
+                                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">ATS Grade</span>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-black text-white brand-font tracking-tight mb-3">Mastery Summary</h3>
+                                    <p class="text-slate-400 text-sm font-medium leading-relaxed">{{ resume_insights.summary }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metrics Grid -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {% for label, value in resume_insights.breakdown.items %}
+                            <div class="glass-elevated rounded-2xl border border-white/5 p-4 group hover:-translate-y-1 transition-all">
+                                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{{ label|replace:"_, " }}</p>
+                                <div class="flex items-end gap-1">
+                                    <span class="text-xl font-black text-white brand-font tracking-tight">{{ value }}</span>
+                                    <span class="text-[9px] font-black text-cyan-500 mb-1.5">%</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if resume_insights.missing_keywords %}
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-2">
+                                <i class="ri-alert-line text-amber-400"></i>
+                                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Missing Domain Keywords</h3>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for kw in resume_insights.missing_keywords %}
+                                <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-slate-300">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="grid sm:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="ri-sparkling-fill text-emerald-400"></i>
+                                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Artifact Highlights</h3>
+                                </div>
+                                <ul class="space-y-3">
+                                    {% for item in resume_insights.detected_highlights %}
+                                    <li class="p-4 rounded-xl bg-white/2 border border-white/5 flex gap-3 text-xs font-medium text-slate-300">
+                                        <i class="ri-checkbox-circle-fill text-emerald-400/40 mt-0.5"></i>
+                                        {{ item }}
+                                    </li>
+                                    {% empty %}
+                                    <li class="text-slate-500 text-xs italic">No highlights detected.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="ri-edit-flash-line text-sky-400"></i>
+                                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Actionable Refinements</h3>
+                                </div>
+                                <ul class="space-y-3">
+                                    {% for s in resume_insights.suggestions %}
+                                    <li class="p-4 rounded-xl bg-white/2 border border-white/5 flex gap-3 text-xs font-medium text-slate-300">
+                                        <i class="ri-flashlight-line text-sky-400/40 mt-0.5"></i>
+                                        {{ s }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
             </div>
-            {{ form.resume_file }}
-            <p class="text-xs text-slate-500 mt-2">PDF, DOCX, or TXT. We use this to personalize your interview and ATS insights.</p>
-            <input type="hidden" name="use_profile_resume" id="id_use_profile_resume" value="false">
-            <div id="profile-resume-badge" class="hidden mt-3 px-3 py-1.5 rounded-lg border border-cyan-500/35 bg-cyan-500/10 text-cyan-200 text-xs flex items-center gap-2">
-                <i class="ri-check-line text-emerald-400"></i>
-                <span>Using: <strong>{{ user.profile.resume.name|cut:"resumes/" }}</strong></span>
-                <button type="button" id="clear-profile-resume" class="ml-auto hover:text-white"><i class="ri-close-line"></i></button>
-            </div>
-          </div>
 
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-semibold text-slate-200 mb-2">Interview Type</label>
-              {{ form.interview_track }}
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-200 mb-2">Target Job Role</label>
-              {{ form.job_role }}
-              {% if form.job_role.errors %}
-                <p class="text-xs text-red-300 mt-2">{{ form.job_role.errors|striptags }}</p>
-              {% endif %}
-            </div>
-          </div>
+            <!-- Right Column: Sidebar -->
+            <aside class="xl:col-span-5 space-y-8">
+                <!-- Why it matters -->
+                <div class="glass-elevated rounded-[2.5rem] border border-white/5 p-8 sm:p-10 animate-reveal" style="animation-delay: 400ms;">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                            <i class="ri-shield-user-line text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-white brand-font tracking-tight uppercase">Protocol Benefits</h3>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex gap-5 group">
+                            <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-all">01</div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-black text-white uppercase tracking-widest mb-1 group-hover:text-cyan-400">ATS Optimization</h4>
+                                <p class="text-xs text-slate-400 font-medium leading-relaxed">Instantly receive a data-backed score with clear improvements for automated screening.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-5 group">
+                            <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-all">02</div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-black text-white uppercase tracking-widest mb-1 group-hover:text-cyan-400">Dual-Track Simulation</h4>
+                                <p class="text-xs text-slate-400 font-medium leading-relaxed">Choose Technical for deep concept probe or HR for culture and behavior readiness.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-5 group">
+                            <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-all">03</div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-black text-white uppercase tracking-widest mb-1 group-hover:text-cyan-400">Dynamic Probing</h4>
+                                <p class="text-xs text-slate-400 font-medium leading-relaxed">AI adapts to your resume data and responses in real-time, simulating a truly bespoke interview.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-slate-200 mb-2">Key Skills (Optional)</label>
-            {{ form.key_skills }}
-            {% if form.key_skills.errors %}
-              <p class="text-xs text-red-300 mt-2">{{ form.key_skills.errors|striptags }}</p>
-            {% endif %}
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <button type="submit" name="action" value="analyze" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-cyan-500/35 bg-cyan-500/15 text-cyan-200 font-semibold hover:bg-cyan-500/25 transition">
-              <i class="ri-search-eye-line"></i>
-              <span>Analyze Resume</span>
-            </button>
-            <button type="submit" name="action" value="start" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-white font-semibold hover:opacity-90 transition">
-              <i class="ri-play-circle-line"></i>
-              <span>Start Interview</span>
-            </button>
-            <p class="text-xs text-slate-500">Tip: Analyze first for better recommendations.</p>
-          </div>
-        </form>
-      </div>
-
-      {% if resume_insights %}
-        <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6 sm:p-8">
-          <div class="flex items-center justify-between mb-5">
-            <h2 class="text-xl font-bold text-slate-100">ATS Resume Insights</h2>
-            <span class="px-3 py-1 rounded-full text-xs font-semibold {% if resume_insights.band == 'excellent' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% elif resume_insights.band == 'good' %}bg-cyan-500/20 text-cyan-300 border border-cyan-500/30{% elif resume_insights.band == 'average' %}bg-amber-500/20 text-amber-300 border border-amber-500/30{% else %}bg-red-500/20 text-red-300 border border-red-500/30{% endif %}">
-              {{ resume_insights.band|title }}
-            </span>
-          </div>
-
-          <div class="mb-4">
-            <div class="flex items-end justify-between mb-2">
-              <p class="text-sm text-slate-400">ATS Score</p>
-              <p class="text-3xl font-bold text-cyan-300">{{ resume_insights.ats_score }}/100</p>
-            </div>
-            <div class="h-2 rounded bg-slate-700">
-              <div class="h-2 rounded bg-gradient-to-r from-cyan-500 to-emerald-500" style="width: {{ resume_insights.ats_score }}%;"></div>
-            </div>
-            <p class="text-sm text-slate-300 mt-2">{{ resume_insights.summary }}</p>
-          </div>
-
-          <div class="grid sm:grid-cols-2 gap-4 mb-5">
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p class="text-xs text-slate-500">Keyword Match</p>
-              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.keyword_match }}%</p>
-            </div>
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p class="text-xs text-slate-500">Structure Quality</p>
-              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.structure_quality }}%</p>
-            </div>
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p class="text-xs text-slate-500">Impact Evidence</p>
-              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.impact_evidence }}%</p>
-            </div>
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p class="text-xs text-slate-500">Readability</p>
-              <p class="text-xl font-semibold text-slate-100">{{ resume_insights.breakdown.readability }}%</p>
-            </div>
-          </div>
-
-          {% if resume_insights.missing_keywords %}
-            <div class="mb-5">
-              <p class="text-sm font-semibold text-slate-200 mb-2">Missing Keywords</p>
-              <div class="flex flex-wrap gap-2">
-                {% for kw in resume_insights.missing_keywords %}
-                  <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs">{{ kw }}</span>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <p class="text-sm font-semibold text-slate-200 mb-2">Detected Highlights</p>
-              <ul class="space-y-2 text-sm text-slate-300">
-                {% for item in resume_insights.detected_highlights %}
-                  <li class="rounded-lg border border-white/10 bg-white/5 p-3">{{ item }}</li>
-                {% empty %}
-                  <li class="text-slate-500">No highlights detected.</li>
-                {% endfor %}
-              </ul>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-slate-200 mb-2">Actionable Improvements</p>
-              <ul class="space-y-2 text-sm text-slate-300">
-                {% for s in resume_insights.suggestions %}
-                  <li class="rounded-lg border border-white/10 bg-white/5 p-3">{{ s }}</li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
+                <!-- Guidelines -->
+                <div class="glass-elevated rounded-[2.5rem] border border-white/5 p-8 sm:p-10 animate-reveal" style="animation-delay: 500ms;">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="ri-information-fill text-amber-400 text-xl"></i>
+                        <h3 class="text-xs font-black text-white uppercase tracking-widest">Protocol Pre-flight</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4">
+                            <div class="mt-1 w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"></div>
+                            <p class="text-xs text-slate-400 font-medium leading-tight">Keep resume updated with quantified project outcomes.</p>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="mt-1 w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"></div>
+                            <p class="text-xs text-slate-400 font-medium leading-tight">Add measurable metrics (%, scale, time) in every bullet.</p>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="mt-1 w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"></div>
+                            <p class="text-xs text-slate-400 font-medium leading-tight">Match your interview track to your current prep milestone.</p>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="mt-1 w-1.5 h-1.5 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.5)]"></div>
+                            <p class="text-xs text-slate-400 font-medium leading-tight">Complete ATS analysis before launching a full mock session.</p>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
         </div>
-      {% endif %}
     </div>
+</div>
 
-    <aside class="xl:col-span-5 space-y-6">
-      <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6">
-        <h3 class="text-lg font-semibold text-slate-100 mb-4">What You Get</h3>
-        <div class="space-y-4 text-sm text-slate-300">
-          <div class="flex gap-3">
-            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-semibold text-xs">1</div>
-            <p>Resume ATS score with clear strengths, gaps, and exact improvement actions.</p>
-          </div>
-          <div class="flex gap-3">
-            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-semibold text-xs">2</div>
-            <p>Interview mode control: Technical for concept depth, HR for behavioral readiness.</p>
-          </div>
-          <div class="flex gap-3">
-            <div class="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 flex items-center justify-center font-semibold text-xs">3</div>
-            <p>Personalized interview conversation and final performance report with transcript.</p>
-          </div>
-        </div>
-      </div>
+<style>
+    .glass-elevated {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .animate-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    .brand-font { font-family: 'Outfit', sans-serif; }
+    
+    #id_resume_file {
+        opacity: 0;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    #id_job_role {
+        width: 100%;
+        height: 3rem;
+        padding: 0 1.25rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-weight: 700;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+    #id_job_role:focus {
+        border-color: rgba(6, 182, 212, 0.3);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+    }
 
-      <div class="rounded-3xl border border-white/15 bg-slate-900/75 backdrop-blur-xl p-6">
-        <h3 class="text-lg font-semibold text-slate-100 mb-4">Before You Start</h3>
-        <ul class="space-y-3 text-sm text-slate-300">
-          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Keep resume updated with latest project impact.</li>
-          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Add measurable outcomes in bullets.</li>
-          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Select interview type based on your preparation goal.</li>
-          <li class="flex items-center gap-2"><i class="ri-checkbox-circle-line text-emerald-400"></i>Use Analyze first, then launch mock interview.</li>
-        </ul>
-      </div>
-    </aside>
-  </div>
-</section>
+    #id_key_skills {
+        width: 100%;
+        min-height: 6rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-weight: 700;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.3s ease;
+        resize: vertical;
+    }
+    #id_key_skills:focus {
+        border-color: rgba(6, 182, 212, 0.3);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+    }
+
+    /* SVG Percentage helper if needed - in Django we might need a filter for this */
+    /* Handled via custom logic in stroke-dashoffset if available or JS */
+</style>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const style = "w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-slate-100";
-    const file = document.getElementById("id_resume_file");
-    const track = document.getElementById("id_interview_track");
-    const role = document.getElementById("id_job_role");
-    const skills = document.getElementById("id_key_skills");
-    if (file) { file.className = style; file.setAttribute("accept", ".pdf,.docx,.txt"); }
-    if (track) track.className = style;
-    if (role) role.className = style;
-    if (skills) skills.className = `${style} h-24`;
+    document.addEventListener("DOMContentLoaded", function () {
+        // Entrance Animations
+        gsap.to(".animate-reveal", {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+        });
 
-    const useProfileBtn = document.getElementById("use-profile-resume");
-    const clearProfileBtn = document.getElementById("clear-profile-resume");
-    const useProfileInput = document.getElementById("id_use_profile_resume");
-    const profileResumeBadge = document.getElementById("profile-resume-badge");
-    const resumeFileInput = document.getElementById("id_resume_file");
-    const roleInput = document.getElementById("id_job_role");
-    const skillsInput = document.getElementById("id_key_skills");
-    const analyzeBtn = document.querySelector('button[value="analyze"]');
-
-    if (useProfileBtn) {
-        useProfileBtn.addEventListener("click", async function() {
-            try {
-                useProfileBtn.disabled = true;
-                useProfileBtn.classList.add("opacity-50");
-                
-                const response = await fetch("{% url 'users:analyze_resume' %}", {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Pre-fill fields
-                    if (roleInput) roleInput.value = data.role;
-                    if (skillsInput) skillsInput.value = data.skills;
-                    
-                    // Show badge and set hidden input
-                    useProfileInput.value = "true";
-                    profileResumeBadge.classList.remove("hidden");
-                    if (resumeFileInput) {
-                        resumeFileInput.required = false;
-                        resumeFileInput.classList.add("hidden");
-                    }
-                    
-                    // Show a notification or just scroll to insights if we want to show them immediately
-                    // For now, let's just show the change on the form.
-                    // If we want to show insights without refreshing, we'd need to inject the HTML.
-                    // But the requirement says "review the insights and ATS score... and fill fields".
-                    // Let's reload the page with a specific flag or just trigger the analysis submit if possible?
-                    // Actually, the user might want to check the fields first.
-                    
-                    // Optional: If we want to show insights instantly, we'd need to build the UI elements.
-                    // Given the current structure, it's easier to just trigger the "Analyze" submit post-selection
-                    // if they really want it instant. But let's just pre-fill for now.
-                    
+        // Resume File Overlay Logic
+        const fileInput = document.getElementById("id_resume_file");
+        const fileOverlay = document.getElementById("file-overlay");
+        
+        if (fileInput && fileOverlay) {
+            fileInput.addEventListener("change", function() {
+                if (this.files.length > 0) {
+                    fileOverlay.textContent = this.files[0].name;
+                    fileOverlay.classList.remove("italic", "text-slate-400");
+                    fileOverlay.classList.add("text-cyan-400", "font-bold");
                 } else {
-                    alert(data.error || "Failed to analyze profile resume.");
+                    fileOverlay.textContent = "Select PDF, DOCX, or TXT file...";
+                    fileOverlay.classList.add("italic", "text-slate-400");
+                    fileOverlay.classList.remove("text-cyan-400", "font-bold");
                 }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("An error occurred while fetching your resume data.");
-            } finally {
-                useProfileBtn.disabled = false;
-                useProfileBtn.classList.remove("opacity-50");
-            }
-        });
-    }
+            });
+        }
 
-    if (clearProfileBtn) {
-        clearProfileBtn.addEventListener("click", function() {
-            useProfileInput.value = "false";
-            profileResumeBadge.classList.add("hidden");
-            if (resumeFileInput) {
-                resumeFileInput.classList.remove("hidden");
-                resumeFileInput.required = true;
+        // Custom Dropdown Logic
+        const dropdowns = document.querySelectorAll('.custom-dropdown');
+        
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            const options = dropdown.querySelectorAll('.dropdown-option');
+            const hiddenSelect = dropdown.querySelector('.hidden-select select');
+            const selectedText = dropdown.querySelector('.selected-value');
+
+            // Initialize from hidden select
+            if (hiddenSelect && hiddenSelect.value) {
+                const initialOption = dropdown.querySelector(`[data-value="${hiddenSelect.value}"]`);
+                if (initialOption) {
+                    selectedText.textContent = initialOption.textContent.trim();
+                }
             }
+
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = !menu.classList.contains('hidden');
+                
+                // Close all other dropdowns
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+                document.querySelectorAll('.dropdown-toggle').forEach(t => t.removeAttribute('data-state'));
+
+                if (!isOpen) {
+                    menu.classList.remove('hidden');
+                    toggle.setAttribute('data-state', 'open');
+                    gsap.fromTo(menu, 
+                        { opacity: 0, y: -10 }, 
+                        { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" }
+                    );
+                }
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const value = option.getAttribute('data-value');
+                    selectedText.textContent = option.textContent.trim();
+                    hiddenSelect.value = value;
+                    
+                    // Trigger change event for form processing
+                    hiddenSelect.dispatchEvent(new Event('change'));
+
+                    // Close menu
+                    menu.classList.add('hidden');
+                    toggle.removeAttribute('data-state');
+                });
+            });
         });
-    }
-  });
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.removeAttribute('data-state'));
+        });
+
+        // Profile Resume Logic
+        const useProfileBtn = document.getElementById("use-profile-resume");
+        const clearProfileBtn = document.getElementById("clear-profile-resume");
+        const useProfileInput = document.getElementById("id_use_profile_resume");
+        const profileResumeBadge = document.getElementById("profile-resume-badge");
+        const resumeFileInput = document.getElementById("id_resume_file");
+        const roleInput = document.getElementById("id_job_role");
+        const skillsInput = document.getElementById("id_key_skills");
+
+        if (useProfileBtn) {
+            useProfileBtn.addEventListener("click", async function() {
+                try {
+                    useProfileBtn.disabled = true;
+                    useProfileBtn.classList.add("opacity-50");
+                    
+                    const response = await fetch("{% url 'users:analyze_resume' %}", {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (roleInput) roleInput.value = data.role;
+                        if (skillsInput) skillsInput.value = data.skills;
+                        
+                        useProfileInput.value = "true";
+                        profileResumeBadge.classList.remove("hidden");
+                        gsap.from(profileResumeBadge, { opacity: 0, y: -10, duration: 0.4 });
+                        
+                        if (resumeFileInput) {
+                            resumeFileInput.required = false;
+                            resumeFileInput.closest('.group').classList.add("hidden");
+                        }
+                    } else {
+                        alert(data.error || "Failed to analyze profile resume.");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred while fetching your resume data.");
+                } finally {
+                    useProfileBtn.disabled = false;
+                    useProfileBtn.classList.remove("opacity-50");
+                }
+            });
+        }
+
+        if (clearProfileBtn) {
+            clearProfileBtn.addEventListener("click", function() {
+                useProfileInput.value = "false";
+                profileResumeBadge.classList.add("hidden");
+                if (resumeFileInput) {
+                    resumeFileInput.closest('.group').classList.remove("hidden");
+                    resumeFileInput.required = true;
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}
