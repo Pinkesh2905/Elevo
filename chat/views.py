@@ -179,7 +179,11 @@ def _serialize_message(msg, user):
         'id': msg.id,
         'content': msg.content,
         'sender': msg.sender.username,
-        'sender_avatar': msg.sender.profile.avatar.url if msg.sender.profile.avatar else None,
+        'sender_avatar': (
+            msg.sender.profile.avatar.url
+            if hasattr(msg.sender, 'profile') and msg.sender.profile.avatar
+            else None
+        ),
         'created_at': msg.created_at.strftime('%b %d, %I:%M %p'),
         'timestamp_raw': msg.created_at.isoformat(),
         'is_mine': msg.sender == user,

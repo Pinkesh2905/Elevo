@@ -35,6 +35,12 @@
         <a href="{% url 'organizations:members' %}" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm hover:bg-white/10 transition-all">
           <i class="ri-group-line mr-1"></i> Members
         </a>
+        <a href="{% url 'organizations:org_analytics' %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-medium hover:from-violet-600 hover:to-fuchsia-600 transition-all shadow-lg shadow-violet-500/15">
+          <i class="ri-bar-chart-grouped-line mr-1"></i> Analytics
+        </a>
+        <a href="{% url 'organizations:ai_dashboard' %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-sm font-medium hover:from-emerald-600 hover:to-cyan-600 transition-all shadow-lg shadow-emerald-500/15">
+          <i class="ri-cpu-line mr-1"></i> AI Costs
+        </a>
         <a href="{% url 'organizations:subscription' %}" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 text-white text-sm font-medium hover:from-sky-600 hover:to-teal-600 transition-all shadow-lg shadow-sky-500/15">
           <i class="ri-vip-crown-line mr-1"></i> Subscription
         </a>

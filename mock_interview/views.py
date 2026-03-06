@@ -4,6 +4,9 @@ import os
 import random
 import re
 import tempfile
+import time
+import threading
+from decimal import Decimal
 from difflib import SequenceMatcher
 
 import docx2txt
@@ -269,19 +272,158 @@ class AIService:
                 last = exc
         raise RuntimeError(f"OpenAI failed: {last}")
 
-    def text(self, prompt, temperature=0.7, max_tokens=300, prefer_json=False):
+    # --- Reliability helpers ---------------------------------------------------
+    _RETRY_DELAYS = (0.5, 1.0)        # exponential backoff for 2 retries
+    _CALL_TIMEOUT  = 30               # seconds per provider call
+
+    @staticmethod
+    def _estimate_tokens(text):
+        """Rough token count: ~4 chars per token."""
+        return max(1, len(text or "") // 4)
+
+    @staticmethod
+    def _compute_cost(provider, input_tokens, output_tokens):
+        pricing = getattr(settings, "AI_COST_PER_1K_TOKENS", {}).get(provider, {})
+        inp = Decimal(str(pricing.get("input", 0))) * Decimal(input_tokens) / 1000
+        out = Decimal(str(pricing.get("output", 0))) * Decimal(output_tokens) / 1000
+        return round(inp + out, 6)
+
+    @staticmethod
+    def _check_quota(organization):
+        """Return True if org is within its monthly AI token quota."""
+        if organization is None:
+            return True
+        from organizations.models import Organization
+        if not isinstance(organization, Organization):
+            return True
+        sub = organization.active_subscription
+        if not sub:
+            return True  # no plan → allow (free-tier default)
+        limit = sub.plan.ai_tokens_monthly
+        if limit == -1:
+            return True  # unlimited
+        from django.utils import timezone as tz
+        month_start = tz.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        from mock_interview.ai_models import AIUsageLog
+        from django.db.models import Sum
+        used = AIUsageLog.objects.filter(
+            organization=organization,
+            created_at__gte=month_start,
+            status__in=["success", "fallback"],
+        ).aggregate(total=Sum("input_tokens") + Sum("output_tokens"))["total"] or 0
+        return used < limit
+
+    def _call_with_timeout(self, fn, *args, **kwargs):
+        """Run *fn* in a thread; raise RuntimeError on timeout."""
+        result = [None]
+        error  = [None]
+        def _target():
+            try:
+                result[0] = fn(*args, **kwargs)
+            except Exception as exc:
+                error[0] = exc
+        t = threading.Thread(target=_target, daemon=True)
+        t.start()
+        t.join(timeout=self._CALL_TIMEOUT)
+        if t.is_alive():
+            raise RuntimeError(f"AI call timed out after {self._CALL_TIMEOUT}s")
+        if error[0]:
+            raise error[0]
+        return result[0]
+
+    def _log_usage(self, *, provider, model_name, operation, input_tokens,
+                   output_tokens, cost, latency_ms, status, error_message="",
+                   user=None, organization=None):
+        try:
+            from mock_interview.ai_models import AIUsageLog
+            AIUsageLog.objects.create(
+                user=user, organization=organization,
+                provider=provider, model_name=model_name or "",
+                operation=operation,
+                input_tokens=input_tokens, output_tokens=output_tokens,
+                estimated_cost_usd=cost,
+                latency_ms=latency_ms, status=status,
+                error_message=error_message[:500] if error_message else "",
+            )
+        except Exception as log_exc:
+            logger.warning("AIUsageLog write failed: %s", log_exc)
+
+    def text(self, prompt, temperature=0.7, max_tokens=300, prefer_json=False,
+             user=None, organization=None, operation="unknown"):
+        # --- Quota gate ---
+        if not self._check_quota(organization):
+            self._log_usage(
+                provider="none", model_name="", operation=operation,
+                input_tokens=0, output_tokens=0, cost=Decimal(0),
+                latency_ms=0, status="quota_exceeded",
+                error_message="Monthly AI token quota exceeded",
+                user=user, organization=organization,
+            )
+            raise RuntimeError("Monthly AI token quota exceeded")
+
         errors = []
+        start = time.time()
+        # --- Try Gemini with retry ---
         if self.gemini_key:
-            try:
-                return self._call_gemini(prompt, temperature, max_tokens, prefer_json=prefer_json)
-            except Exception as exc:
-                errors.append(str(exc))
+            for attempt in range(1 + len(self._RETRY_DELAYS)):
+                try:
+                    result = self._call_with_timeout(
+                        self._call_gemini, prompt, temperature, max_tokens,
+                        prefer_json=prefer_json,
+                    )
+                    latency = int((time.time() - start) * 1000)
+                    text_result, provider, model = result
+                    inp_tok = self._estimate_tokens(prompt)
+                    out_tok = self._estimate_tokens(text_result)
+                    cost = self._compute_cost(provider, inp_tok, out_tok)
+                    self._log_usage(
+                        provider=provider, model_name=model, operation=operation,
+                        input_tokens=inp_tok, output_tokens=out_tok, cost=cost,
+                        latency_ms=latency, status="success",
+                        user=user, organization=organization,
+                    )
+                    return result
+                except Exception as exc:
+                    errors.append(str(exc))
+                    if attempt < len(self._RETRY_DELAYS):
+                        time.sleep(self._RETRY_DELAYS[attempt])
+
+        # --- Try OpenAI with retry (fallback) ---
         if self.openai_key:
-            try:
-                return self._call_openai(prompt, temperature, max_tokens)
-            except Exception as exc:
-                errors.append(str(exc))
-        raise RuntimeError("; ".join(errors) if errors else "No AI provider configured")
+            fallback_start = time.time()
+            for attempt in range(1 + len(self._RETRY_DELAYS)):
+                try:
+                    result = self._call_with_timeout(
+                        self._call_openai, prompt, temperature, max_tokens,
+                    )
+                    latency = int((time.time() - start) * 1000)
+                    text_result, provider, model = result
+                    inp_tok = self._estimate_tokens(prompt)
+                    out_tok = self._estimate_tokens(text_result)
+                    cost = self._compute_cost(provider, inp_tok, out_tok)
+                    self._log_usage(
+                        provider=provider, model_name=model, operation=operation,
+                        input_tokens=inp_tok, output_tokens=out_tok, cost=cost,
+                        latency_ms=latency,
+                        status="fallback" if self.gemini_key else "success",
+                        user=user, organization=organization,
+                    )
+                    return result
+                except Exception as exc:
+                    errors.append(str(exc))
+                    if attempt < len(self._RETRY_DELAYS):
+                        time.sleep(self._RETRY_DELAYS[attempt])
+
+        # --- Both failed ---
+        latency = int((time.time() - start) * 1000)
+        err_msg = "; ".join(errors) if errors else "No AI provider configured"
+        self._log_usage(
+            provider="none", model_name="", operation=operation,
+            input_tokens=self._estimate_tokens(prompt), output_tokens=0,
+            cost=Decimal(0), latency_ms=latency, status="error",
+            error_message=err_msg, user=user, organization=organization,
+        )
+        raise RuntimeError(err_msg)
 
 
 AI = AIService()
@@ -344,7 +486,8 @@ def _extract_resume_profile(resume_text, role_hint="", track="technical"):
         f"Resume:\n{resume_text[:18000]}"
     )
     try:
-        text, _, _ = AI.text(prompt, temperature=0.2, max_tokens=900, prefer_json=True)
+        text, _, _ = AI.text(prompt, temperature=0.2, max_tokens=900, prefer_json=True,
+                             operation="resume_parse")
         data = _parse_json(text) or {}
     except Exception:
         data = {}
@@ -904,7 +1047,8 @@ def _generate_feedback(session):
         f"Role: {session.job_role}\nSkills: {session.key_skills}\nTranscript:\n{chr(10).join(transcript)}"
     )
     try:
-        text, provider, model = AI.text(prompt, temperature=0.35, max_tokens=800, prefer_json=True)
+        text, provider, model = AI.text(prompt, temperature=0.35, max_tokens=800, prefer_json=True,
+                                          operation="feedback")
         logger.info("Feedback generated by %s/%s", provider, model)
         return _coerce_feedback(_parse_json(text), session)
     except Exception as exc:
@@ -923,7 +1067,8 @@ def _next_question(session, turns, user_response, time_remaining=None):
     prompt = _build_question_prompt(session, turns, user_response, time_remaining=time_remaining)
     try:
         # Reduced max_tokens and streamlined logic for faster analysis
-        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=150)
+        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=150,
+                                          operation="question")
         question = _strip(text)
         if question and not _is_incomplete_turn(question):
             return question, {"provider": provider, "model": model, "stage": stage}
@@ -940,7 +1085,8 @@ def _closing(session, answered_count):
         f"Role: {session.job_role}\nAnswered questions: {answered_count}"
     )
     try:
-        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=180)
+        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=180,
+                                          operation="closing")
         if _strip(text):
             return _strip(text), {"provider": provider, "model": model}
     except Exception as exc:

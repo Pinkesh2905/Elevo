@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 
+from .ai_models import AIUsageLog  # noqa: F401 — discovered by migrations
+
 class MockInterviewSession(models.Model):
     """
     Represents a single mock interview session taken by a user.

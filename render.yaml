@@ -30,6 +30,14 @@ services:
         value: 4
       - key: PYTHON_VERSION
         value: 3.11.4
+      - key: ELEVO_ENV
+        value: production
+      - key: SALES_DEMO_MODE
+        value: "true"
+      - key: SHOW_SOCIAL_IN_SALES_DEMO
+        value: "false"
+      - key: ENABLE_CHAT
+        value: "true"
       # IMPORTANT: Add your actual secret keys in the Render dashboard
       - key: JDOODLE_CLIENT_ID
         value: "YOUR_JDOODLE_CLIENT_ID_HERE"

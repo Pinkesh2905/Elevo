@@ -25,3 +25,6 @@ docx2txt==0.9
 
 # Optional NLP utility used in settings
 nltk==3.9.1
+
+# Async task queue
+django-q2==1.9.0

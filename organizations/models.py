@@ -10,9 +10,12 @@ class SubscriptionPlan(models.Model):
     """
     PLAN_CHOICES = [
         ('FREE', 'Free'),
+        ('STARTER', 'Starter'),
+        ('GROWTH', 'Growth'),
+        ('ENTERPRISE', 'Enterprise'),
+        # Legacy plans retained for compatibility with older rows
         ('PRO', 'Pro'),
         ('PERSONAL_PRO', 'Personal Pro'),
-        ('ENTERPRISE', 'Enterprise'),
     ]
 
     TARGET_CHOICES = [
@@ -45,6 +48,12 @@ class SubscriptionPlan(models.Model):
     has_custom_branding = models.BooleanField(default=False, help_text="Custom org branding support")
     has_priority_support = models.BooleanField(default=False, help_text="Priority customer support")
 
+    # AI quota
+    ai_tokens_monthly = models.IntegerField(
+        default=50000,
+        help_text="Max AI tokens per org per month. -1 = unlimited",
+    )
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -65,12 +74,33 @@ class Organization(models.Model):
     """
     Represents a subscribing organization (college, institute, company).
     """
+    ONBOARDING_STEPS = [
+        ('PENDING', 'Pending'),
+        ('DOMAIN_SETUP', 'Domain Setup'),
+        ('DOMAIN_VERIFIED', 'Domain Verified'),
+        ('MEMBERS_INVITED', 'Members Invited'),
+        ('COMPLETE', 'Complete'),
+    ]
+
     name = models.CharField(max_length=200, help_text="Organization name")
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     logo = models.ImageField(upload_to='org_logos/', blank=True, null=True)
     description = models.TextField(blank=True, help_text="Brief description of the organization")
     website = models.URLField(blank=True)
     email = models.EmailField(blank=True, help_text="Organization contact email")
+    verified_domain = models.CharField(
+        max_length=120,
+        blank=True,
+        help_text="Primary verified email domain for this organization (e.g. college.edu).",
+    )
+    is_domain_verified = models.BooleanField(default=False)
+    domain_verification_token = models.CharField(max_length=64, blank=True)
+    onboarding_step = models.CharField(
+        max_length=20,
+        choices=ONBOARDING_STEPS,
+        default='PENDING',
+        help_text="Current onboarding progress.",
+    )
 
     admin = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name='owned_organizations',
@@ -187,7 +217,8 @@ class Subscription(models.Model):
             raise ValidationError("A subscription must be linked to either an organization or a user.")
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        if not kwargs.get('update_fields'):
+            self.full_clean()
         super().save(*args, **kwargs)
 
     class Meta:
@@ -222,8 +253,13 @@ class Membership(models.Model):
     Links a user (student) to an organization.
     """
     ROLE_CHOICES = [
-        ('MEMBER', 'Member'),
-        ('ORG_ADMIN', 'Org Admin'),
+        ('OWNER', 'Owner'),
+        ('ADMIN', 'Admin'),
+        ('TRAINER', 'Trainer'),
+        ('STUDENT', 'Student'),
+        # Legacy roles kept for compatibility with existing rows
+        ('ORG_ADMIN', 'Org Admin (Legacy)'),
+        ('MEMBER', 'Member (Legacy)'),
     ]
 
     user = models.ForeignKey(
@@ -232,7 +268,7 @@ class Membership(models.Model):
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name='memberships'
     )
-    role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='MEMBER')
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='STUDENT')
     is_active = models.BooleanField(default=True)
     joined_at = models.DateTimeField(auto_now_add=True)
     invited_by = models.ForeignKey(
@@ -252,6 +288,17 @@ class Membership(models.Model):
     def __str__(self):
         return f"{self.user.username} @ {self.organization.name} ({self.role})"
 
+    @property
+    def normalized_role(self):
+        """
+        Normalize legacy roles to the new role model.
+        """
+        if self.role == "ORG_ADMIN":
+            return "ADMIN"
+        if self.role == "MEMBER":
+            return "STUDENT"
+        return self.role
+
 
 class OrgInvitation(models.Model):
     """
@@ -262,11 +309,22 @@ class OrgInvitation(models.Model):
         ('ACCEPTED', 'Accepted'),
         ('EXPIRED', 'Expired'),
     ]
+    INVITE_ROLE_CHOICES = [
+        ('ADMIN', 'Admin'),
+        ('TRAINER', 'Trainer'),
+        ('STUDENT', 'Student'),
+    ]
 
     organization = models.ForeignKey(
         Organization, on_delete=models.CASCADE, related_name='invitations'
     )
     email = models.EmailField(help_text="Invitee's email address")
+    role = models.CharField(
+        max_length=15,
+        choices=INVITE_ROLE_CHOICES,
+        default='STUDENT',
+        help_text="Role to assign when invitation is accepted.",
+    )
     token = models.CharField(max_length=64, unique=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     invited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -279,7 +337,7 @@ class OrgInvitation(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Invite {self.email} → {self.organization.name} ({self.status})"
+        return f"Invite {self.email} → {self.organization.name} ({self.status}, {self.role})"
 
     @property
     def is_expired(self):
@@ -292,6 +350,59 @@ class OrgInvitation(models.Model):
         if not self.expires_at:
             self.expires_at = timezone.now() + timezone.timedelta(days=7)
         super().save(*args, **kwargs)
+
+
+class OrganizationAuditLog(models.Model):
+    """
+    Immutable audit trail for organization actions.
+    """
+    ACTION_CHOICES = [
+        ("ORG_CREATED", "Organization Created"),
+        ("INVITE_SENT", "Invitation Sent"),
+        ("INVITE_CANCELLED", "Invitation Cancelled"),
+        ("INVITE_ACCEPTED", "Invitation Accepted"),
+        ("MEMBER_REMOVED", "Member Removed"),
+        ("MEMBER_LEFT", "Member Left"),
+        ("MEMBERSHIP_ROLE_CHANGED", "Membership Role Changed"),
+        ("SUBSCRIPTION_PLAN_CHANGED", "Subscription Plan Changed"),
+        ("SUBSCRIPTION_CREATED", "Subscription Created"),
+    ]
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="audit_logs",
+        null=True,
+        blank=True,
+    )
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="org_audit_actions",
+    )
+    target_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="org_audit_targets",
+    )
+    action = models.CharField(max_length=40, choices=ACTION_CHOICES)
+    details = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization", "created_at"]),
+            models.Index(fields=["action", "created_at"]),
+        ]
+
+    def __str__(self):
+        org_name = self.organization.name if self.organization else "No Org"
+        return f"{self.action} @ {org_name} ({self.created_at:%Y-%m-%d %H:%M:%S})"
 
 
 class OrganizationInterest(models.Model):

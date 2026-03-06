@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import SubscriptionPlan, Organization, Subscription, Membership, OrgInvitation
+from .models import (
+    SubscriptionPlan,
+    Organization,
+    Subscription,
+    Membership,
+    OrgInvitation,
+    OrganizationAuditLog,
+)
 
 
 class SubscriptionInline(admin.StackedInline):
@@ -64,3 +71,11 @@ class OrgInvitationAdmin(admin.ModelAdmin):
     list_filter = ('status', 'organization')
     search_fields = ('email', 'organization__name')
     readonly_fields = ('token', 'created_at')
+
+
+@admin.register(OrganizationAuditLog)
+class OrganizationAuditLogAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "organization", "action", "actor", "target_user")
+    list_filter = ("action", "organization")
+    search_fields = ("organization__name", "actor__username", "target_user__username")
+    readonly_fields = ("organization", "actor", "target_user", "action", "details", "created_at")

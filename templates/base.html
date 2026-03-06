@@ -168,32 +168,56 @@
             <!-- Desktop Links -->
             <nav class="hidden md:flex items-center gap-2">
                 {% if user.is_authenticated %}
-                    {% if user.profile.role == 'STUDENT' %}
+                    {% if user.is_superuser %}
                         <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
-                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Coding</a>
-                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Aptitude</a>
-                        <a href="{% url 'posts:feed' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Feed</a>
-                        <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center gap-2">
-                            <i class="ri-robot-line text-sm"></i> Mock Interviews
+                        <a href="{% url 'users:admin_dashboard' %}" class="h-11 px-8 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all flex items-center gap-2">
+                            <i class="ri-admin-line"></i> System Administration
                         </a>
-                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Pricing</a>
                     {% elif user.profile.role == 'TUTOR' %}
                         {% if user.profile.is_approved_tutor %}
+                            <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
                             <a href="{% url 'tutor:dashboard' %}" class="h-11 px-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2">
                                 <i class="ri-dashboard-line"></i> Tutor Dashboard
                             </a>
                         {% else %}
+                            <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
                             <a href="{% url 'users:tutor_application' %}" class="h-11 px-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all flex items-center gap-2">
                                 <i class="ri-file-list-3-line"></i> Application In Review
                             </a>
                         {% endif %}
-                    {% elif user.is_superuser %}
-                        <a href="{% url 'users:admin_dashboard' %}" class="h-11 px-8 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all flex items-center gap-2">
-                            <i class="ri-admin-line"></i> System Administration
+                    {% elif user.profile.role == 'ORG_ADMIN' %}
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
+                        <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Organization</a>
+                        <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Members</a>
+                        <a href="{% url 'organizations:subscription' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Subscription</a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
+                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Coding</a>
+                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Aptitude</a>
+                        {% if show_social_navigation %}
+                        <a href="{% url 'posts:feed' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Feed</a>
+                        {% endif %}
+                        <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center gap-2">
+                            <i class="ri-robot-line text-sm"></i> Mock Interviews
                         </a>
+                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Pricing</a>
                     {% endif %}
                 {% endif %}
             </nav>
+
+            <!-- Global Search -->
+            <form method="GET" action="{% url 'search' %}" class="hidden md:flex items-center ml-6 mr-4">
+                <div class="relative w-72 lg:w-80">
+                    <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ request.GET.q|default_if_none:'' }}"
+                        placeholder="Search users or posts..."
+                        class="w-full h-10 pl-10 pr-4 rounded-full bg-slate-900/60 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
+                    >
+                </div>
+            </form>
 
             <!-- User Interactions -->
             <div class="flex items-center gap-6">
@@ -203,9 +227,11 @@
                         <i class="ri-message-3-line text-xl"></i>
                         <span id="navUnreadBadge" class="hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 text-[8px] font-black text-white items-center justify-center"></span>
                     </a>
+                    {% if user.profile.role != 'STUDENT' %}
                     <a href="{% url 'organizations:my_org' %}" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-emerald-400 transition-all group" title="Organization">
                         <i class="ri-building-line text-xl"></i>
                     </a>
+                    {% endif %}
                 </div>
 
                 <div class="relative" id="user-menu-root">
@@ -329,7 +355,9 @@
                             <li><a href="{% url 'practice:problem-list' %}" class="text-sm font-bold text-slate-400 hover:text-cyan-400 transition-colors">Coding Challenges</a></li>
                             <li><a href="{% url 'aptitude:dashboard' %}" class="text-sm font-bold text-slate-400 hover:text-emerald-400 transition-colors">Aptitude Logic</a></li>
                             <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-sm font-bold text-slate-400 hover:text-violet-400 transition-colors">Mock Interviews</a></li>
+                            {% if show_social_navigation %}
                             <li><a href="{% url 'posts:feed' %}" class="text-sm font-bold text-slate-400 hover:text-amber-400 transition-colors">Intelligence Feed</a></li>
+                            {% endif %}
                         </ul>
                     </div>
                     <div class="space-y-6">
@@ -338,6 +366,9 @@
                             <li><a href="{% url 'users:profile' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Mastery Profile</a></li>
                             <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Session History</a></li>
                             <li><a href="{% url 'chat:inbox' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Intelligence Inbox</a></li>
+                            <li><a href="{% url 'privacy_policy' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                            <li><a href="{% url 'terms_of_service' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Terms of Service</a></li>
+                            <li><a href="{% url 'data_processing_addendum' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">DPA</a></li>
                             <li><a href="/admin" class="text-sm font-bold text-slate-400 hover:text-rose-400 transition-colors">Hyper-Control</a></li>
                         </ul>
                     </div>
@@ -378,25 +409,55 @@
             </div>
             
             <nav class="space-y-6">
+                <form method="GET" action="{% url 'search' %}" class="mb-6">
+                    <div class="relative">
+                        <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input
+                            type="text"
+                            name="q"
+                            value="{{ request.GET.q|default_if_none:'' }}"
+                            placeholder="Search users or posts..."
+                            class="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-950/70 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
+                        >
+                    </div>
+                </form>
                 {% if user.is_authenticated %}
                     <a href="{% url 'home' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-home-4-line text-cyan-400"></i> Home
                     </a>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'users:admin_dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-admin-line text-rose-400"></i> Admin Dashboard
+                    </a>
+                    {% elif user.profile.role == 'ORG_ADMIN' %}
+                    <a href="{% url 'organizations:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-building-line text-emerald-400"></i> Organization
+                    </a>
+                    <a href="{% url 'organizations:members' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-team-line text-violet-400"></i> Members
+                    </a>
+                    <a href="{% url 'organizations:subscription' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-vip-crown-line text-amber-400"></i> Subscription
+                    </a>
+                    {% else %}
                     <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-code-s-slash-line text-emerald-400"></i> Coding
                     </a>
                     <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-brain-line text-violet-400"></i> Aptitude
                     </a>
+                    {% if show_social_navigation %}
                     <a href="{% url 'posts:feed' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-rss-2-line text-amber-400"></i> Intelligence
                     </a>
+                    {% endif %}
                     <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-robot-line text-cyan-500"></i> Mock Interviews
                     </a>
                     <a href="{% url 'organizations:pricing' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-price-tag-3-line text-emerald-500"></i> Pricing
                     </a>
+                    {% endif %}
                     <div class="pt-6 mt-6 border-t border-white/5 space-y-6">
                         <a href="{% url 'users:profile' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                             <i class="ri-user-settings-line text-slate-400"></i> Mastery Profile

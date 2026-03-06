@@ -4,8 +4,9 @@ import re
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse, HttpResponseBadRequest
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Q, Count, Prefetch, F
 from django.utils import timezone
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -515,13 +516,12 @@ def submit_code(request, slug):
                 user_progress.first_solved = timezone.now()
             
             # Update problem statistics
-            problem.total_accepted += 1
+            Problem.objects.filter(pk=problem.pk).update(total_accepted=F('total_accepted') + 1)
         else:
             submission.status = 'wrong_answer'
     
     # Update problem statistics
-    problem.total_submissions += 1
-    problem.save()
+    Problem.objects.filter(pk=problem.pk).update(total_submissions=F('total_submissions') + 1)
     user_progress.save()
     submission.save()
     
@@ -614,7 +614,7 @@ def execute_code_jdoodle(code, language, stdin):
         # These are just informational, we can ignore for now
         pass
     
-    output = result.get('output', '') or ''
+    output = (result.get('output', '') or '').strip()
     
     return {
         'output': output,
@@ -750,10 +750,8 @@ def get_code_template(request, slug):
     })
 
     
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from .models import Problem
+
+
 
 @staff_member_required
 def admin_activate_problem(request, slug):
@@ -766,4 +764,4 @@ def admin_activate_problem(request, slug):
     problem.save()
     
     messages.success(request, f'Problem "{problem.title}" has been activated.')
-    return redirect('users:admin_dashboard')
+    return redirect('practice:problem-list')

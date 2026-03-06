@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ org.name }} — Analytics Report</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #fff; color: #1e293b; padding: 40px; font-size: 13px; line-height: 1.6; }
+    .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0ea5e9; padding-bottom: 16px; margin-bottom: 32px; }
+    .header h1 { font-size: 24px; font-weight: 700; color: #0f172a; }
+    .header p { font-size: 11px; color: #64748b; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+    .kpi-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; }
+    .kpi-card .value { font-size: 28px; font-weight: 700; color: #0f172a; }
+    .kpi-card .label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+    h2 { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+    th { background: #f1f5f9; text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+    .risk-at_risk { color: #ef4444; font-weight: 700; }
+    .risk-needs_attention { color: #f59e0b; font-weight: 700; }
+    .risk-on_track { color: #0ea5e9; font-weight: 700; }
+    .risk-strong { color: #10b981; font-weight: 700; }
+    .bar-container { width: 80px; height: 8px; background: #e2e8f0; border-radius: 4px; display: inline-block; vertical-align: middle; margin-right: 6px; }
+    .bar-inner { height: 100%; border-radius: 4px; background: #0ea5e9; }
+    .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; text-align: center; }
+    .section { margin-bottom: 28px; }
+    .topic-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .topic-name { width: 200px; font-size: 12px; }
+    .topic-bar { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; }
+    .topic-fill { height: 100%; border-radius: 4px; }
+    .topic-pct { width: 50px; text-align: right; font-size: 12px; font-weight: 600; }
+    @media print {
+      body { padding: 20px; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="text-align: right; margin-bottom: 20px;">
+    <button onclick="window.print()" style="padding: 8px 20px; background: #0ea5e9; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+      Print / Save as PDF
+    </button>
+  </div>
+
+  <div class="header">
+    <div>
+      <h1>{{ org.name }} — Analytics Report</h1>
+      <p>Generated {{ generated_at|date:"F j, Y \a\t g:i A" }} · Elevo Performance Intelligence</p>
+    </div>
+  </div>
+
+  <!-- KPI Summary -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="value">{{ kpis.attempt_rate }}%</div>
+      <div class="label">Attempt Rate</div>
+    </div>
+    <div class="kpi-card">
+      <div class="value">{{ kpis.completion_rate }}%</div>
+      <div class="label">Completion Rate</div>
+    </div>
+    <div class="kpi-card">
+      <div class="value">{{ kpis.avg_aptitude_score }}%</div>
+      <div class="label">Avg Aptitude</div>
+    </div>
+    <div class="kpi-card">
+      <div class="value">{{ kpis.avg_interview_score }}%</div>
+      <div class="label">Avg Interview</div>
+    </div>
+    <div class="kpi-card">
+      <div class="value" style="color: #0ea5e9;">{{ kpis.readiness_score }}</div>
+      <div class="label">Readiness Score</div>
+    </div>
+  </div>
+
+  <!-- Weak Topics -->
+  {% if weak_topics %}
+  <div class="section">
+    <h2>Weakest Topics</h2>
+    {% for t in weak_topics %}
+    <div class="topic-row">
+      <div class="topic-name">{{ t.topic_name }}</div>
+      <div class="topic-bar">
+        <div class="topic-fill" style="width: {{ t.accuracy_pct }}%; background: {% if t.accuracy_pct < 40 %}#ef4444{% elif t.accuracy_pct < 60 %}#f59e0b{% elif t.accuracy_pct < 80 %}#0ea5e9{% else %}#10b981{% endif %};"></div>
+      </div>
+      <div class="topic-pct">{{ t.accuracy_pct }}%</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Student Performance Table -->
+  <div class="section">
+    <h2>Student Performance ({{ students|length }} students)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Email</th>
+          <th>Risk</th>
+          <th>Readiness</th>
+          <th>Quizzes</th>
+          <th>Apt %</th>
+          <th>Solved</th>
+          <th>Interviews</th>
+          <th>Int %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td><strong>{{ s.full_name }}</strong></td>
+          <td>{{ s.email }}</td>
+          <td><span class="risk-{{ s.risk_level }}">{{ s.risk_meta.label }}</span></td>
+          <td>
+            <span class="bar-container"><span class="bar-inner" style="width: {{ s.readiness_score }}%;"></span></span>
+            {{ s.readiness_score }}
+          </td>
+          <td>{{ s.quizzes_taken }}</td>
+          <td>{{ s.avg_aptitude_score }}%</td>
+          <td>{{ s.problems_solved }}/{{ s.problems_attempted }}</td>
+          <td>{{ s.interviews_done }}</td>
+          <td>{{ s.avg_interview_score }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cohort Comparison -->
+  <div class="section">
+    <h2>30-Day Trend Comparison</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Current 30 Days</th>
+          <th>Previous 30 Days</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Aptitude Attempts</td>
+          <td>{{ cohort.current.aptitude_attempts }}</td>
+          <td>{{ cohort.previous.aptitude_attempts }}</td>
+          <td style="color: {% if cohort.deltas.aptitude_attempts >= 0 %}#10b981{% else %}#ef4444{% endif %}; font-weight: 600;">
+            {% if cohort.deltas.aptitude_attempts >= 0 %}+{% endif %}{{ cohort.deltas.aptitude_attempts }}
+          </td>
+        </tr>
+        <tr>
+          <td>Aptitude Avg Score</td>
+          <td>{{ cohort.current.aptitude_avg }}%</td>
+          <td>{{ cohort.previous.aptitude_avg }}%</td>
+          <td style="color: {% if cohort.deltas.aptitude_avg >= 0 %}#10b981{% else %}#ef4444{% endif %}; font-weight: 600;">
+            {% if cohort.deltas.aptitude_avg >= 0 %}+{% endif %}{{ cohort.deltas.aptitude_avg }}
+          </td>
+        </tr>
+        <tr>
+          <td>Code Submissions</td>
+          <td>{{ cohort.current.coding_submissions }}</td>
+          <td>{{ cohort.previous.coding_submissions }}</td>
+          <td style="color: {% if cohort.deltas.coding_submissions >= 0 %}#10b981{% else %}#ef4444{% endif %}; font-weight: 600;">
+            {% if cohort.deltas.coding_submissions >= 0 %}+{% endif %}{{ cohort.deltas.coding_submissions }}
+          </td>
+        </tr>
+        <tr>
+          <td>Interview Sessions</td>
+          <td>{{ cohort.current.interview_sessions }}</td>
+          <td>{{ cohort.previous.interview_sessions }}</td>
+          <td style="color: {% if cohort.deltas.interview_sessions >= 0 %}#10b981{% else %}#ef4444{% endif %}; font-weight: 600;">
+            {% if cohort.deltas.interview_sessions >= 0 %}+{% endif %}{{ cohort.deltas.interview_sessions }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>This report was generated by Elevo Performance Intelligence · {{ org.name }} · Confidential</p>
+  </div>
+</body>
+</html>

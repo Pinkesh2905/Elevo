@@ -3,6 +3,94 @@ from django.shortcuts import redirect
 from django.contrib import messages as django_messages
 
 
+# ---------------------------------------------------------------------------
+# Role hierarchy (higher number = more privilege)
+# ---------------------------------------------------------------------------
+ROLE_HIERARCHY = {
+    "OWNER": 4,
+    "ADMIN": 3,
+    "TRAINER": 2,
+    "STUDENT": 1,
+}
+
+
+def _normalized_role(membership):
+    if not membership:
+        return None
+    if hasattr(membership, "normalized_role"):
+        return membership.normalized_role
+    if membership.role == "ORG_ADMIN":
+        return "ADMIN"
+    if membership.role == "MEMBER":
+        return "STUDENT"
+    return membership.role
+
+
+def has_minimum_role(membership, min_role):
+    """
+    Return True if *membership*'s normalized role is at least *min_role*
+    in the hierarchy (OWNER > ADMIN > TRAINER > STUDENT).
+    """
+    role = _normalized_role(membership)
+    if role is None:
+        return False
+    return ROLE_HIERARCHY.get(role, 0) >= ROLE_HIERARCHY.get(min_role, 0)
+
+
+def can_manage_members(membership):
+    """Owner and Admin can manage (add/remove/change) members."""
+    return has_minimum_role(membership, "ADMIN")
+
+
+def can_view_analytics(membership):
+    """Owner, Admin, and Trainer can view org analytics."""
+    return has_minimum_role(membership, "TRAINER")
+
+
+def can_create_content(membership):
+    """Owner, Admin, and Trainer can create org content."""
+    return has_minimum_role(membership, "TRAINER")
+
+
+def org_member_required(view_func):
+    """
+    Restrict to any active organization member (any role).
+    """
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("login")
+        membership = getattr(request, "user_membership", None)
+        if not membership:
+            django_messages.error(request, "You are not part of an organization.")
+            return redirect("organizations:my_org")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def org_role_required(*allowed_roles):
+    """
+    Restrict view by normalized organization role.
+    """
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect("login")
+            membership = getattr(request, "user_membership", None)
+            if not membership:
+                django_messages.error(request, "You are not part of an organization.")
+                return redirect("organizations:my_org")
+
+            role = _normalized_role(membership)
+            if role not in set(allowed_roles):
+                django_messages.error(request, "You do not have permission for this organization action.")
+                return redirect("organizations:dashboard")
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
 def premium_required(view_func):
     """
     Decorator that restricts a view to users with an active premium subscription.
@@ -49,23 +137,9 @@ def premium_feature(feature_flag):
 
 def org_admin_required(view_func):
     """
-    Decorator that restricts a view to organization admins only.
+    Restrict to organization Owner/Admin roles.
     """
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('login')
-        membership = getattr(request, 'user_membership', None)
-        org = getattr(request, 'user_org', None)
-        is_org_admin = (
-            (membership and membership.role == 'ORG_ADMIN') or
-            (org and org.admin == request.user)
-        )
-        if not is_org_admin:
-            django_messages.error(request, "You do not have admin access to this organization.")
-            return redirect('home')
-        return view_func(request, *args, **kwargs)
-    return wrapper
+    return org_role_required("OWNER", "ADMIN")(view_func)
 
 
 def check_premium_limit(limit_field, get_current_usage):

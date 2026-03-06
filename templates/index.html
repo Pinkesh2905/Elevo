@@ -259,11 +259,13 @@
         <p class="text-slate-300 text-sm leading-relaxed">Strengthen quant, reasoning, and verbal sections used in screening rounds.</p>
       </a>
 
+      {% if show_social_navigation %}
       <a href="{% url 'posts:feed' %}" class="home-card p-6 block">
         <i class="ri-team-line text-2xl text-emerald-300"></i>
         <h3 class="text-white text-xl font-semibold mt-4 mb-2">Peer Network</h3>
         <p class="text-slate-300 text-sm leading-relaxed">Share progress, ask questions, and learn from others preparing for similar roles.</p>
       </a>
+      {% endif %}
 
       <a href="{% url 'mock_interview:interview_setup' %}" class="home-card p-6 block">
         <i class="ri-robot-2-line text-2xl text-emerald-300"></i>

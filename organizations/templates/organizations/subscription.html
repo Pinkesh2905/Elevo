@@ -63,7 +63,7 @@
       {% for plan in plans %}
       <div class="plan-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6 flex flex-col
         {% if current_plan and current_plan.id == plan.id %}active{% endif %}
-        {% if plan.name == 'PRO' %}pro{% elif plan.name == 'ENTERPRISE' %}enterprise{% endif %}">
+        {% if plan.name == 'GROWTH' or plan.name == 'PRO' %}pro{% elif plan.name == 'ENTERPRISE' %}enterprise{% endif %}">
 
         <!-- Plan Header -->
         <div class="mb-5">
@@ -71,7 +71,7 @@
             <div class="w-10 h-10 rounded-xl bg-slate-500/15 border border-slate-500/25 flex items-center justify-center mb-3">
               <i class="ri-seedling-line text-slate-400 text-lg"></i>
             </div>
-          {% elif plan.name == 'PRO' %}
+          {% elif plan.name == 'GROWTH' or plan.name == 'PRO' %}
             <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center mb-3">
               <i class="ri-flashlight-line text-violet-400 text-lg"></i>
             </div>
@@ -151,11 +151,15 @@
             Free Tier
           </div>
         {% else %}
-          <button class="px-4 py-2.5 rounded-xl text-white text-sm font-semibold text-center transition-all shadow-lg
-            {% if plan.name == 'PRO' %}bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 shadow-violet-500/15
-            {% else %}bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/15{% endif %}">
-            Upgrade to {{ plan.display_name }}
-          </button>
+          <form method="POST" action="{% url 'organizations:checkout_organization' %}">
+            {% csrf_token %}
+            <input type="hidden" name="plan_name" value="{{ plan.name }}">
+            <button type="submit" class="w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold text-center transition-all shadow-lg
+              {% if plan.name == 'GROWTH' or plan.name == 'PRO' %}bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 shadow-violet-500/15
+              {% else %}bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/15{% endif %}">
+              Upgrade to {{ plan.display_name }}
+            </button>
+          </form>
         {% endif %}
       </div>
       {% endfor %}

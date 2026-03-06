@@ -23,9 +23,10 @@ urlpatterns = [
     # The 'users' app handles custom signup and profile management
     path('users/', include('users.urls')), 
     
-    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     
 ]
 
-# Serve media files regardless of DEBUG status for Render deployment
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Development-only media serving (or explicit insecure override).
+# In production, media should be served by the platform/storage layer.
+if settings.DEBUG or getattr(settings, 'SERVE_MEDIA_INSECURE', False):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

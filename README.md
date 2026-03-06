@@ -42,6 +42,7 @@ pip install -r requirements.txt
 ```env
 SECRET_KEY=your_secret
 DEBUG=True
+ELEVO_ENV=development
 DATABASE_URL=postgres://postgres:password@localhost:5432/Elevo
 GEMINI_API_KEY=your_gemini_key
 OPENAI_API_KEY=your_openai_key
@@ -54,7 +55,30 @@ ELEVO_CONTENT_CSV=private_data/elevo_content.csv
 5. Run migrations and start:
 ```bash
 python manage.py migrate
+python manage.py seed_subscription_plans
 python manage.py runserver
+```
+
+## Environment Profiles
+
+Elevo now supports explicit settings profiles:
+
+- `ELEVO_ENV=development` -> `elevo.settings_development`
+- `ELEVO_ENV=staging` -> `elevo.settings_staging`
+- `ELEVO_ENV=production` -> `elevo.settings_production`
+
+Use optional feature flags to control the sales demo path:
+
+```env
+SALES_DEMO_MODE=True
+SHOW_SOCIAL_IN_SALES_DEMO=False
+ENABLE_CHAT=True
+```
+
+Use optional media serving override only for local/insecure environments:
+
+```env
+SERVE_MEDIA_INSECURE=False
 ```
 
 ## Data Privacy (Important)
@@ -90,6 +114,11 @@ The commands first use private files (`*.csv`) and automatically fall back to sa
 python manage.py check --deploy
 python manage.py collectstatic --noinput
 ```
+
+Legal draft endpoints:
+- `/privacy-policy/`
+- `/terms-of-service/`
+- `/data-processing-addendum/`
 
 ## Repository
 

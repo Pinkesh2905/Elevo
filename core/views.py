@@ -126,3 +126,15 @@ def search(request):
         'posts': posts,
     }
     return render(request, 'core/search_results.html', context)
+
+
+def privacy_policy(request):
+    return render(request, "core/legal/privacy_policy.html")
+
+
+def terms_of_service(request):
+    return render(request, "core/legal/terms_of_service.html")
+
+
+def data_processing_addendum(request):
+    return render(request, "core/legal/data_processing_addendum.html")
