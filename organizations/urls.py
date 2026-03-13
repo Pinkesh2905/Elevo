@@ -26,6 +26,7 @@ urlpatterns = [
     # --- Multi-Tenant Hardening ---
     path('change-role/<int:membership_id>/', views.change_member_role, name='change_member_role'),
     path('transfer-ownership/<int:membership_id>/', views.transfer_ownership, name='transfer_ownership'),
+    path('bulk-action/', views.bulk_member_action, name='bulk_member_action'),
     path('csv-template/', views.csv_template_download, name='csv_template_download'),
     # --- Analytics ---
     path('analytics/', views.org_analytics, name='org_analytics'),

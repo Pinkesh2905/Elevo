@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.db.models import Q, Count
+from django.db import transaction
 
 from .models import (
     Organization,
@@ -239,16 +240,32 @@ def create_org(request):
     return render(request, 'organizations/create.html')
 
 
-# --- Manage Members ---
 @login_required
 @org_admin_required
 def manage_members(request):
     """
-    List and manage organization members.
+    List and manage organization members with search and filtering.
     """
     org = request.user_org
+    query = request.GET.get('q', '').strip()
+    role_filter = request.GET.get('role', '').strip().upper()
+    
     members = org.memberships.filter(is_active=True).select_related('user', 'user__profile')
+    
+    if query:
+        members = members.filter(
+            Q(user__username__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query)
+        )
+        
+    if role_filter and role_filter in ['ADMIN', 'TRAINER', 'STUDENT', 'OWNER']:
+        members = members.filter(role=role_filter)
+
     pending = org.invitations.filter(status='PENDING', expires_at__gt=timezone.now())
+    if query:
+        pending = pending.filter(Q(email__icontains=query))
 
     context = {
         'org': org,
@@ -257,8 +274,74 @@ def manage_members(request):
         'can_add': org.can_add_members,
         'max_students': org.active_subscription.plan.max_students if org.active_subscription else 0,
         'org_roles': ['ADMIN', 'TRAINER', 'STUDENT'],
+        'query': query,
+        'role_filter': role_filter,
     }
     return render(request, 'organizations/members.html', context)
+
+
+@login_required
+@org_admin_required
+@require_POST
+def bulk_member_action(request):
+    """
+    Handle bulk operations on organization members.
+    Actions: 'deactivate', 'change_role', 'resend_invites'.
+    """
+    org = request.user_org
+    action = request.POST.get('action')
+    member_ids = request.POST.getlist('member_ids') # list of membership IDs
+    invite_ids = request.POST.getlist('invite_ids') # list of invitation IDs
+    
+    if not (member_ids or invite_ids):
+        messages.warning(request, "No members or invitations selected.")
+        return redirect('organizations:members')
+
+    actor_role = _normalized_membership_role(request.user_membership)
+    count = 0
+
+    if action == 'deactivate':
+        memberships = Membership.objects.filter(id__in=member_ids, organization=org, is_active=True)
+        for m in memberships:
+            # Cannot deactivate owner
+            if m.user == org.admin:
+                continue
+            # Cannot deactivate higher/equal role unless OWNER
+            if actor_role != 'OWNER' and ROLE_HIERARCHY.get(_normalized_membership_role(m), 0) >= ROLE_HIERARCHY.get(actor_role, 0):
+                continue
+                
+            m.is_active = False
+            m.save(update_fields=['is_active'])
+            _audit("MEMBER_REMOVED", organization=org, actor=request.user, target_user=m.user, details={"bulk": True})
+            count += 1
+        messages.success(request, f"Successfully deactivated {count} member(s).")
+
+    elif action == 'change_role':
+        new_role = request.POST.get('new_role', '').strip().upper()
+        if new_role not in {'ADMIN', 'TRAINER', 'STUDENT'}:
+            messages.error(request, "Invalid role for bulk update.")
+        else:
+            memberships = Membership.objects.filter(id__in=member_ids, organization=org, is_active=True)
+            for m in memberships:
+                if m.user == request.user or m.user == org.admin:
+                    continue
+                if actor_role != 'OWNER' and ROLE_HIERARCHY.get(_normalized_membership_role(m), 0) >= ROLE_HIERARCHY.get(actor_role, 0):
+                    continue
+                if new_role == 'ADMIN' and actor_role != 'OWNER':
+                    continue
+                
+                m.role = new_role
+                m.save(update_fields=['role'])
+                count += 1
+            messages.success(request, f"Successfully updated roles for {count} member(s).")
+
+    elif action == 'cancel_invites':
+        invites = OrgInvitation.objects.filter(id__in=invite_ids, organization=org, status='PENDING')
+        count = invites.count()
+        invites.delete()
+        messages.success(request, f"Successfully cancelled {count} invitation(s).")
+
+    return redirect('organizations:members')
 
 
 # --- Invite Student ---
@@ -573,13 +656,12 @@ def verify_domain(request):
 
 
 @login_required
-@org_role_required("OWNER", "ADMIN")
+@org_admin_required
 @require_POST
 def bulk_invite_students(request):
     """
-    CSV bulk invite/import.
-    Expected CSV headers: email, role (role optional; defaults to STUDENT),
-                          name (optional; used to auto-create accounts).
+    CSV bulk invite/import with optional user auto-creation.
+    Expected CSV headers: email, name (optional), role (optional, defaults to STUDENT)
     """
     org = request.user_org
     csv_file = request.FILES.get("csv_file")
@@ -594,93 +676,98 @@ def bulk_invite_students(request):
         return redirect("organizations:members")
 
     reader = csv.DictReader(io.StringIO(content))
-    if not reader.fieldnames or "email" not in [h.lower() for h in reader.fieldnames]:
+    # Normalize headers
+    headers = {h.lower().strip(): h for h in (reader.fieldnames or [])}
+    if "email" not in headers:
         messages.error(request, "CSV must include an 'email' column.")
         return redirect("organizations:members")
 
     created_count = 0
     skipped_count = 0
-    auto_created_users = 0
     errors = []
-    max_additional = 200
+    
+    # Use atomicity for the batch
+    with transaction.atomic():
+        for idx, row in enumerate(reader, start=2):
+            email = (row.get(headers.get("email", "email")) or "").strip().lower()
+            name = (row.get(headers.get("name", "name")) or "").strip()
+            role = (row.get(headers.get("role", "role")) or "STUDENT").strip().upper()
+            
+            if role not in {"ADMIN", "TRAINER", "STUDENT"}:
+                role = "STUDENT"
 
-    for idx, row in enumerate(reader, start=2):
-        if created_count >= max_additional:
-            break
-
-        email = (row.get("email") or row.get("Email") or "").strip().lower()
-        role = (row.get("role") or row.get("Role") or "STUDENT").strip().upper()
-        name = (row.get("name") or row.get("Name") or "").strip()
-        if role not in {"ADMIN", "TRAINER", "STUDENT"}:
-            role = "STUDENT"
-
-        if not email or "@" not in email:
-            skipped_count += 1
-            errors.append(f"Row {idx}: invalid email.")
-            continue
-
-        if not org.can_add_members:
-            skipped_count += 1
-            errors.append(f"Row {idx}: member limit reached.")
-            continue
-
-        if Membership.objects.filter(organization=org, user__email=email, is_active=True).exists():
-            skipped_count += 1
-            continue
-
-        pending_exists = OrgInvitation.objects.filter(
-            organization=org, email=email, status='PENDING', expires_at__gt=timezone.now()
-        ).exists()
-        if pending_exists:
-            skipped_count += 1
-            continue
-
-        # Auto-create user account if email is not registered
-        existing_user = User.objects.filter(email=email).first()
-        if existing_user:
-            # If user exists but not a member, directly add membership
-            if not Membership.objects.filter(user=existing_user, organization=org).exists():
-                Membership.objects.create(
-                    user=existing_user,
-                    organization=org,
-                    role=role,
-                    invited_by=request.user,
-                )
-                _audit(
-                    "INVITE_ACCEPTED",
-                    organization=org,
-                    actor=request.user,
-                    target_user=existing_user,
-                    details={"email": email, "role": role, "bulk": True, "auto_added": True},
-                )
-                created_count += 1
+            if not email or "@" not in email:
+                skipped_count += 1
                 continue
 
-        # Create invitation with role
-        inv = OrgInvitation.objects.create(
-            organization=org,
-            email=email,
-            role=role,
-            invited_by=request.user,
-            expires_at=timezone.now() + timedelta(days=7),
-        )
-        _audit(
-            "INVITE_SENT",
-            organization=org,
-            actor=request.user,
-            details={"email": email, "invite_id": inv.id, "role": role, "bulk": True},
-        )
-        created_count += 1
+            if not org.can_add_members:
+                errors.append(f"Row {idx}: Limit reached.")
+                skipped_count += 1
+                continue
 
+            # Skip if already a member
+            if Membership.objects.filter(organization=org, user__email=email, is_active=True).exists():
+                skipped_count += 1
+                continue
+
+            user = User.objects.filter(email=email).first()
+            
+            # If user doesn't exist AND name is provided, auto-create a deactivated user
+            # They will set password on first login/activation
+            if not user and name:
+                username = email.split('@')[0]
+                # Ensure unique username
+                base_username = username
+                counter = 1
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+                
+                user = User.objects.create(
+                    username=username,
+                    email=email,
+                    first_name=name.split(' ')[0],
+                    last_name=' '.join(name.split(' ')[1:]) if ' ' in name else '',
+                    is_active=True # Allow login via social/email verification later
+                )
+                user.set_unusable_password()
+                user.save()
+
+            if user:
+                # Add directly to org if user exists (or was just created)
+                Membership.objects.get_or_create(
+                    user=user,
+                    organization=org,
+                    defaults={'role': role, 'invited_by': request.user}
+                )
+                _audit("MEMBER_ADDED", organization=org, actor=request.user, target_user=user, details={"bulk": True, "role": role})
+                created_count += 1
+            else:
+                # Create invitation for non-existing user without name
+                invite, created = OrgInvitation.objects.get_or_create(
+                    organization=org,
+                    email=email,
+                    status='PENDING',
+                    defaults={
+                        'role': role,
+                        'invited_by': request.user,
+                        'expires_at': timezone.now() + timedelta(days=7)
+                    }
+                )
+                if created:
+                    _audit("INVITE_SENT", organization=org, actor=request.user, details={"email": email, "role": role, "bulk": True})
+                    created_count += 1
+                else:
+                    skipped_count += 1
+
+    messages.success(request, f"Processed CSV: {created_count} invited/added, {skipped_count} skipped.")
+    if errors:
+        messages.warning(request, f"Some rows had errors: {', '.join(errors[:5])}")
+        
     # Advance onboarding
     if created_count > 0 and org.onboarding_step in ('PENDING', 'DOMAIN_SETUP', 'DOMAIN_VERIFIED'):
         org.onboarding_step = 'MEMBERS_INVITED'
         org.save(update_fields=['onboarding_step', 'updated_at'])
-
-    msg = f"Bulk import complete. Invites/members added: {created_count}, skipped: {skipped_count}."
-    if errors:
-        msg += f" First issue: {errors[0]}"
-    messages.success(request, msg)
     return redirect("organizations:members")
 
 
@@ -1221,6 +1308,7 @@ def ai_cost_dashboard(request):
     """
     from .ai_analytics import (
         compute_ai_cost_summary,
+        compute_interview_outcome_metrics,
         compute_latency_stats,
         compute_provider_health,
         compute_quota_usage,
@@ -1233,6 +1321,7 @@ def ai_cost_dashboard(request):
     latency = compute_latency_stats(org, days=days)
     health = compute_provider_health(org, days=days)
     quota = compute_quota_usage(org)
+    interview_metrics = compute_interview_outcome_metrics(org, days=days)
 
     context = {
         "org": org,
@@ -1240,7 +1329,7 @@ def ai_cost_dashboard(request):
         "latency": latency,
         "health": health,
         "quota": quota,
+        "interview_metrics": interview_metrics,
         "days": days,
     }
     return render(request, "organizations/ai_dashboard.html", context)
-

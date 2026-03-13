@@ -5,6 +5,17 @@ from .models import MockInterviewSession
 
 class InterviewSetupForm(forms.ModelForm):
     resume_file = forms.FileField(required=False, label="Resume (PDF/DOCX/TXT)")
+    job_description = forms.CharField(
+        required=False,
+        label="Job Description",
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": 6,
+                "placeholder": "Paste target job description (optional, improves fit-gap analysis).",
+            }
+        ),
+    )
     interview_track = forms.ChoiceField(
         choices=[
             ("technical", "Technical Interview"),

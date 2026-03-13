@@ -13,25 +13,35 @@ from .models import Comment, Follow, Like, Post, Repost, Share
 
 
 def _build_activity_feed(posts, reposts):
+    # Use a dictionary to keep track of unique post IDs we've already included
+    seen_post_ids = set()
     items = []
 
-    for post in posts:
-        items.append({
-            "type": "post",
-            "post": post,
-            "actor": post.author,
-            "timestamp": post.created_at,
-        })
-
+    # Process reposts first to prioritize the "You reposted" or follow actor context
     for repost in reposts:
-        items.append({
-            "type": "repost",
-            "post": repost.original_post,
-            "repost": repost,
-            "actor": repost.user,
-            "timestamp": repost.created_at,
-        })
+        post_id = repost.original_post_id
+        if post_id not in seen_post_ids:
+            items.append({
+                "type": "repost",
+                "post": repost.original_post,
+                "repost": repost,
+                "actor": repost.user,
+                "timestamp": repost.created_at,
+            })
+            seen_post_ids.add(post_id)
 
+    # Process regular posts
+    for post in posts:
+        if post.id not in seen_post_ids:
+            items.append({
+                "type": "post",
+                "post": post,
+                "actor": post.author,
+                "timestamp": post.created_at,
+            })
+            seen_post_ids.add(post.id)
+
+    # Sort all items by timestamp (most recent first)
     items.sort(key=lambda row: row["timestamp"], reverse=True)
     return items
 
@@ -44,8 +54,12 @@ def feed_view(request):
             post = post_form.save(commit=False)
             post.author = request.user
             post.save()
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"success": True})
             messages.success(request, "Post shared successfully.")
             return redirect("posts:feed")
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": False, "errors": post_form.errors}, status=400)
         messages.error(request, "Could not publish post. Please review the content.")
     else:
         post_form = PostForm()
@@ -53,8 +67,13 @@ def feed_view(request):
     following_ids = list(
         Follow.objects.filter(follower=request.user).values_list("following_id", flat=True)
     )
+    
+    # Get active tab from GET params, default to 'following' if following anyone, else 'discover'
+    active_tab = request.GET.get("tab")
+    if not active_tab:
+        active_tab = "following" if following_ids else "discover"
+    
     visible_user_ids = following_ids + [request.user.id]
-    discover_mode = not following_ids
 
     base_posts = Post.objects.select_related(
         "author", "author__profile"
@@ -74,10 +93,11 @@ def feed_view(request):
         "original_post__shares",
     )
 
-    if discover_mode:
+    if active_tab == "discover":
         posts = base_posts.all()
         reposts = base_reposts.all()
     else:
+        # 'following' tab logic
         posts = base_posts.filter(author_id__in=visible_user_ids)
         reposts = base_reposts.filter(user_id__in=visible_user_ids)
 
@@ -100,7 +120,7 @@ def feed_view(request):
         "activity_items": activity_items,
         "liked_post_ids": liked_post_ids,
         "following_count": len(following_ids),
-        "discover_mode": discover_mode,
+        "active_tab": active_tab,
         "suggested_users": suggested_users,
     }
     return render(request, "posts/feed.html", context)
@@ -152,7 +172,11 @@ def add_comment(request, post_id):
 @require_POST
 def repost(request, post_id):
     original_post = get_object_or_404(Post, id=post_id)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    
     if original_post.author_id == request.user.id:
+        if is_ajax:
+            return JsonResponse({"success": False, "message": "You cannot repost your own post."}, status=400)
         messages.warning(request, "You cannot repost your own post.")
         return redirect(request.META.get("HTTP_REFERER", reverse("posts:feed")))
 
@@ -168,13 +192,31 @@ def repost(request, post_id):
     )
 
     if created:
+        if is_ajax:
+            return JsonResponse({
+                "success": True, 
+                "message": "Reposted to your timeline.",
+                "repost_count": original_post.reposts.count(),
+                "created": True
+            })
         messages.success(request, "Reposted to your timeline.")
     else:
         if repost_comment and repost_obj.comment != repost_comment:
             repost_obj.comment = repost_comment
             repost_obj.save(update_fields=["comment"])
+            if is_ajax:
+                return JsonResponse({"success": True, "message": "Repost note updated.", "created": False})
             messages.success(request, "Repost note updated.")
         else:
+            if is_ajax:
+                repost_obj.delete() # Toggle behavior for AJAX
+                return JsonResponse({
+                    "success": True, 
+                    "message": "Repost removed.", 
+                    "repost_count": original_post.reposts.count(),
+                    "created": False,
+                    "removed": True
+                })
             messages.info(request, "You already reposted this.")
 
     return redirect(request.POST.get("next") or request.META.get("HTTP_REFERER", reverse("posts:feed")))

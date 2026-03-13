@@ -72,10 +72,21 @@ def async_generate_feedback(session_id):
         logger.error("async_generate_feedback: session %s not found", session_id)
         return {"error": "session_not_found"}
 
-    feedback = _generate_feedback(session)
-    session.overall_feedback = json.dumps(feedback)
-    session.score = feedback.get("overall_score")
-    session.save(update_fields=["overall_feedback", "score", "updated_at"])
+    try:
+        feedback = _generate_feedback(session)
+        session.overall_feedback = json.dumps(feedback)
+        session.score = feedback.get("overall_score")
+        session.feedback_status = "ready"
+        session.feedback_error = ""
+        session.status = "COMPLETED"
+        session.save(update_fields=["overall_feedback", "score", "feedback_status", "feedback_error", "status", "updated_at"])
+    except Exception as exc:
+        session.feedback_status = "failed"
+        session.feedback_error = str(exc)[:500]
+        session.status = "COMPLETED"
+        session.save(update_fields=["feedback_status", "feedback_error", "status", "updated_at"])
+        logger.error("async_generate_feedback: session %s failed: %s", session_id, exc)
+        return {"error": "feedback_failed"}
 
     logger.info("async_generate_feedback: session %s completed, score=%s", session_id, session.score)
     return {"status": "ok", "score": session.score}

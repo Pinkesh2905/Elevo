@@ -41,6 +41,7 @@ class MockInterviewSession(models.Model):
 
     SESSION_STATUS_CHOICES = [
         ('STARTED', 'Started'),
+        ('FEEDBACK_PROCESSING', 'Feedback Processing'),
         ('COMPLETED', 'Completed'),
         ('REVIEW_PENDING', 'Review Pending'),
         ('REVIEWED', 'Reviewed'),
@@ -56,6 +57,49 @@ class MockInterviewSession(models.Model):
     overall_feedback = models.TextField(blank=True, null=True)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
                                 help_text="Overall score for the interview (e.g., 0-100).")
+    PERFORMANCE_BAND_CHOICES = [
+        ('foundation', 'Foundation'),
+        ('standard', 'Standard'),
+        ('advanced', 'Advanced'),
+    ]
+    performance_band = models.CharField(
+        max_length=20,
+        choices=PERFORMANCE_BAND_CHOICES,
+        default='standard',
+        help_text="Current adaptive performance band.",
+    )
+    starting_band = models.CharField(
+        max_length=20,
+        choices=PERFORMANCE_BAND_CHOICES,
+        default='standard',
+        help_text="Initial adaptive performance band at session start.",
+    )
+    current_band = models.CharField(
+        max_length=20,
+        choices=PERFORMANCE_BAND_CHOICES,
+        default='standard',
+        help_text="Latest adaptive performance band based on turn progression.",
+    )
+    band_confidence = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=50.00,
+        help_text="Confidence (0-100) in current adaptive band assignment.",
+    )
+    weak_skill_tags = models.JSONField(default=list, blank=True)
+    strong_skill_tags = models.JSONField(default=list, blank=True)
+    selected_pack = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        help_text="Selected interview pack preset identifier.",
+    )
+    feedback_status = models.CharField(
+        max_length=20,
+        default="pending",
+        help_text="Feedback generation lifecycle: pending, processing, ready, failed.",
+    )
+    feedback_error = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -81,6 +125,28 @@ class InterviewTurn(models.Model):
 
     ai_internal_analysis = models.TextField(blank=True, null=True, help_text="AI's internal assessment of the user's answer.")
     ai_follow_up_feedback = models.TextField(blank=True, null=True, help_text="AI's direct feedback or next question.")
+    DIFFICULTY_LEVEL_CHOICES = [
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('hard', 'Hard'),
+    ]
+    difficulty_level = models.CharField(
+        max_length=10,
+        choices=DIFFICULTY_LEVEL_CHOICES,
+        default='medium',
+        help_text="Difficulty of this turn's generated question.",
+    )
+    skill_tags = models.JSONField(default=list, blank=True)
+    turn_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    communication_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    technical_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    confidence_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    band_after_turn = models.CharField(
+        max_length=20,
+        choices=MockInterviewSession.PERFORMANCE_BAND_CHOICES,
+        default='standard',
+        help_text="Adaptive band after evaluating this turn.",
+    )
 
     timestamp = models.DateTimeField(default=timezone.now)
 

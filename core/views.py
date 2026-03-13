@@ -44,7 +44,7 @@ def home(request):
                 return redirect('users:tutor_application')
 
         elif role == 'ADMIN':
-            return redirect('practice:admin_dashboard')
+            return redirect('users:admin_dashboard')
 
     # Fetch real statistics for the landing page
     stats = {
@@ -86,7 +86,7 @@ def dashboard_redirect(request):
         return redirect('users:onboarding_wizard')
 
     if is_admin(request.user):
-        return redirect('practice:admin_dashboard')
+        return redirect('users:admin_dashboard')
     elif is_approved_tutor(request.user):
         return redirect('tutor:dashboard')
     elif is_tutor(request.user) and not request.user.profile.is_approved_tutor:

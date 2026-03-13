@@ -118,6 +118,23 @@ def outputs_match(output, expected, problem=None, test_input=None):
     return left == right
 
 
+def _is_supported_language(problem, language):
+    """
+    Validate requested language against template-configured languages per problem.
+    Falls back to global language choices when a problem has no templates.
+    """
+    requested = (language or "").strip()
+    if not requested:
+        return False
+
+    configured = set(problem.code_templates.values_list("language", flat=True))
+    if configured:
+        return requested in configured
+
+    allowed = {choice[0] for choice in CodeTemplate.LANGUAGE_CHOICES}
+    return requested in allowed
+
+
 def _extract_python_function_info(code):
     """
     Return (class_name, function_name) from user code.
@@ -372,6 +389,12 @@ def run_code(request, slug):
     
     if not code:
         return JsonResponse({'error': 'No code provided'}, status=400)
+
+    if not _is_supported_language(problem, language):
+        return JsonResponse(
+            {'error': f'Unsupported language for this problem: {language}'},
+            status=400,
+        )
     
     # Get only sample test cases for "Run Code"
     test_cases = problem.test_cases.filter(is_sample=True)
@@ -440,6 +463,12 @@ def submit_code(request, slug):
     
     if not code:
         return JsonResponse({'error': 'No code provided'}, status=400)
+
+    if not _is_supported_language(problem, language):
+        return JsonResponse(
+            {'error': f'Unsupported language for this problem: {language}'},
+            status=400,
+        )
     
     # Get ALL test cases (including hidden ones)
     test_cases = problem.test_cases.all()
@@ -469,6 +498,8 @@ def submit_code(request, slug):
     
     # Execute code against all test cases
     passed_count = 0
+    max_execution_time = None
+    max_memory_used = None
     failed_test_case = None
     error_occurred = False
     error_message = ''
@@ -487,6 +518,13 @@ def submit_code(request, slug):
                 submission.status = 'runtime_error'
             submission.error_message = error_message
             break
+
+        execution_time = result.get('execution_time')
+        memory_used = result.get('memory_used')
+        if execution_time is not None:
+            max_execution_time = execution_time if max_execution_time is None else max(max_execution_time, execution_time)
+        if memory_used is not None:
+            max_memory_used = memory_used if max_memory_used is None else max(max_memory_used, memory_used)
         
         output = result['output']
         expected = tc.expected_output.strip()
@@ -505,6 +543,8 @@ def submit_code(request, slug):
     
     # Update submission results
     submission.passed_test_cases = passed_count
+    submission.execution_time = max_execution_time
+    submission.memory_used = max_memory_used
     
     if not error_occurred:
         if passed_count == test_cases.count():
@@ -537,7 +577,7 @@ def submit_code(request, slug):
     }
     
     if submission.status == 'accepted':
-        response_data['message'] = '🎉 Accepted! All test cases passed!'
+        response_data['message'] = 'Accepted! All test cases passed!'
     elif submission.status == 'wrong_answer' and failed_test_case:
         response_data['message'] = f'Wrong Answer on test case {failed_test_case["test_case_number"]}'
         response_data['failed_test_case'] = failed_test_case
@@ -597,29 +637,62 @@ def execute_code_jdoodle(code, language, stdin):
             'error': f'JDoodle API error (status {response.status_code})',
             'details': response.text
         }
-    
-    result = response.json()
-    
-    # Check for compilation or runtime errors
-    if result.get('statusCode') == 1:
-        # Compilation error
+
+    try:
+        result = response.json()
+    except ValueError:
         return {
             'output': '',
-            'error': 'Compilation Error',
-            'details': result.get('error', '') or result.get('output', '')
+            'error': 'Invalid response from code execution service',
+            'details': response.text[:500]
         }
-    
-    # Check for memory or time limit
-    if result.get('memory') and result.get('cpuTime'):
-        # These are just informational, we can ignore for now
-        pass
-    
+
+    status_code = result.get('statusCode')
+    details = (result.get('error', '') or result.get('output', '')).strip()
+    details_lower = details.lower()
+
+    # JDoodle returns non-200 status codes for compile/runtime failures.
+    if status_code not in (None, 200):
+        if status_code == 1 or 'compile' in details_lower:
+            error = 'Compilation Error'
+        elif 'time limit' in details_lower or 'timeout' in details_lower:
+            error = 'Time Limit Exceeded'
+        else:
+            error = 'Runtime Error'
+        return {
+            'output': '',
+            'error': error,
+            'details': details
+        }
+
+    if result.get('error'):
+        return {
+            'output': '',
+            'error': 'Runtime Error',
+            'details': details
+        }
+
+    execution_time = None
+    memory_used = None
+    try:
+        if result.get('cpuTime') is not None:
+            execution_time = float(result.get('cpuTime'))
+    except (TypeError, ValueError):
+        execution_time = None
+    try:
+        if result.get('memory') is not None:
+            memory_used = float(result.get('memory'))
+    except (TypeError, ValueError):
+        memory_used = None
+
     output = (result.get('output', '') or '').strip()
     
     return {
         'output': output,
         'error': '',
-        'details': ''
+        'details': '',
+        'execution_time': execution_time,
+        'memory_used': memory_used,
     }
 
 

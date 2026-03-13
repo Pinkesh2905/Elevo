@@ -1,233 +1,148 @@
 <!-- posts/templates/posts/post_card.html -->
 <style>
   .post-card {
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.4);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.3s ease;
   }
 
   .post-card:hover {
-    transform: translateY(-4px);
-    background: rgba(30, 41, 59, 0.7);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.1);
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
-  .action-btn {
-    transition: all 0.2s ease;
-    padding: 8px 14px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  .action-btn-new {
+    @apply flex items-center gap-2 p-2 rounded-lg transition-all text-slate-500 hover:bg-white/5;
   }
 
-  .action-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: scale(1.05);
+  .action-btn-new.liked {
+    @apply text-rose-500 bg-rose-500/5;
+  }
+  
+  .action-btn-new.reposted {
+    @apply text-emerald-500 bg-emerald-500/5;
   }
 
-  .action-btn.liked {
-    color: #f43f5e;
-    background: rgba(244, 63, 94, 0.1);
-    border-color: rgba(244, 63, 94, 0.2);
-  }
-
-  .repost-badge {
+  .brand-mono {
     font-family: 'Fira Code', monospace;
-    letter-spacing: 0.1em;
+    letter-spacing: -0.02em;
   }
 </style>
 
-<div class="post-card rounded-3xl p-6 mb-6 group reveal-card" data-post-id="{{ post.id }}">
-  <!-- Repost Header -->
-  {% if post.is_repost %}
-    <div class="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 w-fit">
-      <i class="ri-repeat-2-line text-teal-400"></i>
-      <span class="text-xs font-bold text-teal-300 uppercase tracking-widest repost-badge">Reposted</span>
-      {% if post.reposted_by %}
-        <span class="text-[10px] text-slate-400 font-medium">by</span>
-        <a href="{% url 'users:public_profile' post.reposted_by.username %}" class="text-[11px] font-bold text-teal-200 hover:text-teal-100 transition-colors">
-          {{ post.reposted_by.get_full_name|default:post.reposted_by.username }}
-        </a>
+<div class="post-card rounded-2xl p-4 mb-4 group reveal-card cursor-pointer relative" 
+     data-post-id="{{ post.id }}" 
+     onclick="navigateToThreadWithFocus('{{ post.id }}')">
+  
+  <!-- Repost Indicator -->
+  <div class="repost-indicator flex items-center gap-2 mb-2 ml-10 {% if not repost %}hidden{% endif %}">
+    <i class="ri-repeat-2-line text-xs text-emerald-500"></i>
+    <span class="text-[11px] font-bold text-slate-500">
+      {% if actor == request.user %}
+        You reposted
+      {% else %}
+        {{ actor.get_full_name|default:actor.username }} reposted
       {% endif %}
-    </div>
-  {% endif %}
+    </span>
+  </div>
 
-  <!-- Author Info -->
-  <div class="flex items-center justify-between mb-5">
-    <div class="flex items-center gap-4">
-      <div class="relative">
+  <div class="flex gap-4">
+    <!-- Avatar -->
+    <div class="flex-shrink-0 relative z-10">
+      <a href="{% url 'users:public_profile' post.author.username %}" class="block relative group/avatar" onclick="event.stopPropagation()">
         {% if post.author.profile.avatar %}
-          <img src="{{ post.author.profile.avatar.url }}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/10" alt="{{ post.author.username }}">
+          <img src="{{ post.author.profile.avatar.url }}" class="w-10 h-10 rounded-xl object-cover ring-1 ring-white/10 group-hover/avatar:ring-sky-500/50 transition-all" alt="{{ post.author.username }}">
         {% else %}
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg ring-2 ring-white/10">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 border border-white/5 flex items-center justify-center text-white font-black text-lg group-hover/avatar:border-sky-500/50 transition-all">
             {{ post.author.username|first|upper }}
           </div>
         {% endif %}
-        <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
-      </div>
-      <div>
-        <a href="{% url 'users:public_profile' post.author.username %}" class="block font-black text-slate-100 hover:text-sky-400 transition-colors text-base leading-tight">
-          {{ post.author.get_full_name|default:post.author.username }}
-        </a>
-        <div class="flex items-center gap-2 mt-0.5">
-          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">@{{ post.author.username }}</span>
-          <span class="text-slate-700 font-bold">•</span>
-          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{{ post.created_at|timesince }} ago</span>
+      </a>
+    </div>
+
+    <!-- Content Area -->
+    <div class="flex-1 min-w-0">
+      <!-- Identity Row -->
+      <div class="flex items-center justify-between mb-1">
+        <div class="flex items-center gap-1.5 min-w-0 relative z-10">
+          <a href="{% url 'users:public_profile' post.author.username %}" class="text-sm font-black text-white hover:underline truncate" onclick="event.stopPropagation()">
+            {{ post.author.get_full_name|default:post.author.username }}
+          </a>
+          <span class="text-xs text-slate-500 truncate">@{{ post.author.username }}</span>
+          <span class="text-xs text-slate-600">•</span>
+          <span class="text-xs text-slate-500 whitespace-nowrap">{{ post.created_at|timesince }}</span>
+        </div>
+        
+        <div class="relative opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <button class="text-slate-500 hover:text-white p-1" onclick="event.stopPropagation()">
+            <i class="ri-more-fill"></i>
+          </button>
         </div>
       </div>
-    </div>
-    
-    <button class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all">
-      <i class="ri-more-2-fill text-xl"></i>
-    </button>
-  </div>
 
-  <!-- Post Body -->
-  <div class="text-slate-200 text-[15px] leading-relaxed mb-5 whitespace-pre-wrap font-medium">
-    {{ post.content }}
-  </div>
-
-  {% if post.image %}
-    <div class="relative mb-5 rounded-2xl overflow-hidden border border-white/5 shadow-2xl group/img">
-      <img src="{{ post.image.url }}" alt="Post content" class="w-full h-auto max-h-[500px] object-cover transition-transform duration-700 group-hover/img:scale-105">
-      <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity"></div>
-    </div>
-  {% endif %}
-
-  <!-- Post Controls -->
-  <div class="flex items-center justify-between pt-4 border-t border-white/5">
-    <div class="flex items-center gap-3">
-      <!-- Like -->
-      <button type="button" 
-              onclick="handleLike('{{ post.id }}', this)" 
-              class="action-btn flex items-center gap-2 text-slate-400 hover:text-rose-400 transition-all {% if post.id in liked_post_ids %}liked{% endif %}">
-        <i class="ri-heart-3-{% if post.id in liked_post_ids %}fill{% else %}line{% endif %} text-lg"></i>
-        <span class="text-xs font-black uppercase tracking-widest like-count">{{ post.like_count|default:0 }}</span>
-      </button>
-
-      <!-- Comment Toggle -->
-      <button type="button" 
-              onclick="toggleCommentSection('{{ post.id }}')" 
-              class="action-btn flex items-center gap-2 text-slate-400 hover:text-sky-400 transition-all">
-        <i class="ri-chat-3-line text-lg"></i>
-        <span class="text-xs font-black uppercase tracking-widest">{{ post.comment_count|default:0 }}</span>
-      </button>
-
-      <!-- Repost -->
-      <form method="post" action="{% url 'posts:repost' post.id %}" class="inline">
-        {% csrf_token %}
-        <button type="submit" class="action-btn flex items-center gap-2 text-slate-400 hover:text-emerald-400 transition-all">
-          <i class="ri-repeat-line text-lg"></i>
-          <span class="text-xs font-black uppercase tracking-widest">{{ post.repost_count|default:0 }}</span>
-        </button>
-      </form>
-
-      <!-- Share -->
-      <button onclick="copyPostLink(event)" 
-              data-detail-url="{% url 'posts:post_detail' post.id %}"
-              class="action-btn flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-all">
-        <i class="ri-share-forward-line text-lg"></i>
-      </button>
-    </div>
-
-    <!-- Edit/Delete -->
-    {% if post.author == request.user %}
-      <div class="flex items-center gap-2">
-        <a href="{% url 'posts:edit_post' post.id %}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-all" title="Edit">
-          <i class="ri-edit-line"></i>
-        </a>
-        <form method="post" action="{% url 'posts:delete_post' post.id %}" onsubmit="return confirm('Delete this post?');" class="inline">
-          {% csrf_token %}
-          <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all" title="Delete">
-            <i class="ri-delete-bin-line"></i>
-          </button>
-        </form>
+      <!-- Post Body -->
+      <div class="text-slate-200 text-sm leading-relaxed mb-3 whitespace-pre-wrap font-medium">
+        {{ post.content }}
       </div>
-    {% endif %}
-  </div>
 
-  <!-- Comment Box (Hidden) -->
-  <div id="comment-section-{{ post.id }}" class="hidden mt-6 animate-in slide-in-from-top-2 duration-300">
-    <div class="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-      <div class="flex-1">
-        {% if user.is_authenticated %}
-          <form method="post" action="{% url 'posts:add_comment' post.id %}" class="flex gap-3">
-            {% csrf_token %}
-            <textarea name="content" required 
-                      class="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500/50 transition-all resize-none" 
-                      placeholder="Add a comment..."></textarea>
-            <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-sky-500 text-white shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all self-end">
-              <i class="ri-send-plane-2-fill"></i>
-            </button>
-          </form>
-        {% else %}
-           <p class="text-xs text-slate-400 font-bold uppercase tracking-widest text-center py-2">
-             Please <a href="{% url 'login' %}" class="text-sky-400 hover:underline">login</a> to join the conversation
-           </p>
+      <!-- Media -->
+      {% if post.image %}
+        <div class="relative mb-3 rounded-xl overflow-hidden border border-white/5 max-w-2xl group/img">
+          <img src="{{ post.image.url }}" alt="Post content" class="w-full h-auto max-h-[512px] object-cover transition-transform duration-700 group-hover/img:scale-[1.02]">
+        </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between max-w-md -ml-2 relative z-10">
+        <div class="flex items-center gap-1">
+          <!-- Like -->
+          <button type="button" 
+                  onclick="event.stopPropagation(); handleLike('{{ post.id }}', this)" 
+                  class="action-btn-new hover:text-rose-500 {% if post.id in liked_post_ids %}liked{% endif %}">
+            <i class="ri-heart-3-{% if post.id in liked_post_ids %}fill{% else %}line{% endif %} text-[17px]"></i>
+            <span class="text-[11px] font-bold brand-mono like-count-{{ post.id }}">{{ post.like_count|default:0 }}</span>
+          </button>
+
+          <!-- Comment -->
+          <button type="button" 
+                  onclick="event.stopPropagation(); navigateToThreadWithFocus('{{ post.id }}')" 
+                  class="action-btn-new hover:text-sky-500">
+            <i class="ri-chat-3-line text-[17px]"></i>
+            <span class="text-[11px] font-bold brand-mono">{{ post.comment_count|default:0 }}</span>
+          </button>
+
+          <!-- Repost -->
+          <button type="button" 
+                  onclick="event.stopPropagation(); handleRepost('{{ post.id }}', this)"
+                  class="action-btn-new hover:text-emerald-500">
+            <i class="ri-repeat-2-line text-[17px]"></i>
+            <span class="text-[11px] font-bold brand-mono repost-count-{{ post.id }}">{{ post.repost_count|default:0 }}</span>
+          </button>
+
+          <!-- Share -->
+          <button onclick="event.stopPropagation(); copyPostLink(event)" 
+                  data-detail-url="{% url 'posts:post_detail' post.id %}"
+                  class="action-btn-new hover:text-amber-500">
+            <i class="ri-share-forward-line text-[17px]"></i>
+          </button>
+        </div>
+
+        <!-- Personal Actions -->
+        {% if post.author == request.user %}
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <a href="{% url 'posts:edit_post' post.id %}" class="p-2 text-slate-500 hover:text-sky-400" title="Edit" onclick="event.stopPropagation()">
+              <i class="ri-edit-line text-sm"></i>
+            </a>
+            <form method="post" action="{% url 'posts:delete_post' post.id %}" onsubmit="return confirm('Delete this post?');" class="inline" onclick="event.stopPropagation()">
+              {% csrf_token %}
+              <button type="submit" class="p-2 text-slate-500 hover:text-rose-400" title="Delete">
+                <i class="ri-delete-bin-line text-sm"></i>
+              </button>
+            </form>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
-
-<script>
-  if (typeof toggleCommentSection === 'undefined') {
-    function toggleCommentSection(postId) {
-      const section = document.getElementById(`comment-section-${postId}`);
-      if (section) {
-        section.classList.toggle('hidden');
-        if (!section.classList.contains('hidden')) {
-          section.querySelector('textarea')?.focus();
-        }
-      }
-    }
-  }
-
-  if (typeof handleLike === 'undefined') {
-    async function handleLike(postId, button) {
-      try {
-        const response = await fetch(`/posts/like/${postId}/`, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        });
-        const data = await response.json();
-        if (data.success) {
-          const count = button.querySelector('.like-count');
-          count.textContent = data.like_count;
-          const icon = button.querySelector('i');
-          if (data.liked) {
-            button.classList.add('liked');
-            icon.classList.remove('ri-heart-3-line');
-            icon.classList.add('ri-heart-3-fill');
-          } else {
-            button.classList.remove('liked');
-            icon.classList.remove('ri-heart-3-fill');
-            icon.classList.add('ri-heart-3-line');
-          }
-        }
-      } catch (err) { console.error('Like error:', err); }
-    }
-  }
-
-  if (typeof copyPostLink === 'undefined') {
-    function copyPostLink(e) {
-      const btn = e.currentTarget;
-      const detailUrl = btn.getAttribute('data-detail-url');
-      const fullUrl = window.location.origin + detailUrl;
-      navigator.clipboard.writeText(fullUrl).then(() => {
-        // Simple visual feedback
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="ri-check-line text-emerald-400"></i>';
-        setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
-      });
-    }
-  }
-</script>
 

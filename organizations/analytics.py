@@ -10,6 +10,12 @@ from django.db.models import Avg, Count, Q, F, Case, When, Value, CharField
 from django.utils import timezone
 
 from organizations.tenant import get_org_user_ids
+from core.placement_readiness import (
+    compute_readiness_score,
+    confidence_from_activity,
+    confidence_from_coverage,
+    readiness_band,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -55,7 +61,13 @@ def compute_org_kpis(org):
     apt_score = apt_stats["avg_score"]  # 0-100
     code_score = min(code_stats["solve_rate"] * 100, 100)  # 0-100
     interview_score = interview_stats["avg_score"]  # 0-100
-    readiness = round(apt_score * 0.4 + code_score * 0.3 + interview_score * 0.3, 1)
+    readiness = compute_readiness_score(apt_score, code_score, interview_score)
+    readiness_meta = confidence_from_coverage(
+        total_members,
+        len(apt_stats["active_user_ids"]),
+        len(code_stats["active_user_ids"]),
+        len(interview_stats["active_user_ids"]),
+    )
 
     return {
         "active_members": total_members,
@@ -64,6 +76,9 @@ def compute_org_kpis(org):
         "avg_aptitude_score": round(apt_score, 1),
         "avg_interview_score": round(interview_score, 1),
         "readiness_score": round(readiness, 1),
+        "readiness_band": readiness_band(readiness),
+        "readiness_confidence_score": readiness_meta["score"],
+        "readiness_confidence_band": readiness_meta["band"],
         # Raw numbers for cards
         "aptitude_attempts": apt_stats["total"],
         "aptitude_completed": apt_stats["completed"],
@@ -171,7 +186,15 @@ def compute_student_table(org):
         a = row["avg_aptitude_score"]
         c = min(code["solve_rate"] * 100, 100) if code["attempted"] else 0
         i = row["avg_interview_score"]
-        row["readiness_score"] = round(a * 0.4 + c * 0.3 + i * 0.3, 1)
+        row["readiness_score"] = compute_readiness_score(a, c, i)
+        row["readiness_band"] = readiness_band(row["readiness_score"])
+        conf = confidence_from_activity(
+            apt["completed"],
+            code["attempted"],
+            iv["completed"],
+        )
+        row["readiness_confidence_score"] = conf["score"]
+        row["readiness_confidence_band"] = conf["band"]
 
         students.append(row)
 
@@ -259,6 +282,9 @@ def _empty_kpis():
         "avg_aptitude_score": 0,
         "avg_interview_score": 0,
         "readiness_score": 0,
+        "readiness_band": "early_stage",
+        "readiness_confidence_score": 0,
+        "readiness_confidence_band": "low",
         "aptitude_attempts": 0,
         "aptitude_completed": 0,
         "coding_submissions": 0,
@@ -299,8 +325,9 @@ def _interview_stats(user_ids):
         from mock_interview.models import MockInterviewSession
         qs = MockInterviewSession.objects.filter(user__in=user_ids)
         total = qs.count()
-        completed = qs.filter(status="COMPLETED").count()
-        avg = qs.filter(status="COMPLETED", score__isnull=False).aggregate(a=Avg("score"))["a"] or 0
+        completed_qs = qs.filter(status__in=["COMPLETED", "REVIEWED"], score__isnull=False)
+        completed = completed_qs.count()
+        avg = completed_qs.aggregate(a=Avg("score"))["a"] or 0
         active = set(qs.values_list("user_id", flat=True).distinct())
         return {"total": total, "completed": completed, "avg_score": float(avg), "active_user_ids": active}
     except (ImportError, Exception):
@@ -312,10 +339,11 @@ def _user_aptitude_stats(user):
         from aptitude.models import AptitudeQuizAttempt
         qs = AptitudeQuizAttempt.objects.filter(user=user)
         total = qs.count()
+        completed = qs.filter(status="completed").count()
         avg = qs.filter(status="completed").aggregate(a=Avg("score_percent"))["a"] or 0
-        return {"total": total, "avg_score": round(avg, 1)}
+        return {"total": total, "completed": completed, "avg_score": round(avg, 1)}
     except (ImportError, Exception):
-        return {"total": 0, "avg_score": 0}
+        return {"total": 0, "completed": 0, "avg_score": 0}
 
 
 def _user_coding_stats(user):
@@ -335,10 +363,12 @@ def _user_interview_stats(user):
         from mock_interview.models import MockInterviewSession
         qs = MockInterviewSession.objects.filter(user=user)
         total = qs.count()
-        avg = qs.filter(status="COMPLETED", score__isnull=False).aggregate(a=Avg("score"))["a"] or 0
-        return {"total": total, "avg_score": round(float(avg), 1)}
+        completed_qs = qs.filter(status__in=["COMPLETED", "REVIEWED"], score__isnull=False)
+        completed = completed_qs.count()
+        avg = completed_qs.aggregate(a=Avg("score"))["a"] or 0
+        return {"total": total, "completed": completed, "avg_score": round(float(avg), 1)}
     except (ImportError, Exception):
-        return {"total": 0, "avg_score": 0}
+        return {"total": 0, "completed": 0, "avg_score": 0}
 
 
 def _period_kpis(user_ids, start, end):

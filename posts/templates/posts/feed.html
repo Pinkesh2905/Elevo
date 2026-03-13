@@ -29,162 +29,164 @@
   }
 </style>
 
-<section class="min-h-screen py-10 px-4">
-  <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8">
+<section class="max-w-7xl mx-auto px-4 py-6">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     
     <!-- Main Feed -->
-    <div class="lg:col-span-8 space-y-8">
-      <!-- Header -->
-      <div class="feed-header rounded-3xl p-8 backdrop-blur-xl reveal-card">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-black text-white tracking-tight brand-font">Elevo Social</h1>
-            <p class="text-slate-400 font-medium mt-1">Connect, share, and grow with the community.</p>
-          </div>
-          {% if discover_mode %}
-            <div class="px-4 py-1.5 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-[10px] font-black uppercase tracking-widest">
-              Discover Mode
-            </div>
-          {% endif %}
-        </div>
+    <div class="lg:col-span-8 space-y-6">
+      <!-- Modern Tab Switcher -->
+      <div class="flex items-center gap-1 p-1 bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-2xl reveal-card">
+        <a href="?tab=following" 
+           class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 {% if active_tab == 'following' %}bg-sky-500/10 border border-sky-400/20 text-sky-400 font-black shadow-lg shadow-sky-500/5{% else %}text-slate-500 font-bold hover:text-slate-300 hover:bg-white/5{% endif %}">
+          <i class="ri-team-line {% if active_tab == 'following' %}text-sky-400{% endif %}"></i>
+          <span class="text-xs uppercase tracking-widest">Following</span>
+        </a>
+        <a href="?tab=discover" 
+           class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 {% if active_tab == 'discover' %}bg-emerald-500/10 border border-emerald-400/20 text-emerald-400 font-black shadow-lg shadow-emerald-500/5{% else %}text-slate-500 font-bold hover:text-slate-300 hover:bg-white/5{% endif %}">
+          <i class="ri-compass-3-line {% if active_tab == 'discover' %}text-emerald-400{% endif %}"></i>
+          <span class="text-xs uppercase tracking-widest">Discover</span>
+        </a>
       </div>
 
-      <!-- Create Post -->
-      <div class="rounded-3xl border border-white/10 bg-slate-900/40 backdrop-blur-xl p-6 reveal-card">
+      <!-- Create Post (Modern & Integrated) -->
+      <div class="rounded-2xl border border-white/5 bg-slate-900/40 backdrop-blur-xl p-5 reveal-card">
         <form method="post" enctype="multipart/form-data" action="{% url 'posts:feed' %}" class="space-y-4">
           {% csrf_token %}
           <div class="flex gap-4">
             {% if user.profile.avatar %}
-              <img src="{{ user.profile.avatar.url }}" class="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/10" alt="Me">
+              <img src="{{ user.profile.avatar.url }}" class="w-10 h-10 rounded-xl object-cover ring-1 ring-white/10" alt="Me">
             {% else %}
-               <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
+               <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
                 {{ user.username|first|upper }}
               </div>
             {% endif %}
             <div class="flex-1">
-              <textarea name="content" rows="3" required 
-                        class="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all resize-none shadow-inner text-[15px] font-medium" 
-                        placeholder="Share your breakthrough today..."></textarea>
+              <textarea name="content" rows="2" required id="postTextarea"
+                        class="w-full bg-transparent border-none p-0 text-slate-100 placeholder-slate-500 focus:ring-0 transition-all resize-none text-base font-medium" 
+                        placeholder="What's happening?"></textarea>
             </div>
           </div>
 
-          <div class="flex items-center justify-between pt-2 border-t border-white/5">
-            <div id="image-preview-container" class="hidden relative">
-              <img id="image-preview" src="#" class="h-16 w-16 object-cover rounded-xl border border-white/20">
-              <button type="button" onclick="clearImage()" class="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-lg"><i class="ri-close-line"></i></button>
-            </div>
-            
-            <div class="flex items-center gap-3">
-              <label class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 cursor-pointer hover:bg-white/10 hover:text-sky-400 transition-all">
-                <i class="ri-image-add-line text-xl"></i>
+          <div class="flex items-center justify-between pt-3 border-t border-white/5">
+            <div class="flex items-center gap-1">
+              <div id="image-preview-container" class="hidden relative mr-2">
+                <img id="image-preview" src="#" class="h-10 w-10 object-cover rounded-lg border border-white/10">
+                <button type="button" onclick="clearImage()" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] shadow-lg"><i class="ri-close-line"></i></button>
+              </div>
+              
+              <label class="w-9 h-9 flex items-center justify-center rounded-lg text-sky-400 cursor-pointer hover:bg-sky-500/10 transition-all" title="Add Image">
+                <i class="ri-image-add-line text-lg"></i>
                 <input type="file" name="image" accept="image/*" class="hidden" onchange="previewFile(this)">
               </label>
-              <button type="button" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-emerald-400 transition-all">
-                <i class="ri-at-line text-xl"></i>
+              <button type="button" class="w-9 h-9 flex items-center justify-center rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-all" title="Tag Someone">
+                <i class="ri-at-line text-lg"></i>
               </button>
             </div>
             
-            <button type="submit" class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all">
-              Post Status
+            <button type="submit" class="px-6 py-2 rounded-full bg-sky-500 text-white font-black text-xs shadow-lg shadow-sky-500/20 hover:bg-sky-400 transition-all">
+              Post
             </button>
           </div>
         </form>
       </div>
 
       <!-- Feed Items -->
-      <div class="space-y-6">
+      <div class="space-y-4">
         {% for item in activity_items %}
-          {% include 'posts/post_card.html' with post=item.post liked_post_ids=liked_post_ids %}
+          {% include 'posts/post_card.html' with post=item.post repost=item.repost actor=item.actor liked_post_ids=liked_post_ids %}
         {% empty %}
-          <div class="rounded-3xl border border-dashed border-white/10 bg-slate-900/20 p-20 text-center reveal-card">
-            <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
-              <i class="ri-ghost-line text-4xl text-slate-600"></i>
+          <div class="rounded-2xl border border-dashed border-white/5 bg-slate-900/20 py-16 text-center reveal-card">
+            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <i class="{% if active_tab == 'following' %}ri-user-add-line{% else %}ri-ghost-line{% endif %} text-3xl text-slate-600"></i>
             </div>
-            <h3 class="text-xl font-bold text-slate-400 tracking-tight">The feed is remarkably quiet.</h3>
-            <p class="text-slate-500 mt-2">Start the conversation by sharing your first update!</p>
+            <h3 class="text-lg font-black text-slate-400 tracking-tight">
+              {% if active_tab == 'following' %}Expand your network{% else %}No transmissions found{% endif %}
+            </h3>
+            <p class="text-slate-500 text-sm mt-1">
+              {% if active_tab == 'following' %}Follow some architects from the discovery tab to see their updates!{% else %}Be the first to share an update on Elevo!{% endif %}
+            </p>
+            {% if active_tab == 'following' %}
+              <a href="?tab=discover" class="inline-block mt-4 px-6 py-2 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-[10px] font-black uppercase tracking-widest hover:bg-sky-500 hover:text-white transition-all">
+                Go to Discover
+              </a>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
     </div>
 
     <!-- Sidebar -->
-    <aside class="lg:col-span-4 space-y-8">
-      <!-- Network Stats -->
-      <div class="sidebar-card p-6 reveal-card">
-        <h3 class="text-base font-black text-slate-100 flex items-center gap-2 tracking-tight mb-6">
-          <i class="ri-pulse-fill text-sky-400"></i> Network Vitals
+    <aside class="lg:col-span-4 space-y-6">
+      <!-- Network Stats Card (More Compact) -->
+      <div class="sidebar-card p-5 reveal-card">
+        <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+          <i class="ri-pulse-fill text-sky-400"></i> Vitals
         </h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
-            <div class="text-2xl font-black text-white">{{ following_count }}</div>
-            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Following</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white/[0.03] border border-white/5 rounded-xl p-3 text-center">
+            <div class="text-xl font-black text-white">{{ following_count }}</div>
+            <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Following</div>
           </div>
-          <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
-             <div class="text-2xl font-black text-sky-400">{{ suggested_users|length }}</div>
-             <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Suggested</div>
+          <div class="bg-white/[0.03] border border-white/5 rounded-xl p-3 text-center">
+             <div class="text-xl font-black text-sky-400">{{ suggested_users|length }}</div>
+             <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Discovery</div>
           </div>
         </div>
       </div>
 
-      <!-- Suggested Friends -->
-      <div class="sidebar-card p-6 reveal-card">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-base font-black text-slate-100 flex items-center gap-2 tracking-tight">
+      <!-- Discover Card (Refined) -->
+      <div class="sidebar-card p-5 reveal-card">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
             <i class="ri-compass-3-fill text-teal-400"></i> Discover
           </h3>
-          <button class="text-[10px] font-black text-sky-400 uppercase tracking-widest hover:text-white transition-colors">See All</button>
         </div>
         
         <div class="space-y-4">
           {% for u in suggested_users %}
             <div class="flex items-center justify-between gap-3 group">
-              <a href="{% url 'users:public_profile' u.username %}" class="flex items-center gap-3 overflow-hidden">
+              <a href="{% url 'users:public_profile' u.username %}" class="flex items-center gap-2.5 min-w-0">
                 <div class="relative flex-shrink-0">
                   {% if u.profile.avatar %}
-                    <img src="{{ u.profile.avatar.url }}" class="w-10 h-10 rounded-xl object-cover ring-2 ring-white/5 group-hover:ring-sky-400/30 transition-all" alt="{{ u.username }}">
+                    <img src="{{ u.profile.avatar.url }}" class="w-9 h-9 rounded-lg object-cover ring-1 ring-white/5 group-hover:ring-sky-400/30 transition-all" alt="{{ u.username }}">
                   {% else %}
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-lg ring-2 ring-white/5 group-hover:ring-sky-400/30 transition-all">
+                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white font-bold text-sm ring-1 ring-white/5 group-hover:ring-sky-400/30 transition-all">
                       {{ u.username|first|upper }}
                     </div>
                   {% endif %}
-                  <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
                 </div>
                 <div class="min-w-0">
-                  <div class="text-sm font-black text-slate-200 truncate group-hover:text-sky-400 transition-colors">{{ u.get_full_name|default:u.username }}</div>
-                  <div class="text-[10px] text-slate-500 font-bold uppercase group-hover:text-slate-400 transition-colors">@{{ u.username }}</div>
+                  <div class="text-[13px] font-bold text-slate-200 truncate group-hover:text-sky-400 transition-colors">{{ u.get_full_name|default:u.username }}</div>
+                  <div class="text-[10px] text-slate-500 font-medium truncate">@{{ u.username }}</div>
                 </div>
               </a>
-              <button onclick="toggleSidebarFollow('{{ u.username }}', this)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500 hover:text-white transition-all">
-                <i class="ri-user-add-line"></i>
+              <button onclick="toggleSidebarFollow('{{ u.username }}', this)" class="px-3 py-1.5 rounded-full bg-white/5 text-[10px] font-black uppercase text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+                Follow
               </button>
             </div>
           {% empty %}
-             <p class="text-[11px] text-slate-600 font-bold uppercase tracking-widest text-center py-4 italic">Everyone is following you!</p>
+             <p class="text-[10px] text-slate-600 font-bold uppercase tracking-widest text-center py-2 italic opacity-50">Discovery complete</p>
           {% endfor %}
+          {% if suggested_users %}
+            <button class="w-full mt-2 py-2 text-[10px] font-black text-sky-400 uppercase tracking-widest hover:text-white transition-colors border-t border-white/5 pt-4">View suggestions</button>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Trending/Info -->
-      <div class="sidebar-card p-6 reveal-card">
-         <div class="space-y-4">
-            <div class="p-4 rounded-2xl bg-gradient-to-br from-sky-500/10 to-indigo-600/10 border border-sky-500/20">
-               <h4 class="text-xs font-black text-white uppercase tracking-widest mb-2 flex items-center gap-2">
-                 <i class="ri-flashlight-fill text-amber-400"></i> Pro Tip
-               </h4>
-               <p class="text-xs text-slate-400 leading-relaxed">Sharing your daily code snippets and problems solved increases your visibility by 4x.</p>
-            </div>
-         </div>
-         <div class="mt-8 pt-6 border-t border-white/5 flex flex-wrap gap-x-4 gap-y-2">
-            <a href="#" class="text-[10px] font-bold text-slate-600 uppercase hover:text-slate-400">Privacy</a>
-            <a href="#" class="text-[10px] font-bold text-slate-600 uppercase hover:text-slate-400">Terms</a>
-            <a href="#" class="text-[10px] font-bold text-slate-600 uppercase hover:text-slate-400">Help</a>
-            <span class="text-[10px] font-bold text-slate-700 uppercase">© 2026 Elevo</span>
+      <!-- Footer/Info -->
+      <div class="opacity-40 hover:opacity-100 transition-opacity">
+         <div class="flex flex-wrap gap-x-4 gap-y-2 px-2">
+            <a href="#" class="text-[10px] font-bold text-slate-500 uppercase hover:text-sky-400">Privacy</a>
+            <a href="#" class="text-[10px] font-bold text-slate-500 uppercase hover:text-sky-400">Terms</a>
+            <a href="#" class="text-[10px] font-bold text-slate-500 uppercase hover:text-sky-400">Cookies</a>
+            <span class="text-[10px] font-bold text-slate-600 uppercase">Elevo © 2026</span>
          </div>
       </div>
     </aside>
   </div>
 </section>
 
+{% include 'posts/social_scripts.html' %}
 <script>
   function previewFile(input) {
     const preview = document.getElementById('image-preview');

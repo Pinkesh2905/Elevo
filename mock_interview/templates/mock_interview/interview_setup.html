@@ -133,9 +133,49 @@
                             <p class="text-[10px] text-slate-500 font-medium ml-1">Comma-separated skills (e.g. Django, React, AWS) for deeper probe.</p>
                         </div>
 
+                        <!-- Job Description -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Target Job Description (Optional)</label>
+                            <div class="relative">
+                                {{ form.job_description }}
+                                <div class="absolute right-4 top-4 text-slate-500">
+                                    <i class="ri-file-list-3-line"></i>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-medium ml-1">Paste JD to enable role-fit and missing-skill targeting.</p>
+                        </div>
+
+                        <!-- Interview Pack -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Interview Pack</label>
+                            <div class="custom-dropdown relative" id="dropdown-pack">
+                                <button type="button" class="dropdown-toggle w-full h-12 px-5 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm font-bold flex items-center justify-between hover:border-cyan-500/30 transition-all" data-target="dropdown-menu-pack">
+                                    <span class="selected-value">Select Pack</span>
+                                    <i class="ri-arrow-down-s-line text-slate-500 group-data-[state=open]:rotate-180 transition-transform"></i>
+                                </button>
+                                <div id="dropdown-menu-pack" class="dropdown-menu hidden absolute top-full left-0 w-full mt-2 rounded-xl border border-white/10 bg-slate-900 shadow-2xl overflow-hidden z-[100] backdrop-blur-xl">
+                                    <div class="p-1 max-h-60 overflow-y-auto custom-scrollbar">
+                                        {% for pack in pack_options %}
+                                        <div class="dropdown-option px-4 py-3 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white cursor-pointer transition-colors" data-value="{{ pack.id }}">
+                                            {{ pack.name }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="hidden-select hidden">
+                                    <select name="interview_pack">
+                                        {% for pack in pack_options %}
+                                        <option value="{{ pack.id }}" {% if selected_pack == pack.id %}selected{% endif %}>{{ pack.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-medium ml-1">Pack controls difficulty mix and question style.</p>
+                        </div>
+
                         <!-- Action Buttons -->
                         <div class="flex flex-wrap items-center gap-4 pt-4">
-                            <button type="submit" name="action" value="analyze" class="h-12 px-8 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-black uppercase tracking-widest text-[10px] hover:bg-cyan-500 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all flex items-center gap-3">
+                            <button type="submit" name="action" value="analyze" id="analyze-artifact-btn" class="h-12 px-8 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-black uppercase tracking-widest text-[10px] hover:bg-cyan-500 hover:text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all flex items-center gap-3">
                                 <i class="ri-search-eye-line text-lg"></i>
                                 Analyze Artifact
                             </button>
@@ -148,109 +188,37 @@
                                 <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Analyze first for tailored AI prompts</span>
                             </div>
                         </div>
+
+                        <div id="jd-fit-preview" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 {% if not resume_insights.jd_fit %}hidden{% endif %}">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-2">
+                                    <i class="ri-briefcase-4-line text-cyan-400"></i>
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">JD Fit Snapshot</span>
+                                </div>
+                                <span id="jd-fit-score-chip" class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {% if resume_insights.jd_fit.fit_score >= 80 %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% elif resume_insights.jd_fit.fit_score >= 60 %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                                    {% if resume_insights.jd_fit %}{{ resume_insights.jd_fit.fit_score }}% fit{% else %}--{% endif %}
+                                </span>
+                            </div>
+                            <p id="jd-fit-summary" class="text-xs text-slate-400 font-medium mt-2">
+                                {% if resume_insights.jd_fit %}{{ resume_insights.jd_fit.summary }}{% endif %}
+                            </p>
+                            <div id="jd-missing-badges" class="mt-3 flex flex-wrap gap-2">
+                                {% if resume_insights.jd_fit %}
+                                    {% for skill in resume_insights.jd_fit.missing_skills|slice:":6" %}
+                                    <span class="px-2 py-1 rounded-md bg-rose-500/10 text-rose-300 text-[10px] font-bold">{{ skill }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if resume_insights.jd_fit %}
+                            {{ resume_insights.jd_fit|json_script:"initial-jd-fit-data" }}
+                        {% endif %}
                     </form>
                 </div>
 
-                {% if resume_insights %}
-                <!-- Insights Card -->
-                <div class="glass-elevated rounded-[2.5rem] border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 300ms;">
-                    <div class="px-8 py-6 border-b border-white/5 bg-white/2 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i class="ri-radar-line text-cyan-400 text-xl"></i>
-                            <h2 class="text-xs font-black text-white uppercase tracking-widest">Resume Intelligence Insights</h2>
-                        </div>
-                        <div class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest {% if resume_insights.band == 'excellent' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% elif resume_insights.band == 'good' %}bg-cyan-500/10 text-cyan-400 border border-cyan-500/20{% elif resume_insights.band == 'average' %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
-                            {{ resume_insights.band }}
-                        </div>
-                    </div>
-
-                    <div class="p-8 sm:p-10 space-y-10">
-                        <!-- Score Visualization -->
-                        <div class="relative group">
-                            <div class="absolute -inset-4 bg-cyan-500/5 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="relative flex flex-col sm:flex-row items-center gap-8">
-                                <div class="relative w-32 h-32 flex items-center justify-center">
-                                    <svg class="w-full h-full -rotate-90">
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-white/5" />
-                                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" 
-                                            stroke-dasharray="364.4" 
-                                            stroke-dashoffset="{{ 364.4|subtract_percentage:resume_insights.ats_score }}"
-                                            class="{% if resume_insights.ats_score > 80 %}text-emerald-500{% elif resume_insights.ats_score > 60 %}text-cyan-500{% else %}text-amber-500{% endif %} transition-all duration-1000" />
-                                    </svg>
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                        <span class="text-3xl font-black text-white brand-font tracking-tight">{{ resume_insights.ats_score }}</span>
-                                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">ATS Grade</span>
-                                    </div>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-xl font-black text-white brand-font tracking-tight mb-3">Mastery Summary</h3>
-                                    <p class="text-slate-400 text-sm font-medium leading-relaxed">{{ resume_insights.summary }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Metrics Grid -->
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {% for label, value in resume_insights.breakdown.items %}
-                            <div class="glass-elevated rounded-2xl border border-white/5 p-4 group hover:-translate-y-1 transition-all">
-                                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{{ label|replace:"_, " }}</p>
-                                <div class="flex items-end gap-1">
-                                    <span class="text-xl font-black text-white brand-font tracking-tight">{{ value }}</span>
-                                    <span class="text-[9px] font-black text-cyan-500 mb-1.5">%</span>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        {% if resume_insights.missing_keywords %}
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-2">
-                                <i class="ri-alert-line text-amber-400"></i>
-                                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Missing Domain Keywords</h3>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
-                                {% for kw in resume_insights.missing_keywords %}
-                                <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-slate-300">{{ kw }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <div class="grid sm:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-2">
-                                    <i class="ri-sparkling-fill text-emerald-400"></i>
-                                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Artifact Highlights</h3>
-                                </div>
-                                <ul class="space-y-3">
-                                    {% for item in resume_insights.detected_highlights %}
-                                    <li class="p-4 rounded-xl bg-white/2 border border-white/5 flex gap-3 text-xs font-medium text-slate-300">
-                                        <i class="ri-checkbox-circle-fill text-emerald-400/40 mt-0.5"></i>
-                                        {{ item }}
-                                    </li>
-                                    {% empty %}
-                                    <li class="text-slate-500 text-xs italic">No highlights detected.</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-2">
-                                    <i class="ri-edit-flash-line text-sky-400"></i>
-                                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Actionable Refinements</h3>
-                                </div>
-                                <ul class="space-y-3">
-                                    {% for s in resume_insights.suggestions %}
-                                    <li class="p-4 rounded-xl bg-white/2 border border-white/5 flex gap-3 text-xs font-medium text-slate-300">
-                                        <i class="ri-flashlight-line text-sky-400/40 mt-0.5"></i>
-                                        {{ s }}
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                <div id="resume-insights-container">
+                    {% include "mock_interview/partials/resume_insights_card.html" %}
                 </div>
-                {% endif %}
             </div>
 
             <!-- Right Column: Sidebar -->
@@ -377,6 +345,25 @@
         box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
     }
 
+    #id_job_description {
+        width: 100%;
+        min-height: 8rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        font-weight: 700;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.3s ease;
+        resize: vertical;
+    }
+    #id_job_description:focus {
+        border-color: rgba(6, 182, 212, 0.3);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+    }
+
     /* SVG Percentage helper if needed - in Django we might need a filter for this */
     /* Handled via custom logic in stroke-dashoffset if available or JS */
 </style>
@@ -475,6 +462,93 @@
         const resumeFileInput = document.getElementById("id_resume_file");
         const roleInput = document.getElementById("id_job_role");
         const skillsInput = document.getElementById("id_key_skills");
+        const analyzeBtn = document.getElementById("analyze-artifact-btn");
+        const setupForm = document.querySelector('form[enctype="multipart/form-data"]');
+        const insightsContainer = document.getElementById("resume-insights-container");
+        const jdFitPreview = document.getElementById("jd-fit-preview");
+        const jdFitScoreChip = document.getElementById("jd-fit-score-chip");
+        const jdFitSummary = document.getElementById("jd-fit-summary");
+        const jdMissingBadges = document.getElementById("jd-missing-badges");
+
+        function renderJdFit(jdFit) {
+            if (!jdFitPreview || !jdFitScoreChip || !jdFitSummary || !jdMissingBadges) return;
+            if (!jdFit || typeof jdFit.fit_score === "undefined" || jdFit.fit_score === null) {
+                jdFitPreview.classList.add("hidden");
+                jdFitSummary.textContent = "";
+                jdMissingBadges.innerHTML = "";
+                return;
+            }
+            jdFitPreview.classList.remove("hidden");
+            const score = Number(jdFit.fit_score) || 0;
+            jdFitScoreChip.className = "px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest";
+            if (score >= 80) {
+                jdFitScoreChip.classList.add("bg-emerald-500/10", "text-emerald-400", "border", "border-emerald-500/20");
+            } else if (score >= 60) {
+                jdFitScoreChip.classList.add("bg-amber-500/10", "text-amber-400", "border", "border-amber-500/20");
+            } else {
+                jdFitScoreChip.classList.add("bg-rose-500/10", "text-rose-400", "border", "border-rose-500/20");
+            }
+            jdFitScoreChip.textContent = `${score}% fit`;
+            jdFitSummary.textContent = jdFit.summary || "JD fit analysis ready.";
+            const missing = Array.isArray(jdFit.missing_skills) ? jdFit.missing_skills.slice(0, 6) : [];
+            jdMissingBadges.innerHTML = missing.length
+                ? missing.map((skill) => `<span class="px-2 py-1 rounded-md bg-rose-500/10 text-rose-300 text-[10px] font-bold">${skill}</span>`).join("")
+                : '<span class="text-[10px] text-slate-500 font-bold">Great coverage across JD skills.</span>';
+        }
+
+        const initialJdFitNode = document.getElementById("initial-jd-fit-data");
+        if (initialJdFitNode) {
+            try {
+                renderJdFit(JSON.parse(initialJdFitNode.textContent));
+            } catch (e) {
+                // ignore invalid initial payload
+            }
+        } else {
+            renderJdFit(null);
+        }
+
+        if (setupForm && analyzeBtn) {
+            analyzeBtn.addEventListener("click", async function(event) {
+                event.preventDefault();
+                const formData = new FormData(setupForm);
+                formData.set("action", "analyze");
+                analyzeBtn.disabled = true;
+                analyzeBtn.classList.add("opacity-60");
+                try {
+                    const response = await fetch(window.location.pathname, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        body: formData,
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.error || "Unable to analyze resume.");
+                    }
+
+                    if (roleInput && data.detected_role && !roleInput.value.trim()) {
+                        roleInput.value = data.detected_role;
+                    }
+                    if (skillsInput && data.detected_skills && !skillsInput.value.trim()) {
+                        skillsInput.value = data.detected_skills;
+                    }
+                    if (insightsContainer) {
+                        insightsContainer.innerHTML = data.resume_insights_html || "";
+                        const card = insightsContainer.querySelector(".animate-reveal");
+                        if (card) {
+                            gsap.fromTo(card, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" });
+                        }
+                    }
+                    renderJdFit(data.jd_fit || null);
+                } catch (err) {
+                    alert(err.message || "Resume analysis failed.");
+                } finally {
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.classList.remove("opacity-60");
+                }
+            });
+        }
 
         if (useProfileBtn) {
             useProfileBtn.addEventListener("click", async function() {

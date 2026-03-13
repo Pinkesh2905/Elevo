@@ -14,6 +14,11 @@ from django.db import transaction
 from django.db.models import Avg, Count, Prefetch, Q
 from django.conf import settings
 from django.views.decorators.http import require_POST
+from core.placement_readiness import (
+    compute_readiness_score,
+    confidence_from_activity,
+    readiness_band,
+)
 
 from .models import (
     EmailChangeToken,
@@ -664,13 +669,18 @@ def profile(request):
     own_activity_items.sort(key=lambda item: item['timestamp'], reverse=True)
     recent_reposts = own_reposts.order_by('-created_at')[:10]
 
-    coding_total = coding_solved = 0
+    coding_total = coding_solved = coding_attempted = 0
     aptitude_quizzes = aptitude_avg = 0
+    interview_completed = 0
+    interview_avg = 0
     try:
         from practice.models import UserProblemProgress
         coding_total = UserProblemProgress.objects.filter(user=request.user).count()
         coding_solved = UserProblemProgress.objects.filter(
             user=request.user, status='solved'
+        ).count()
+        coding_attempted = UserProblemProgress.objects.filter(
+            user=request.user, status__in=['solved', 'attempted']
         ).count()
         coding_percent = (coding_solved / coding_total * 100) if coding_total > 0 else 0
     except Exception:
@@ -688,6 +698,35 @@ def profile(request):
         ) if aptitude_quizzes else 0
     except Exception:
         pass
+
+    try:
+        from mock_interview.models import MockInterviewSession
+        iv_qs = MockInterviewSession.objects.filter(
+            user=request.user,
+            status__in=['COMPLETED', 'REVIEWED'],
+            score__isnull=False,
+        )
+        interview_completed = iv_qs.count()
+        interview_avg = round(float(iv_qs.aggregate(avg=Avg('score')).get('avg', 0) or 0), 1) if interview_completed else 0
+    except Exception:
+        pass
+
+    coding_readiness_score = (coding_solved / coding_attempted * 100) if coding_attempted else 0
+    placement_readiness_score = compute_readiness_score(aptitude_avg, coding_readiness_score, interview_avg)
+    placement_readiness_conf = confidence_from_activity(
+        aptitude_quizzes,
+        coding_attempted,
+        interview_completed,
+    )
+    placement_readiness = {
+        "score": placement_readiness_score,
+        "band": readiness_band(placement_readiness_score),
+        "confidence_score": placement_readiness_conf["score"],
+        "confidence_band": placement_readiness_conf["band"],
+        "aptitude_score": round(float(aptitude_avg), 1),
+        "coding_score": round(float(coding_readiness_score), 1),
+        "interview_score": round(float(interview_avg), 1),
+    }
 
     tutor_application = None
     if request.user.profile.role == 'TUTOR':
@@ -708,6 +747,9 @@ def profile(request):
         'coding_percent': coding_percent,
         'aptitude_quizzes': aptitude_quizzes,
         'aptitude_avg': aptitude_avg,
+        'interview_completed': interview_completed,
+        'interview_avg': interview_avg,
+        'placement_readiness': placement_readiness,
         'is_own_profile': True,
         'tutor_application': tutor_application,
     }
@@ -799,6 +841,8 @@ def public_profile(request, username):
 
     coding_total = coding_solved = coding_attempted = 0
     aptitude_quizzes = aptitude_best = 0
+    interview_completed = 0
+    interview_avg = 0
     recent_achievements = []
     try:
         from practice.models import Submission, UserProblemProgress
@@ -838,6 +882,29 @@ def public_profile(request, username):
     except Exception:
         pass
 
+    try:
+        from mock_interview.models import MockInterviewSession
+        iv_qs = MockInterviewSession.objects.filter(
+            user=user_profile.user,
+            status__in=['COMPLETED', 'REVIEWED'],
+            score__isnull=False,
+        )
+        interview_completed = iv_qs.count()
+        interview_avg = round(float(iv_qs.aggregate(avg=Avg('score')).get('avg', 0) or 0), 1) if interview_completed else 0
+    except Exception:
+        pass
+
+    aptitude_avg = aptitude_best
+    coding_readiness_score = (coding_solved / coding_attempted * 100) if coding_attempted else 0
+    readiness_score = compute_readiness_score(aptitude_avg, coding_readiness_score, interview_avg)
+    readiness_conf = confidence_from_activity(aptitude_quizzes, coding_attempted, interview_completed)
+    placement_readiness = {
+        "score": readiness_score,
+        "band": readiness_band(readiness_score),
+        "confidence_score": readiness_conf["score"],
+        "confidence_band": readiness_conf["band"],
+    }
+
     recent_achievements.sort(key=lambda item: item['time'], reverse=True)
     recent_achievements = recent_achievements[:6]
 
@@ -853,6 +920,9 @@ def public_profile(request, username):
         'coding_attempted': coding_attempted,
         'aptitude_quizzes': aptitude_quizzes,
         'aptitude_best': aptitude_best,
+        'interview_completed': interview_completed,
+        'interview_avg': interview_avg,
+        'placement_readiness': placement_readiness,
         'recent_achievements': recent_achievements,
         'is_admin_user': request.user.is_staff,
     }

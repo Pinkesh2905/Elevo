@@ -119,6 +119,42 @@
       </div>
     </div>
 
+    <!-- Adaptive Interview Outcomes -->
+    <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6 mb-6">
+      <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2 mb-4">
+        <i class="ri-user-star-line text-cyan-400"></i> Adaptive Interview Outcomes
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+        <div>
+          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.total_sessions }}</p>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Sessions</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.completed_sessions }}</p>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Completed</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.avg_score|floatformat:1 }}</p>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Avg Score</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-emerald-400">{{ interview_metrics.promotion_rate }}%</p>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Band Shift</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.stable_rate }}%</p>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Band Stable</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        {% for band, total in interview_metrics.band_distribution.items %}
+        <span class="badge-op bg-white/5 text-slate-300 border border-white/10">{{ band }}: {{ total }}</span>
+        {% empty %}
+        <span class="text-xs text-slate-500">No adaptive band data yet.</span>
+        {% endfor %}
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
       <!-- Cost by Operation -->

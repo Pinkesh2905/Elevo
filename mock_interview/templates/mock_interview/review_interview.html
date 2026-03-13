@@ -111,6 +111,60 @@
       </article>
     </div>
 
+    {% if replay_steps %}
+      {{ replay_steps|json_script:"replay-steps-data" }}
+      {{ weak_skill_trend|json_script:"weak-skill-trend-data" }}
+      {{ band_transitions|json_script:"band-transitions-data" }}
+      <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold text-slate-100">Session Replay + Timeline</h2>
+          <div class="flex items-center gap-2">
+            <button id="replay-prev" type="button" class="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-slate-200 hover:bg-white/10">Prev</button>
+            <button id="replay-play" type="button" class="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs text-white hover:bg-cyan-500">Play</button>
+            <button id="replay-next" type="button" class="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-slate-200 hover:bg-white/10">Next</button>
+          </div>
+        </div>
+        <div class="mt-4">
+          <input id="replay-slider" type="range" min="1" max="{{ replay_steps|length }}" value="1" class="w-full accent-cyan-500">
+          <div class="mt-2 flex items-center justify-between text-[11px] text-slate-400">
+            <span id="replay-position">Turn 1 / {{ replay_steps|length }}</span>
+            <span id="replay-band-chip" class="rounded-md px-2 py-1 font-semibold uppercase">standard</span>
+          </div>
+        </div>
+        <div class="mt-4 grid gap-3 md:grid-cols-2">
+          <div class="rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-3">
+            <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-cyan-300">Question</p>
+            <p id="replay-question" class="text-sm text-slate-100"></p>
+          </div>
+          <div class="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3">
+            <p class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300">Your Answer</p>
+            <p id="replay-answer" class="text-sm text-slate-100"></p>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+          <span id="replay-difficulty" class="rounded-md border border-white/15 bg-white/5 px-2 py-1 text-slate-200"></span>
+          <span id="replay-score" class="rounded-md border border-white/15 bg-white/5 px-2 py-1 text-slate-200"></span>
+          <span id="replay-weak-tags" class="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-rose-200"></span>
+          <span class="text-slate-400">Weak-skill trend:</span>
+          {% for p in weak_skill_trend %}
+            <span class="rounded-md border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-rose-200">T{{ p.turn }}: {{ p.weak_count }}</span>
+          {% endfor %}
+        </div>
+        <div class="mt-3 rounded-lg border border-white/10 bg-slate-950/40 p-3">
+          <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Band Transition Log</p>
+          {% if band_transitions %}
+            <div class="flex flex-wrap gap-2 text-xs">
+              {% for bt in band_transitions %}
+                <span class="rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-cyan-200">T{{ bt.turn }}: {{ bt.from }} -> {{ bt.to }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-xs text-slate-500">No band changes this session.</p>
+          {% endif %}
+        </div>
+      </article>
+    {% endif %}
+
     <article class="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
       <h2 class="text-lg font-semibold text-slate-100">Transcript</h2>
       <div class="mt-3 max-h-[460px] space-y-3 overflow-y-auto">
@@ -137,4 +191,90 @@
     </footer>
   </div>
 </section>
+
+{% if replay_steps %}
+<script>
+  (() => {
+    const stepsNode = document.getElementById("replay-steps-data");
+    if (!stepsNode) return;
+    const steps = JSON.parse(stepsNode.textContent || "[]");
+    if (!steps.length) return;
+
+    const slider = document.getElementById("replay-slider");
+    const playBtn = document.getElementById("replay-play");
+    const prevBtn = document.getElementById("replay-prev");
+    const nextBtn = document.getElementById("replay-next");
+    const pos = document.getElementById("replay-position");
+    const bandChip = document.getElementById("replay-band-chip");
+    const question = document.getElementById("replay-question");
+    const answer = document.getElementById("replay-answer");
+    const difficulty = document.getElementById("replay-difficulty");
+    const score = document.getElementById("replay-score");
+    const weakTags = document.getElementById("replay-weak-tags");
+    let idx = 0;
+    let timer = null;
+
+    function bandChipClasses(band) {
+      if (band === "advanced") return ["bg-emerald-500/10", "text-emerald-300", "border", "border-emerald-500/30"];
+      if (band === "foundation") return ["bg-amber-500/10", "text-amber-300", "border", "border-amber-500/30"];
+      return ["bg-cyan-500/10", "text-cyan-300", "border", "border-cyan-500/30"];
+    }
+
+    function render() {
+      const step = steps[idx];
+      slider.value = String(idx + 1);
+      pos.textContent = `Turn ${step.turn || (idx + 1)} / ${steps.length}`;
+      question.textContent = step.question || "-";
+      answer.textContent = step.answer || "No answer recorded for this turn.";
+      difficulty.textContent = `Difficulty: ${step.difficulty || "medium"}`;
+      score.textContent = `Score: ${step.score ?? 0}`;
+      const weak = Array.isArray(step.weak_tags) ? step.weak_tags.filter(Boolean) : [];
+      weakTags.textContent = weak.length ? `Weak tags: ${weak.join(", ")}` : "Weak tags: none";
+      bandChip.className = "rounded-md px-2 py-1 font-semibold uppercase";
+      bandChipClasses(step.band).forEach((c) => bandChip.classList.add(c));
+      bandChip.textContent = step.band || "standard";
+    }
+
+    function nextStep() {
+      idx = (idx + 1) % steps.length;
+      render();
+    }
+
+    function stopPlayback() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      playBtn.textContent = "Play";
+    }
+
+    function togglePlayback() {
+      if (timer) {
+        stopPlayback();
+      } else {
+        timer = setInterval(nextStep, 2200);
+        playBtn.textContent = "Pause";
+      }
+    }
+
+    slider.addEventListener("input", () => {
+      idx = Math.max(0, Math.min(steps.length - 1, Number(slider.value) - 1));
+      render();
+      stopPlayback();
+    });
+    playBtn.addEventListener("click", togglePlayback);
+    prevBtn.addEventListener("click", () => {
+      idx = Math.max(0, idx - 1);
+      render();
+      stopPlayback();
+    });
+    nextBtn.addEventListener("click", () => {
+      idx = Math.min(steps.length - 1, idx + 1);
+      render();
+      stopPlayback();
+    });
+    render();
+  })();
+</script>
+{% endif %}
 {% endblock %}

@@ -1,0 +1,88 @@
+<script>
+  function navigateToThreadWithFocus(postId) {
+    window.location.href = `/posts/detail/${postId}/?focus=1`;
+  }
+
+  async function handleLike(postId, button) {
+    try {
+      const response = await fetch(`/posts/like/${postId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Update all like counts for this post on the page
+        document.querySelectorAll(`.like-count-${postId}`).forEach(count => {
+          count.textContent = data.like_count;
+        });
+        
+        const icon = button.querySelector('i');
+        if (data.liked) {
+          button.classList.add('liked', 'text-rose-500');
+          button.classList.remove('text-slate-400');
+          if (icon) {
+            icon.classList.remove('ri-heart-3-line');
+            icon.classList.add('ri-heart-3-fill');
+          }
+        } else {
+          button.classList.remove('liked', 'text-rose-500');
+          button.classList.add('text-slate-400');
+          if (icon) {
+            icon.classList.remove('ri-heart-3-fill');
+            icon.classList.add('ri-heart-3-line');
+          }
+        }
+      }
+    } catch (err) { console.error('Like error:', err); }
+  }
+
+  async function handleRepost(postId, button) {
+    try {
+      const response = await fetch(`/posts/repost/${postId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Update all repost counts for this post on the page
+        document.querySelectorAll(`.repost-count-${postId}`).forEach(count => {
+          count.textContent = data.repost_count;
+        });
+        
+        const card = button.closest('.post-card');
+        const indicator = card?.querySelector('.repost-indicator');
+        
+        if (data.created) {
+          button.classList.add('text-emerald-500', 'bg-emerald-500/5');
+          if (indicator) indicator.classList.remove('hidden');
+        } else if (data.removed) {
+          button.classList.remove('text-emerald-500', 'bg-emerald-500/5');
+          if (indicator) indicator.classList.add('hidden');
+        }
+      } else {
+        alert(data.message || 'Error processing request');
+      }
+    } catch (err) { console.error('Repost error:', err); }
+  }
+
+  function copyPostLink(e) {
+    const btn = e.currentTarget;
+    const detailUrl = btn.getAttribute('data-detail-url');
+    const fullUrl = window.location.origin + detailUrl;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="ri-check-line text-emerald-400"></i>';
+      setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+    });
+  }
+</script>

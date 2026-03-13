@@ -5,7 +5,6 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import Avg, Count, F, Max, Q, Sum
-from django.db.models.functions import Percentile
 from django.utils import timezone
 
 
@@ -131,3 +130,37 @@ def compute_quota_usage(org):
     used = (agg["used_input"] or 0) + (agg["used_output"] or 0)
     pct = round(used / max(1, limit) * 100, 1) if limit != -1 else 0
     return {"used": used, "limit": limit, "percent": min(100, pct)}
+
+
+def compute_interview_outcome_metrics(org, days=30):
+    """
+    Adaptive interview outcome metrics for org dashboard.
+    """
+    from mock_interview.models import MockInterviewSession
+    cutoff = timezone.now() - timedelta(days=days)
+    qs = MockInterviewSession.objects.filter(created_at__gte=cutoff)
+    if org is not None:
+        qs = qs.filter(user__org_memberships__organization=org, user__org_memberships__is_active=True).distinct()
+    total = qs.count()
+    completed = qs.filter(status__in=["COMPLETED", "REVIEWED", "FEEDBACK_PROCESSING"]).count()
+    avg_score = qs.filter(score__isnull=False).aggregate(v=Avg("score"))["v"] or 0
+    band_rows = qs.values("current_band").annotate(total=Count("id")).order_by("-total")
+    band_distribution = {row["current_band"] or "unknown": row["total"] for row in band_rows}
+    promoted = 0
+    stable = 0
+    for session in qs.only("starting_band", "current_band"):
+        start = (session.starting_band or "standard").strip().lower()
+        current = (session.current_band or session.performance_band or "standard").strip().lower()
+        if start != current:
+            promoted += 1
+        else:
+            stable += 1
+    promotion_rate = round((promoted / max(1, total)) * 100, 1)
+    return {
+        "total_sessions": total,
+        "completed_sessions": completed,
+        "avg_score": round(float(avg_score), 2),
+        "band_distribution": band_distribution,
+        "promotion_rate": promotion_rate,
+        "stable_rate": round((stable / max(1, total)) * 100, 1),
+    }

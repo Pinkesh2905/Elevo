@@ -22,6 +22,9 @@
     <!-- Animation Orchestration -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <!-- Alpine.js for Interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <!-- Visual Depth -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
@@ -34,6 +37,7 @@
             --accent-cyan: #22d3ee;
             --accent-emerald: #34d399;
             --accent-sky: #0ea5e9;
+            --accent-violet: #818cf8;
         }
         
         body { 
@@ -41,22 +45,24 @@
             background: #020617;
             color: #f8fafc;
             overflow-x: hidden;
+            letter-spacing: -0.01em;
         }
         
-        .brand-font { font-family: 'Outfit', sans-serif; }
+        .brand-font { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
         .mono-font { font-family: 'Fira Code', monospace; }
 
         .glass-elevated {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(24px) saturate(160%);
-            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
         }
 
         .navbar-blur {
-            background: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(2, 6, 23, 0.7);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
@@ -143,7 +149,7 @@
         <div class="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
             
             <!-- Branding -->
-            <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+            <a href="{% url 'home' %}" class="flex items-center gap-2.5 group">
                 <div class="relative w-11 h-11 flex items-center justify-center">
                     <!-- Premium Hexagon Logo: Luminous Hexagon with <> -->
                     <svg class="w-10 h-10 logo-pulse" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -153,69 +159,73 @@
                         <defs>
                             <linearGradient id="logoStroke" x1="4.74167" y1="3" x2="27.2583" y2="29" gradientUnits="userSpaceOnUse">
                                 <stop offset="0" stop-color="#22d3ee"/>
+                                <stop offset="0.5" stop-color="#818cf8"/>
                                 <stop offset="1" stop-color="#34d399"/>
                             </linearGradient>
                             <radialGradient id="logoGlassBg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(16 16) rotate(90) scale(13)">
-                                <stop offset="0" stop-color="#164e63" stop-opacity="0.6"/>
+                                <stop offset="0" stop-color="#22d3ee" stop-opacity="0.2"/>
                                 <stop offset="1" stop-color="#020617" stop-opacity="0.8"/>
                             </radialGradient>
                         </defs>
                     </svg>
                 </div>
-                <span class="text-2xl font-black text-white brand-font tracking-tight group-hover:text-cyan-400 transition-colors">Elevo</span>
+                <span class="text-xl font-black text-white brand-font tracking-tight group-hover:text-cyan-400 transition-all duration-300">Elevo</span>
             </a>
 
             <!-- Desktop Links -->
             <nav class="hidden md:flex items-center gap-2">
                 {% if user.is_authenticated %}
                     {% if user.is_superuser %}
-                        <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
                         <a href="{% url 'users:admin_dashboard' %}" class="h-11 px-8 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all flex items-center gap-2">
                             <i class="ri-admin-line"></i> System Administration
                         </a>
                     {% elif user.profile.role == 'TUTOR' %}
                         {% if user.profile.is_approved_tutor %}
-                            <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
+                            <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
                             <a href="{% url 'tutor:dashboard' %}" class="h-11 px-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2">
                                 <i class="ri-dashboard-line"></i> Tutor Dashboard
                             </a>
                         {% else %}
-                            <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
+                            <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
                             <a href="{% url 'users:tutor_application' %}" class="h-11 px-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all flex items-center gap-2">
                                 <i class="ri-file-list-3-line"></i> Application In Review
                             </a>
                         {% endif %}
                     {% elif user.profile.role == 'ORG_ADMIN' %}
-                        <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
-                        <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Organization</a>
-                        <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Members</a>
-                        <a href="{% url 'organizations:subscription' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Subscription</a>
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
+                        <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Organization</a>
+                        <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Members</a>
+                        <a href="{% url 'organizations:subscription' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Subscription</a>
                     {% else %}
-                        <a href="{% url 'home' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Home</a>
-                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Coding</a>
-                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Aptitude</a>
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
+                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Coding</a>
+                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Aptitude</a>
                         {% if show_social_navigation %}
-                        <a href="{% url 'posts:feed' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Feed</a>
+                        <a href="{% url 'posts:feed' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Feed</a>
                         {% endif %}
                         <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center gap-2">
                             <i class="ri-robot-line text-sm"></i> Mock Interviews
                         </a>
-                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-sm font-bold text-slate-400 hover:text-white transition-all rounded-full hover:bg-white/5">Pricing</a>
+                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Pricing</a>
                     {% endif %}
                 {% endif %}
             </nav>
 
             <!-- Global Search -->
-            <form method="GET" action="{% url 'search' %}" class="hidden md:flex items-center ml-6 mr-4">
-                <div class="relative w-72 lg:w-80">
-                    <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            <form method="GET" action="{% url 'search' %}" class="hidden md:flex items-center ml-8 group">
+                <div class="relative w-64 lg:w-72">
+                    <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors"></i>
                     <input
                         type="text"
                         name="q"
                         value="{{ request.GET.q|default_if_none:'' }}"
-                        placeholder="Search users or posts..."
-                        class="w-full h-10 pl-10 pr-4 rounded-full bg-slate-900/60 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
+                        placeholder="Scan protocols..."
+                        class="w-full h-10 pl-11 pr-4 rounded-full bg-slate-950/40 border border-white/5 text-[13px] text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 focus:bg-slate-950/80 transition-all"
                     >
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                        <kbd class="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] font-black text-slate-500">ESC</kbd>
+                    </div>
                 </div>
             </form>
 
@@ -245,46 +255,68 @@
                         {% endif %}
                     </button>
                     <!-- Dropdown Content -->
-                    <div id="user-dropdown" class="hidden absolute right-0 mt-4 w-64 rounded-2xl dropdown-animate z-[200]">
-                        <div class="p-6 border-b border-white/5">
-                            <p class="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1">Active User</p>
-                            <p class="text-sm font-bold text-white truncate">{{ user.username }}</p>
+                                        <div id="user-dropdown" class="hidden absolute right-0 mt-4 w-72 rounded-2xl dropdown-animate z-[200] overflow-hidden">
+                        <div class="p-6 bg-gradient-to-br from-slate-900/50 to-slate-950/50 border-b border-white/5 relative">
+                            <div class="absolute top-0 right-0 p-4 opacity-10">
+                                <i class="ri-shield-user-line text-4xl text-cyan-500"></i>
+                            </div>
+                            <p class="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                                <span class="w-1 h-1 rounded-full bg-cyan-500"></span> Authorized Protocol
+                            </p>
+                            <p class="text-base font-black text-white truncate">{{ user.username }}</p>
                             {% if request.is_premium %}
-                                <div class="mt-2 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 w-fit">
+                                <div class="mt-3 flex items-center gap-2 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 w-fit">
                                     <i class="ri-vip-diamond-fill text-[10px] text-cyan-400"></i>
-                                    <span class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Premium Active</span>
+                                    <span class="text-[9px] font-black text-cyan-400 uppercase tracking-widest">Premium Entity</span>
                                 </div>
                             {% endif %}
-                            <p class="text-[10px] text-slate-500 font-medium truncate mt-0.5">{{ user.email }}</p>
                         </div>
-                        <div class="p-2">
-                            <a href="{% url 'users:profile' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-slate-300 hover:text-white transition-all">
-                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                                    <i class="ri-user-settings-line"></i>
+                        <div class="p-3 grid grid-cols-1 gap-1">
+                            <a href="{% url 'users:profile' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                                        <i class="ri-user-settings-line"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-200 group-hover:text-white">Mastery Profile</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">Digital identity meta-data</p>
+                                    </div>
                                 </div>
-                                Mastery Profile
+                                <i class="ri-arrow-right-s-line text-slate-600 group-hover:text-cyan-400"></i>
                             </a>
-                            <a href="{% url 'chat:inbox' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-slate-300 hover:text-white transition-all">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                                    <i class="ri-question-answer-line"></i>
+                            <a href="{% url 'chat:inbox' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                        <i class="ri-question-answer-line"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-200 group-hover:text-white">Neural Hub</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">Communication channel</p>
+                                    </div>
                                 </div>
-                                Discussions
+                                <i class="ri-arrow-right-s-line text-slate-600 group-hover:text-emerald-400"></i>
                             </a>
-                            <a href="{% url 'mock_interview:my_mock_interviews' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-sm font-bold text-slate-300 hover:text-white transition-all">
-                                <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
-                                    <i class="ri-history-line"></i>
+                            <a href="{% url 'mock_interview:my_mock_interviews' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
+                                        <i class="ri-history-line"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-200 group-hover:text-white">Session Matrix</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">Historical performance</p>
+                                    </div>
                                 </div>
-                                Session Archive
+                                <i class="ri-arrow-right-s-line text-slate-600 group-hover:text-violet-400"></i>
                             </a>
                         </div>
-                        <div class="p-2 border-t border-white/5">
+                        <div class="p-3 border-t border-white/5 bg-slate-950/30">
                             <form method="POST" action="{% url 'logout' %}">
                                 {% csrf_token %}
-                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-sm font-bold text-slate-400 hover:text-rose-400 transition-all">
-                                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-sm font-bold text-slate-400 hover:text-rose-400 transition-all group">
+                                    <div class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-rose-500/10">
                                         <i class="ri-logout-box-r-line"></i>
                                     </div>
-                                    Sign Protocol Out
+                                    Terminate Session
                                 </button>
                             </form>
                         </div>
@@ -330,7 +362,8 @@
                                 <defs>
                                     <linearGradient id="footerLogoGrad" x1="10" y1="8" x2="22" y2="24" gradientUnits="userSpaceOnUse">
                                         <stop offset="0" stop-color="#22d3ee"/>
-                                        <stop offset="1" stop-color="#34d399"/>
+                                        <stop offset="0.5" stop-color="#818cf8"/>
+                                <stop offset="1" stop-color="#34d399"/>
                                     </linearGradient>
                                 </defs>
                             </svg>
@@ -539,9 +572,9 @@
                     scaleMobile: 1.00,
                     color: 0x0ea5e9,
                     backgroundColor: 0x020617,
-                    points: 10.00,
-                    maxDistance: 20.00,
-                    spacing: 18.00
+                    points: 12.00,
+                    maxDistance: 18.00,
+                    spacing: 16.00
                 });
             }
 

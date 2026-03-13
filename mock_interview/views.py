@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 import os
 import random
@@ -13,13 +13,20 @@ import docx2txt
 import openai
 import pdfplumber
 from django.conf import settings
+from django.core.cache import cache
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.utils import timezone
 from google import genai
 from google.genai import types
+try:
+    from django_q.tasks import async_task
+except Exception:  # pragma: no cover - qcluster may be unavailable in tests
+    async_task = None
 
 from .forms import InterviewSetupForm
 from .models import InterviewTurn, MockInterviewSession
@@ -55,6 +62,49 @@ HR_TOPICS = [
     "leadership",
     "adaptability",
     "motivation",
+]
+
+CANONICAL_SKILL_KEYWORDS = {
+    "python": ["python", "py"],
+    "java": ["java"],
+    "c++": ["c++", "cpp"],
+    "c": [" c ", "language c"],
+    "javascript": ["javascript", "js", "nodejs", "node.js"],
+    "typescript": ["typescript", "ts"],
+    "django": ["django"],
+    "flask": ["flask"],
+    "fastapi": ["fastapi"],
+    "react": ["react", "reactjs", "react.js"],
+    "angular": ["angular"],
+    "vue": ["vue", "vuejs"],
+    "sql": ["sql", "mysql", "postgresql", "postgres", "sqlite"],
+    "mongodb": ["mongodb", "mongo"],
+    "redis": ["redis"],
+    "aws": ["aws", "amazon web services"],
+    "azure": ["azure"],
+    "gcp": ["gcp", "google cloud"],
+    "docker": ["docker"],
+    "kubernetes": ["kubernetes", "k8s"],
+    "git": ["git", "github", "gitlab"],
+    "rest api": ["rest api", "restful", "api development", "http api"],
+    "machine learning": ["machine learning", "ml"],
+    "deep learning": ["deep learning", "cnn", "rnn"],
+    "nlp": ["nlp", "natural language processing"],
+    "pandas": ["pandas"],
+    "numpy": ["numpy"],
+    "power bi": ["power bi"],
+    "tableau": ["tableau"],
+    "excel": ["excel"],
+}
+
+ROLE_HINTS = [
+    ("Data Scientist", ["machine learning", "deep learning", "nlp", "pandas", "numpy"]),
+    ("Data Analyst", ["power bi", "tableau", "excel", "sql", "analytics"]),
+    ("Backend Developer", ["django", "flask", "fastapi", "rest api", "sql", "docker"]),
+    ("Frontend Developer", ["react", "angular", "vue", "javascript", "typescript"]),
+    ("Full Stack Developer", ["react", "javascript", "django", "node", "sql"]),
+    ("DevOps Engineer", ["docker", "kubernetes", "aws", "azure", "ci/cd"]),
+    ("Software Engineer", ["python", "java", "c++", "sql", "api"]),
 ]
 
 FUNDAMENTAL_TECH_QUESTION_BANK = {
@@ -111,6 +161,43 @@ GENERIC_TECH_QUESTIONS = [
     "What is your approach to writing clean and maintainable code?",
     "How do you choose between normalization and denormalization in database design?",
 ]
+
+BAND_ORDER = ["foundation", "standard", "advanced"]
+BAND_TO_DIFFICULTY = {
+    "foundation": "easy",
+    "standard": "medium",
+    "advanced": "hard",
+}
+INTERVIEW_PACKS = {
+    "default": {
+        "id": "default",
+        "name": "General Adaptive",
+        "difficulty_mix": {"easy": 0.3, "medium": 0.5, "hard": 0.2},
+        "question_style": "resume-grounded",
+        "stage_minutes": {"introduction": 2, "core": 5, "depth": 5, "final": 3},
+    },
+    "mnc_fresher": {
+        "id": "mnc_fresher",
+        "name": "MNC Fresher",
+        "difficulty_mix": {"easy": 0.5, "medium": 0.4, "hard": 0.1},
+        "question_style": "structured-fundamentals",
+        "stage_minutes": {"introduction": 3, "core": 6, "depth": 4, "final": 2},
+    },
+    "startup_backend": {
+        "id": "startup_backend",
+        "name": "Startup Backend",
+        "difficulty_mix": {"easy": 0.2, "medium": 0.5, "hard": 0.3},
+        "question_style": "tradeoff-and-scaling",
+        "stage_minutes": {"introduction": 2, "core": 4, "depth": 7, "final": 2},
+    },
+    "data_analyst": {
+        "id": "data_analyst",
+        "name": "Data Analyst",
+        "difficulty_mix": {"easy": 0.3, "medium": 0.5, "hard": 0.2},
+        "question_style": "metrics-and-insights",
+        "stage_minutes": {"introduction": 2, "core": 5, "depth": 6, "final": 2},
+    },
+}
 
 
 def is_student(user):
@@ -298,7 +385,7 @@ class AIService:
             return True
         sub = organization.active_subscription
         if not sub:
-            return True  # no plan → allow (free-tier default)
+            return True  # no plan â†’ allow (free-tier default)
         limit = sub.plan.ai_tokens_monthly
         if limit == -1:
             return True  # unlimited
@@ -458,6 +545,94 @@ def _safe_list(value):
     return []
 
 
+def _skill_matches_in_text(resume_text):
+    lowered = " " + (resume_text or "").lower() + " "
+    matches = []
+    for canonical, aliases in CANONICAL_SKILL_KEYWORDS.items():
+        for alias in aliases:
+            alias_norm = alias.lower().strip()
+            if alias_norm == "c":
+                if re.search(r"\bc\b", lowered):
+                    matches.append(canonical)
+                    break
+            elif alias_norm in lowered:
+                matches.append(canonical)
+                break
+    return matches
+
+
+def _extract_explicit_skills(resume_text):
+    lines = [ln.strip(" -•\t").strip() for ln in (resume_text or "").splitlines() if ln.strip()]
+    skill_lines = []
+    section_mode = False
+    for raw in lines:
+        low = raw.lower()
+        if re.match(r"^(skills|technical skills|key skills|competencies|tools)\b[:\-]?$", low):
+            section_mode = True
+            continue
+        if section_mode and re.match(r"^[A-Z][A-Za-z ]{0,30}$", raw) and ":" not in raw and len(raw.split()) <= 4:
+            section_mode = False
+        if section_mode:
+            skill_lines.append(raw)
+        if re.match(r"^(skills|technical skills|key skills|competencies|tools)\b[:\-]", low):
+            skill_lines.append(re.sub(r"^(skills|technical skills|key skills|competencies|tools)\b[:\-]\s*", "", raw, flags=re.IGNORECASE))
+
+    from_section = _skill_matches_in_text("\n".join(skill_lines)) if skill_lines else []
+    from_full = _skill_matches_in_text(resume_text)
+    merged = []
+    for item in from_section + from_full:
+        if item not in merged:
+            merged.append(item)
+    return merged[:16]
+
+
+def _extract_candidate_name(resume_text):
+    for line in (resume_text or "").splitlines()[:8]:
+        cleaned = re.sub(r"[^A-Za-z\s]", " ", line).strip()
+        if 2 <= len(cleaned.split()) <= 4 and len(cleaned) <= 40:
+            if not any(tok in cleaned.lower() for tok in ["resume", "curriculum", "vitae", "email", "phone", "linkedin"]):
+                return cleaned
+    return ""
+
+
+def _infer_target_role(resume_text, role_hint, skills):
+    lowered = (resume_text or "").lower()
+    scored = []
+    for role, hints in ROLE_HINTS:
+        score = 0
+        for hint in hints:
+            if hint in lowered:
+                score += 2
+            if hint in skills:
+                score += 3
+        if role.lower() in lowered:
+            score += 4
+        scored.append((role, score))
+    scored.sort(key=lambda x: x[1], reverse=True)
+    best_role, best_score = scored[0]
+    if _strip(role_hint):
+        if best_score >= 8:
+            return best_role, min(98, 60 + best_score * 4)
+        return _strip(role_hint), 70
+    if best_score <= 2:
+        return "", 0
+    return best_role, min(98, 55 + best_score * 4)
+
+
+def _merge_unique(primary, fallback, limit=12):
+    merged = []
+    seen = set()
+    for item in (primary or []) + (fallback or []):
+        val = str(item).strip()
+        key = val.lower()
+        if val and key not in seen:
+            seen.add(key)
+            merged.append(val)
+        if len(merged) >= limit:
+            break
+    return merged
+
+
 def _extract_resume_profile(resume_text, role_hint="", track="technical"):
     role_hint = _strip(role_hint)
     if not _strip(resume_text):
@@ -471,49 +646,60 @@ def _extract_resume_profile(resume_text, role_hint="", track="technical"):
             "education_highlights": [],
             "tools_tech": [],
             "hr_signals": [],
+            "role_confidence": 0,
+            "skills_confidence": 0,
         }
 
+    heuristic_skills = _extract_explicit_skills(resume_text)
+    inferred_role, role_confidence = _infer_target_role(resume_text, role_hint, heuristic_skills)
+    candidate_name_heur = _extract_candidate_name(resume_text)
+
     prompt = (
-        "Extract structured candidate profile from this resume.\n"
+        "Extract structured candidate profile from this resume with high precision.\n"
         "Return ONLY JSON with keys:\n"
         "summary, candidate_name, preferred_role, skills, projects, experience_highlights, education_highlights, tools_tech, hr_signals.\n"
         "Rules:\n"
+        "- Do NOT invent information. If unknown, return empty string/list.\n"
         "- projects: list of short lines with project and impact.\n"
         "- experience_highlights: list of measurable achievements.\n"
         "- hr_signals: communication/team/leadership indicators from resume.\n"
+        "- preferred_role: infer from evidence in resume content and skills, not generic assumptions.\n"
+        "- skills/tools_tech: include only explicit or strongly implied technical skills.\n"
         f"Role hint: {role_hint}\n"
         f"Interview track: {track}\n"
         f"Resume:\n{resume_text[:18000]}"
     )
     try:
-        text, _, _ = AI.text(prompt, temperature=0.2, max_tokens=900, prefer_json=True,
-                             operation="resume_parse")
+        text, _, _ = AI.text(prompt, temperature=0.15, max_tokens=900, prefer_json=True, operation="resume_parse")
         data = _parse_json(text) or {}
     except Exception:
         data = {}
 
-    # heuristic fallback/augmentation
-    lowered = resume_text.lower()
-    heuristic_skills = [topic for topic in TECHNICAL_TOPICS if topic in lowered]
-    heuristic_tools = [item for item in ["python", "sql", "pandas", "numpy", "django", "react", "aws", "docker", "excel", "tableau", "power bi"] if item in lowered]
-    lines = [ln.strip("-• ").strip() for ln in resume_text.splitlines() if ln.strip()]
+    lines = [ln.strip(" -•\t").strip() for ln in (resume_text or "").splitlines() if ln.strip()]
     project_lines = [ln for ln in lines if "project" in ln.lower()][:6]
     exp_lines = [ln for ln in lines if any(k in ln.lower() for k in ["intern", "worked", "developed", "built", "implemented", "led"])][:8]
     edu_lines = [ln for ln in lines if any(k in ln.lower() for k in ["b.tech", "btech", "mca", "bca", "degree", "university", "college"])][:5]
     hr_lines = [ln for ln in lines if any(k in ln.lower() for k in ["team", "communication", "lead", "collaborat", "responsib", "managed"])][:6]
 
-    profile = {
+    ai_skills = _safe_list(data.get("skills"))
+    ai_tools = _safe_list(data.get("tools_tech"))
+    merged_skills = _merge_unique(ai_skills, heuristic_skills, limit=14)
+    merged_tools = _merge_unique(ai_tools, heuristic_skills, limit=14)
+    preferred_role = _strip(data.get("preferred_role")) or inferred_role or role_hint
+
+    return {
         "summary": _strip(data.get("summary")) or _strip(" ".join(lines[:3]))[:320],
-        "candidate_name": _strip(data.get("candidate_name")),
-        "preferred_role": _strip(data.get("preferred_role")) or role_hint,
-        "skills": _safe_list(data.get("skills")) or heuristic_skills[:10],
+        "candidate_name": _strip(data.get("candidate_name")) or candidate_name_heur,
+        "preferred_role": preferred_role,
+        "skills": merged_skills,
         "projects": _safe_list(data.get("projects")) or project_lines,
         "experience_highlights": _safe_list(data.get("experience_highlights")) or exp_lines,
         "education_highlights": _safe_list(data.get("education_highlights")) or edu_lines,
-        "tools_tech": _safe_list(data.get("tools_tech")) or heuristic_tools[:12],
+        "tools_tech": merged_tools,
         "hr_signals": _safe_list(data.get("hr_signals")) or hr_lines,
+        "role_confidence": role_confidence,
+        "skills_confidence": min(98, 45 + (len(merged_skills) * 4)),
     }
-    return profile
 
 
 def _compute_resume_ats_insights(profile, role_hint="", skills_hint="", track="technical", resume_text=""):
@@ -623,6 +809,76 @@ def _compute_resume_ats_insights(profile, role_hint="", skills_hint="", track="t
     }
 
 
+def _extract_jd_requirements(jd_text):
+    jd_text = _strip(jd_text)
+    if not jd_text:
+        return []
+    canonical = _skill_matches_in_text(jd_text)
+    lines = [ln.strip(" -•\t").strip() for ln in jd_text.splitlines() if ln.strip()]
+    req_lines = []
+    for ln in lines:
+        low = ln.lower()
+        if any(k in low for k in ["require", "must", "preferred", "skill", "experience with", "proficient in"]):
+            req_lines.append(ln)
+    from_req_lines = _skill_matches_in_text("\n".join(req_lines)) if req_lines else []
+    return _merge_unique(from_req_lines, canonical, limit=20)
+
+
+def _extract_jd_role_hint(jd_text):
+    jd_text = _strip(jd_text)
+    if not jd_text:
+        return ""
+    top = " ".join(jd_text.splitlines()[:12]).lower()
+    for role, hints in ROLE_HINTS:
+        if role.lower() in top:
+            return role
+        if sum(1 for h in hints if h in top) >= 2:
+            return role
+    return ""
+
+
+def _compute_jd_fit_insights(profile, jd_text, role_hint="", track="technical"):
+    jd_text = _strip(jd_text)
+    if not jd_text:
+        return None
+    resume_skills = {s.lower() for s in (_safe_list(profile.get("skills")) + _safe_list(profile.get("tools_tech")))}
+    jd_requirements = [s.lower() for s in _extract_jd_requirements(jd_text)]
+    if not jd_requirements:
+        return {
+            "fit_score": 0,
+            "summary": "Job description parsed, but no clear technical requirements were detected.",
+            "matched_skills": [],
+            "missing_skills": [],
+            "coverage_percent": 0,
+            "target_role": _extract_jd_role_hint(jd_text) or role_hint or "",
+        }
+
+    matched = [s for s in jd_requirements if s in resume_skills]
+    missing = [s for s in jd_requirements if s not in resume_skills]
+    coverage = int(round((len(matched) / max(1, len(jd_requirements))) * 100))
+    jd_role = _extract_jd_role_hint(jd_text) or role_hint
+    resume_role = _strip(profile.get("preferred_role")).lower()
+    role_alignment = 100 if jd_role and resume_role and jd_role.lower() in resume_role else 70 if jd_role else 60
+    fit_score = int(round((0.75 * coverage) + (0.25 * role_alignment)))
+
+    if fit_score >= 80:
+        summary = "Strong JD fit. Your resume aligns well with the role requirements."
+    elif fit_score >= 60:
+        summary = "Moderate JD fit. You match core requirements but can improve alignment."
+    else:
+        summary = "Low JD fit. Add more evidence for required tools/skills in your resume."
+
+    return {
+        "fit_score": fit_score,
+        "summary": summary,
+        "matched_skills": matched[:12],
+        "missing_skills": missing[:12],
+        "coverage_percent": coverage,
+        "target_role": jd_role or "",
+        "total_requirements": len(jd_requirements),
+    }
+
+
 def _question_stage(question_number, track="technical"):
     track = track if track in INTERVIEW_TRACKS else "technical"
     if question_number <= 1:
@@ -647,20 +903,217 @@ def _question_stage(question_number, track="technical"):
 def _response_quality(answer):
     text = _strip(answer)
     words = text.split()
-    action_words = ["built", "designed", "implemented", "optimized", "led", "improved", "delivered"]
-    metric_markers = ["%", "x", "ms", "days", "weeks", "users", "latency", "throughput", "revenue"]
+    
+    # Action-oriented and strategic language
+    action_words = ["built", "designed", "implemented", "optimized", "led", "improved", "delivered", "solved", "analyzed", "managed"]
+    # Indicators of measurable impact
+    metric_markers = ["%", "x", "ms", "days", "weeks", "users", "latency", "throughput", "revenue", "cost", "conversion"]
+    # Indicators of structured thinking (STAR)
+    structure_words = ["because", "therefore", "result", "initially", "challenge", "situation", "task", "impact"]
+    
     has_action = any(word in text.lower() for word in action_words)
     has_metric = any(marker in text.lower() for marker in metric_markers)
+    has_structure = any(word in text.lower() for word in structure_words)
+    
     score = 0
-    score += 35 if len(words) >= 40 else 20 if len(words) >= 20 else 8
-    score += 35 if has_action else 10
-    score += 30 if has_metric else 8
+    # Length: 40+ words is usually a good detail level
+    score += 30 if len(words) >= 45 else 20 if len(words) >= 25 else 5
+    # Substance: Action verbs show ownership
+    score += 25 if has_action else 5
+    # Impact: Numbers/metrics show results
+    score += 25 if has_metric else 5
+    # Structure: Logical connectors show clear thinking
+    score += 20 if has_structure else 5
+    
     return {
         "word_count": len(words),
         "has_action_language": has_action,
         "has_metrics": has_metric,
+        "has_structure": has_structure,
         "quality_score": min(100, score),
     }
+
+
+def _to_band(value):
+    value = _strip(value).lower()
+    return value if value in BAND_ORDER else "standard"
+
+
+def _clamp_score(value):
+    try:
+        return float(max(0, min(100, round(float(value), 2))))
+    except Exception:
+        return 0.0
+
+
+def _profile_skill_tags(session):
+    parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
+    profile = parsed.get("resume_profile", {}) if isinstance(parsed.get("resume_profile"), dict) else {}
+    tags = []
+    tags.extend(_technical_skill_tokens(session))
+    tags.extend([s.strip().lower() for s in _safe_list(profile.get("hr_signals"))])
+    dedup = []
+    seen = set()
+    for item in tags:
+        cleaned = re.sub(r"\s+", " ", str(item).strip().lower())
+        if cleaned and cleaned not in seen:
+            dedup.append(cleaned)
+            seen.add(cleaned)
+    return dedup[:12]
+
+
+def _extract_skill_tags(session, answer):
+    tags = []
+    text = _strip(answer).lower()
+    for token in _profile_skill_tags(session):
+        if token in text:
+            tags.append(token)
+
+    heuristics = {
+        "communication": ["communicat", "explain", "present", "collaborat"],
+        "ownership": ["owned", "ownership", "responsib", "initiative", "led"],
+        "problem-solving": ["debug", "solved", "fixed", "root cause", "issue"],
+        "metrics": ["%", "latency", "throughput", "users", "revenue", "cost"],
+        "architecture": ["architecture", "design", "microservice", "scal", "system"],
+    }
+    for tag, words in heuristics.items():
+        if any(w in text for w in words):
+            tags.append(tag)
+
+    dedup = []
+    seen = set()
+    for item in tags:
+        item = str(item).strip().lower()
+        if item and item not in seen:
+            dedup.append(item)
+            seen.add(item)
+    return dedup[:8]
+
+
+def _assign_starting_band(user, track, ats_score=None):
+    recent_scores = list(
+        MockInterviewSession.objects.filter(user=user, score__isnull=False)
+        .exclude(status="CANCELLED")
+        .order_by("-created_at")
+        .values_list("score", flat=True)[:5]
+    )
+    recent_avg = float(sum(float(s) for s in recent_scores) / len(recent_scores)) if recent_scores else None
+    score_seed = recent_avg if recent_avg is not None else 68
+    if ats_score is not None:
+        score_seed = (0.65 * score_seed) + (0.35 * float(ats_score))
+    if track == "hr":
+        score_seed -= 2
+    if score_seed >= 82:
+        return "advanced", 74.0
+    if score_seed <= 56:
+        return "foundation", 74.0
+    return "standard", 68.0
+
+
+def _score_turn(session, answer):
+    quality = _response_quality(answer)
+    text = _strip(answer).lower()
+    comm = (
+        (35 if quality["word_count"] >= 30 else 18)
+        + (30 if quality["has_structure"] else 10)
+        + (20 if any(w in text for w in ["team", "stakeholder", "collaborat", "communicat"]) else 8)
+        + (15 if any(w in text for w in ["clearly", "therefore", "result"]) else 7)
+    )
+    tech = (
+        (40 if quality["has_action_language"] else 12)
+        + (30 if quality["has_metrics"] else 10)
+        + (20 if any(w in text for w in ["tradeoff", "latency", "scal", "design", "complexity"]) else 8)
+        + (10 if quality["word_count"] >= 45 else 4)
+    )
+    conf = (
+        (40 if quality["word_count"] >= 25 else 15)
+        + (35 if quality["has_action_language"] else 12)
+        + (25 if not any(w in text for w in ["maybe", "not sure", "i think", "probably"]) else 8)
+    )
+    comm = _clamp_score(comm)
+    tech = _clamp_score(tech)
+    conf = _clamp_score(conf)
+    turn_score = _clamp_score((0.3 * comm) + (0.45 * tech) + (0.25 * conf))
+    return {
+        "turn_score": turn_score,
+        "communication_score": comm,
+        "technical_score": tech,
+        "confidence_score": conf,
+        "word_count": quality["word_count"],
+        "has_action_language": quality["has_action_language"],
+        "has_metrics": quality["has_metrics"],
+        "has_structure": quality["has_structure"],
+        "quality_score": quality["quality_score"],
+        "quality_snapshot": quality,
+        "skill_tags": _extract_skill_tags(session, answer),
+    }
+
+
+def _band_transition(current_band, recent_turn_scores):
+    current_band = _to_band(current_band)
+    if len(recent_turn_scores) < 2:
+        return current_band
+    last_two = recent_turn_scores[-2:]
+    idx = BAND_ORDER.index(current_band)
+    if min(last_two) >= 75 and idx < len(BAND_ORDER) - 1:
+        return BAND_ORDER[idx + 1]
+    if max(last_two) <= 45 and idx > 0:
+        return BAND_ORDER[idx - 1]
+    return current_band
+
+
+def _update_session_skill_memory(session):
+    answered_turns = session.turns.exclude(turn_score__isnull=True).order_by("turn_number")
+    weak = []
+    strong = []
+    for turn in answered_turns:
+        tags = [str(t).strip().lower() for t in (turn.skill_tags or []) if str(t).strip()]
+        if not tags:
+            continue
+        if float(turn.turn_score or 0) <= 50:
+            weak.extend(tags)
+        if float(turn.turn_score or 0) >= 75:
+            strong.extend(tags)
+
+    def _top(items):
+        counts = {}
+        for item in items:
+            counts[item] = counts.get(item, 0) + 1
+        ranked = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+        return [k for k, _ in ranked][:6]
+
+    session.weak_skill_tags = _top(weak)
+    session.strong_skill_tags = _top(strong)
+
+
+def _next_focus_skills(session):
+    parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
+    jd_fit = parsed.get("jd_fit", {}) if isinstance(parsed.get("jd_fit"), dict) else {}
+    jd_missing = [s for s in _safe_list(jd_fit.get("missing_skills")) if s]
+    weak = [s for s in (session.weak_skill_tags or []) if s]
+    strong = [s for s in (session.strong_skill_tags or []) if s]
+    pool = weak[:3] + [s for s in jd_missing if s not in weak][:3]
+    pool = pool[:3]
+    if len(pool) < 3:
+        for skill in _technical_skill_tokens(session):
+            if skill not in pool:
+                pool.append(skill)
+            if len(pool) == 3:
+                break
+    if len(pool) < 3:
+        for skill in strong:
+            if skill not in pool:
+                pool.append(skill)
+            if len(pool) == 3:
+                break
+    return pool[:3]
+
+
+def _difficulty_for_question(session, stage):
+    band = _to_band(session.current_band or session.performance_band or "standard")
+    if stage == "final-evaluation":
+        return "medium" if band == "foundation" else "hard" if band == "advanced" else "medium"
+    return BAND_TO_DIFFICULTY.get(band, "medium")
 
 
 def _session_track(session):
@@ -712,10 +1165,20 @@ def _build_interview_plan(session):
     if track not in INTERVIEW_TRACKS:
         track = "technical"
     profile = parsed.get("resume_profile", {}) if isinstance(parsed.get("resume_profile"), dict) else {}
+    jd_fit = parsed.get("jd_fit", {}) if isinstance(parsed.get("jd_fit"), dict) else {}
+    if not jd_fit and _strip(parsed.get("job_description")):
+        jd_fit = _compute_jd_fit_insights(
+            profile,
+            parsed.get("job_description", ""),
+            role_hint=session.job_role,
+            track=track,
+        ) or {}
 
     skills = [s.strip() for s in (session.key_skills or "").split(",") if s.strip()]
     resume_skills = _safe_list(profile.get("skills")) + _safe_list(profile.get("tools_tech"))
-    top_skills = (skills or resume_skills or (TECHNICAL_TOPICS if track == "technical" else HR_TOPICS))[:6]
+    jd_missing = _safe_list(jd_fit.get("missing_skills"))
+    jd_matched = _safe_list(jd_fit.get("matched_skills"))
+    top_skills = (jd_missing + skills + resume_skills + jd_matched or (TECHNICAL_TOPICS if track == "technical" else HR_TOPICS))[:6]
     focus_tracks = [
         {"stage": "introduction", "goal": "Resume-based introduction and context setup"},
     ]
@@ -742,6 +1205,12 @@ def _build_interview_plan(session):
         "total_questions": MAX_INTERVIEW_QUESTIONS,
         "focus_tracks": focus_tracks,
         "skills_focus": top_skills,
+        "jd_context": {
+            "target_role": _strip(jd_fit.get("target_role")),
+            "fit_score": jd_fit.get("fit_score"),
+            "matched_skills": jd_matched[:8],
+            "missing_skills": jd_missing[:8],
+        },
         "resume_anchor": {
             "candidate_name": _strip(profile.get("candidate_name")),
             "summary": _strip(profile.get("summary")),
@@ -752,7 +1221,7 @@ def _build_interview_plan(session):
     }
 
 
-def _build_question_prompt(session, turns, user_response, time_remaining=None):
+def _build_question_prompt(session, turns, user_response, time_remaining=None, difficulty_level="medium", focus_skills=None):
     next_q = turns.count() + 1
     parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
     track = _strip(parsed.get("interview_track")) or "technical"
@@ -760,13 +1229,25 @@ def _build_question_prompt(session, turns, user_response, time_remaining=None):
         track = "technical"
     stage = _question_stage(next_q, track=track)
     plan = (session.parsed_resume_data or {}).get("interview_plan", {})
-    focus_skills = ", ".join(plan.get("skills_focus", [])) if isinstance(plan, dict) else ""
+    plan_skills = ", ".join(plan.get("skills_focus", [])) if isinstance(plan, dict) else ""
     resume_anchor = plan.get("resume_anchor", {}) if isinstance(plan, dict) else {}
+    jd_context = plan.get("jd_context", {}) if isinstance(plan, dict) else {}
     resume_projects = "; ".join(_safe_list(resume_anchor.get("projects"))[:3])
     resume_exp = "; ".join(_safe_list(resume_anchor.get("experience_highlights"))[:3])
     resume_hr = "; ".join(_safe_list(resume_anchor.get("hr_signals"))[:3])
+    jd_missing = ", ".join(_safe_list(jd_context.get("missing_skills"))[:5])
+    jd_matched = ", ".join(_safe_list(jd_context.get("matched_skills"))[:5])
+    jd_target_role = _strip(jd_context.get("target_role"))
     candidate_name = _strip(resume_anchor.get("candidate_name"))
     question_style = "fundamental skill-based technical question" if (track == "technical" and next_q > 1 and next_q % 2 == 0) else "resume-anchored question"
+    adaptive_band = _to_band(session.current_band or session.performance_band)
+    focus_text = ", ".join(focus_skills or _next_focus_skills(session))
+    if adaptive_band == "foundation":
+        adaptive_instruction = "Keep the question straightforward, avoid heavy jargon, and guide with concrete context."
+    elif adaptive_band == "advanced":
+        adaptive_instruction = "Ask a high-rigor question requiring tradeoffs, edge cases, and measurable reasoning."
+    else:
+        adaptive_instruction = "Ask a balanced question with practical depth linked to resume context."
 
     history = []
     recent_turns = list(turns.order_by("-turn_number")[:6])[::-1]
@@ -777,40 +1258,98 @@ def _build_question_prompt(session, turns, user_response, time_remaining=None):
             history.append(f"Candidate: {t.user_answer}")
     time_str = f"{time_remaining // 60}m {time_remaining % 60}s" if time_remaining is not None else "15m 00s"
     return (
-        "You are Elevo, a friendly, warm, and professional AI interviewer. Speak naturally as if having a real conversation.\n"
-        f"Target Role: {session.job_role}\n"
-        f"Session Track: {track}\n"
-        f"Time Remaining: {time_str}\n"
-        f"Current Progress: {next_q}/{MAX_INTERVIEW_QUESTIONS}\n"
-        f"Candidate Name: {candidate_name or 'Friend'}\n"
-        f"Skills Focus: {focus_skills or session.key_skills or 'general'}\n"
-        f"Resume Context:\n- Projects: {resume_projects or 'None'}\n- Highlights: {resume_exp or 'None'}\n"
-        f"Latest Response: {user_response or '(Start)'}\n"
-        f"History:\n{chr(10).join(history) if history else 'None'}\n\n"
-        "INSTRUCTIONS:\n"
-        "- Be encouraging, supportive, and human-like.\n"
-        "- Strictly use resume and role context for questions.\n"
-        "- Acknowledge their response warmly but briefly.\n"
-        "- Ask ONE high-quality leading question.\n"
-        "- Keep it concise (35-60 words) to ensure fast turn-around.\n"
-        "- Return plain text only."
+        "SYSTEM: You are Elevo, an empathetic, expert AI interviewer. Your goal is to conduct a high-quality mock interview that feels like a natural conversation with a human mentor.\n"
+        "CORE PERSONA:\n"
+        "- Warm, supportive, and professional.\n"
+        "- Practice ACTIVE LISTENING. Acknowledge the candidate's specific points before pivoting to the next question.\n"
+        "- Avoid generic responses like 'Great job' or 'Nice work'. Instead, say something like 'That's a solid approach to [topic]...' or 'Your experience with [project] sounds quite relevant...'\n\n"
+        f"SESSION CONTEXT:\n"
+        f"- Target Role: {session.job_role}\n"
+        f"- Session Track: {track}\n"
+        f"- Time Remaining: {time_str}\n"
+        f"- Progress: {next_q}/{MAX_INTERVIEW_QUESTIONS}\n"
+        f"- Candidate: {candidate_name or 'Friend'}\n"
+        f"- Skills Focus: {focus_text or plan_skills or session.key_skills or 'general'}\n"
+        f"- Adaptive Band: {adaptive_band}\n"
+        f"- Difficulty: {difficulty_level}\n"
+        f"- Interview Pack: {session.selected_pack or 'default'}\n"
+        f"RESUME GROUNDING:\n"
+        f"- Projects: {resume_projects or 'None'}\n"
+        f"- Work Highlights: {resume_exp or 'None'}\n\n"
+        f"JD CONTEXT:\n"
+        f"- Target JD Role: {jd_target_role or 'None'}\n"
+        f"- JD Matched Skills: {jd_matched or 'None'}\n"
+        f"- JD Missing Skills to Probe: {jd_missing or 'None'}\n\n"
+        f"CONVERSATION HISTORY:\n"
+        f"{chr(10).join(history) if history else 'None'}\n\n"
+        f"CANDIDATE'S LATEST RESPONSE:\n{user_response or '(Start of interview)'}\n\n"
+        "TASK:\n"
+        "1. Start with a brief (1 sentence) 'Active Listening' acknowledgement that references a detail from their latest response.\n"
+        f"2. Ask ONE high-quality leading question for the '{stage}' stage.\n"
+        "- If Technical: Dig into architecture, technical decisions, or troubleshooting.\n"
+        "- If HR/Behavioral: Use situational scenarios or explore their ownership/communication style.\n"
+        "- Ensure the question is grounded in their resume context.\n"
+        f"- Adaptive rule: {adaptive_instruction}\n"
+        f"- Desired question style: {question_style}\n"
+        "- Keep total response under 60 words. Plain text only."
+    )
+
+
+def _generate_personalized_opening(session):
+    """
+    Generate a warm, AI-driven opening message based on resume context.
+    """
+    parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
+    plan = parsed.get("interview_plan", {}) if isinstance(parsed.get("interview_plan"), dict) else {}
+    anchor = plan.get("resume_anchor", {}) if isinstance(plan.get("resume_anchor"), dict) else {}
+    
+    role = session.job_role or "your target role"
+    track = _strip(parsed.get("interview_track")) or "technical"
+    candidate_name = _strip(anchor.get("candidate_name"))
+    summary = _strip(anchor.get("summary"))
+    projects = _safe_list(anchor.get("projects"))
+    
+    prompt = (
+        "You are Elevo, a friendly and professional AI interviewer. Write a warm, human-like opening for a mock interview.\n"
+        f"Candidate: {candidate_name or 'there'}\n"
+        f"Role: {role}\n"
+        f"Track: {track}\n"
+        f"Resume Summary: {summary[:500]}\n"
+        f"Top Project: {projects[0] if projects else 'N/A'}\n"
+        "Requirements:\n"
+        "- Start with a warm greeting.\n"
+        "- Mention one specific highlight from their resume summary or project to show you've read it.\n"
+        "- Explain that this is a mock session for the target role.\n"
+        "- End by asking them to introduce themselves and summarize their recent work.\n"
+        "- Keep it under 65 words. Plain text only."
+    )
+    
+    try:
+        text, provider, model = AI.text(prompt, temperature=0.7, max_tokens=400, operation="opening")
+        opening = _strip(text)
+        if opening and len(opening.split()) >= 12:
+            return opening
+        # If the opening was too short / truncated, retry once with higher token budget
+        logger.warning("Opening too short (%d words), retrying with higher budget", len((opening or '').split()))
+        text2, _, _ = AI.text(prompt, temperature=0.7, max_tokens=600, operation="opening_retry")
+        opening2 = _strip(text2)
+        if opening2 and len(opening2.split()) >= 12:
+            return opening2
+    except Exception as exc:
+        logger.warning("Personalized opening failed: %s", exc)
+        
+    # Fallback to the original static style but slightly improved
+    intro_name = f" {candidate_name}" if candidate_name else ""
+    mode_label = "technical" if track == "technical" else "HR"
+    return (
+        f"Hi{intro_name}, I'm Elevo! It's great to meet you. I've been looking over your profile, and I'm excited to dive in. "
+        f"We'll be conducting a {mode_label} mock interview for the {role} position today. "
+        "To get us started, could you please introduce yourself and give me a quick overview of your background?"
     )
 
 
 def _opening_message(session):
-    parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
-    plan = parsed.get("interview_plan", {}) if isinstance(parsed.get("interview_plan"), dict) else {}
-    anchor = plan.get("resume_anchor", {}) if isinstance(plan.get("resume_anchor"), dict) else {}
-    role = session.job_role or "your target role"
-    track = _strip(parsed.get("interview_track")) or "technical"
-    candidate_name = _strip(anchor.get("candidate_name"))
-    intro_name = f" {candidate_name}" if candidate_name else ""
-    mode_label = "technical" if track == "technical" else "HR"
-    return (
-        f"Hi{intro_name}, I am Elevo. Nice to meet you. "
-        f"We will run a {mode_label} mock interview for {role}, based on your resume. "
-        "To begin, please introduce yourself and briefly summarize your recent resume highlights."
-    )
+    return _generate_personalized_opening(session)
 
 
 def _is_incomplete_turn(text):
@@ -886,30 +1425,21 @@ def _targeted_followup_prompt(session, stage, user_response, recent_questions):
     resume_hr = "; ".join(_safe_list(anchor.get("hr_signals"))[:3])
     recent = "\n".join([f"- {q}" for q in recent_questions]) if recent_questions else "- none"
     return (
-        "You are Elevo, a natural human interviewer.\n"
-        "Write one fresh follow-up response in simple English.\n"
-        "Requirements:\n"
-        "- Start with one short appreciation line.\n"
-        "- Ask one NEW question based on the candidate's latest answer.\n"
-        "- Do NOT repeat or paraphrase recent questions.\n"
-        "- Focus on one concrete detail from the candidate answer.\n"
-        "- Keep total 22-60 words and end with '?'\n"
-        "- STRICT: use only resume-grounded context.\n"
-        "- Technical track -> only technical question after intro.\n"
-        "- HR track -> only HR/behavioral/situational question after intro.\n"
-        f"Role: {session.job_role}\n"
-        f"Track: {track}\n"
-        f"Stage: {stage}\n"
-        f"Resume projects: {resume_projects or 'Not available'}\n"
-        f"Resume experience: {resume_exp or 'Not available'}\n"
-        f"Resume HR signals: {resume_hr or 'Not available'}\n"
-        f"Candidate latest answer: {user_response}\n"
+        "You are Elevo, an expert interviewer practicing active listening.\n"
+        "TASK: Write a personalized follow-up response that digs deeper into the candidate's last answer.\n\n"
+        "REQUIREMENTS:\n"
+        "- ACKNOWLEDGE: Briefly mention a specific technical or behavioral point they just made.\n"
+        "- PROBE: Ask a 'Why' or 'How' question that explores their specific contribution or decision-making process.\n"
+        "- NO REPETITION: Do not repeat or paraphrase previous questions.\n"
+        "- CONCISE: 25-55 words total. Plain text only.\n\n"
+        f"Role: {session.job_role} | Track: {track} | Stage: {stage}\n"
+        f"Resume context: {resume_projects or resume_exp or 'N/A'}\n"
+        f"Candidate answer: {user_response}\n"
         f"Recent questions to avoid:\n{recent}\n"
-        "Return plain text only."
     )
 
 
-def _fallback_followup_question(stage, user_response, turns, session):
+def _fallback_followup_question(stage, user_response, turns, session, difficulty_level="medium", focus_skills=None):
     answer = _strip(user_response).lower()
     role = session.job_role or "this role"
     parsed = session.parsed_resume_data if isinstance(session.parsed_resume_data, dict) else {}
@@ -923,6 +1453,7 @@ def _fallback_followup_question(stage, user_response, turns, session):
     exp_anchor = resume_exp[0] if resume_exp else "one experience item from your resume"
     hr_anchor = resume_hr[0] if resume_hr else "one teamwork or communication example in your resume"
 
+    focus_primary = (focus_skills or _next_focus_skills(session) or ["core fundamentals"])[0]
     if track == "technical":
         fundamentals_q = _technical_fundamental_question(session, turns)
         stage_options = {
@@ -939,11 +1470,13 @@ def _fallback_followup_question(stage, user_response, turns, session):
                 f"Understood. In {project_anchor}, what was the toughest technical issue and how did you debug it?",
                 f"Thanks. Based on {exp_anchor}, what tradeoff did you make between speed and quality?",
                 fundamentals_q,
+                f"Can you walk through one deeper technical decision around {focus_primary} and why you chose that path?",
             ],
             "problem-solving": [
                 f"If {project_anchor} had 10x more data/users, what technical changes would you make first?",
                 f"In {project_anchor}, how would you improve performance or reliability in the next iteration?",
                 fundamentals_q,
+                f"Suppose {focus_primary} fails in production. What would be your first diagnosis and rollback strategy?",
             ],
             "final-evaluation": [
                 f"Great discussion. From your resume work, which technical area do you want to deepen next for {role}?",
@@ -991,6 +1524,13 @@ def _fallback_followup_question(stage, user_response, turns, session):
     # In technical mode, alternate resume question and fundamentals after introduction.
     if track == "technical" and stage in {"technical-core", "technical-depth", "problem-solving"} and turns.count() % 2 == 0:
         options = [_technical_fundamental_question(session, turns)] + options
+    if difficulty_level == "easy":
+        options = list(reversed(options))
+    elif difficulty_level == "hard":
+        options = options + [
+            f"What tradeoff did you make around {focus_primary}, and what alternative would you test next?",
+            f"How would you validate that your {focus_primary} decision improved reliability or performance?",
+        ]
     for candidate in options:
         if not _is_repetitive_question(candidate, turns):
             return candidate
@@ -1042,9 +1582,17 @@ def _generate_feedback(session):
         if t.user_answer:
             transcript.append(f"A{t.turn_number}: {t.user_answer}")
     prompt = (
+        "You are an expert Interview Coach. Analyze the following interview transcript and provide constructive, detailed feedback.\n"
         "Return ONLY valid JSON with keys: overall_score, communication_score, confidence_level, strengths, "
-        "areas_for_improvement, technical_assessment, recommendations, encouragement_note.\n"
-        f"Role: {session.job_role}\nSkills: {session.key_skills}\nTranscript:\n{chr(10).join(transcript)}"
+        "areas_for_improvement, technical_assessment, recommendations, encouragement_note.\n\n"
+        "EVALUATION CRITERIA:\n"
+        "- Did the candidate use the STAR method (Situation, Task, Action, Result)?\n"
+        "- Was there clear measurable impact (%, numbers, scale)?\n"
+        "- How deep was the technical maturity shown?\n"
+        "- Was the communication structured and professional?\n\n"
+        f"Target Role: {session.job_role}\n"
+        f"Required Skills: {session.key_skills}\n"
+        f"Transcript:\n{chr(10).join(transcript)}"
     )
     try:
         text, provider, model = AI.text(prompt, temperature=0.35, max_tokens=800, prefer_json=True,
@@ -1063,20 +1611,69 @@ def _next_question(session, turns, user_response, time_remaining=None):
     if track not in INTERVIEW_TRACKS:
         track = "technical"
     stage = _question_stage(next_q, track=track)
+    difficulty_level = _difficulty_for_question(session, stage)
+    focus_skills = _next_focus_skills(session)
     recent_questions = [t.ai_question for t in turns.order_by("-turn_number")[:4] if t.ai_question]
-    prompt = _build_question_prompt(session, turns, user_response, time_remaining=time_remaining)
+    prompt = _build_question_prompt(
+        session,
+        turns,
+        user_response,
+        time_remaining=time_remaining,
+        difficulty_level=difficulty_level,
+        focus_skills=focus_skills,
+    )
+    broken_text = ""
     try:
-        # Reduced max_tokens and streamlined logic for faster analysis
-        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=150,
+        text, provider, model = AI.text(prompt, temperature=0.6, max_tokens=300,
                                           operation="question")
         question = _strip(text)
         if question and not _is_incomplete_turn(question):
-            return question, {"provider": provider, "model": model, "stage": stage}
+            return question, {
+                "provider": provider,
+                "model": model,
+                "stage": stage,
+                "difficulty_level": difficulty_level,
+                "focus_skills": focus_skills,
+            }
+        # Store the broken/truncated text for repair attempt
+        broken_text = question or ""
+        logger.warning("Incomplete question detected (%d words), attempting repair", len(broken_text.split()))
     except Exception as exc:
         logger.warning("Question generation error: %s", exc)
-    
-    choice = _fallback_followup_question(stage, user_response, turns, session)
-    return choice, {"provider": "fallback", "model": "static", "stage": stage}
+
+    # --- Repair attempt: ask AI to fix the broken/truncated response ---
+    if broken_text:
+        try:
+            repair_prompt = _repair_turn_prompt(session, stage, broken_text, user_response)
+            repaired, rprov, rmodel = AI.text(repair_prompt, temperature=0.5, max_tokens=300,
+                                               operation="question_repair")
+            repaired_q = _strip(repaired)
+            if repaired_q and not _is_incomplete_turn(repaired_q):
+                return repaired_q, {
+                    "provider": rprov,
+                    "model": rmodel,
+                    "stage": stage,
+                    "difficulty_level": difficulty_level,
+                    "focus_skills": focus_skills,
+                }
+        except Exception as exc:
+            logger.warning("Question repair failed: %s", exc)
+
+    choice = _fallback_followup_question(
+        stage,
+        user_response,
+        turns,
+        session,
+        difficulty_level=difficulty_level,
+        focus_skills=focus_skills,
+    )
+    return choice, {
+        "provider": "fallback",
+        "model": "static",
+        "stage": stage,
+        "difficulty_level": difficulty_level,
+        "focus_skills": focus_skills,
+    }
 
 
 def _closing(session, answered_count):
@@ -1092,6 +1689,33 @@ def _closing(session, answered_count):
     except Exception as exc:
         logger.warning("Closing generation fallback: %s", exc)
     return FALLBACK_CLOSING, {"provider": "fallback", "model": "static"}
+
+
+def _queue_feedback_generation(session):
+    if async_task is None:
+        try:
+            feedback = _generate_feedback(session)
+            session.overall_feedback = json.dumps(feedback)
+            session.score = feedback.get("overall_score")
+            session.feedback_status = "ready"
+            session.status = "COMPLETED"
+            session.save(update_fields=["overall_feedback", "score", "feedback_status", "status", "updated_at"])
+        except Exception as exc:
+            session.feedback_status = "failed"
+            session.feedback_error = str(exc)[:500]
+            session.status = "COMPLETED"
+            session.save(update_fields=["feedback_status", "feedback_error", "status", "updated_at"])
+        return
+    try:
+        async_task("mock_interview.tasks.async_generate_feedback", session.id)
+    except Exception as exc:
+        logger.warning("Async feedback queue failed, using sync fallback: %s", exc)
+        feedback = _generate_feedback(session)
+        session.overall_feedback = json.dumps(feedback)
+        session.score = feedback.get("overall_score")
+        session.feedback_status = "ready"
+        session.status = "COMPLETED"
+        session.save(update_fields=["overall_feedback", "score", "feedback_status", "status", "updated_at"])
 
 
 @login_required
@@ -1133,10 +1757,14 @@ def interview_setup(request):
         })
 
     insights = None
+    pack_options = list(INTERVIEW_PACKS.values())
+    selected_pack = "default"
     if request.method == "POST":
         action = request.POST.get("action", "start")
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         form = InterviewSetupForm(request.POST, request.FILES)
         resume = request.FILES.get("resume_file")
+        job_description_text = _strip(request.POST.get("job_description"))
         use_profile_resume = request.POST.get("use_profile_resume") == "true"
         
         # If user chose to use profile resume and didn't upload a new one
@@ -1145,6 +1773,10 @@ def interview_setup(request):
 
         parsed = None
         requested_track = _strip(request.POST.get("interview_track")) or "technical"
+        requested_pack = _strip(request.POST.get("interview_pack")) or "default"
+        if requested_pack not in INTERVIEW_PACKS:
+            requested_pack = "default"
+        selected_pack = requested_pack
         if requested_track not in INTERVIEW_TRACKS:
             requested_track = "technical"
 
@@ -1155,13 +1787,14 @@ def interview_setup(request):
                     resume.open()
                 
                 text = _resume_text(resume, resume.name)
-                lowered = text.lower()
-                detected_skills = [s for s in ["python", "django", "react", "sql", "aws", "docker"] if s in lowered]
-                detected_role = "Software Engineer" if any(k in lowered for k in ["python", "api", "backend", "frontend"]) else ""
-                role_hint = _strip(request.POST.get("job_role")) or detected_role
+                role_hint = _strip(request.POST.get("job_role"))
                 resume_profile = _extract_resume_profile(text, role_hint=role_hint, track=requested_track)
-                merged_role = _strip(resume_profile.get("preferred_role")) or detected_role
-                merged_skills = _safe_list(resume_profile.get("skills")) or detected_skills
+                merged_role = _strip(resume_profile.get("preferred_role")) or role_hint
+                merged_skills = _merge_unique(
+                    _safe_list(resume_profile.get("skills")),
+                    _safe_list(resume_profile.get("tools_tech")),
+                    limit=12,
+                )
 
                 parsed = {
                     "job_role": merged_role,
@@ -1169,6 +1802,8 @@ def interview_setup(request):
                     "resume_text_preview": text[:5000],
                     "resume_profile": resume_profile,
                     "interview_track": requested_track,
+                    "interview_pack": requested_pack,
+                    "job_description": job_description_text,
                 }
                 insights = _compute_resume_ats_insights(
                     resume_profile,
@@ -1177,27 +1812,74 @@ def interview_setup(request):
                     track=requested_track,
                     resume_text=text,
                 )
-                insights["detected_role"] = merged_role or "Not detected"
+                jd_fit = _compute_jd_fit_insights(
+                    resume_profile,
+                    job_description_text,
+                    role_hint=role_hint,
+                    track=requested_track,
+                )
+                insights["detected_role"] = merged_role or ""
                 insights["detected_skills"] = merged_skills[:12]
                 insights["text_length"] = len(text)
+                insights["role_confidence"] = resume_profile.get("role_confidence", 0)
+                insights["skills_confidence"] = resume_profile.get("skills_confidence", 0)
+                insights["jd_fit"] = jd_fit
+                parsed["jd_fit"] = jd_fit
 
                 post = request.POST.copy()
                 if not post.get("job_role") and merged_role:
                     post["job_role"] = merged_role
                 if not post.get("key_skills") and merged_skills:
                     post["key_skills"] = ", ".join(merged_skills[:12])
+                if job_description_text:
+                    post["job_description"] = job_description_text
                 post["interview_track"] = requested_track
+                post["interview_pack"] = requested_pack
                 form = InterviewSetupForm(post, request.FILES)
                 request.session["mock_resume_context"] = parsed
             except Exception as exc:
+                if action == "analyze" and is_ajax:
+                    return JsonResponse({"success": False, "error": f"Resume parse failed: {exc}"}, status=400)
                 messages.warning(request, f"Resume parse failed: {exc}")
 
         if action == "analyze":
             if not resume:
+                if is_ajax:
+                    return JsonResponse({"success": False, "error": "Upload a resume first."}, status=400)
                 messages.warning(request, "Upload a resume first.")
             elif insights:
+                if is_ajax:
+                    insights_html = render_to_string(
+                        "mock_interview/partials/resume_insights_card.html",
+                        {"resume_insights": insights},
+                        request=request,
+                    )
+                    return JsonResponse(
+                        {
+                            "success": True,
+                            "message": "Resume analyzed.",
+                            "resume_insights_html": insights_html,
+                            "detected_role": insights.get("detected_role", ""),
+                            "detected_skills": ", ".join(insights.get("detected_skills", [])),
+                            "role_confidence": insights.get("role_confidence", 0),
+                            "skills_confidence": insights.get("skills_confidence", 0),
+                            "jd_fit": insights.get("jd_fit"),
+                        }
+                    )
                 messages.success(request, "Resume analyzed.")
-            return render(request, "mock_interview/interview_setup.html", {"form": form, "resume_insights": insights, "ai_available": AI.enabled})
+            elif is_ajax:
+                return JsonResponse({"success": False, "error": "Could not extract insights from this resume."}, status=400)
+            return render(
+                request,
+                "mock_interview/interview_setup.html",
+                {
+                    "form": form,
+                    "resume_insights": insights,
+                    "ai_available": AI.enabled,
+                    "pack_options": pack_options,
+                    "selected_pack": selected_pack,
+                },
+            )
 
         if form.is_valid():
             track = form.cleaned_data.get("interview_track") or "technical"
@@ -1210,20 +1892,47 @@ def interview_setup(request):
             data = parsed or request.session.get("mock_resume_context")
             if not data or not _strip(data.get("resume_text_preview")):
                 messages.error(request, "Resume is required. Upload and analyze your resume before starting interview.")
-                return render(request, "mock_interview/interview_setup.html", {"form": form, "resume_insights": insights, "ai_available": AI.enabled})
+                return render(
+                    request,
+                    "mock_interview/interview_setup.html",
+                    {
+                        "form": form,
+                        "resume_insights": insights,
+                        "ai_available": AI.enabled,
+                        "pack_options": pack_options,
+                        "selected_pack": selected_pack,
+                    },
+                )
 
             session.parsed_resume_data = {
                 "job_role": data.get("job_role", ""),
                 "skills": data.get("skills", []),
                 "resume_profile": data.get("resume_profile", {}),
                 "interview_track": track,
+                "interview_pack": data.get("interview_pack") or requested_pack,
+                "job_description": data.get("job_description") or job_description_text,
+                "jd_fit": data.get("jd_fit"),
             }
             session.extracted_resume_text = data.get("resume_text_preview", "")
+            ats_score = (insights or {}).get("ats_score")
+            initial_band, confidence = _assign_starting_band(request.user, track, ats_score=ats_score)
+            session.selected_pack = data.get("interview_pack") or requested_pack
+            session.starting_band = initial_band
+            session.current_band = initial_band
+            session.performance_band = initial_band
+            session.band_confidence = confidence
+            session.feedback_status = "pending"
 
             interview_plan = _build_interview_plan(session)
             if not isinstance(session.parsed_resume_data, dict):
                 session.parsed_resume_data = {}
             session.parsed_resume_data["interview_plan"] = interview_plan
+            session.parsed_resume_data["adaptive"] = {
+                "starting_band": initial_band,
+                "current_band": initial_band,
+                "band_confidence": confidence,
+            }
+            session.parsed_resume_data["pack"] = INTERVIEW_PACKS.get(session.selected_pack, INTERVIEW_PACKS["default"])
             if resume:
                 ext = resume.name.lower().rsplit(".", 1)[-1] if "." in resume.name else ""
                 if ext in {"pdf", "docx"}:
@@ -1236,7 +1945,17 @@ def interview_setup(request):
     else:
         form = InterviewSetupForm()
 
-    return render(request, "mock_interview/interview_setup.html", {"form": form, "resume_insights": insights, "ai_available": AI.enabled})
+    return render(
+        request,
+        "mock_interview/interview_setup.html",
+        {
+            "form": form,
+            "resume_insights": insights,
+            "ai_available": AI.enabled,
+            "pack_options": pack_options,
+            "selected_pack": selected_pack,
+        },
+    )
 
 
 @login_required
@@ -1254,12 +1973,15 @@ def main_interview(request, session_id):
                 turn_number=1,
                 ai_question=question,
                 ai_internal_analysis=json.dumps({"type": "start", **meta}),
+                difficulty_level=_difficulty_for_question(session, "introduction"),
+                skill_tags=_next_focus_skills(session),
+                band_after_turn=session.current_band or session.performance_band or "standard",
             )
             return JsonResponse({"success": True, "ai_response_text": question, "ai_audio_url": None, "current_question": 1})
         last = turns.last()
         return JsonResponse({"success": True, "ai_response_text": last.ai_question, "ai_audio_url": None, "current_question": last.turn_number})
 
-    if session.status in {"COMPLETED", "REVIEWED"}:
+    if session.status in {"COMPLETED", "REVIEWED", "FEEDBACK_PROCESSING"}:
         return redirect("mock_interview:review_interview", session_id=session.id)
 
     history = []
@@ -1274,6 +1996,8 @@ def main_interview(request, session_id):
         "job_role": session.job_role,
         "key_skills": session.key_skills,
         "interview_track": track,
+        "performance_band": session.current_band or session.performance_band or "standard",
+        "selected_pack": session.selected_pack or "default",
         "interview_plan_json": json.dumps((session.parsed_resume_data or {}).get("interview_plan", _build_interview_plan(session))),
         "initial_chat_history_json": json.dumps(history),
         "interview_progress": json.dumps(
@@ -1283,6 +2007,7 @@ def main_interview(request, session_id):
                 "current_question": max(1, turns.count()),
                 "max_questions": MAX_INTERVIEW_QUESTIONS,
                 "stage": _question_stage(max(1, turns.count()), track=track),
+                "performance_band": session.current_band or session.performance_band or "standard",
             }
         ),
         "ai_initialized": AI.enabled,
@@ -1309,26 +2034,68 @@ def ai_interaction_api(request, session_id):
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON payload."}, status=400)
 
+    interaction_id = _strip(payload.get("interaction_id"))
     user_response = _strip(payload.get("user_response"))
     time_remaining = payload.get("time_remaining")
     if not user_response:
         return JsonResponse({"error": "No user response provided."}, status=400)
+    if interaction_id:
+        idem_key = f"mock_interview:idem:{session.id}:{interaction_id}"
+        cached = cache.get(idem_key)
+        if cached:
+            return JsonResponse(cached)
 
     turns = session.turns.all().order_by("turn_number")
     if not turns.exists():
         return JsonResponse({"error": "Interview has not started."}, status=400)
 
-    last_turn = turns.last()
-    if last_turn and not _strip(last_turn.user_answer):
-        last_turn.user_answer = user_response
-        last_turn.save(update_fields=["user_answer"])
+    with transaction.atomic():
+        last_turn = session.turns.select_for_update().order_by("-turn_number").first()
+        if not last_turn:
+            return JsonResponse({"error": "Interview has not started."}, status=400)
+        if not _strip(last_turn.user_answer):
+            turn_eval = _score_turn(session, user_response)
+            last_turn.user_answer = user_response
+            last_turn.skill_tags = turn_eval["skill_tags"]
+            last_turn.turn_score = turn_eval["turn_score"]
+            last_turn.communication_score = turn_eval["communication_score"]
+            last_turn.technical_score = turn_eval["technical_score"]
+            last_turn.confidence_score = turn_eval["confidence_score"]
+            last_turn.band_after_turn = session.current_band or session.performance_band or "standard"
+            last_turn.save(
+                update_fields=[
+                    "user_answer",
+                    "skill_tags",
+                    "turn_score",
+                    "communication_score",
+                    "technical_score",
+                    "confidence_score",
+                    "band_after_turn",
+                ]
+            )
 
     refreshed = session.turns.all().order_by("turn_number")
     track = _session_track(session)
     answered_count = refreshed.filter(user_answer__isnull=False).exclude(user_answer="").count()
     duration_minutes = (timezone.now() - session.start_time).total_seconds() / 60 if session.start_time else 0
     finish_requested = payload.get("request_type") == "finish"
-    quality = _response_quality(user_response)
+    quality = _score_turn(session, user_response)
+    recent_scores = [
+        float(v)
+        for v in refreshed.exclude(turn_score__isnull=True).order_by("turn_number").values_list("turn_score", flat=True)
+    ]
+    prev_band = session.current_band or session.performance_band or "standard"
+    new_band = _band_transition(prev_band, recent_scores)
+    session.current_band = new_band
+    session.performance_band = new_band
+    session.band_confidence = _clamp_score((session.band_confidence or 50) + (4 if new_band == prev_band else 8))
+    _update_session_skill_memory(session)
+    session.save(update_fields=["current_band", "performance_band", "band_confidence", "weak_skill_tags", "strong_skill_tags", "updated_at"])
+    if refreshed.exists():
+        latest_answered = refreshed.filter(user_answer__isnull=False).exclude(user_answer="").order_by("-turn_number").first()
+        if latest_answered and latest_answered.band_after_turn != new_band:
+            latest_answered.band_after_turn = new_band
+            latest_answered.save(update_fields=["band_after_turn"])
     completion_gate_met = answered_count >= MIN_INTERVIEW_QUESTIONS
 
     if (finish_requested and completion_gate_met) or answered_count >= MAX_INTERVIEW_QUESTIONS:
@@ -1338,27 +2105,43 @@ def ai_interaction_api(request, session_id):
             turn_number=refreshed.count() + 1,
             ai_question=closing_text,
             ai_internal_analysis=json.dumps({"type": "closing", **meta}),
+            difficulty_level=_difficulty_for_question(session, "final-evaluation"),
+            skill_tags=_next_focus_skills(session),
+            band_after_turn=session.current_band or session.performance_band or "standard",
         )
-        session.status = "COMPLETED"
+        session.status = "FEEDBACK_PROCESSING"
+        session.feedback_status = "processing"
+        session.feedback_error = ""
         session.end_time = timezone.now()
-        feedback = _generate_feedback(session)
-        session.overall_feedback = json.dumps(feedback)
-        session.score = feedback.get("overall_score")
-        session.save(update_fields=["status", "end_time", "overall_feedback", "score", "updated_at"])
+        session.save(update_fields=["status", "feedback_status", "feedback_error", "end_time", "updated_at"])
+        _queue_feedback_generation(session)
+        response_data = {
+            "success": True,
+            "ai_response_text": closing_text,
+            "ai_audio_url": None,
+            "interview_complete": True,
+            "feedback_status": session.feedback_status,
+            "interview_progress": {
+                "current_question": answered_count,
+                "duration_minutes": round(duration_minutes, 1),
+                "questions_remaining": 0,
+                "stage": "completed",
+                "performance_band": session.current_band or session.performance_band or "standard",
+                "next_focus_skills": _next_focus_skills(session),
+            },
+            "quality_snapshot": quality,
+            "adaptive": {
+                "performance_band": session.current_band or session.performance_band or "standard",
+                "weak_skill_tags": session.weak_skill_tags or [],
+                "strong_skill_tags": session.strong_skill_tags or [],
+            },
+            "debug_info": {"provider": meta.get("provider"), "model": meta.get("model"), "tts_method": "disabled"},
+        }
+        if interaction_id:
+            cache.set(idem_key, response_data, timeout=600)
         return JsonResponse(
             {
-                "success": True,
-                "ai_response_text": closing_text,
-                "ai_audio_url": None,
-                "interview_complete": True,
-                "interview_progress": {
-                    "current_question": answered_count,
-                    "duration_minutes": round(duration_minutes, 1),
-                    "questions_remaining": 0,
-                    "stage": "completed",
-                },
-                "quality_snapshot": quality,
-                "debug_info": {"provider": meta.get("provider"), "model": meta.get("model"), "tts_method": "disabled"},
+                **response_data,
             }
         )
 
@@ -1377,28 +2160,46 @@ def ai_interaction_api(request, session_id):
         )
 
     question, meta = _next_question(session, refreshed, user_response, time_remaining=time_remaining)
-    InterviewTurn.objects.create(
+    new_turn = InterviewTurn.objects.create(
         session=session,
         turn_number=refreshed.count() + 1,
         ai_question=question,
         ai_internal_analysis=json.dumps({"type": "followup", **meta}),
+        difficulty_level=meta.get("difficulty_level", _difficulty_for_question(session, meta.get("stage"))),
+        skill_tags=meta.get("focus_skills") or _next_focus_skills(session),
+        band_after_turn=session.current_band or session.performance_band or "standard",
     )
-    return JsonResponse(
-        {
-            "success": True,
-            "ai_response_text": question,
-            "ai_audio_url": None,
-            "interview_complete": False,
-            "interview_progress": {
-                "current_question": answered_count + 1,
-                "duration_minutes": round(duration_minutes, 1),
-                "questions_remaining": max(0, MAX_INTERVIEW_QUESTIONS - answered_count),
-                "stage": meta.get("stage", _question_stage(answered_count + 1, track=track)),
-            },
-            "quality_snapshot": quality,
-            "debug_info": {"provider": meta.get("provider"), "model": meta.get("model"), "tts_method": "disabled"},
-        }
-    )
+    response_data = {
+        "success": True,
+        "ai_response_text": question,
+        "ai_audio_url": None,
+        "interview_complete": False,
+        "feedback_status": session.feedback_status or "pending",
+        "interview_progress": {
+            "current_question": answered_count + 1,
+            "duration_minutes": round(duration_minutes, 1),
+            "questions_remaining": max(0, MAX_INTERVIEW_QUESTIONS - answered_count),
+            "stage": meta.get("stage", _question_stage(answered_count + 1, track=track)),
+            "performance_band": session.current_band or session.performance_band or "standard",
+            "next_focus_skills": _next_focus_skills(session),
+        },
+        "quality_snapshot": quality,
+        "adaptive": {
+            "performance_band": session.current_band or session.performance_band or "standard",
+            "difficulty_level": new_turn.difficulty_level,
+            "skill_tags": new_turn.skill_tags or [],
+            "turn_score": float(quality["turn_score"]),
+            "communication_score": float(quality["communication_score"]),
+            "technical_score": float(quality["technical_score"]),
+            "confidence_score": float(quality["confidence_score"]),
+            "weak_skill_tags": session.weak_skill_tags or [],
+            "strong_skill_tags": session.strong_skill_tags or [],
+        },
+        "debug_info": {"provider": meta.get("provider"), "model": meta.get("model"), "tts_method": "disabled"},
+    }
+    if interaction_id:
+        cache.set(idem_key, response_data, timeout=600)
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -1418,6 +2219,8 @@ def my_mock_interviews(request):
             "confidence": feedback.get("confidence_level", "Pending"),
             "communication": feedback.get("communication_score"),
             "top_strength": (feedback.get("strengths") or [None])[0],
+            "performance_band": item.current_band or item.performance_band or "standard",
+            "feedback_status": item.feedback_status or "pending",
         }
     return render(request, "mock_interview/my_mock_interviews.html", {"sessions": sessions})
 
@@ -1431,6 +2234,8 @@ def review_interview(request, session_id):
         messages.info(request, "Interview not started yet.")
         return redirect("mock_interview:main_interview", session_id=session.id)
 
+    if session.status == "FEEDBACK_PROCESSING" and (session.feedback_status or "pending") == "processing":
+        messages.info(request, "Your feedback is still processing. Refresh in a moment.")
     if session.status == "STARTED" and turns.filter(user_answer__isnull=False).exclude(user_answer="").count() >= 3:
         session.status = "COMPLETED"
         if not session.end_time:
@@ -1439,13 +2244,15 @@ def review_interview(request, session_id):
             feedback = _generate_feedback(session)
             session.overall_feedback = json.dumps(feedback)
             session.score = feedback.get("overall_score")
+            session.feedback_status = "ready"
         session.save()
 
     feedback = _coerce_feedback(_parse_json(session.overall_feedback or ""), session)
-    if not _strip(session.overall_feedback):
+    if not _strip(session.overall_feedback) and (session.feedback_status or "pending") != "processing":
         session.overall_feedback = json.dumps(feedback)
         session.score = feedback.get("overall_score")
-        session.save(update_fields=["overall_feedback", "score", "updated_at"])
+        session.feedback_status = "ready"
+        session.save(update_fields=["overall_feedback", "score", "feedback_status", "updated_at"])
 
     duration_minutes = None
     if session.start_time and session.end_time:
@@ -1473,12 +2280,69 @@ def review_interview(request, session_id):
             stage_counts[stage] += 1
     if quality_points:
         avg_quality = round(sum(quality_points) / len(quality_points), 1)
+    replay_steps = []
+    weak_skill_trend = []
+    band_transitions = []
+    last_band = None
+    cumulative_weak = 0
+    for t in turns:
+        if not t.ai_question:
+            continue
+        score_val = float(t.turn_score or 0)
+        tags = [str(x).strip() for x in (t.skill_tags or []) if str(x).strip()]
+        weak_tags = tags if score_val <= 50 else []
+        if weak_tags:
+            cumulative_weak += len(weak_tags)
+        step = {
+            "turn": t.turn_number,
+            "question": t.ai_question or "",
+            "answer": t.user_answer or "",
+            "band": t.band_after_turn or session.current_band or "standard",
+            "difficulty": t.difficulty_level or "medium",
+            "score": round(score_val, 1),
+            "skill_tags": tags[:6],
+            "weak_tags": weak_tags[:6],
+        }
+        replay_steps.append(step)
+        weak_skill_trend.append(
+            {
+                "turn": t.turn_number,
+                "weak_count": len(weak_tags),
+                "cumulative_weak": cumulative_weak,
+            }
+        )
+        if last_band is not None and step["band"] != last_band:
+            band_transitions.append(
+                {
+                    "turn": t.turn_number,
+                    "from": last_band,
+                    "to": step["band"],
+                }
+            )
+        last_band = step["band"]
     context = {
         "session": session,
         "turns": turns,
         "transcript": turns,
         "ai_feedback": feedback,
         "score_deg": feedback.get("overall_score", 70) * 3.6,
+        "adaptive_timeline": [
+            {
+                "turn": t.turn_number,
+                "band": t.band_after_turn or session.current_band or "standard",
+                "difficulty": t.difficulty_level or "medium",
+                "score": float(t.turn_score or 0),
+                "skills": t.skill_tags or [],
+            }
+            for t in turns
+            if t.ai_question
+        ],
+        "next_action_plan": [
+            f"Focus on weak area: {tag}" for tag in (session.weak_skill_tags or [])[:3]
+        ] or ["Continue structured mock practice and quantify impact in answers."],
+        "replay_steps": replay_steps,
+        "weak_skill_trend": weak_skill_trend,
+        "band_transitions": band_transitions,
         "interview_metrics": {
             "duration_minutes": round(duration_minutes, 1) if duration_minutes is not None else None,
             "total_questions": turns.count(),
@@ -1488,6 +2352,10 @@ def review_interview(request, session_id):
             "engagement_score": min(100, 40 + answered * 8),
             "avg_answer_quality": avg_quality,
             "stage_distribution": stage_counts,
+            "performance_band": session.current_band or session.performance_band or "standard",
+            "weak_skill_tags": session.weak_skill_tags or [],
+            "strong_skill_tags": session.strong_skill_tags or [],
+            "feedback_status": session.feedback_status or "pending",
             "tts_enhanced": False,
         },
     }
@@ -1523,14 +2391,22 @@ def get_interview_hints_api(request, session_id):
         return JsonResponse({"error": "POST required."}, status=405)
     session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
     track = _session_track(session)
+    stage = _question_stage(max(1, session.turns.count()), track=track)
+    cache_key = f"mock_interview:hints:{session.id}:{stage}:{session.current_band or session.performance_band}"
+    cached_hints = cache.get(cache_key)
+    if cached_hints:
+        return JsonResponse(cached_hints)
     profile = {}
+    jd_fit = {}
     if isinstance(session.parsed_resume_data, dict):
         profile = session.parsed_resume_data.get("resume_profile", {}) or {}
+        jd_fit = session.parsed_resume_data.get("jd_fit", {}) or {}
     latest = session.turns.order_by("-turn_number").first()
     prompt = (
         "Provide exactly 3 interview hints as JSON array of strings.\n"
         f"Role: {session.job_role}\nTrack: {track}\nSkills: {session.key_skills}\n"
         f"Resume projects: {_safe_list(profile.get('projects'))[:3]}\n"
+        f"JD missing skills: {_safe_list(jd_fit.get('missing_skills'))[:5]}\n"
         f"Current question: {(latest.ai_question if latest else '')}"
     )
     hints = None
@@ -1549,19 +2425,22 @@ def get_interview_hints_api(request, session_id):
             "Use one concrete project example.",
             "End with a measurable result.",
         ]
-    return JsonResponse(
-        {
-            "success": True,
-            "hints": hints,
-            "session_id": session.id,
+    response_data = {
+        "success": True,
+        "hints": hints,
+        "session_id": session.id,
             "context": {
-                "stage": _question_stage(max(1, session.turns.count()), track=track),
+                "stage": stage,
                 "provider": provider,
                 "model": model,
                 "track": track,
+                "performance_band": session.current_band or session.performance_band or "standard",
+                "next_focus_skills": _next_focus_skills(session),
+                "jd_fit_score": jd_fit.get("fit_score"),
             },
         }
-    )
+    cache.set(cache_key, response_data, timeout=300)
+    return JsonResponse(response_data)
 
 
 @login_required
@@ -1572,14 +2451,22 @@ def practice_question_api(request, session_id):
     session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
     track = _session_track(session)
     profile = {}
+    jd_fit = {}
     if isinstance(session.parsed_resume_data, dict):
         profile = session.parsed_resume_data.get("resume_profile", {}) or {}
+        jd_fit = session.parsed_resume_data.get("jd_fit", {}) or {}
     payload = json.loads(request.body or "{}")
     focus = payload.get("focus_area") or session.key_skills or session.job_role or "general"
+    stage = _question_stage(max(1, session.turns.count()), track=track)
+    cache_key = f"mock_interview:practice:{session.id}:{stage}:{focus}:{session.current_band or session.performance_band}"
+    cached_questions = cache.get(cache_key)
+    if cached_questions:
+        return JsonResponse(cached_questions)
     prompt = (
         "Generate 4 practice interview questions and return JSON {\"questions\":[...]}.\n"
         f"Role: {session.job_role}\nTrack: {track}\nFocus: {focus}\n"
         f"Resume anchors: projects={_safe_list(profile.get('projects'))[:3]}, experience={_safe_list(profile.get('experience_highlights'))[:3]}\n"
+        f"JD missing skills to target: {_safe_list(jd_fit.get('missing_skills'))[:6]}\n"
         "Technical track: only technical questions.\n"
         "HR track: only HR/behavioral/situational questions."
     )
@@ -1614,16 +2501,25 @@ def practice_question_api(request, session_id):
         {"type": "quality", "question": questions[2]},
         {"type": "ownership", "question": questions[3]},
     ]
-    return JsonResponse(
-        {
-            "success": True,
-            "session_id": session.id,
-            "job_role": session.job_role,
-            "questions": questions,
-            "question_bank": typed,
-            "context": {"provider": provider, "model": model, "focus": focus, "track": track},
-        }
-    )
+    response_data = {
+        "success": True,
+        "session_id": session.id,
+        "job_role": session.job_role,
+        "questions": questions,
+        "question_bank": typed,
+        "context": {
+            "provider": provider,
+            "model": model,
+            "focus": focus,
+            "track": track,
+            "stage": stage,
+            "performance_band": session.current_band or session.performance_band or "standard",
+            "next_focus_skills": _next_focus_skills(session),
+            "jd_fit_score": jd_fit.get("fit_score"),
+        },
+    }
+    cache.set(cache_key, response_data, timeout=300)
+    return JsonResponse(response_data)
 
 
 def ai_health_check(request):
@@ -1642,5 +2538,9 @@ def ai_health_check(request):
             },
             "interview": {"max_questions": MAX_INTERVIEW_QUESTIONS, "min_questions": MIN_INTERVIEW_QUESTIONS},
             "tracks": ["technical", "hr"],
+            "adaptive_bands": BAND_ORDER,
+            "packs": list(INTERVIEW_PACKS.keys()),
         }
     )
+
+
