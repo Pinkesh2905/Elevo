@@ -2,6 +2,9 @@
 
 Elevo is an AI-powered placement preparation platform built with Django. It combines coding practice, aptitude preparation, social learning, and resume-driven mock interviews in one system.
 
+Live Demo:
+https://elevo.13.51.206.127.nip.io
+
 ## Core Features
 
 - Coding practice with problem lists, submissions, and tutor-managed content
