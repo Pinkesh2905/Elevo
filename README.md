@@ -112,8 +112,16 @@ The commands first use private files (`*.csv`) and automatically fall back to sa
 - Set `DEBUG=False`
 - Use managed PostgreSQL and set `DATABASE_URL`
 - Set secure `SECRET_KEY` and allowed hosts
+- Configure deployment host values, for example:
+```env
+ELEVO_ENV=production
+ALLOWED_HOSTS=elevo.life,www.elevo.life
+DOMAIN_NAME=elevo.life
+CSRF_TRUSTED_ORIGINS=https://elevo.life,https://www.elevo.life
+```
 - Run:
 ```bash
+python manage.py migrate
 python manage.py check --deploy
 python manage.py collectstatic --noinput
 ```

@@ -397,7 +397,8 @@ def invite_student(request):
     from django.core.mail import send_mail
     from django.conf import settings
 
-    invite_url = f"http://{settings.DOMAIN_NAME}/org/join/{invite.token}/"
+    scheme = "https" if request.is_secure() else "http"
+    invite_url = f"{scheme}://{settings.DOMAIN_NAME}/org/join/{invite.token}/"
 
     subject = f"Invitation to join {org.name} on Elevo"
     message = (

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 import environ
 import nltk
@@ -19,11 +20,46 @@ RENDER_EXTERNAL_HOSTNAME = env("RENDER_EXTERNAL_HOSTNAME", default=None)
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
-if RENDER_EXTERNAL_HOSTNAME:
-    render_origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
-    if render_origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(render_origin)
+CSRF_TRUSTED_ORIGINS = []
+
+
+def _normalize_host(value):
+    if not value:
+        return None
+
+    candidate = value.strip()
+    if not candidate or candidate == "*":
+        return None
+
+    if "://" in candidate:
+        parsed = urlparse(candidate)
+        candidate = parsed.netloc or parsed.path
+
+    candidate = candidate.lstrip(".").rstrip("/")
+    return candidate or None
+
+
+def _append_unique(values, item):
+    if item and item not in values:
+        values.append(item)
+
+
+DOMAIN_NAME = env("DOMAIN_NAME", default="localhost:8000")
+
+trusted_hosts = []
+for host in ALLOWED_HOSTS:
+    _append_unique(trusted_hosts, _normalize_host(host))
+
+_append_unique(trusted_hosts, _normalize_host(RENDER_EXTERNAL_HOSTNAME))
+_append_unique(trusted_hosts, _normalize_host(DOMAIN_NAME))
+
+for origin in env.list("CSRF_TRUSTED_ORIGINS", default=[]):
+    _append_unique(CSRF_TRUSTED_ORIGINS, origin.rstrip("/"))
+
+for host in trusted_hosts:
+    _append_unique(CSRF_TRUSTED_ORIGINS, f"https://{host}")
+    if host.startswith("localhost") or host.startswith("127.0.0.1"):
+        _append_unique(CSRF_TRUSTED_ORIGINS, f"http://{host}")
 
 # Product scope flags (Week 1 B2B MVP shaping)
 B2B_MVP_MODULES = ["organizations", "practice", "aptitude", "mock_interview", "chat"]
@@ -128,7 +164,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "elevo.wsgi.application"
 ASGI_APPLICATION = "elevo.asgi.application"
 
-DATABASES = {"default": env.db("DATABASE_URL", default="sqlite:///db.sqlite3")}
+DATABASES = {
+    "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -159,8 +197,6 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
-
-DOMAIN_NAME = env("DOMAIN_NAME", default="localhost:8000")
 
 NLTK_DATA_DIR = os.path.join(BASE_DIR, "nltk_data")
 if os.path.exists(NLTK_DATA_DIR):

@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 MAX_INTERVIEW_QUESTIONS = getattr(settings, "MOCK_INTERVIEW_MAX_QUESTIONS", 8)
 MIN_INTERVIEW_QUESTIONS = getattr(settings, "MOCK_INTERVIEW_MIN_QUESTIONS", 5)
-DEFAULT_GEMINI_MODELS = ["models/gemini-2.0-flash", "models/gemini-1.5-flash"]
+DEFAULT_GEMINI_MODELS = ["models/gemini-2.5-flash", "models/gemini-2.5-flash-lite"]
 DEFAULT_OPENAI_MODELS = ["gpt-4o-mini", "gpt-4.1-mini"]
 FALLBACK_CLOSING = "Thank you for completing your interview. Check your report for detailed feedback."
 INTERVIEW_TRACKS = {"technical", "hr"}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib import messages
+from django.db.utils import OperationalError, ProgrammingError
 from django.db.models import Q
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -27,6 +28,13 @@ from practice.models import Problem, Company
 from mock_interview.models import MockInterviewSession
 from aptitude.models import AptitudeProblem
 
+
+def _safe_count(queryset):
+    try:
+        return queryset.count()
+    except (ProgrammingError, OperationalError):
+        return 0
+
 # --- Homepage View ---
 def home(request):
     """
@@ -48,10 +56,10 @@ def home(request):
 
     # Fetch real statistics for the landing page
     stats = {
-        'total_problems': Problem.objects.filter(is_active=True).count(),
-        'total_companies': Company.objects.count(),
-        'total_questions': AptitudeProblem.objects.count(),
-        'active_users': User.objects.count(),
+        'total_problems': _safe_count(Problem.objects.filter(is_active=True)),
+        'total_companies': _safe_count(Company.objects.all()),
+        'total_questions': _safe_count(AptitudeProblem.objects.all()),
+        'active_users': _safe_count(User.objects.all()),
     }
 
     return render(request, 'index.html', {'stats': stats})
