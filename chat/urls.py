@@ -15,4 +15,10 @@ urlpatterns = [
     path('<int:thread_id>/typing/', views.update_typing_status, name='update_typing_status'),
     path('<int:thread_id>/status/', views.get_thread_status, name='thread_status'),
     path('message/<int:message_id>/react/', views.toggle_reaction, name='toggle_reaction'),
+    path('message/<int:message_id>/edit/', views.edit_message, name='edit_message'),
+    path('message/<int:message_id>/delete/', views.delete_message, name='delete_message'),
+    path('<int:thread_id>/theme/', views.update_theme, name='update_theme'),
+    path('message/<int:message_id>/edit/', views.edit_message, name='edit_message'),
+    path('message/<int:message_id>/delete/', views.delete_message, name='delete_message'),
+    path('<int:thread_id>/theme/', views.update_theme, name='update_theme'),
 ]

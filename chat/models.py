@@ -8,6 +8,14 @@ class ChatThread(models.Model):
     Represents a private conversation between exactly two users.
     """
     participants = models.ManyToManyField(User, related_name='chat_threads')
+    THEME_CHOICES = [
+        ('default', 'Default'),
+        ('ocean', 'Ocean Edge'),
+        ('sunset', 'Sunset'),
+        ('cyberpunk', 'Cyberpunk'),
+        ('forest', 'Forest'),
+    ]
+    theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='default')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -74,6 +82,9 @@ class Message(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
+    is_edited = models.BooleanField(default=False)
+    is_deleted_for_everyone = models.BooleanField(default=False)
+    deleted_by = models.ManyToManyField(User, related_name='deleted_messages', blank=True)
 
     class Meta:
         ordering = ['created_at']

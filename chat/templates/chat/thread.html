@@ -16,8 +16,61 @@
   .sidebar-thread.active { background: rgba(14, 165, 233, 0.14); border-left: 3px solid #38bdf8; }
   .messages-container { flex: 1; min-height: 0; scroll-behavior: smooth; }
   .bubble-sent, .bubble-received { border-radius: 1.25rem; box-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.8); }
-  .bubble-sent { background: linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(79, 70, 229, 0.2)); border: 1px solid rgba(56, 189, 248, 0.32); border-bottom-right-radius: 0.45rem; }
-  .bubble-received { background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(148, 163, 184, 0.18); border-bottom-left-radius: 0.45rem; }
+    :root {
+    --chat-bg-image: none;
+    --chat-bg-color: transparent;
+    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(79, 70, 229, 0.2));
+    --bubble-sent-border: rgba(56, 189, 248, 0.32);
+    --bubble-sent-text: #e0f2fe;
+    --bubble-received-bg: rgba(15, 23, 42, 0.78);
+    --bubble-received-border: rgba(148, 163, 184, 0.18);
+  }
+
+  [data-theme="ocean"] {
+    --chat-bg-image: url('{% static "core/themes/bg_ocean.png" %}');
+    --chat-bg-color: rgba(8, 47, 73, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 184, 166, 0.5), rgba(14, 165, 233, 0.8));
+    --bubble-sent-border: rgba(56, 189, 248, 0.4);
+    --bubble-received-bg: rgba(8, 47, 73, 0.95);
+  }
+
+  [data-theme="sunset"] {
+    --chat-bg-image: url('{% static "core/themes/bg_sunset.png" %}');
+    --chat-bg-color: rgba(69, 10, 10, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(249, 115, 22, 0.7), rgba(239, 68, 68, 0.6));
+    --bubble-sent-border: rgba(251, 146, 60, 0.5);
+    --bubble-sent-text: #fff;
+    --bubble-received-bg: rgba(69, 10, 10, 0.9);
+  }
+
+  [data-theme="cyberpunk"] {
+    --chat-bg-image: url('{% static "core/themes/bg_cyberpunk.png" %}');
+    --chat-bg-color: rgba(30, 27, 75, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(217, 70, 239, 0.45), rgba(168, 85, 247, 0.6));
+    --bubble-sent-border: rgba(232, 121, 249, 0.5);
+    --bubble-sent-text: #fdf4ff;
+    --bubble-received-bg: rgba(30, 27, 75, 0.95);
+  }
+
+  [data-theme="forest"] {
+    --chat-bg-image: url('{% static "core/themes/bg_forest.png" %}');
+    --chat-bg-color: rgba(2, 44, 34, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(5, 150, 105, 0.7));
+    --bubble-sent-border: rgba(52, 211, 153, 0.5);
+    --bubble-received-bg: rgba(6, 78, 59, 0.95);
+  }
+
+  .theme-wrapper {
+    background-color: var(--chat-bg-color);
+    background-image: var(--chat-bg-image);
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+    transition: background 0.7s ease-in-out;
+  }
+  .bubble-sent { background: var(--bubble-sent-bg); border: 1px solid var(--bubble-sent-border); color: var(--bubble-sent-text); border-bottom-right-radius: 0.45rem; transition: background 0.5s ease, border-color 0.5s ease; }
+  .bubble-received { background: var(--bubble-received-bg); border: 1px solid var(--bubble-received-border); border-bottom-left-radius: 0.45rem; transition: background 0.5s ease; }
+  
   .reply-chip { border-left: 3px solid rgba(56, 189, 248, 0.75); background: rgba(15, 23, 42, 0.46); }
   .message-actions { opacity: 1; }
   .reaction-trigger, .reply-btn, .reaction-badge { transition: color 0.2s ease, background 0.2s ease, opacity 0.2s ease, transform 0.2s ease; }
@@ -82,8 +135,8 @@
     </aside>
 
     <main class="lg:col-span-8 xl:col-span-9">
-      <div class="chat-panel flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/55 shadow-2xl shadow-slate-950/30 backdrop-blur-2xl">
-        <header class="flex items-center gap-3 border-b border-white/5 bg-slate-950/25 px-3 py-3 sm:px-5 sm:py-4">
+      <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl shadow-slate-950/30" data-theme="{{ thread.theme }}">
+        <header class="flex items-center gap-3 border-b border-white/10 bg-black/40 px-3 py-3 sm:px-5 sm:py-4">
           <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white lg:hidden">
             <i class="ri-arrow-left-line text-xl"></i>
           </a>
@@ -117,10 +170,28 @@
               <i class="ri-more-2-fill text-lg"></i>
             </button>
           </div>
+
+          <button id="themePickerBtn" class="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white" title="Change Theme">
+            <i class="ri-palette-line text-lg"></i>
+          </button>
         </header>
 
         <div id="messagesContainer" class="messages-container space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5" data-thread-id="{{ thread.id }}">
           {% for msg in messages %}
+            {% ifchanged msg.created_at.date %}
+              <div class="my-6 flex justify-center">
+                <span class="rounded-full bg-slate-800/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 backdrop-blur-sm">
+                  {{ msg.created_at|date:"M j, Y" }}
+                </span>
+              </div>
+            {% endifchanged %}
+            {% if msg.id == first_unread_message_id %}
+              <div class="my-6 flex items-center justify-center gap-3">
+                <div class="h-px w-full max-w-[4rem] bg-sky-500/30 sm:max-w-[8rem]"></div>
+                <span class="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-400">Unread Messages</span>
+                <div class="h-px w-full max-w-[4rem] bg-sky-500/30 sm:max-w-[8rem]"></div>
+              </div>
+            {% endif %}
             <div class="msg-wrapper flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-msg-id="{{ msg.id }}">
               <div class="flex w-full max-w-[92%] flex-col gap-1.5 {% if msg.sender == request.user %}items-end sm:max-w-[78%]{% else %}items-start sm:max-w-[78%]{% endif %}">
                 {% if msg.parent_message %}
@@ -140,7 +211,7 @@
                       <source src="{{ msg.file.url }}">
                     </video>
                   {% elif msg.message_type == 'file' and msg.file %}
-                    <a href="{{ msg.file.url }}" target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10">
+                    <a href="{{ msg.file.url }}" download target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10">
                       <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400">
                         <i class="ri-file-line text-xl"></i>
                       </div>
@@ -169,14 +240,28 @@
 
                 <div class="flex w-full flex-wrap items-center gap-2 {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
                   <div class="message-actions flex items-center gap-2">
+                    {% if not msg.is_deleted_for_everyone %}
                     <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="{{ msg.id }}" data-user="{{ msg.sender.username }}" data-content="{{ msg.content|default_if_none:''|escapejs }}">
                       Reply
+                    </button>
+                    <button type="button" class="copy-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-sky-400" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Copy">
+                      <i class="ri-file-copy-line text-sm"></i>
+                    </button>
+                    {% if msg.sender == request.user and msg.message_type == 'text' %}
+                      <button type="button" class="edit-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-emerald-400" data-id="{{ msg.id }}" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Edit">
+                        <i class="ri-edit-line text-sm"></i>
+                      </button>
+                    {% endif %}
+                    {% endif %}
+                    <button type="button" class="delete-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-rose-400" data-id="{{ msg.id }}" data-mine="{% if msg.sender == request.user and not msg.is_deleted_for_everyone %}true{% else %}false{% endif %}" title="Delete">
+                      <i class="ri-delete-bin-line text-sm"></i>
                     </button>
                     <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-yellow-300" data-id="{{ msg.id }}">
                       <i class="ri-emotion-happy-line text-sm"></i>
                     </button>
                   </div>
                   <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"h:i A" }}</span>
+                  {% if msg.is_edited %}<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>{% endif %}
                   {% if msg.sender == request.user %}
                     <i class="js-seen-status {% if msg.is_read %}ri-double-check-line text-sky-400{% else %}ri-check-line text-slate-600{% endif %} text-xs" data-mine="true" {% if msg.read_at %}data-read-at="{{ msg.read_at|date:'c' }}"{% endif %} title="{% if msg.read_at %}Seen at {{ msg.read_at|date:'h:i A' }}{% endif %}"></i>
                   {% endif %}
@@ -250,6 +335,49 @@
       <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128546;">&#128546;</button>
     </div>
   </div>
+
+
+  <!-- Theme Picker Modal -->
+  <div id="themeModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl">
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="text-lg font-black text-slate-100">Select Theme</h3>
+        <button id="closeThemeModalBtn" class="text-slate-400 hover:text-slate-200"><i class="ri-close-line text-xl"></i></button>
+      </div>
+      <div class="grid grid-cols-5 gap-3" id="themeGrid">
+        <button class="theme-option h-12 rounded-full border-2 border-transparent bg-slate-800 hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);" data-theme-val="default" title="Default"></button>
+        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_ocean.png" %}');" data-theme-val="ocean" title="Ocean Edge"></button>
+        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_sunset.png" %}');" data-theme-val="sunset" title="Sunset"></button>
+        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_cyberpunk.png" %}');" data-theme-val="cyberpunk" title="Cyberpunk"></button>
+        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_forest.png" %}');" data-theme-val="forest" title="Forest"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="deleteModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl">
+      <h3 class="mb-2 text-lg font-black text-slate-100">Delete message</h3>
+      <p class="mb-5 text-sm text-slate-400">Are you sure you want to delete this message?</p>
+      <div class="flex flex-col gap-2">
+        <button id="deleteForMeBtn" class="w-full rounded-2xl bg-white/5 py-3 text-sm font-bold text-slate-300 hover:bg-white/10">Delete for me</button>
+        <button id="deleteForEveryoneBtn" class="hidden w-full rounded-2xl bg-rose-500/10 py-3 text-sm font-bold text-rose-400 hover:bg-rose-500/20">Delete for everyone</button>
+        <button id="cancelDeleteBtn" class="mt-2 w-full text-xs font-bold text-slate-500 hover:text-slate-300">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="editModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl">
+      <h3 class="mb-4 text-lg font-black text-slate-100">Edit message</h3>
+      <textarea id="editContentInput" class="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30" rows="3"></textarea>
+      <div class="mt-4 flex gap-3">
+        <button id="cancelEditBtn" class="flex-1 rounded-2xl bg-white/5 py-3 text-sm font-bold text-slate-300 hover:bg-white/10">Cancel</button>
+        <button id="saveEditBtn" class="flex-1 rounded-2xl bg-emerald-500/20 py-3 text-sm font-bold text-emerald-400 hover:bg-emerald-500/30">Save changes</button>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <script>
@@ -412,7 +540,7 @@
       } else if (message.message_type === 'video' && message.file_url) {
         attachmentMarkup = `<video controls class="mb-3 max-h-72 w-full rounded-2xl border border-white/10"><source src="${escapeHtml(message.file_url)}"></video>`;
       } else if (message.message_type === 'file' && message.file_url) {
-        attachmentMarkup = `<a href="${escapeHtml(message.file_url)}" target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10"><div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400"><i class="ri-file-line text-xl"></i></div><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-100">${escapeHtml(message.file_name || 'Attachment')}</p><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p></div></a>`;
+        attachmentMarkup = `<a href="${escapeHtml(message.file_url)}" download target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10"><div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400"><i class="ri-file-line text-xl"></i></div><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-100">${escapeHtml(message.file_name || 'Attachment')}</p><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p></div></a>`;
       }
 
       wrapper.innerHTML = `
@@ -425,10 +553,14 @@
           </div>
           <div class="flex w-full flex-wrap items-center gap-2 ${message.is_mine ? 'justify-end' : 'justify-start'}">
             <div class="message-actions flex items-center gap-2">
-              <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="${message.id}" data-user="${escapeHtml(message.sender)}" data-content="${escapeHtml(message.content || '')}">Reply</button>
+              ${!message.is_deleted ? `<button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="${message.id}" data-user="${escapeHtml(message.sender)}" data-content="${escapeHtml(message.content || '')}">Reply</button>
+              <button type="button" class="copy-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-sky-400" data-content="${escapeHtml(message.content || '')}" title="Copy"><i class="ri-file-copy-line text-sm"></i></button>
+              ${message.is_mine && message.message_type === 'text' ? `<button type="button" class="edit-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-emerald-400" data-id="${message.id}" data-content="${escapeHtml(message.content || '')}" title="Edit"><i class="ri-edit-line text-sm"></i></button>` : ''}` : ''}
+              <button type="button" class="delete-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-rose-400" data-id="${message.id}" data-mine="${message.is_mine && !message.is_deleted ? 'true' : 'false'}" title="Delete"><i class="ri-delete-bin-line text-sm"></i></button>
               <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-yellow-300" data-id="${message.id}"><i class="ri-emotion-happy-line text-sm"></i></button>
             </div>
             <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="${escapeHtml(message.timestamp_raw)}">${escapeHtml(message.created_at || '')}</span>
+            ${message.is_edited ? '<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>' : ''}
             ${message.is_mine ? `<i class="js-seen-status ${message.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs" data-mine="true" ${message.read_at_raw ? `data-read-at="${escapeHtml(message.read_at_raw)}"` : ''} title="${escapeHtml(getSeenTitle(message.read_at_raw))}"></i>` : ''}
           </div>
         </div>
@@ -577,6 +709,162 @@
 
     document.addEventListener('click', (event) => {
       const replyButton = event.target.closest('.reply-btn');
+
+      const copyBtn = event.target.closest('.copy-btn');
+      if (copyBtn) {
+        navigator.clipboard.writeText(copyBtn.dataset.content || '');
+        const icon = copyBtn.querySelector('i');
+        const oldClass = icon.className;
+        icon.className = 'ri-check-line text-emerald-400 text-sm';
+        setTimeout(() => icon.className = oldClass, 1500);
+        return;
+      }
+
+      const deleteBtn = event.target.closest('.delete-btn');
+      if (deleteBtn) {
+        window.activeDeleteMessageId = deleteBtn.dataset.id;
+        const isMine = deleteBtn.dataset.mine === 'true';
+        document.getElementById('deleteForEveryoneBtn').classList.toggle('hidden', !isMine);
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+        return;
+      }
+
+      const editBtn = event.target.closest('.edit-btn');
+      if (editBtn) {
+        window.activeEditMessageId = editBtn.dataset.id;
+        document.getElementById('editContentInput').value = editBtn.dataset.content || '';
+        document.getElementById('editModal').classList.remove('hidden');
+        document.getElementById('editModal').classList.add('flex');
+        document.getElementById('editContentInput').focus();
+        return;
+      }
+
+
+      if (event.target.closest('#themePickerBtn')) {
+        document.getElementById('themeModal').classList.remove('hidden');
+        document.getElementById('themeModal').classList.add('flex');
+        return;
+      }
+
+      if (event.target.closest('#closeThemeModalBtn') || (event.target.id === 'themeModal')) {
+        document.getElementById('themeModal').classList.add('hidden');
+        document.getElementById('themeModal').classList.remove('flex');
+        return;
+      }
+      
+      const themeOpt = event.target.closest('.theme-option');
+      if (themeOpt) {
+        const themeVal = themeOpt.dataset.themeVal;
+        // Optimistic UI update
+        document.getElementById('chatWrapper').setAttribute('data-theme', themeVal);
+        
+        fetch(`/chat/${threadId}/theme/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          body: new URLSearchParams({ theme: themeVal })
+        });
+        
+        document.getElementById('themeModal').classList.add('hidden');
+        document.getElementById('themeModal').classList.remove('flex');
+        return;
+      }
+
+      if (event.target.id === 'cancelDeleteBtn') {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+        return;
+      }
+
+      if (event.target.id === 'cancelEditBtn') {
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').classList.remove('flex');
+        return;
+      }
+
+      if (event.target.id === 'deleteForMeBtn' || event.target.id === 'deleteForEveryoneBtn') {
+        const messageId = window.activeDeleteMessageId;
+        const deleteType = event.target.id === 'deleteForMeBtn' ? 'for_me' : 'for_everyone';
+        if (messageId) {
+          fetch(`/chat/message/${messageId}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: new URLSearchParams({ delete_type: deleteType })
+          }).then(() => {
+            const msgEl = document.querySelector(`[data-msg-id="${messageId}"]`);
+            if (msgEl) {
+              if (deleteType === 'for_me') {
+                msgEl.remove();
+              } else {
+                let p = msgEl.querySelector('p');
+                if (!p) {
+                    p = document.createElement('p');
+                    p.className = 'whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-100 sm:text-sm';
+                    const bubble = msgEl.querySelector('.bubble-sent, .bubble-received');
+                    if (bubble) bubble.insertBefore(p, bubble.firstChild);
+                }
+                p.textContent = 'This message was deleted';
+                p.classList.add('italic', 'text-slate-500');
+                
+                // Remove attachments
+                msgEl.querySelectorAll('a, video').forEach(e => {
+                  if (!e.closest('.message-actions') && !e.closest('.reactions-row')) e.remove();
+                });
+
+                // Remove extraneous actions
+                const editBtn = msgEl.querySelector('.edit-btn'); if (editBtn) editBtn.remove();
+                const copyBtn = msgEl.querySelector('.copy-btn'); if (copyBtn) copyBtn.remove();
+                const replyBtn = msgEl.querySelector('.reply-btn'); if (replyBtn) replyBtn.remove();
+                
+                // Downgrade delete button privileges
+                const delBtn = msgEl.querySelector('.delete-btn');
+                if (delBtn) delBtn.dataset.mine = 'false';
+              }
+            }
+          });
+        }
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+        window.activeDeleteMessageId = null;
+        return;
+      }
+
+      if (event.target.id === 'saveEditBtn') {
+        const messageId = window.activeEditMessageId;
+        const newContent = document.getElementById('editContentInput').value.trim();
+        if (messageId && newContent) {
+          fetch(`/chat/message/${messageId}/edit/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: new URLSearchParams({ content: newContent })
+          }).then(res => res.json()).then(data => {
+            if(data.status === 'ok') {
+               const msgEl = document.querySelector(`[data-msg-id="${messageId}"]`);
+               if(msgEl) {
+                  const p = msgEl.querySelector('p');
+                  if (p) p.textContent = data.message.content;
+                  if (!msgEl.querySelector('.is-edited-tag')) {
+                    const timeEl = msgEl.querySelector('.js-message-time');
+                    if (timeEl) {
+                      timeEl.insertAdjacentHTML('afterend', '<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>');
+                    }
+                  }
+                  const editB = msgEl.querySelector('.edit-btn');
+                  const replyB = msgEl.querySelector('.reply-btn');
+                  const copyB = msgEl.querySelector('.copy-btn');
+                  if(editB) editB.dataset.content = data.message.content;
+                  if(replyB) replyB.dataset.content = data.message.content;
+                  if(copyB) copyB.dataset.content = data.message.content;
+               }
+            }
+          });
+        }
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editModal').classList.remove('flex');
+        window.activeEditMessageId = null;
+        return;
+      }
+
       if (replyButton) {
         parentInput.value = replyButton.dataset.id;
         document.getElementById('replyUser').textContent = replyButton.dataset.user || '';

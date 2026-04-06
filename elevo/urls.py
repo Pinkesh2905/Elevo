@@ -28,5 +28,12 @@ urlpatterns = [
 
 # Development-only media serving (or explicit insecure override).
 # In production, media should be served by the platform/storage layer.
+from django.urls import re_path
+from django.views.static import serve
+
 if settings.DEBUG or getattr(settings, 'SERVE_MEDIA_INSECURE', False):
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [
+        re_path(r'^%s(?P<path>.*)$' % settings.MEDIA_URL.lstrip('/'), serve, {
+            'document_root': settings.MEDIA_ROOT,
+        }),
+    ]

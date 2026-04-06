@@ -97,7 +97,7 @@ def _build_thread_list(user):
             last_message_time=Max('messages__created_at'),
             unread=Count(
                 'messages',
-                filter=Q(messages__is_read=False) & ~Q(messages__sender=user),
+                filter=Q(messages__is_read=False) & ~Q(messages__sender=user) & ~Q(messages__is_deleted_for_everyone=True) & ~Q(messages__deleted_by=user),
             ),
             other_user_id=Subquery(other_user_subquery),
             last_message_id=Subquery(last_message_subquery),
@@ -188,6 +188,9 @@ def chat_thread(request, thread_id):
     other_user = thread.get_other_participant(request.user)
     _mark_user_presence(request.user, thread.id)
 
+    first_unread = thread.messages.filter(is_read=False).exclude(sender=request.user).order_by('created_at').first()
+    first_unread_message_id = first_unread.id if first_unread else None
+
     # Mark messages from the other user as read
     now = timezone.now()
     thread.messages.filter(is_read=False).exclude(sender=request.user).update(
@@ -197,6 +200,7 @@ def chat_thread(request, thread_id):
 
     messages = (
         thread.messages
+        .exclude(deleted_by=request.user)
         .select_related('sender', 'sender__profile', 'parent_message', 'parent_message__sender')
         .prefetch_related('reactions')
         .order_by('created_at')
@@ -214,6 +218,7 @@ def chat_thread(request, thread_id):
         'other_user': other_user,
         'messages': messages,
         'thread_list': _build_thread_list(request.user),
+        'first_unread_message_id': first_unread_message_id,
     })
 
 
@@ -285,6 +290,24 @@ def send_message(request, thread_id):
 
 def _serialize_message(msg, user):
     """Helper to convert Message instance to dict."""
+    if msg.is_deleted_for_everyone:
+        return {
+            'id': msg.id,
+            'content': 'This message was deleted',
+            'sender': msg.sender.username,
+            'sender_avatar': (
+                msg.sender.profile.avatar.url
+                if hasattr(msg.sender, 'profile') and msg.sender.profile.avatar
+                else None
+            ),
+            'created_at': timezone.localtime(msg.created_at).strftime('%I:%M %p'),
+            'timestamp_raw': _iso_local(msg.created_at),
+            'is_mine': msg.sender == user,
+            'is_read': msg.is_read,
+            'is_deleted': True,
+            'reactions': []
+        }
+
     return {
         'id': msg.id,
         'content': msg.content,
@@ -298,6 +321,7 @@ def _serialize_message(msg, user):
         'timestamp_raw': _iso_local(msg.created_at),
         'is_mine': msg.sender == user,
         'is_read': msg.is_read,
+        'is_edited': msg.is_edited,
         'read_at': timezone.localtime(msg.read_at).strftime('%I:%M %p') if msg.read_at else None,
         'read_at_raw': _iso_local(msg.read_at),
         'message_type': msg.message_type,
@@ -330,6 +354,7 @@ def fetch_messages(request, thread_id):
     new_messages = (
         thread.messages
         .filter(id__gt=after_id)
+        .exclude(deleted_by=request.user)
         .select_related('sender', 'sender__profile', 'parent_message', 'parent_message__sender')
         .prefetch_related('reactions')
         .order_by('created_at')
@@ -405,6 +430,7 @@ def thread_stream(request, thread_id):
             new_messages = list(
                 thread.messages
                 .filter(id__gt=current_last_id)
+                .exclude(deleted_by=request.user)
                 .select_related('sender', 'sender__profile', 'parent_message', 'parent_message__sender')
                 .prefetch_related('reactions')
                 .order_by('created_at', 'id')
@@ -498,6 +524,68 @@ def unread_count(request):
         Message.objects
         .filter(thread__participants=request.user, is_read=False)
         .exclude(sender=request.user)
+        .exclude(deleted_by=request.user)
+        .exclude(is_deleted_for_everyone=True)
         .count()
     )
     return JsonResponse({'unread_count': count})
+
+@login_required
+def edit_message(request, message_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    content = request.POST.get('content', '').strip()
+    if not content:
+        return JsonResponse({'error': 'Content cannot be empty'}, status=400)
+        
+    message = get_object_or_404(Message, id=message_id, sender=request.user)
+    
+    if message.message_type != 'text':
+        return JsonResponse({'error': 'Can only edit text messages'}, status=400)
+        
+    message.content = content
+    message.is_edited = True
+    message.save(update_fields=['content', 'is_edited'])
+    
+    return JsonResponse({
+        'status': 'ok',
+        'message': _serialize_message(message, request.user)
+    })
+
+@login_required
+def delete_message(request, message_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+        
+    message = get_object_or_404(Message, id=message_id, thread__participants=request.user)
+    delete_type = request.POST.get('delete_type', 'for_me')
+    
+    if delete_type == 'for_me':
+        message.deleted_by.add(request.user)
+    elif delete_type == 'for_everyone':
+        if message.sender != request.user:
+            return JsonResponse({'error': 'Not authorized to delete for everyone'}, status=403)
+        message.is_deleted_for_everyone = True
+        message.image = None
+        message.file = None
+        message.content = 'This message was deleted'
+        message.save(update_fields=['is_deleted_for_everyone', 'image', 'file', 'content'])
+        
+    return JsonResponse({'status': 'ok'})
+
+@login_required
+def update_theme(request, thread_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+        
+    thread = get_object_or_404(ChatThread, id=thread_id, participants=request.user)
+    theme = request.POST.get('theme', 'default')
+    
+    valid_themes = [t[0] for t in ChatThread.THEME_CHOICES]
+    if theme in valid_themes:
+        thread.theme = theme
+        thread.save(update_fields=['theme'])
+        return JsonResponse({'status': 'ok', 'theme': theme})
+        
+    return JsonResponse({'error': 'Invalid theme'}, status=400)
