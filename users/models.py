@@ -290,6 +290,8 @@ def create_user_profile(sender, instance, created, **kwargs):
     """
     Signal receiver to create a UserProfile whenever a new User is created.
     """
+    if kwargs.get('raw', False):
+        return
     if created:
         UserProfile.objects.create(user=instance)
 
@@ -298,5 +300,7 @@ def save_user_profile(sender, instance, **kwargs):
     """
     Signal receiver to save the UserProfile whenever the User is saved.
     """
+    if kwargs.get('raw', False):
+        return
     if hasattr(instance, 'profile'):
         instance.profile.save()
