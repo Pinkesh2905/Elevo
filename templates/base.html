@@ -230,7 +230,7 @@
             </form>
 
             <!-- User Interactions -->
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3 sm:gap-6">
                 {% if user.is_authenticated %}
                 <div class="hidden lg:flex items-center gap-6 pr-6 border-r border-white/10">
                     <a href="{% url 'chat:inbox' %}" class="relative w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-cyan-400 transition-all group" title="Intelligence Inbox">
@@ -323,7 +323,7 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-4">
                     <a href="{% url 'login' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Login</a>
                     <a href="{% url 'users:signup' %}" class="h-10 px-6 rounded-full bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center">
                         Initiate Registration
@@ -487,6 +487,11 @@
                     <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-robot-line text-cyan-500"></i> Mock Interviews
                     </a>
+                    {% if enable_chat %}
+                    <a href="{% url 'chat:inbox' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-message-3-line text-sky-400"></i> Intelligence Inbox
+                    </a>
+                    {% endif %}
                     <a href="{% url 'organizations:pricing' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-price-tag-3-line text-emerald-500"></i> Pricing
                     </a>
@@ -503,8 +508,16 @@
                         </form>
                     </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="block py-4 text-xl font-bold text-white border-b border-white/5">Login</a>
-                    <a href="{% url 'users:signup' %}" class="block py-4 text-xl font-bold text-cyan-400">Registration</a>
+                    <div class="space-y-3 pt-2">
+                        <a href="{% url 'login' %}" class="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base font-bold text-white transition-all hover:border-cyan-400/40 hover:bg-cyan-500/10">
+                            <i class="ri-login-box-line text-cyan-400"></i>
+                            Login
+                        </a>
+                        <a href="{% url 'users:signup' %}" class="flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 text-base font-black uppercase tracking-[0.18em] text-slate-950 transition-all hover:bg-cyan-500 hover:text-white">
+                            <i class="ri-user-add-line"></i>
+                            Registration
+                        </a>
+                    </div>
                 {% endif %}
             </nav>
         </div>

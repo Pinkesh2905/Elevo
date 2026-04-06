@@ -27,17 +27,17 @@
 {% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+<section class="min-h-screen px-3 py-4 sm:px-6 sm:py-10 lg:px-8">
   <div class="mx-auto max-w-5xl">
     
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+    <div class="mb-8 flex flex-col justify-between gap-4 md:mb-10 md:flex-row md:items-end md:gap-6">
       <div>
-        <h1 class="text-4xl font-black text-slate-100 tracking-tight flex items-center gap-4">
+        <h1 class="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-100 sm:gap-4 sm:text-4xl">
           <span class="bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent italic">SOCIAL</span> 
           <span>CENTER</span>
         </h1>
-        <p class="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-2 ml-1">Connect • Collaborate • Elevate</p>
+        <p class="ml-1 mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Connect | Collaborate | Elevate</p>
       </div>
       
       <div class="flex items-center gap-3">
@@ -49,16 +49,16 @@
     </div>
 
     <!-- Main Container -->
-    <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/40 backdrop-blur-3xl overflow-hidden shadow-2xl">
+    <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 shadow-2xl backdrop-blur-3xl sm:rounded-[2.5rem]">
       
       <!-- Search & Controls Bar -->
-      <div class="p-6 border-b border-white/5 bg-slate-900/20 flex flex-col sm:flex-row gap-4">
+      <div class="flex flex-col gap-3 border-b border-white/5 bg-slate-900/20 p-4 sm:flex-row sm:gap-4 sm:p-6">
         <div class="relative flex-1">
           <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
           <input type="text" id="threadSearch" placeholder="Search for conversations..."
                  class="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-white/5 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-search transition-all shadow-inner">
         </div>
-        <button class="px-6 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 font-bold text-xs uppercase">
+        <button class="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3.5 text-xs font-bold uppercase text-slate-300 transition-all hover:bg-white/10 hover:text-white">
           <i class="ri-user-add-line"></i> New Message
         </button>
       </div>
@@ -68,7 +68,7 @@
         <div class="divide-y divide-white/5" id="threadListContainer">
           {% for item in thread_list %}
             <a href="{% url 'chat:thread' item.thread.id %}"
-               class="thread-item flex items-center gap-5 px-8 py-6 cursor-pointer" 
+               class="thread-item flex cursor-pointer items-center gap-3 px-4 py-4 sm:gap-5 sm:px-8 sm:py-6" 
                data-username="{{ item.other_user.username|lower }}" 
                data-fullname="{{ item.other_user.get_full_name|lower }}">
               
@@ -76,28 +76,28 @@
               <div class="relative flex-shrink-0">
                 {% if item.other_user.profile.avatar %}
                   <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}"
-                       class="w-16 h-16 rounded-[1.5rem] object-cover border-2 border-white/10 shadow-lg">
+                       class="h-12 w-12 rounded-[1.1rem] border-2 border-white/10 object-cover shadow-lg sm:h-16 sm:w-16 sm:rounded-[1.5rem]">
                 {% else %}
-                  <div class="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-2xl font-black flex items-center justify-center border-2 border-white/10 shadow-lg">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-[1.1rem] border-2 border-white/10 bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-black text-white shadow-lg sm:h-16 sm:w-16 sm:rounded-[1.5rem] sm:text-2xl">
                     {{ item.other_user.username|first|upper }}
                   </div>
                 {% endif %}
-                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-4 border-slate-900 shadow-sm"></span>
+                <span class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-[3px] border-slate-900 bg-emerald-500 shadow-sm sm:h-5 sm:w-5 sm:border-4"></span>
               </div>
 
               <!-- Info Block -->
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between mb-1.5">
-                  <span class="font-black text-slate-100 text-lg tracking-tight truncate">
+                  <span class="truncate text-base font-black tracking-tight text-slate-100 sm:text-lg">
                     {{ item.other_user.get_full_name|default:item.other_user.username }}
                   </span>
                   {% if item.last_message %}
-                    <span class="text-[10px] font-bold text-slate-500 uppercase">{{ item.last_message.created_at|naturaltime }}</span>
+                    <span class="shrink-0 text-[10px] font-bold uppercase text-slate-500">{{ item.last_message.created_at|naturaltime }}</span>
                   {% endif %}
                 </div>
                 
                 <div class="flex items-center justify-between">
-                  <div class="text-sm text-slate-400 truncate flex items-center gap-2 pr-4">
+                  <div class="flex items-center gap-2 truncate pr-3 text-xs text-slate-400 sm:pr-4 sm:text-sm">
                     {% if item.last_message %}
                       {% if item.last_message.sender == request.user %}
                         <i class="ri-check-double-line text-sky-400 text-base"></i>
@@ -113,7 +113,7 @@
                         {{ item.last_message.content|truncatechars:60 }}
                       {% endif %}
                     {% else %}
-                      <span class="text-slate-600 italic font-medium">New connection – say hi!</span>
+                      <span class="font-medium italic text-slate-600">New connection, say hi!</span>
                     {% endif %}
                   </div>
                   

@@ -1,128 +1,77 @@
 {% extends "base.html" %}
 {% load static %}
-{% load humanize %}
 
 {% block title %}Chat with {{ other_user.get_full_name|default:other_user.username }} | Elevo{% endblock %}
 
 {% block extra_css %}
 <style>
-  /* Sidebar thread list */
-  .sidebar-thread { transition: all 0.2s ease; }
-  .sidebar-thread:hover { background: rgba(14, 165, 233, 0.08); }
-  .sidebar-thread.active { background: rgba(14, 165, 233, 0.14); border-left: 3px solid #0ea5e9; }
-  .unread-dot { width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; }
-
-  /* Chat bubbles */
-  .bubble-sent {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(20, 184, 166, 0.25));
-    border: 1px solid rgba(14, 165, 233, 0.3);
-    border-radius: 20px 20px 4px 20px;
+  .chat-shell { min-height: calc(100dvh - 5rem); }
+  .chat-panel { min-height: calc(100dvh - 7rem); }
+  .chat-sidebar, .messages-container { overflow-y: auto; }
+  .chat-sidebar { max-height: calc(100dvh - 9rem); }
+  .chat-sidebar::-webkit-scrollbar, .messages-container::-webkit-scrollbar { width: 4px; }
+  .chat-sidebar::-webkit-scrollbar-thumb, .messages-container::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.28); border-radius: 999px; }
+  .sidebar-thread { transition: background 0.2s ease, transform 0.2s ease; }
+  .sidebar-thread:hover { background: rgba(14, 165, 233, 0.08); transform: translateX(3px); }
+  .sidebar-thread.active { background: rgba(14, 165, 233, 0.14); border-left: 3px solid #38bdf8; }
+  .messages-container { flex: 1; min-height: 0; scroll-behavior: smooth; }
+  .bubble-sent, .bubble-received { border-radius: 1.25rem; box-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.8); }
+  .bubble-sent { background: linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(79, 70, 229, 0.2)); border: 1px solid rgba(56, 189, 248, 0.32); border-bottom-right-radius: 0.45rem; }
+  .bubble-received { background: rgba(15, 23, 42, 0.78); border: 1px solid rgba(148, 163, 184, 0.18); border-bottom-left-radius: 0.45rem; }
+  .reply-chip { border-left: 3px solid rgba(56, 189, 248, 0.75); background: rgba(15, 23, 42, 0.46); }
+  .message-actions { opacity: 1; }
+  .reaction-trigger, .reply-btn, .reaction-badge { transition: color 0.2s ease, background 0.2s ease, opacity 0.2s ease, transform 0.2s ease; }
+  .reaction-trigger:hover, .reply-btn:hover, .reaction-badge:hover { transform: translateY(-1px); }
+  .typing-dot { animation: typing-dot 1.2s infinite ease-in-out; }
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typing-dot { 0%, 80%, 100% { opacity: 0.25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-1px); } }
+  @media (min-width: 768px) {
+    .message-actions { opacity: 0; }
+    .msg-wrapper:hover .message-actions { opacity: 1; }
   }
-  .bubble-received {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px 20px 20px 4px;
-  }
-
-  /* Message area */
-  .messages-container {
-    height: calc(100vh - 300px);
-    min-height: 450px;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    padding-bottom: 20px;
-  }
-  .messages-container::-webkit-scrollbar { width: 4px; }
-  .messages-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-  /* Input bar */
-  .chat-input:focus { border-color: rgba(14, 165, 233, 0.5); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
-  .send-btn { transition: all 0.2s ease; }
-  .send-btn:hover { transform: scale(1.05); }
-  .send-btn:active { transform: scale(0.95); }
-
-  /* Typing indicator dots */
-  @keyframes typingDot { 0%,60%,100% { opacity: 0.3; } 30% { opacity: 1; } }
-  .typing-dot { animation: typingDot 1.4s infinite; }
-  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-  /* Sidebar */
-  .chat-sidebar {
-    height: calc(100vh - 180px);
-    min-height: 500px;
-    overflow-y: auto;
-  }
-  .chat-sidebar::-webkit-scrollbar { width: 3px; }
-  .chat-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-
-  /* Reply UI */
-  .reply-preview {
-    border-left: 4px solid #0ea5e9;
-    background: rgba(14, 165, 233, 0.08);
-  }
-  .quote-bubble {
-    border-left: 3px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.05);
-  }
-
-  /* Reactions */
-  .reaction-badge {
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .reaction-badge:hover { transform: scale(1.1); background: rgba(14, 165, 233, 0.2); }
-  .reaction-picker {
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    background: #1e293b;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-  .msg-wrapper:hover .reaction-trigger { opacity: 1; }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-6 px-4">
-  <div class="mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-    <!-- Sidebar: Thread List -->
-    <aside class="lg:col-span-3 hidden lg:block">
-      <div class="rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-2xl overflow-hidden">
-        <div class="p-6 border-b border-white/5 flex items-center justify-between">
-          <h2 class="text-base font-black text-slate-100 flex items-center gap-2 tracking-tight">
-            <i class="ri-message-3-fill text-sky-400"></i> Channels
-          </h2>
-          <a href="{% url 'chat:inbox' %}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-slate-400 hover:text-white transition-all">
-            <i class="ri-settings-4-line"></i>
+<section class="chat-shell px-3 py-3 sm:px-4 sm:py-6">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
+    <aside class="hidden lg:col-span-4 lg:block xl:col-span-3">
+      <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/55 backdrop-blur-2xl">
+        <div class="flex items-center justify-between border-b border-white/5 px-5 py-4">
+          <div>
+            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-sky-400">Inbox</p>
+            <h2 class="mt-1 text-base font-black text-slate-100">Active Threads</h2>
+          </div>
+          <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+            <i class="ri-layout-grid-line text-lg"></i>
           </a>
         </div>
         <div class="chat-sidebar divide-y divide-white/5">
           {% for item in thread_list %}
-            <a href="{% url 'chat:thread' item.thread.id %}"
-               class="sidebar-thread flex items-center gap-3 px-5 py-4 {% if item.thread.id == thread.id %}active{% endif %}">
-              <div class="relative">
+            <a href="{% url 'chat:thread' item.thread.id %}" class="sidebar-thread flex items-center gap-3 px-5 py-4 {% if item.thread.id == thread.id %}active{% endif %}">
+              <div class="relative shrink-0">
                 {% if item.other_user.profile.avatar %}
-                  <img src="{{ item.other_user.profile.avatar.url }}" class="w-11 h-11 rounded-2xl object-cover border border-white/10">
+                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl border border-white/10 object-cover">
                 {% else %}
-                  <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-lg font-black flex items-center justify-center">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-base font-black text-white">
                     {{ item.other_user.username|first|upper }}
                   </div>
                 {% endif %}
                 {% if item.unread > 0 %}
-                   <span class="absolute -top-1 -right-1 unread-dot"></span>
+                  <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-slate-950 bg-sky-400"></span>
                 {% endif %}
               </div>
               <div class="min-w-0 flex-1">
-                <div class="text-sm font-bold text-slate-200 truncate">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
-                <div class="text-[11px] text-slate-500 truncate flex items-center gap-1">
+                <div class="truncate text-sm font-bold text-slate-100">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
+                <div class="mt-1 flex items-center gap-1 truncate text-[11px] text-slate-500">
                   {% if item.last_message %}
-                     {% if item.last_message.sender == request.user %}<i class="ri-check-double-line text-sky-400"></i>{% endif %}
-                     {{ item.last_message.content|truncatechars:25|default:item.last_message.message_type }}
+                    {% if item.last_message.sender == request.user %}
+                      <i class="ri-check-double-line text-sky-400"></i>
+                    {% endif %}
+                    {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:26 }}
                   {% else %}
-                    New connection
+                    New conversation
                   {% endif %}
                 </div>
               </div>
@@ -132,481 +81,647 @@
       </div>
     </aside>
 
-    <!-- Main Chat Area -->
-    <main class="lg:col-span-9">
-      <div class="rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-2xl overflow-hidden flex flex-col h-full shadow-2xl">
-
-        <!-- Chat Header -->
-        <div class="px-6 py-4 border-b border-white/5 flex items-center gap-4 bg-slate-900/40">
-          <a href="{% url 'chat:inbox' %}" class="lg:hidden text-slate-400 hover:text-sky-400 mr-2">
-            <i class="ri-arrow-left-s-line text-2xl"></i>
+    <main class="lg:col-span-8 xl:col-span-9">
+      <div class="chat-panel flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/55 shadow-2xl shadow-slate-950/30 backdrop-blur-2xl">
+        <header class="flex items-center gap-3 border-b border-white/5 bg-slate-950/25 px-3 py-3 sm:px-5 sm:py-4">
+          <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white lg:hidden">
+            <i class="ri-arrow-left-line text-xl"></i>
           </a>
-          <div class="relative">
+          <div class="relative shrink-0">
             {% if other_user.profile.avatar %}
-              <img src="{{ other_user.profile.avatar.url }}" class="w-11 h-11 rounded-2xl object-cover border border-white/20">
+              <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.username }}" class="h-11 w-11 rounded-2xl border border-white/15 object-cover sm:h-12 sm:w-12">
             {% else %}
-              <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-lg font-black flex items-center justify-center">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-12 sm:w-12">
                 {{ other_user.username|first|upper }}
               </div>
             {% endif %}
-            <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
+            <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-950 bg-emerald-500"></span>
           </div>
-          <div class="flex-1 min-w-0">
-            <h1 class="font-black text-slate-100 text-base leading-tight">
-              {{ other_user.get_full_name|default:other_user.username }}
-            </h1>
-            <div id="typingIndicator" class="hidden flex items-center gap-1 mt-0.5">
-               <div class="flex gap-0.5">
-                 <span class="typing-dot w-1 h-1 rounded-full bg-sky-400"></span>
-                 <span class="typing-dot w-1 h-1 rounded-full bg-sky-400"></span>
-                 <span class="typing-dot w-1 h-1 rounded-full bg-sky-400"></span>
-               </div>
-               <span class="text-[10px] font-bold text-sky-400 uppercase tracking-widest">typing...</span>
+          <div class="min-w-0 flex-1">
+            <h1 class="truncate text-sm font-black text-slate-100 sm:text-base">{{ other_user.get_full_name|default:other_user.username }}</h1>
+            <div id="typingIndicator" class="hidden items-center gap-2">
+              <div class="flex items-center gap-1">
+                <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+                <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+                <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-400">typing</span>
             </div>
-            <p id="participantStatus" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Active Now</p>
+            <p id="participantStatus" class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Live conversation</p>
           </div>
-          <div class="flex items-center gap-3">
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all"><i class="ri-phone-fill text-lg"></i></button>
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all"><i class="ri-vidicon-fill text-lg"></i></button>
-            <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white transition-all"><i class="ri-more-2-fill text-lg"></i></button>
+          <div class="hidden items-center gap-2 sm:flex">
+            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+              <i class="ri-search-line text-lg"></i>
+            </button>
+            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+              <i class="ri-more-2-fill text-lg"></i>
+            </button>
           </div>
-        </div>
+        </header>
 
-        <!-- Messages Area -->
-        <div class="messages-container px-6 py-6 space-y-6" id="messagesContainer" data-thread-id="{{ thread.id }}">
+        <div id="messagesContainer" class="messages-container space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5" data-thread-id="{{ thread.id }}">
           {% for msg in messages %}
-            <div class="msg-wrapper flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %} group" data-msg-id="{{ msg.id }}">
-              <div class="flex flex-col {% if msg.sender == request.user %}items-end{% else %}items-start{% endif %} max-w-[80%] relative">
-                
-                <!-- Reply Context -->
+            <div class="msg-wrapper flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-msg-id="{{ msg.id }}">
+              <div class="flex w-full max-w-[92%] flex-col gap-1.5 {% if msg.sender == request.user %}items-end sm:max-w-[78%]{% else %}items-start sm:max-w-[78%]{% endif %}">
                 {% if msg.parent_message %}
-                <div class="quote-bubble px-3 py-1.5 rounded-t-xl mb-1 text-[11px] text-slate-400 max-w-full truncate">
-                   <span class="font-black text-white/40 block uppercase text-[8px]">Replying to {{ msg.parent_message.sender.username }}</span>
-                   {{ msg.parent_message.content|truncatechars:100 }}
-                </div>
+                  <div class="reply-chip w-full rounded-2xl px-3 py-2 text-[11px] text-slate-400">
+                    <span class="block text-[9px] font-black uppercase tracking-[0.18em] text-sky-400/90">Replying to {{ msg.parent_message.sender.username }}</span>
+                    {{ msg.parent_message.content|default:msg.parent_message.get_message_type_display|truncatechars:100 }}
+                  </div>
                 {% endif %}
 
-                <!-- Content Bubble -->
-                <div class="{% if msg.sender == request.user %}bubble-sent{% else %}bubble-received{% endif %} px-5 py-3 relative shadow-lg">
-                  
-                  <!-- Media Rendering -->
+                <div class="{% if msg.sender == request.user %}bubble-sent{% else %}bubble-received{% endif %} w-full px-4 py-3 sm:px-5">
                   {% if msg.message_type == 'image' and msg.image %}
-                    <a href="{{ msg.image.url }}" target="_blank" class="block mb-3 rounded-xl overflow-hidden border border-white/5">
-                      <img src="{{ msg.image.url }}" class="max-w-full h-auto max-h-64 object-contain">
+                    <a href="{{ msg.image.url }}" target="_blank" rel="noopener noreferrer" class="mb-3 block overflow-hidden rounded-2xl border border-white/10">
+                      <img src="{{ msg.image.url }}" alt="Shared image" class="max-h-72 w-full object-contain">
                     </a>
                   {% elif msg.message_type == 'video' and msg.file %}
-                    <video controls class="max-w-full h-auto max-h-64 mb-3 rounded-xl border border-white/5">
+                    <video controls class="mb-3 max-h-72 w-full rounded-2xl border border-white/10">
                       <source src="{{ msg.file.url }}">
                     </video>
                   {% elif msg.message_type == 'file' and msg.file %}
-                    <a href="{{ msg.file.url }}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 mb-3 hover:bg-white/10 transition-all">
-                      <i class="ri-file-text-line text-2xl text-sky-400"></i>
+                    <a href="{{ msg.file.url }}" target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10">
+                      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400">
+                        <i class="ri-file-line text-xl"></i>
+                      </div>
                       <div class="min-w-0">
-                         <p class="text-[11px] font-bold text-slate-200 truncate">{{ msg.file.name|slice:"12:" }}</p>
-                         <p class="text-[9px] text-slate-500 uppercase font-black">Download Asset</p>
+                        <p class="truncate text-sm font-bold text-slate-100">{{ msg.file.name|cut:"chat/files/" }}</p>
+                        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p>
                       </div>
                     </a>
                   {% endif %}
 
                   {% if msg.content %}
-                    <p class="text-[13px] text-slate-100 font-medium leading-relaxed whitespace-pre-wrap break-words">{{ msg.content }}</p>
+                    <p class="whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-100 sm:text-sm">{{ msg.content }}</p>
                   {% endif %}
 
-                  <!-- Reactions Row -->
-                  <div class="flex flex-wrap gap-1 mt-2 reactions-row" id="reactions-{{ msg.id }}">
+                  <div class="reactions-row mt-3 flex flex-wrap gap-1.5" id="reactions-{{ msg.id }}">
                     {% for r in msg.grouped_reactions %}
-                      <span class="px-2 py-0.5 rounded-full {% if r.reacted %}bg-sky-500/20 border-sky-500/30{% else %}bg-slate-800/80 border-white/5{% endif %} border text-[10px] reaction-badge flex items-center gap-1 transition-all hover:scale-105 cursor-pointer" 
-                            data-emoji="{{ r.emoji }}" data-id="{{ msg.id }}">
+                      <button type="button" class="reaction-badge inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] {% if r.reacted %}border-sky-400/30 bg-sky-500/15 text-sky-100{% else %}border-white/8 bg-slate-950/35 text-slate-300{% endif %}" data-emoji="{{ r.emoji }}" data-id="{{ msg.id }}">
                         <span>{{ r.emoji }}</span>
                         {% if r.count > 1 %}
                           <span class="font-bold text-slate-400">{{ r.count }}</span>
                         {% endif %}
-                      </span>
+                      </button>
                     {% endfor %}
                   </div>
                 </div>
 
-                <!-- Footer: Time & Seen Status -->
-                <div class="flex items-center gap-2 mt-1.5">
-                   <button type="button" 
-                           class="reply-btn opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-sky-400 font-black uppercase transition-all"
-                           data-id="{{ msg.id }}" 
-                           data-user="{{ msg.sender.username }}" 
-                           data-content="{{ msg.content|escapejs }}">
-                     Reply
-                   </button>
-                   <span class="text-[10px] text-slate-500 font-bold">{{ msg.created_at|date:"h:i A" }}</span>
-                   {% if msg.sender == request.user %}
-                     {% if msg.is_read %}
-                        <i class="ri-double-check-line text-sky-400 text-xs" title="Seen at {{ msg.read_at|date:'h:i A' }}"></i>
-                     {% else %}
-                        <i class="ri-check-line text-slate-600 text-xs"></i>
-                     {% endif %}
-                   {% endif %}
+                <div class="flex w-full flex-wrap items-center gap-2 {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+                  <div class="message-actions flex items-center gap-2">
+                    <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="{{ msg.id }}" data-user="{{ msg.sender.username }}" data-content="{{ msg.content|default_if_none:''|escapejs }}">
+                      Reply
+                    </button>
+                    <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-yellow-300" data-id="{{ msg.id }}">
+                      <i class="ri-emotion-happy-line text-sm"></i>
+                    </button>
+                  </div>
+                  <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"h:i A" }}</span>
+                  {% if msg.sender == request.user %}
+                    <i class="js-seen-status {% if msg.is_read %}ri-double-check-line text-sky-400{% else %}ri-check-line text-slate-600{% endif %} text-xs" data-mine="true" {% if msg.read_at %}data-read-at="{{ msg.read_at|date:'c' }}"{% endif %} title="{% if msg.read_at %}Seen at {{ msg.read_at|date:'h:i A' }}{% endif %}"></i>
+                  {% endif %}
                 </div>
-
-                <!-- Action: React Button -->
-                <button type="button" 
-                        class="reaction-trigger opacity-0 absolute top-2 {% if msg.sender == request.user %}-left-8{% else %}-right-8{% endif %} w-6 h-6 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-yellow-400 transition-all"
-                        data-id="{{ msg.id }}">
-                  <i class="ri-emotion-happy-line text-sm"></i>
-                </button>
               </div>
             </div>
           {% endfor %}
         </div>
-
-        <!-- Input Section -->
-        <div class="px-6 py-6 border-t border-white/5 bg-slate-900/40 relative">
-          
-          <!-- Reply Preview Bar -->
-          <div id="replyBar" class="hidden absolute bottom-full left-0 right-0 p-4 bg-slate-800/90 backdrop-blur-md border-t border-white/5 flex items-center justify-between animate-in slide-in-from-bottom-2 duration-200">
-             <div class="flex items-center gap-3 min-w-0">
-               <div class="w-1 h-8 bg-sky-500 rounded-full"></div>
-               <div class="min-w-0">
-                 <p class="text-[10px] font-black text-sky-400 uppercase">Replying to <span id="replyUser"></span></p>
-                 <p id="replyContent" class="text-xs text-slate-300 truncate"></p>
-               </div>
-             </div>
-             <button type="button" id="cancelReplyBtn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-slate-400"><i class="ri-close-line"></i></button>
+        <div class="border-t border-white/5 bg-slate-950/25 px-3 py-3 sm:px-5 sm:py-4">
+          <div id="replyBar" class="reply-chip mb-3 hidden items-center justify-between gap-3 rounded-2xl px-3 py-3">
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-sky-400">Replying to <span id="replyUser"></span></p>
+              <p id="replyContent" class="truncate text-xs text-slate-300"></p>
+            </div>
+            <button type="button" id="cancelReplyBtn" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+              <i class="ri-close-line"></i>
+            </button>
           </div>
 
-          <form id="messageForm" class="flex flex-col gap-4">
+          <form id="messageForm" class="space-y-3">
             {% csrf_token %}
             <input type="hidden" name="parent_id" id="parentInput">
             <input type="file" id="fileAttachment" class="hidden">
-            
-            <!-- File Preview -->
-            <div id="filePreview" class="hidden flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 w-fit">
-               <div class="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400"><i class="ri-attachment-line text-lg"></i></div>
-               <div class="pr-6">
-                 <p id="previewName" class="text-[11px] font-bold text-slate-200"></p>
-                 <p id="previewSize" class="text-[9px] text-slate-500 uppercase"></p>
-               </div>
-               <button type="button" id="clearFileBtn" class="text-rose-400 hover:text-rose-300"><i class="ri-delete-bin-line"></i></button>
+
+            <div id="filePreview" class="hidden items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400">
+                <i class="ri-attachment-2 text-lg"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p id="previewName" class="truncate text-sm font-bold text-slate-100"></p>
+                <p id="previewSize" class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"></p>
+              </div>
+              <button type="button" id="clearFileBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-rose-400 transition hover:bg-white/10 hover:text-rose-300">
+                <i class="ri-delete-bin-line"></i>
+              </button>
             </div>
 
-            <div class="flex items-end gap-3">
-              <button type="button" id="attachBtn" class="w-12 h-12 rounded-2xl bg-white/5 text-slate-400 hover:text-sky-400 flex items-center justify-center transition-all flex-shrink-0">
+            <div class="flex items-end gap-2 sm:gap-3">
+              <button type="button" id="attachBtn" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-sky-400 sm:h-12 sm:w-12">
                 <i class="ri-add-line text-2xl"></i>
               </button>
-              
-              <div class="flex-1 relative">
-                <textarea id="messageInput" name="content" rows="1" placeholder="Type a message..."
-                          class="w-full px-5 py-3.5 rounded-2xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500/50 transition-all resize-none shadow-inner"
-                          style="max-height: 150px;"></textarea>
-                <div class="absolute right-3 bottom-3 flex items-center gap-2">
-                   <button type="button" class="text-slate-500 hover:text-yellow-400"><i class="ri-emotion-line text-lg"></i></button>
-                </div>
+              <div class="relative flex-1">
+                <textarea id="messageInput" name="content" rows="1" placeholder="Type a message..." class="max-h-36 min-h-[3rem] w-full resize-none rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-3 pr-12 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"></textarea>
+                <span class="pointer-events-none absolute bottom-3 right-3 text-slate-500">
+                  <i class="ri-chat-smile-2-line text-lg"></i>
+                </span>
               </div>
-              
-              <button type="submit" class="send-btn w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all flex-shrink-0">
-                <i class="ri-send-plane-fill text-xl"></i>
+              <button type="submit" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white shadow-lg shadow-sky-500/20 transition hover:scale-[1.03] active:scale-95 sm:h-12 sm:w-12">
+                <i class="ri-send-plane-fill text-lg sm:text-xl"></i>
               </button>
             </div>
           </form>
         </div>
-
       </div>
     </main>
-
   </div>
 
-  <!-- Global Reaction Picker Template (hidden) -->
-  <div id="globalEmojiPicker" class="hidden fixed z-50 bg-slate-900 border border-white/10 rounded-3xl p-4 shadow-2xl flex flex-wrap gap-2 ring-1 ring-white/10 max-w-[280px]">
-     <button type="button" data-emoji="👍" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">👍</button>
-     <button type="button" data-emoji="❤️" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">❤️</button>
-     <button type="button" data-emoji="🔥" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🔥</button>
-     <button type="button" data-emoji="😂" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">😂</button>
-     <button type="button" data-emoji="😮" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">😮</button>
-     <button type="button" data-emoji="👏" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">👏</button>
-     <button type="button" data-emoji="🚀" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🚀</button>
-     <button type="button" data-emoji="✨" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">✨</button>
-     <button type="button" data-emoji="💯" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">💯</button>
-     <button type="button" data-emoji="🤩" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🤩</button>
-     <button type="button" data-emoji="💡" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">💡</button>
-     <button type="button" data-emoji="😢" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">😢</button>
-     <button type="button" data-emoji="✅" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">✅</button>
-     <button type="button" data-emoji="❌" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">❌</button>
-     <button type="button" data-emoji="🎉" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🎉</button>
-     <button type="button" data-emoji="🙌" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🙌</button>
-     <button type="button" data-emoji="🤔" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">🤔</button>
-     <button type="button" data-emoji="👀" class="emoji-btn w-10 h-10 flex items-center justify-center text-xl hover:bg-white/10 rounded-xl transition-all hover:scale-110 active:scale-90">👀</button>
+  <div id="globalEmojiPicker" class="hidden fixed z-50 max-w-[260px] rounded-[1.4rem] border border-white/10 bg-slate-900/95 p-3 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
+    <div class="grid grid-cols-6 gap-1.5">
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128077;">&#128077;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#10084;&#65039;">&#10084;&#65039;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128293;">&#128293;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128514;">&#128514;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128562;">&#128562;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128079;">&#128079;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128640;">&#128640;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#10024;">&#10024;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128175;">&#128175;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#129321;">&#129321;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128161;">&#128161;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128546;">&#128546;</button>
+    </div>
   </div>
 </section>
 
 <script>
-(function() {
-  const container = document.getElementById('messagesContainer');
-  const threadId = container.dataset.threadId;
-  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-  const typingIndicator = document.getElementById('typingIndicator');
-  const threadStatus = document.getElementById('participantStatus');
-  const picker = document.getElementById('globalEmojiPicker');
-  let lastId = 0;
-  let activeReactionMsgId = null;
-  let isTyping = false;
-  let typingTimeout = null;
+  (function() {
+    const container = document.getElementById('messagesContainer');
+    if (!container) return;
 
-  function scrollToBottom() { container.scrollTop = container.scrollHeight; }
-  scrollToBottom();
+    const threadId = container.dataset.threadId;
+    const form = document.getElementById('messageForm');
+    const input = document.getElementById('messageInput');
+    const fileInput = document.getElementById('fileAttachment');
+    const filePreview = document.getElementById('filePreview');
+    const replyBar = document.getElementById('replyBar');
+    const parentInput = document.getElementById('parentInput');
+    const csrfToken = document.querySelector('#messageForm [name=csrfmiddlewaretoken]').value;
+    const typingIndicator = document.getElementById('typingIndicator');
+    const participantStatus = document.getElementById('participantStatus');
+    const picker = document.getElementById('globalEmojiPicker');
+    const supportsEventSource = typeof window.EventSource !== 'undefined';
 
-  const msgElements = container.querySelectorAll('[data-msg-id]');
-  if(msgElements.length) lastId = Math.max(...Array.from(msgElements).map(el => parseInt(el.dataset.msgId)));
+    let lastId = 0;
+    let syncTimer = null;
+    let reconnectTimer = null;
+    let heartbeatTimer = null;
+    let activeReactionMessageId = null;
+    let isSyncing = false;
+    let lastTypingPing = 0;
+    let stream = null;
+    let latestPresence = null;
 
-  const form = document.getElementById('messageForm');
-  const input = document.getElementById('messageInput');
-  const fileInput = document.getElementById('fileAttachment');
-
-  // Event Delegation ──────────────────────────────────────────
-  document.addEventListener('click', (e) => {
-    // Reply Button
-    const replyBtn = e.target.closest('.reply-btn');
-    if(replyBtn) {
-      const { id, user, content } = replyBtn.dataset;
-      document.getElementById('parentInput').value = id;
-      document.getElementById('replyUser').innerText = user;
-      document.getElementById('replyContent').innerText = content;
-      document.getElementById('replyBar').classList.remove('hidden');
-      input.focus();
-      return;
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    // Reaction Badge Click (from Row)
-    const badge = e.target.closest('.reaction-badge');
-    if(badge) {
-      sendReaction(badge.dataset.emoji, badge.dataset.id);
-      return;
+    function formatTime(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      if (Number.isNaN(date.getTime())) return '';
+      return new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' }).format(date);
     }
 
-    // Reaction Trigger (the happy face button)
-    const reactTrigger = e.target.closest('.reaction-trigger');
-    if(reactTrigger) {
-      const rect = reactTrigger.getBoundingClientRect();
-      activeReactionMsgId = reactTrigger.dataset.id;
-      picker.style.top = (rect.top - 55) + 'px';
-      picker.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-      picker.classList.toggle('hidden');
-      return;
+    function getSeenTitle(timestamp) {
+      const label = formatTime(timestamp);
+      return label ? `Seen at ${label}` : '';
     }
 
-    // Emoji Selection
-    const emojiBtn = e.target.closest('.emoji-btn');
-    if(emojiBtn) {
-      sendReaction(emojiBtn.dataset.emoji);
-      return;
+    function formatRelativeTime(timestamp) {
+      if (!timestamp) return 'Offline';
+      const date = new Date(timestamp);
+      if (Number.isNaN(date.getTime())) return 'Offline';
+      const diffSeconds = Math.round((date.getTime() - Date.now()) / 1000);
+      const absSeconds = Math.abs(diffSeconds);
+      const formatter = new Intl.RelativeTimeFormat([], { numeric: 'auto' });
+
+      if (absSeconds < 60) return formatter.format(diffSeconds, 'second');
+      if (absSeconds < 3600) return formatter.format(Math.round(diffSeconds / 60), 'minute');
+      if (absSeconds < 86400) return formatter.format(Math.round(diffSeconds / 3600), 'hour');
+      return formatter.format(Math.round(diffSeconds / 86400), 'day');
     }
 
-    // Attachment Button
-    if(e.target.closest('#attachBtn')) {
-      fileInput.click();
-      return;
-    }
-
-    // Cancel Reply
-    if(e.target.closest('#cancelReplyBtn')) {
-      cancelReply();
-      return;
-    }
-
-    // Clear File
-    if(e.target.closest('#clearFileBtn')) {
-      clearAttachment();
-      return;
-    }
-
-    // Close picker when clicking outside
-    if(!picker.contains(e.target)) picker.classList.add('hidden');
-  });
-
-  // 1. Sending ──────────────────────────────────────────────────
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-    const content = input.value.trim();
-    const file = fileInput.files[0];
-    const parentId = document.getElementById('parentInput').value;
-
-    if(!content && !file) return;
-
-    const fd = new FormData();
-    fd.append('content', content);
-    if(parentId) fd.append('parent_id', parentId);
-    if(file) {
-      if(file.type.startsWith('image/')) fd.append('image', file);
-      else fd.append('file', file);
-    }
-
-    input.value = '';
-    input.style.height = 'auto';
-    cancelReply();
-    clearAttachment();
-
-    try {
-      const r = await fetch(`/chat/${threadId}/send/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: fd
+    function applyFormattedTimes(scope) {
+      scope.querySelectorAll('.js-message-time').forEach((element) => {
+        const formatted = formatTime(element.dataset.timestamp);
+        if (formatted) element.textContent = formatted;
       });
-      const data = await r.json();
-      if(data.success && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) appendMessage(data.message);
-    } catch(err) { console.error(err); }
-  };
-
-  // 2. Real-time Polling ───────────────────────────────────────
-  async function poll() {
-    try {
-      const r = await fetch(`/chat/${threadId}/fetch/?after=${lastId}`);
-      const data = await r.json();
-      (data.messages || []).forEach(m => {
-        if(!container.querySelector(`[data-msg-id="${m.id}"]`)) appendMessage(m);
+      scope.querySelectorAll('.js-seen-status[data-read-at]').forEach((icon) => {
+        const title = getSeenTitle(icon.dataset.readAt);
+        if (title) icon.title = title;
       });
+    }
 
-      // 2b. Thread Status (Seen/Typing/Reactions)
-      const rs = await fetch(`/chat/${threadId}/status/`);
-      const sdata = await rs.json();
-      
-      if(sdata.is_typing) {
-        typingIndicator.classList.remove('hidden');
-        threadStatus.classList.add('hidden');
-      } else {
-        typingIndicator.classList.add('hidden');
-        threadStatus.classList.remove('hidden');
+    function updateLastMessageId() {
+      const ids = Array.from(container.querySelectorAll('[data-msg-id]'))
+        .map((item) => parseInt(item.dataset.msgId, 10))
+        .filter((value) => !Number.isNaN(value));
+      lastId = ids.length ? Math.max(...ids) : 0;
+    }
+
+    function isNearBottom() {
+      return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    }
+
+    function scrollToBottom(force) {
+      if (force || isNearBottom()) container.scrollTop = container.scrollHeight;
+    }
+
+    function setTypingVisible(visible) {
+      typingIndicator.classList.toggle('hidden', !visible);
+      typingIndicator.classList.toggle('flex', visible);
+      participantStatus.classList.toggle('hidden', visible);
+    }
+
+    function updatePresenceStatus(presence) {
+      latestPresence = presence;
+      if (!presence) return;
+      if (presence.is_online && presence.is_active_here) {
+        participantStatus.textContent = 'Online now';
+        return;
       }
-
-      // Update seen icons
-      if(sdata.seen_status.is_read) {
-        container.querySelectorAll('.ri-check-line').forEach(icon => {
-           icon.className = 'ri-double-check-line text-sky-400 text-xs';
-           icon.title = 'Seen at ' + sdata.seen_status.read_at;
-        });
+      if (presence.is_online) {
+        participantStatus.textContent = 'Online';
+        return;
       }
-
-      // Update Reactions
-      (sdata.reaction_updates || []).forEach(update => {
-        updateMessageReactions(update.id, update.reactions);
-      });
-    } catch(err) { console.error('Poll error', err); }
-  }
-  setInterval(poll, 3000);
-
-  // 3. Typing Notification ────────────────────────────────────
-  input.oninput = () => {
-    if(!isTyping) {
-      isTyping = true;
-      fetch(`/chat/${threadId}/typing/`);
+      if (presence.last_seen_raw) {
+        participantStatus.textContent = `Last seen ${formatRelativeTime(presence.last_seen_raw)}`;
+        return;
+      }
+      participantStatus.textContent = 'Offline';
     }
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => { isTyping = false; }, 3000);
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 150) + 'px';
-  };
 
-  // 4. Utils ──────────────────────────────────────────────────
-  function appendMessage(m) {
-    const div = document.createElement('div');
-    div.className = `msg-wrapper flex ${m.is_mine ? 'justify-end' : 'justify-start'} group`;
-    div.dataset.msgId = m.id;
-    
-    div.innerHTML = `
-      <div class="flex flex-col ${m.is_mine ? 'items-end' : 'items-start'} max-w-[80%] relative">
-        ${m.parent ? `
-          <div class="quote-bubble px-3 py-1.5 rounded-t-xl mb-1 text-[11px] text-slate-400 max-w-full truncate">
-             <span class="font-black text-white/40 block uppercase text-[8px]">Replying to ${m.parent.sender}</span>
-             ${m.parent.content}
-          </div>
-        ` : ''}
-        <div class="${m.is_mine ? 'bubble-sent' : 'bubble-received'} px-5 py-3 relative shadow-lg">
-          ${m.message_type === 'image' ? `
-            <a href="${m.image_url}" target="_blank" class="block mb-3 rounded-xl overflow-hidden border border-white/5">
-              <img src="${m.image_url}" class="max-w-full h-auto max-h-64 object-contain">
-            </a>
-          ` : ''}
-          ${m.message_type === 'video' ? `<video controls class="max-w-full h-auto max-h-64 mb-3 rounded-xl border border-white/5"><source src="${m.file_url}"></video>` : ''}
-          ${m.message_type === 'file' ? `
-            <a href="${m.file_url}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 mb-3 hover:bg-white/10 transition-all">
-              <i class="ri-file-text-line text-2xl text-sky-400"></i>
-              <div class="min-w-0">
-                 <p class="text-[11px] font-bold text-slate-200 truncate">${m.file_name}</p>
-                 <p class="text-[9px] text-slate-500 uppercase font-black">Download Asset</p>
-              </div>
-            </a>
-          ` : ''}
-          ${m.content ? `<p class="text-[13px] text-slate-100 font-medium leading-relaxed whitespace-pre-wrap break-words">${m.content}</p>` : ''}
-          <div class="flex flex-wrap gap-1 mt-2 reactions-row" id="reactions-${m.id}">
-             ${(m.reactions || []).map(r => `
-               <span class="px-2 py-0.5 rounded-full ${r.reacted ? 'bg-sky-500/20 border-sky-500/30' : 'bg-slate-800/80 border-white/5'} border text-[10px] reaction-badge flex items-center gap-1 transition-all hover:scale-105 cursor-pointer"
-                     onclick="sendReaction('${r.emoji}', ${m.id})">
-                 <span>${r.emoji}</span>
-                 ${r.count > 1 ? `<span class="font-bold text-slate-400">${r.count}</span>` : ''}
-               </span>
-             `).join('')}
-          </div>
-        </div>
-        <div class="flex items-center gap-2 mt-1.5">
-           <button type="button" class="reply-btn opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-sky-400 font-black uppercase transition-all" data-id="${m.id}" data-user="${m.sender}" data-content="${m.content}">Reply</button>
-           <span class="text-[10px] text-slate-500 font-bold">${m.created_at}</span>
-           ${m.is_mine ? `<i class="${m.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs"></i>` : ''}
-        </div>
-        <button type="button" class="reaction-trigger opacity-0 absolute top-2 ${m.is_mine ? '-left-8' : '-right-8'} w-6 h-6 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:text-yellow-400 transition-all" data-id="${m.id}">
-          <i class="ri-emotion-happy-line text-sm"></i>
+    function handleStatusPayload(status) {
+      if (!status) return;
+      setTypingVisible(Boolean(status.is_typing));
+      updateSeenStatus(status.seen_status);
+      updatePresenceStatus(status.presence);
+      (status.reaction_updates || []).forEach((update) => updateMessageReactions(update.id, update.reactions));
+    }
+
+    function cancelReply() {
+      parentInput.value = '';
+      replyBar.classList.add('hidden');
+      replyBar.classList.remove('flex');
+    }
+
+    function clearAttachment() {
+      fileInput.value = '';
+      filePreview.classList.add('hidden');
+      filePreview.classList.remove('flex');
+    }
+
+    function renderReactionButtons(reactions, messageId) {
+      return (reactions || []).map((reaction) => `
+        <button type="button" class="reaction-badge inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] ${reaction.reacted ? 'border-sky-400/30 bg-sky-500/15 text-sky-100' : 'border-white/8 bg-slate-950/35 text-slate-300'}" data-emoji="${escapeHtml(reaction.emoji)}" data-id="${messageId}">
+          <span>${reaction.emoji}</span>
+          ${reaction.count > 1 ? `<span class="font-bold text-slate-400">${reaction.count}</span>` : ''}
         </button>
-      </div>
-    `;
-    
-    container.appendChild(div);
-    lastId = Math.max(lastId, m.id);
-    scrollToBottom();
-  }
+      `).join('');
+    }
 
-  window.cancelReply = () => {
-    document.getElementById('parentInput').value = '';
-    document.getElementById('replyBar').classList.add('hidden');
-  };
+    function renderMessage(message) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `msg-wrapper flex ${message.is_mine ? 'justify-end' : 'justify-start'}`;
+      wrapper.dataset.msgId = message.id;
 
-  fileInput.onchange = () => {
-    const file = fileInput.files[0];
-    if(!file) return;
-    document.getElementById('previewName').innerText = file.name;
-    document.getElementById('previewSize').innerText = (file.size / 1024).toFixed(1) + ' KB';
-    document.getElementById('filePreview').classList.remove('hidden');
-  };
+      const replyMarkup = message.parent ? `
+        <div class="reply-chip w-full rounded-2xl px-3 py-2 text-[11px] text-slate-400">
+          <span class="block text-[9px] font-black uppercase tracking-[0.18em] text-sky-400/90">Replying to ${escapeHtml(message.parent.sender)}</span>
+          ${escapeHtml(message.parent.content)}
+        </div>
+      ` : '';
 
-  window.clearAttachment = () => {
-    fileInput.value = '';
-    document.getElementById('filePreview').classList.add('hidden');
-  };
+      let attachmentMarkup = '';
+      if (message.message_type === 'image' && message.image_url) {
+        attachmentMarkup = `<a href="${escapeHtml(message.image_url)}" target="_blank" rel="noopener noreferrer" class="mb-3 block overflow-hidden rounded-2xl border border-white/10"><img src="${escapeHtml(message.image_url)}" alt="Shared image" class="max-h-72 w-full object-contain"></a>`;
+      } else if (message.message_type === 'video' && message.file_url) {
+        attachmentMarkup = `<video controls class="mb-3 max-h-72 w-full rounded-2xl border border-white/10"><source src="${escapeHtml(message.file_url)}"></video>`;
+      } else if (message.message_type === 'file' && message.file_url) {
+        attachmentMarkup = `<a href="${escapeHtml(message.file_url)}" target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10"><div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400"><i class="ri-file-line text-xl"></i></div><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-100">${escapeHtml(message.file_name || 'Attachment')}</p><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p></div></a>`;
+      }
 
-  function updateMessageReactions(msgId, reactions) {
-    const row = document.getElementById(`reactions-${msgId}`);
-    if(!row) return;
-    
-    row.innerHTML = (reactions || []).map(r => `
-      <span class="px-2 py-0.5 rounded-full ${r.reacted ? 'bg-sky-500/20 border-sky-500/30' : 'bg-slate-800/80 border-white/5'} border text-[10px] reaction-badge flex items-center gap-1 transition-all hover:scale-105 cursor-pointer"
-            onclick="sendReaction('${r.emoji}', ${msgId})">
-        <span>${r.emoji}</span>
-        ${r.count > 1 ? `<span class="font-bold text-slate-400">${r.count}</span>` : ''}
-      </span>
-    `).join('');
-  }
+      wrapper.innerHTML = `
+        <div class="flex w-full max-w-[92%] flex-col gap-1.5 ${message.is_mine ? 'items-end sm:max-w-[78%]' : 'items-start sm:max-w-[78%]'}">
+          ${replyMarkup}
+          <div class="${message.is_mine ? 'bubble-sent' : 'bubble-received'} w-full px-4 py-3 sm:px-5">
+            ${attachmentMarkup}
+            ${message.content ? `<p class="whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-100 sm:text-sm">${escapeHtml(message.content)}</p>` : ''}
+            <div class="reactions-row mt-3 flex flex-wrap gap-1.5" id="reactions-${message.id}">${renderReactionButtons(message.reactions, message.id)}</div>
+          </div>
+          <div class="flex w-full flex-wrap items-center gap-2 ${message.is_mine ? 'justify-end' : 'justify-start'}">
+            <div class="message-actions flex items-center gap-2">
+              <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="${message.id}" data-user="${escapeHtml(message.sender)}" data-content="${escapeHtml(message.content || '')}">Reply</button>
+              <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-yellow-300" data-id="${message.id}"><i class="ri-emotion-happy-line text-sm"></i></button>
+            </div>
+            <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="${escapeHtml(message.timestamp_raw)}">${escapeHtml(message.created_at || '')}</span>
+            ${message.is_mine ? `<i class="js-seen-status ${message.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs" data-mine="true" ${message.read_at_raw ? `data-read-at="${escapeHtml(message.read_at_raw)}"` : ''} title="${escapeHtml(getSeenTitle(message.read_at_raw))}"></i>` : ''}
+          </div>
+        </div>
+      `;
 
-  window.sendReaction = async (emoji, forceMsgId = null) => {
-    const msgId = forceMsgId || activeReactionMsgId;
-    if(!msgId) return;
-    
-    picker.classList.add('hidden');
-    try {
-      const r = await fetch(`/chat/message/${msgId}/react/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken },
-        body: new URLSearchParams({ emoji })
+      applyFormattedTimes(wrapper);
+      return wrapper;
+    }
+
+    function updateMessageReactions(messageId, reactions) {
+      const row = document.getElementById(`reactions-${messageId}`);
+      if (row) row.innerHTML = renderReactionButtons(reactions, messageId);
+    }
+
+    function updateSeenStatus(seenStatus) {
+      if (!seenStatus) return;
+      const mineIcons = Array.from(container.querySelectorAll('.js-seen-status[data-mine="true"]'));
+      const lastMineIcon = mineIcons[mineIcons.length - 1];
+      if (!lastMineIcon || !seenStatus.is_read) return;
+      lastMineIcon.className = 'js-seen-status ri-double-check-line text-sky-400 text-xs';
+      if (seenStatus.read_at_raw) {
+        lastMineIcon.dataset.readAt = seenStatus.read_at_raw;
+        lastMineIcon.title = getSeenTitle(seenStatus.read_at_raw);
+      }
+    }
+
+    async function sendReaction(emoji, messageId) {
+      try {
+        const response = await fetch(`/chat/message/${messageId}/react/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          body: new URLSearchParams({ emoji }),
+        });
+        const data = await response.json();
+        if (data.status === 'ok') updateMessageReactions(messageId, data.reactions);
+      } catch (error) {
+        console.error('Reaction error', error);
+      }
+    }
+
+    async function sendPresenceHeartbeat() {
+      if (document.hidden) return;
+      try {
+        await fetch(`/chat/${threadId}/presence/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+        });
+      } catch (error) {
+        console.error('Presence error', error);
+      }
+    }
+
+    function startPresenceHeartbeat() {
+      clearInterval(heartbeatTimer);
+      sendPresenceHeartbeat();
+      heartbeatTimer = window.setInterval(sendPresenceHeartbeat, 20000);
+    }
+
+    function connectStream() {
+      if (!supportsEventSource) {
+        scheduleSync(3000);
+        return;
+      }
+
+      if (stream) {
+        stream.close();
+      }
+
+      clearTimeout(reconnectTimer);
+      stream = new EventSource(`/chat/${threadId}/stream/?last_id=${lastId}`);
+
+      stream.addEventListener('messages', (event) => {
+        const messages = JSON.parse(event.data || '[]');
+        const stickToBottom = isNearBottom();
+        messages.forEach((message) => {
+          if (!container.querySelector(`[data-msg-id="${message.id}"]`)) {
+            container.appendChild(renderMessage(message));
+          }
+        });
+        if (messages.length) {
+          updateLastMessageId();
+          scrollToBottom(stickToBottom);
+        }
       });
-      const data = await r.json();
-      if(data.status === 'ok') {
-        updateMessageReactions(msgId, data.reactions);
-      } 
-    } catch(err) { console.error(err); }
-  }
 
-})();
+      stream.addEventListener('status', (event) => {
+        handleStatusPayload(JSON.parse(event.data || '{}'));
+      });
+
+      stream.onerror = () => {
+        if (stream) {
+          stream.close();
+          stream = null;
+        }
+        if (!document.hidden) {
+          reconnectTimer = window.setTimeout(connectStream, 3000);
+        }
+      };
+    }
+
+    function scheduleSync(delay) {
+      clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(syncThread, delay);
+    }
+
+    async function syncThread() {
+      if (isSyncing) return;
+      isSyncing = true;
+      try {
+        const response = await fetch(`/chat/${threadId}/fetch/?after=${lastId}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const data = await response.json();
+        const stickToBottom = isNearBottom();
+        (data.messages || []).forEach((message) => {
+          if (!container.querySelector(`[data-msg-id="${message.id}"]`)) {
+            container.appendChild(renderMessage(message));
+          }
+        });
+        if (data.messages && data.messages.length) {
+          updateLastMessageId();
+          scrollToBottom(stickToBottom);
+        }
+        handleStatusPayload(data.status);
+      } catch (error) {
+        console.error('Sync error', error);
+      } finally {
+        isSyncing = false;
+        scheduleSync(document.hidden ? 10000 : 3000);
+      }
+    }
+
+    async function notifyTyping() {
+      const now = Date.now();
+      if (now - lastTypingPing < 1500) return;
+      lastTypingPing = now;
+      try {
+        await fetch(`/chat/${threadId}/typing/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+        });
+      } catch (error) {
+        console.error('Typing error', error);
+      }
+    }
+
+    document.addEventListener('click', (event) => {
+      const replyButton = event.target.closest('.reply-btn');
+      if (replyButton) {
+        parentInput.value = replyButton.dataset.id;
+        document.getElementById('replyUser').textContent = replyButton.dataset.user || '';
+        document.getElementById('replyContent').textContent = replyButton.dataset.content || 'Attachment';
+        replyBar.classList.remove('hidden');
+        replyBar.classList.add('flex');
+        input.focus();
+        return;
+      }
+
+      const reactionBadge = event.target.closest('.reaction-badge');
+      if (reactionBadge) {
+        sendReaction(reactionBadge.dataset.emoji, reactionBadge.dataset.id);
+        return;
+      }
+
+      const reactionTrigger = event.target.closest('.reaction-trigger');
+      if (reactionTrigger) {
+        activeReactionMessageId = reactionTrigger.dataset.id;
+        const rect = reactionTrigger.getBoundingClientRect();
+        picker.classList.toggle('hidden');
+        picker.style.top = `${Math.max(16, rect.top - 130)}px`;
+        picker.style.left = `${Math.min(window.innerWidth - 276, Math.max(12, rect.left - 108))}px`;
+        return;
+      }
+
+      const emojiButton = event.target.closest('.emoji-btn');
+      if (emojiButton && activeReactionMessageId) {
+        picker.classList.add('hidden');
+        sendReaction(emojiButton.dataset.emoji, activeReactionMessageId);
+        activeReactionMessageId = null;
+        return;
+      }
+
+      if (event.target.closest('#attachBtn')) {
+        fileInput.click();
+        return;
+      }
+
+      if (event.target.closest('#clearFileBtn')) {
+        clearAttachment();
+        return;
+      }
+
+      if (event.target.closest('#cancelReplyBtn')) {
+        cancelReply();
+        return;
+      }
+
+      if (!picker.contains(event.target)) picker.classList.add('hidden');
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const content = input.value.trim();
+      const file = fileInput.files[0];
+      if (!content && !file) return;
+
+      const payload = new FormData();
+      payload.append('content', content);
+      if (parentInput.value) payload.append('parent_id', parentInput.value);
+      if (file) {
+        if (file.type.startsWith('image/')) payload.append('image', file);
+        else payload.append('file', file);
+      }
+
+      try {
+        const response = await fetch(`/chat/${threadId}/send/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrfToken },
+          body: payload,
+        });
+        const data = await response.json();
+        if (data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
+          container.appendChild(renderMessage(data.message));
+          updateLastMessageId();
+          scrollToBottom(true);
+        }
+      } catch (error) {
+        console.error('Send error', error);
+      } finally {
+        input.value = '';
+        input.style.height = 'auto';
+        cancelReply();
+        clearAttachment();
+      }
+    });
+
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, 144)}px`;
+      notifyTyping();
+    });
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        clearAttachment();
+        return;
+      }
+      document.getElementById('previewName').textContent = file.name;
+      document.getElementById('previewSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+      filePreview.classList.remove('hidden');
+      filePreview.classList.add('flex');
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (stream) {
+          stream.close();
+          stream = null;
+        }
+        clearTimeout(reconnectTimer);
+        if (!supportsEventSource) {
+          scheduleSync(10000);
+        }
+        return;
+      }
+
+      sendPresenceHeartbeat();
+      if (supportsEventSource) {
+        clearTimeout(syncTimer);
+        connectStream();
+      } else {
+        scheduleSync(500);
+      }
+    });
+
+    window.setInterval(() => {
+      if (!typingIndicator.classList.contains('hidden')) return;
+      if (latestPresence && !latestPresence.is_online && latestPresence.last_seen_raw) {
+        updatePresenceStatus(latestPresence);
+      }
+    }, 30000);
+
+    applyFormattedTimes(document);
+    updateLastMessageId();
+    scrollToBottom(true);
+    updatePresenceStatus({ is_online: false, is_active_here: false, last_seen_raw: null });
+    startPresenceHeartbeat();
+    if (supportsEventSource) {
+      connectStream();
+    } else {
+      scheduleSync(3000);
+    }
+  })();
 </script>
 {% endblock %}
