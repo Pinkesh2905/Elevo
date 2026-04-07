@@ -95,6 +95,50 @@
     --bubble-received-bg: rgba(127, 29, 29, 0.85);
   }
 
+  [data-theme="cutee"] {
+    --chat-bg-image: url('{% static "core/themes/cutee.jpeg" %}');
+    --chat-bg-color: rgba(251, 207, 232, 0.2);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(236, 72, 153, 0.5), rgba(190, 24, 93, 0.7));
+    --bubble-sent-border: rgba(244, 114, 182, 0.4);
+    --bubble-received-bg: rgba(255, 255, 255, 0.85);
+    --bubble-received-text: #1e293b;
+    --bubble-received-border: rgba(251, 207, 232, 0.4);
+  }
+
+  [data-theme="hands_in_hands"] {
+    --chat-bg-image: url('{% static "core/themes/hands_in_hands.jpeg" %}');
+    --chat-bg-color: rgba(24, 24, 27, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(161, 161, 170, 0.4), rgba(63, 63, 70, 0.6));
+    --bubble-sent-border: rgba(212, 212, 216, 0.3);
+    --bubble-received-bg: rgba(24, 24, 27, 0.85);
+  }
+
+  [data-theme="love_2"] {
+    --chat-bg-image: url('{% static "core/themes/love_2.jpeg" %}');
+    --chat-bg-color: rgba(69, 10, 10, 0.25);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(220, 38, 38, 0.45), rgba(153, 27, 27, 0.65));
+    --bubble-sent-border: rgba(248, 113, 113, 0.4);
+    --bubble-received-bg: rgba(255, 255, 255, 0.9);
+    --bubble-received-text: #450a0a;
+  }
+
+  [data-theme="milk_mocha"] {
+    --chat-bg-image: url('{% static "core/themes/milk_mocha.jpeg" %}');
+    --chat-bg-color: rgba(254, 250, 232, 0.15);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(161, 98, 7, 0.4), rgba(133, 77, 14, 0.6));
+    --bubble-sent-border: rgba(202, 138, 4, 0.3);
+    --bubble-received-bg: rgba(254, 250, 232, 0.9);
+    --bubble-received-text: #422006;
+  }
+
+  [data-theme="red_purple_hearts"] {
+    --chat-bg-image: url('{% static "core/themes/red_purple_hearts.jpeg" %}');
+    --chat-bg-color: rgba(88, 28, 135, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(126, 34, 206, 0.5), rgba(107, 33, 168, 0.7));
+    --bubble-sent-border: rgba(168, 85, 247, 0.4);
+    --bubble-received-bg: rgba(88, 28, 135, 0.85);
+  }
+
   .theme-wrapper {
     background-color: var(--chat-bg-color);
     background-image: var(--chat-bg-image);
@@ -440,6 +484,11 @@
         <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_emerald.png' %}');" data-theme-val="emerald" title="Emerald"></button>
         <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_lavender.png' %}');" data-theme-val="lavender" title="Lavender Love"></button>
         <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_rose.png' %}');" data-theme-val="rose" title="Rose Passion"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/cutee.jpeg' %}');" data-theme-val="cutee" title="Cutee"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/hands_in_hands.jpeg' %}');" data-theme-val="hands_in_hands" title="Hands in Hands"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/love_2.jpeg' %}');" data-theme-val="love_2" title="Love 2"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/milk_mocha.jpeg' %}');" data-theme-val="milk_mocha" title="Milk Mocha"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/red_purple_hearts.jpeg' %}');" data-theme-val="red_purple_hearts" title="Red Purple Hearts"></button>
       </div>
     </div>
   </div>

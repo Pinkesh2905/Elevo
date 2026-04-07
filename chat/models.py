@@ -14,6 +14,11 @@ class ChatThread(models.Model):
         ('sunset', 'Sunset'),
         ('cyberpunk', 'Cyberpunk'),
         ('forest', 'Forest'),
+        ('cutee', 'Cutee'),
+        ('hands_in_hands', 'Hands in Hands'),
+        ('love_2', 'Love 2'),
+        ('milk_mocha', 'Milk Mocha'),
+        ('red_purple_hearts', 'Red Purple Hearts'),
     ]
     theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='default')
     created_at = models.DateTimeField(auto_now_add=True)
