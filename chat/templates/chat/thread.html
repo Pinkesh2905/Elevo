@@ -232,18 +232,30 @@
 {% block content %}
 <section class="chat-shell px-3 py-3 sm:px-4 sm:py-6">
   <div class="chat-layout mx-auto grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
-    <aside class="chat-column hidden lg:col-span-4 lg:block xl:col-span-3">
+    <aside id="inboxSidebar" class="chat-column {% if not inbox_mode %}hidden lg:block{% endif %} lg:col-span-4 xl:col-span-3">
       <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/55 backdrop-blur-2xl">
         <div class="flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div>
             <p class="text-[10px] font-black uppercase tracking-[0.22em] text-sky-400">Inbox</p>
-            <h2 class="mt-1 text-base font-black text-slate-100">Active Threads</h2>
+            <h2 class="mt-1 text-base font-black text-slate-100">Talk To Others</h2>
           </div>
-          <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
-            <i class="ri-layout-grid-line text-lg"></i>
-          </a>
+          <div class="flex items-center gap-2">
+            <button id="newMessageBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 transition hover:bg-sky-500/20 hover:text-white" title="New Message">
+              <i class="ri-user-add-line text-lg"></i>
+            </button>
+            <a href="{% url 'chat:inbox' %}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white" title="Refresh">
+              <i class="ri-refresh-line text-lg"></i>
+            </a>
+          </div>
         </div>
-        <div class="chat-sidebar divide-y divide-white/5">
+        <!-- Search Bar -->
+        <div class="px-5 pt-4 pb-3 border-b border-white/5 bg-slate-900/20">
+           <div class="relative">
+             <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+             <input type="text" id="threadSearch" placeholder="Search conversations..." class="w-full rounded-xl border border-white/5 bg-white/5 py-2 pl-9 pr-4 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/30">
+           </div>
+        </div>
+        <div id="socialThreadList" class="chat-sidebar divide-y divide-white/5">
           {% for item in thread_list %}
             <a href="{% url 'chat:thread' item.thread.id %}" class="sidebar-thread flex items-center gap-3 px-5 py-4 {% if item.thread.id == thread.id %}active{% endif %}">
               <div class="relative shrink-0">
@@ -273,11 +285,14 @@
               </div>
             </a>
           {% endfor %}
+          <div id="noThreadResults" class="hidden py-10 text-center">
+            <p class="text-sm font-bold text-slate-500">No conversations found.</p>
+          </div>
         </div>
       </div>
     </aside>
 
-    <main class="chat-column h-full min-h-0 lg:col-span-8 xl:col-span-9">
+    <main id="mainChatArea" class="chat-column h-full min-h-0 {% if inbox_mode %}hidden lg:block{% endif %} lg:col-span-8 xl:col-span-9">
       
       <!-- ─── Thread View ─── -->
       <div id="chatThreadView" class="{% if inbox_mode %}hidden{% endif %} h-full">
@@ -520,87 +535,14 @@
       </div>
     </div>
 
-    <!-- ─── Social Center (Inbox) View ─── -->
-    <div id="socialCenterView" class="{% if not inbox_mode %}hidden{% endif %} flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 shadow-2xl backdrop-blur-3xl">
-      <!-- Header -->
-      <div class="border-b border-white/5 bg-slate-900/40 px-6 py-6 sm:px-8">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h1 class="flex items-center gap-2 text-2xl font-black tracking-tight text-slate-100 sm:text-3xl">
-              <span class="bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent italic">SOCIAL</span> 
-              <span>CENTER</span>
-            </h1>
-            <p class="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Connect | Collaborate | Elevate</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 hidden sm:flex">
-              <div class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
-              <span class="text-[9px] font-black uppercase text-slate-300">Network Online</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search & Control -->
-      <div class="flex flex-col gap-3 border-b border-white/5 bg-slate-950/20 p-4 sm:flex-row sm:p-6">
-        <div class="relative flex-1">
-          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500"></i>
-          <input type="text" id="threadSearch" placeholder="Search conversations..." class="w-full rounded-2xl border border-white/5 bg-white/5 py-3 pl-12 pr-6 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/30">
-        </div>
-        <button id="newMessageBtn" class="flex items-center justify-center gap-2 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-5 py-3 text-xs font-bold uppercase text-sky-400 transition hover:bg-sky-500/20 hover:text-white">
-          <i class="ri-user-add-line text-base"></i> New Message
-        </button>
-      </div>
-
-      <!-- Scrollable List -->
-      <div class="messages-container divide-y divide-white/5" id="socialThreadList">
-        {% if thread_list %}
-          {% for item in thread_list %}
-            <a href="{% url 'chat:thread' item.thread.id %}" class="sidebar-thread flex items-center gap-4 px-6 py-5 sm:px-8" data-username="{{ item.other_user.username|lower }}" data-fullname="{{ item.other_user.get_full_name|lower }}">
-              <div class="relative shrink-0">
-                {% if item.other_user.profile.avatar %}
-                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl border border-white/10 object-cover sm:h-14 sm:w-14">
-                {% else %}
-                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-14 sm:w-14">
-                    {{ item.other_user.username|first|upper }}
-                  </div>
-                {% endif %}
-                {% if item.unread > 0 %}
-                  <span class="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-slate-900 bg-sky-400"></span>
-                {% endif %}
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="truncate text-base font-black text-slate-100">{{ item.other_user.get_full_name|default:item.other_user.username }}</span>
-                  <span class="text-[10px] font-bold text-slate-500 uppercase">{{ item.thread.updated_at|timesince }} ago</span>
-                </div>
-                <div class="flex items-center justify-between gap-3">
-                  <p class="truncate text-xs text-slate-400">
-                    {% if item.last_message and item.last_message.sender == request.user %}
-                      <i class="ri-check-double-line text-sky-400 mr-1"></i>
-                    {% endif %}
-                    {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:100|default:"No messages yet" }}
-                  </p>
-                  {% if item.unread > 0 %}
-                    <span class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-black text-white">{{ item.unread }}</span>
-                  {% endif %}
-                </div>
-              </div>
-            </a>
-          {% endfor %}
-        {% else %}
-          <div class="flex flex-col items-center justify-center py-20 text-center">
-            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
-              <i class="ri-chat-smile-2-line text-3xl text-sky-500/30"></i>
-            </div>
-            <p class="text-sm font-bold text-slate-400">Quiet in here...</p>
-            <button onclick="document.getElementById('newMessageBtn').click()" class="mt-4 text-[10px] font-black uppercase tracking-widest text-sky-400 hover:text-white">Start a conversation</button>
-          </div>
-        {% endif %}
-        <div id="noThreadResults" class="hidden py-20 text-center">
-          <p class="text-sm font-bold text-slate-500">No conversations match your search</p>
-        </div>
-      </div>
+    <!-- ─── Desktop Placeholder (Inbox Mode) ─── -->
+    <div id="socialCenterView" class="{% if not inbox_mode %}hidden{% endif %} flex h-full flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 shadow-2xl backdrop-blur-3xl text-center p-8">
+       <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white/5 border border-white/10 shadow-inner">
+         <i class="ri-chat-smile-2-line text-4xl text-sky-500/50"></i>
+       </div>
+       <h2 class="text-2xl font-black text-slate-100 tracking-tight">Your Messages</h2>
+       <p class="mt-2 text-sm font-medium text-slate-400 max-w-xs">Select an existing conversation from the sidebar or start a new one to begin.</p>
+       <button onclick="document.getElementById('newMessageBtn').click()" class="mt-6 rounded-2xl bg-sky-500/10 px-6 py-3 text-xs font-bold uppercase tracking-wider text-sky-400 hover:bg-sky-500/20 hover:text-white transition">Start New Chat</button>
     </div>
 </main>
   </div>
@@ -1538,13 +1480,33 @@ ${data.code || '// No code provided'}
     const chatThreadView = document.getElementById('chatThreadView');
     const socialCenterView = document.getElementById('socialCenterView');
 
+    const inboxSidebar = document.getElementById('inboxSidebar');
+    const mainChatArea = document.getElementById('mainChatArea');
+
     function toggleView(inboxMode) {
       if (inboxMode) {
+        if (inboxSidebar) {
+           inboxSidebar.classList.remove('hidden');
+           inboxSidebar.classList.add('lg:block');
+        }
+        if (mainChatArea) {
+           mainChatArea.classList.add('hidden');
+           mainChatArea.classList.add('lg:block');
+        }
+
         chatThreadView.classList.add('hidden');
         socialCenterView.classList.remove('hidden');
         if (stream) { stream.close(); stream = null; }
-        document.title = "Social Center | Elevo";
+        document.title = "Inbox | Elevo";
       } else {
+        if (inboxSidebar) {
+           inboxSidebar.classList.add('hidden');
+           inboxSidebar.classList.add('lg:block');
+        }
+        if (mainChatArea) {
+           mainChatArea.classList.remove('hidden');
+        }
+
         socialCenterView.classList.add('hidden');
         chatThreadView.classList.remove('hidden');
       }
