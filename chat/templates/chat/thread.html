@@ -1295,6 +1295,14 @@ ${data.code || '// No code provided'}
         return;
       }
 
+      // Optimistic UI Reset
+      const originalValue = input.value;
+      input.value = '';
+      input.style.height = 'auto';
+      const originalSendHtml = sendBtn.innerHTML;
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i class="ri-loader-4-line animate-spin text-lg"></i>';
+
       const payload = new FormData();
       payload.append('content', content);
       if (parentInput.value) payload.append('parent_id', parentInput.value);
@@ -1302,6 +1310,9 @@ ${data.code || '// No code provided'}
         if (file.type.startsWith('image/')) payload.append('image', file);
         else payload.append('file', file);
       }
+      
+      cancelReply();
+      clearAttachment();
 
       // Fetch fresh CSRF token from cookie for every request
       const freshToken = getCookie('csrftoken') || csrfToken;
@@ -1336,12 +1347,12 @@ ${data.code || '// No code provided'}
         }
       } catch (error) {
         console.error('Send error:', error);
+        input.value = originalValue;
         alert('Failed to send message: ' + error.message);
       } finally {
-        input.value = '';
-        input.style.height = 'auto';
-        cancelReply();
-        clearAttachment();
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = originalSendHtml;
+        updateSendButtonState();
       }
     });
 

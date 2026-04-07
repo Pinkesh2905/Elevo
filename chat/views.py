@@ -17,7 +17,7 @@ from .models import ChatThread, Message, MessageReaction
 
 PRESENCE_TTL_SECONDS = 75
 THREAD_ACTIVITY_TTL_SECONDS = 45
-STREAM_POLL_INTERVAL_SECONDS = 1
+STREAM_POLL_INTERVAL_SECONDS = 2
 STREAM_KEEPALIVE_SECONDS = 15
 
 
@@ -209,12 +209,23 @@ def chat_thread(request, thread_id):
     messages = list(messages_qs)
     messages.reverse()
 
-    # Attach grouped reactions to each message for easier template rendering
+    # Optimized Bulk Fetching of Reactions (Eliminate N+1)
+    message_ids = [m.id for m in messages]
+    all_reactions = (
+        MessageReaction.objects.filter(message_id__in=message_ids)
+        .values('message_id', 'emoji')
+        .annotate(count=Count('id'), reacted=Count('id', filter=Q(user=request.user)))
+    )
+
+    reactions_map = {}
+    for r in all_reactions:
+        m_id = r.pop('message_id')
+        if m_id not in reactions_map:
+            reactions_map[m_id] = []
+        reactions_map[m_id].append(r)
+
     for msg in messages:
-        msg.grouped_reactions = list(
-            msg.reactions.values('emoji')
-            .annotate(count=Count('id'), reacted=Count('id', filter=Q(user=request.user)))
-        )
+        msg.grouped_reactions = reactions_map.get(msg.id, [])
 
     return render(request, 'chat/thread.html', {
         'thread': thread,
@@ -299,8 +310,13 @@ def send_message(request, thread_id):
     })
 
 
-def _serialize_message(msg, user):
-    """Helper to convert Message instance to dict."""
+def _serialize_message(msg, user, reactions=None):
+    """Helper to convert Message instance to dict. Optional reactions can be passed to avoid N+1 queries."""
+    if reactions is None and not msg.is_deleted_for_everyone:
+        reactions = list(msg.reactions.values('emoji').annotate(count=Count('id'), reacted=Count('id', filter=Q(user=user))))
+    elif reactions is None:
+        reactions = []
+
     if msg.is_deleted_for_everyone:
         return {
             'id': msg.id,
@@ -344,7 +360,7 @@ def _serialize_message(msg, user):
             'content': (msg.parent_message.content or msg.parent_message.message_type)[:50],
             'sender': msg.parent_message.sender.username
         } if msg.parent_message else None,
-        'reactions': list(msg.reactions.values('emoji').annotate(count=Count('id'), reacted=Count('id', filter=Q(user=user))))
+        'reactions': reactions
     }
 
 
@@ -377,7 +393,21 @@ def fetch_messages(request, thread_id):
     if incoming.exists():
         incoming.update(is_read=True, read_at=now)
 
-    messages_data = [_serialize_message(msg, request.user) for msg in new_messages]
+    # Bulk Fetch Reactions
+    message_ids = [msg.id for msg in new_messages]
+    all_reactions = (
+        MessageReaction.objects.filter(message_id__in=message_ids)
+        .values('message_id', 'emoji')
+        .annotate(count=Count('id'), reacted=Count('id', filter=Q(user=request.user)))
+    )
+    reactions_map = {}
+    for r in all_reactions:
+        m_id = r.pop('message_id')
+        if m_id not in reactions_map:
+            reactions_map[m_id] = []
+        reactions_map[m_id].append(r)
+
+    messages_data = [_serialize_message(msg, request.user, reactions_map.get(msg.id, [])) for msg in new_messages]
     return JsonResponse({
         'messages': messages_data,
         'status': _build_thread_status(thread, request.user),
@@ -407,7 +437,21 @@ def fetch_older_messages(request, thread_id):
     old_messages = list(old_messages_qs)
     old_messages.reverse()
 
-    messages_data = [_serialize_message(msg, request.user) for msg in old_messages]
+    # Bulk Fetch Reactions
+    message_ids = [msg.id for msg in old_messages]
+    all_reactions = (
+        MessageReaction.objects.filter(message_id__in=message_ids)
+        .values('message_id', 'emoji')
+        .annotate(count=Count('id'), reacted=Count('id', filter=Q(user=request.user)))
+    )
+    reactions_map = {}
+    for r in all_reactions:
+        m_id = r.pop('message_id')
+        if m_id not in reactions_map:
+            reactions_map[m_id] = []
+        reactions_map[m_id].append(r)
+
+    messages_data = [_serialize_message(msg, request.user, reactions_map.get(msg.id, [])) for msg in old_messages]
     return JsonResponse({
         'messages': messages_data,
         'has_more': len(old_messages) == 50
@@ -675,6 +719,7 @@ def global_notifications_stream(request):
             last_id = latest_msg.id if latest_msg else 0
 
         last_unread_total = -1
+        last_unread_total_check = 0
         last_keepalive = time.monotonic()
 
         while True:
@@ -707,30 +752,31 @@ def global_notifications_stream(request):
                     yield f"event: notification\ndata: {json.dumps(payload)}\n\n"
                 last_id = new_messages[-1].id
 
-            # 2. Periodically sync unread counts
-            current_unread_total = (
-                Message.objects
-                .filter(thread__participants=request.user, is_read=False)
-                .exclude(sender=request.user)
-                .exclude(deleted_by=request.user)
-                .exclude(is_deleted_for_everyone=True)
-                .count()
-            )
+            # 2. Periodically sync unread counts (Less frequent than message checks)
+            current_time = time.monotonic()
+            if current_time - last_unread_total_check >= 10: # Only check every 10s or if new msg
+                last_unread_total_check = current_time
+                current_unread_total = (
+                    Message.objects
+                    .filter(thread__participants=request.user, is_read=False)
+                    .exclude(sender=request.user)
+                    .exclude(deleted_by=request.user)
+                    .exclude(is_deleted_for_everyone=True)
+                    .count()
+                )
 
-            if current_unread_total != last_unread_total:
-                last_unread_total = current_unread_total
-                # Also get per-thread breakdown for the sidebar/inbox
-                thread_unread_map = {
-                    t.id: t.unread_count 
-                    for t in user_threads.annotate(
-                        unread_count=Count(
-                            'messages',
-                            filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user) & ~Q(messages__is_deleted_for_everyone=True) & ~Q(messages__deleted_by=request.user)
-                        )
-                    ).filter(unread_count__gt=0)
-                }
-                
-                yield f"event: unread_update\ndata: {json.dumps({'total': current_unread_total, 'threads': thread_unread_map})}\n\n"
+                if current_unread_total != last_unread_total:
+                    last_unread_total = current_unread_total
+                    thread_unread_map = {
+                        t.id: t.unread_count 
+                        for t in user_threads.annotate(
+                            unread_count=Count(
+                                'messages',
+                                filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user) & ~Q(messages__is_deleted_for_everyone=True) & ~Q(messages__deleted_by=request.user)
+                            )
+                        ).filter(unread_count__gt=0)
+                    }
+                    yield f"event: unread_update\ndata: {json.dumps({'total': current_unread_total, 'threads': thread_unread_map})}\n\n"
 
             # 3. Keep-alive
             current_time = time.monotonic()
