@@ -344,6 +344,7 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% block footer %}
     <!-- Engineering Footer -->
     <footer class="mt-20 border-t border-white/5 bg-slate-950/50 backdrop-blur-xl relative pb-12">
         <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
@@ -429,6 +430,7 @@
             </div>
         </div>
     </footer>
+    {% endblock %}
 
     <!-- Mobile Drawer -->
     <div id="mobile-drawer" class="fixed inset-0 z-[150] hidden">
