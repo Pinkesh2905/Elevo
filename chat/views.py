@@ -654,3 +654,93 @@ def search_users(request):
             'avatar_url': avatar_url
         })
     return JsonResponse({'users': results})
+
+
+@login_required
+def global_notifications_stream(request):
+    """
+    Stream notifications for ALL threads the user is a participant in.
+    Used for desktop notifications and real-time unread count updates across the app.
+    """
+    def event_stream():
+        # Get the latest message ID globally to start from
+        try:
+            last_id = int(request.GET.get('last_id', 0))
+        except (TypeError, ValueError):
+            last_id = 0
+
+        # If no last_id provided, start from the current message count to avoid historical floods
+        if last_id == 0:
+            latest_msg = Message.objects.order_by('-id').first()
+            last_id = latest_msg.id if latest_msg else 0
+
+        last_unread_total = -1
+        last_keepalive = time.monotonic()
+
+        while True:
+            close_old_connections()
+            user_threads = ChatThread.objects.filter(participants=request.user)
+            
+            # 1. Check for New Messages in any thread
+            new_messages = list(
+                Message.objects.filter(
+                    thread__in=user_threads,
+                    id__gt=last_id
+                )
+                .exclude(sender=request.user)
+                .exclude(deleted_by=request.user)
+                .exclude(is_deleted_for_everyone=True)
+                .select_related('sender', 'thread')
+                .order_by('id')
+            )
+
+            if new_messages:
+                for msg in new_messages:
+                    payload = {
+                        'type': 'new_message',
+                        'message_id': msg.id,
+                        'thread_id': msg.thread_id,
+                        'sender_name': msg.sender.get_full_name() or msg.sender.username,
+                        'content_snippet': (msg.content or msg.get_message_type_display())[:100],
+                        'timestamp': _iso_local(msg.created_at)
+                    }
+                    yield f"event: notification\ndata: {json.dumps(payload)}\n\n"
+                last_id = new_messages[-1].id
+
+            # 2. Periodically sync unread counts
+            current_unread_total = (
+                Message.objects
+                .filter(thread__participants=request.user, is_read=False)
+                .exclude(sender=request.user)
+                .exclude(deleted_by=request.user)
+                .exclude(is_deleted_for_everyone=True)
+                .count()
+            )
+
+            if current_unread_total != last_unread_total:
+                last_unread_total = current_unread_total
+                # Also get per-thread breakdown for the sidebar/inbox
+                thread_unread_map = {
+                    t.id: t.unread_count 
+                    for t in user_threads.annotate(
+                        unread_count=Count(
+                            'messages',
+                            filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user) & ~Q(messages__is_deleted_for_everyone=True) & ~Q(messages__deleted_by=request.user)
+                        )
+                    ).filter(unread_count__gt=0)
+                }
+                
+                yield f"event: unread_update\ndata: {json.dumps({'total': current_unread_total, 'threads': thread_unread_map})}\n\n"
+
+            # 3. Keep-alive
+            current_time = time.monotonic()
+            if current_time - last_keepalive >= STREAM_KEEPALIVE_SECONDS:
+                last_keepalive = current_time
+                yield ": keep-alive\n\n"
+
+            time.sleep(STREAM_POLL_INTERVAL_SECONDS)
+
+    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response

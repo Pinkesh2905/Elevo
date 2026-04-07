@@ -49,6 +49,9 @@ class UserProfile(models.Model):
     )
     resume_uploaded_at = models.DateTimeField(blank=True, null=True, help_text="When the resume was last uploaded.")
     
+    # Notification Preferences
+    email_notifications_enabled = models.BooleanField(default=True, help_text="Designates if the user wants to receive email alerts for missed messages.")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

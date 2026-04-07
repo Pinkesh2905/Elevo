@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; line-height: 1.6; color: #1e293b; background-color: #f8fafc; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0ea5e9, #6366f1); padding: 32px; text-align: center; color: white; }
+        .content { padding: 32px; }
+        .footer { padding: 24px; text-align: center; font-size: 12px; color: #64748b; background: #f1f5f9; }
+        .message-item { padding: 16px; border-bottom: 1px solid #f1f5f9; }
+        .message-item:last-child { border-bottom: none; }
+        .sender { font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+        .message-text { color: #475569; font-size: 14px; }
+        .btn { display: inline-block; padding: 12px 24px; background: #0ea5e9; color: white; text-decoration: none; border-radius: 12px; font-weight: 700; margin-top: 24px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); }
+        h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.025em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Elevo</h1>
+            <p style="margin-top: 8px; opacity: 0.9; font-weight: 500;">You have missed some messages</p>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.get_full_name|default:user.username }},</p>
+            <p>While you were away, you received <strong>{{ count }}</strong> new message{{ count|pluralize }} on Elevo:</p>
+            
+            <div style="background: #f8fafc; border-radius: 12px; margin: 20px 0; border: 1px solid #f1f5f9;">
+                {% for msg in messages %}
+                <div class="message-item">
+                    <div class="sender">{{ msg.sender.get_full_name|default:msg.sender.username }}</div>
+                    <div class="message-text">
+                        {% if msg.message_type == 'text' %}
+                            {{ msg.content|truncatechars:100 }}
+                        {% else %}
+                            Sent a {{ msg.get_message_type_display }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <center>
+                <a href="https://{{ site_url }}/chat/inbox/" class="btn">View All Messages</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Elevo Platform. All rights reserved.</p>
+            <p>You received this because you have email notifications enabled. <br> You can change this in your profile settings.</p>
+        </div>
+    </div>
+</body>
+</html>

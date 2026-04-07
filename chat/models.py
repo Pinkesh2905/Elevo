@@ -87,6 +87,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
+    email_sent = models.BooleanField(default=False, help_text="Designates if a missed-message notification email has been sent.")
     is_edited = models.BooleanField(default=False)
     is_deleted_for_everyone = models.BooleanField(default=False)
     deleted_by = models.ManyToManyField(User, related_name='deleted_messages', blank=True)

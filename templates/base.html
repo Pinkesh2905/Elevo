@@ -645,5 +645,8 @@
             }
         });
     </script>
+    {% if user.is_authenticated %}
+    <script src="{% static 'core/js/notifications.js' %}"></script>
+    {% endif %}
 </body>
 </html>

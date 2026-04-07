@@ -208,7 +208,11 @@
             </button>
           </div>
 
-          <button id="themePickerBtn" class="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white" title="Change Theme">
+          <button id="soundToggleBtn" class="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white" title="Mute Notification Sounds">
+            <i class="ri-volume-up-line text-lg"></i>
+          </button>
+
+          <button id="themePickerBtn" class="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white" title="Change Theme">
             <i class="ri-palette-line text-lg"></i>
           </button>
         </header>
@@ -430,12 +434,12 @@
       </div>
       <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" id="themeGrid">
         <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent bg-slate-800 hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);" data-theme-val="default" title="Default"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_ocean.png" %}');" data-theme-val="ocean" title="Ocean"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_deep_sea.png" %}');" data-theme-val="deep_sea" title="Deep Sea"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_forest.png" %}');" data-theme-val="forest" title="Forest"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_emerald.png" %}');" data-theme-val="emerald" title="Emerald"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_lavender.png" %}');" data-theme-val="lavender" title="Lavender Love"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_rose.png" %}');" data-theme-val="rose" title="Rose Passion"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_ocean.png' %}');" data-theme-val="ocean" title="Ocean"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_deep_sea.png' %}');" data-theme-val="deep_sea" title="Deep Sea"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_forest.png' %}');" data-theme-val="forest" title="Forest"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_emerald.png' %}');" data-theme-val="emerald" title="Emerald"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_lavender.png' %}');" data-theme-val="lavender" title="Lavender Love"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_rose.png' %}');" data-theme-val="rose" title="Rose Passion"></button>
       </div>
     </div>
   </div>

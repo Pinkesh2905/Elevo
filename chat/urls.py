@@ -20,7 +20,5 @@ urlpatterns = [
     path('message/<int:message_id>/edit/', views.edit_message, name='edit_message'),
     path('message/<int:message_id>/delete/', views.delete_message, name='delete_message'),
     path('<int:thread_id>/theme/', views.update_theme, name='update_theme'),
-    path('message/<int:message_id>/edit/', views.edit_message, name='edit_message'),
-    path('message/<int:message_id>/delete/', views.delete_message, name='delete_message'),
-    path('<int:thread_id>/theme/', views.update_theme, name='update_theme'),
+    path('notifications/stream/', views.global_notifications_stream, name='notifications_stream'),
 ]
