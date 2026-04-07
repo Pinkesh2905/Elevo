@@ -45,6 +45,7 @@
     --bubble-sent-text: #e0f2fe;
     --bubble-received-bg: rgba(15, 23, 42, 0.78);
     --bubble-received-border: rgba(148, 163, 184, 0.18);
+    --bubble-received-text: #cbd5e1;
   }
 
   [data-theme="ocean"] {
@@ -52,7 +53,9 @@
     --chat-bg-color: rgba(8, 47, 73, 0.3);
     --bubble-sent-bg: linear-gradient(135deg, rgba(14, 184, 166, 0.5), rgba(14, 165, 233, 0.8));
     --bubble-sent-border: rgba(56, 189, 248, 0.4);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(8, 47, 73, 0.95);
+    --bubble-received-text: #e0f2fe;
   }
 
   [data-theme="deep_sea"] {
@@ -60,7 +63,9 @@
     --chat-bg-color: rgba(1, 15, 30, 0.4);
     --bubble-sent-bg: linear-gradient(135deg, rgba(2, 132, 199, 0.5), rgba(49, 46, 129, 0.7));
     --bubble-sent-border: rgba(56, 189, 248, 0.3);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(1, 15, 30, 0.92);
+    --bubble-received-text: #e0f2fe;
   }
 
   [data-theme="forest"] {
@@ -68,7 +73,9 @@
     --chat-bg-color: rgba(2, 44, 34, 0.3);
     --bubble-sent-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(5, 150, 105, 0.7));
     --bubble-sent-border: rgba(52, 211, 153, 0.5);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(6, 78, 59, 0.95);
+    --bubble-received-text: #d1fae5;
   }
 
   [data-theme="emerald"] {
@@ -76,7 +83,9 @@
     --chat-bg-color: rgba(6, 78, 59, 0.35);
     --bubble-sent-bg: linear-gradient(135deg, rgba(52, 211, 153, 0.4), rgba(16, 185, 129, 0.6));
     --bubble-sent-border: rgba(110, 231, 183, 0.4);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(6, 78, 59, 0.9);
+    --bubble-received-text: #d1fae5;
   }
 
   [data-theme="lavender"] {
@@ -84,7 +93,9 @@
     --chat-bg-color: rgba(46, 16, 101, 0.25);
     --bubble-sent-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(139, 92, 246, 0.6));
     --bubble-sent-border: rgba(192, 132, 252, 0.4);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(46, 16, 101, 0.85);
+    --bubble-received-text: #ede9fe;
   }
 
   [data-theme="rose"] {
@@ -92,52 +103,61 @@
     --chat-bg-color: rgba(127, 29, 29, 0.3);
     --bubble-sent-bg: linear-gradient(135deg, rgba(244, 63, 94, 0.4), rgba(225, 29, 72, 0.6));
     --bubble-sent-border: rgba(251, 113, 133, 0.4);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(127, 29, 29, 0.85);
+    --bubble-received-text: #ffe4e6;
   }
 
   [data-theme="cutee"] {
-    --chat-bg-image: url('{% static 'core/themes/cutee.jpeg' %}');
+    --chat-bg-image: url('{% static "core/themes/cutee.jpeg" %}');
     --chat-bg-color: rgba(251, 207, 232, 0.4);
     --bubble-sent-bg: linear-gradient(135deg, rgba(219, 39, 119, 0.75), rgba(157, 23, 77, 0.85));
     --bubble-sent-border: rgba(244, 114, 182, 0.5);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(255, 255, 255, 0.96);
     --bubble-received-text: #1a0f1d;
     --bubble-received-border: rgba(251, 207, 232, 0.6);
   }
 
   [data-theme="hands_in_hands"] {
-    --chat-bg-image: url('{% static 'core/themes/hands_in_hands.jpeg' %}');
+    --chat-bg-image: url('{% static "core/themes/hands_in_hands.jpeg" %}');
     --chat-bg-color: rgba(15, 23, 42, 0.55);
     --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.7), rgba(79, 70, 229, 0.7));
     --bubble-sent-border: rgba(56, 189, 248, 0.4);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(15, 23, 42, 0.9);
+    --bubble-received-text: #e0f2fe;
   }
 
   [data-theme="love_2"] {
-    --chat-bg-image: url('{% static 'core/themes/love_2.jpeg' %}');
+    --chat-bg-image: url('{% static "core/themes/love_2.jpeg" %}');
     --chat-bg-color: rgba(69, 10, 10, 0.45);
     --bubble-sent-bg: linear-gradient(135deg, rgba(185, 28, 28, 0.75), rgba(127, 29, 29, 0.85));
     --bubble-sent-border: rgba(248, 113, 113, 0.5);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(255, 255, 255, 0.94);
     --bubble-received-text: #2c0000;
   }
 
   [data-theme="milk_mocha"] {
-    --chat-bg-image: url('{% static 'core/themes/milk_mocha.jpeg' %}');
+    --chat-bg-image: url('{% static "core/themes/milk_mocha.jpeg" %}');
     --chat-bg-color: rgba(24, 24, 27, 0.45);
     --bubble-sent-bg: linear-gradient(135deg, rgba(180, 83, 9, 0.75), rgba(120, 53, 15, 0.85));
     --bubble-sent-border: rgba(245, 158, 11, 0.45);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(255, 255, 255, 0.96);
     --bubble-received-text: #261a0f;
     --bubble-received-border: rgba(217, 119, 6, 0.4);
   }
 
   [data-theme="red_purple_hearts"] {
-    --chat-bg-image: url('{% static 'core/themes/red_purple_hearts.jpeg' %}');
+    --chat-bg-image: url('{% static "core/themes/red_purple_hearts.jpeg" %}');
     --chat-bg-color: rgba(61, 12, 110, 0.55);
     --bubble-sent-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(91, 33, 182, 0.85));
     --bubble-sent-border: rgba(167, 139, 250, 0.4);
+    --bubble-sent-text: #ffffff;
     --bubble-received-bg: rgba(27, 10, 48, 0.92);
+    --bubble-received-text: #ede9fe;
   }
 
   .theme-wrapper {
@@ -160,7 +180,7 @@
   .bubble-sent { 
     background: var(--bubble-sent-bg); 
     border: 1px solid var(--bubble-sent-border); 
-    color: var(--bubble-sent-text); 
+    color: var(--bubble-sent-text) !important; 
     border-bottom-right-radius: 0.45rem; 
     transition: background 0.5s ease, border-color 0.5s ease;
     backdrop-filter: blur(12px) saturate(180%);
@@ -169,11 +189,15 @@
   .bubble-received { 
     background: var(--bubble-received-bg); 
     border: 1px solid var(--bubble-received-border); 
-    color: var(--bubble-received-text, #cbd5e1);
+    color: var(--bubble-received-text) !important;
     border-bottom-left-radius: 0.45rem; 
     transition: background 0.5s ease;
     backdrop-filter: blur(12px) saturate(180%);
     -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+  
+  .bubble-sent p, .bubble-received p {
+    color: inherit !important;
   }
   
   .reply-chip { 
@@ -316,9 +340,9 @@
             <div class="msg-wrapper flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-msg-id="{{ msg.id }}">
               <div class="flex w-full max-w-[92%] flex-col gap-1.5 {% if msg.sender == request.user %}items-end sm:max-w-[78%]{% else %}items-start sm:max-w-[78%]{% endif %}">
                 {% if msg.parent_message %}
-                  <div class="reply-chip w-full rounded-2xl px-3 py-2 text-[11px] text-slate-400">
-                    <span class="block text-[9px] font-black uppercase tracking-[0.18em] text-sky-400/90">Replying to {{ msg.parent_message.sender.username }}</span>
-                    {{ msg.parent_message.content|default:msg.parent_message.get_message_type_display|truncatechars:100 }}
+                  <div class="reply-chip w-full">
+                    <span class="reply-header block">Replying to {{ msg.parent_message.sender.username }}</span>
+                    <div class="reply-content">{{ msg.parent_message.content|default:msg.parent_message.get_message_type_display|truncatechars:100 }}</div>
                   </div>
                 {% endif %}
 
@@ -361,7 +385,7 @@
                   {% endif %}
 
                   {% if msg.content %}
-                    <p class="whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-100 sm:text-sm">{{ msg.content }}</p>
+                    <p class="whitespace-pre-wrap break-words text-[13px] leading-6 font-medium sm:text-sm" style="color: inherit;">{{ msg.content }}</p>
                   {% endif %}
 
                   <div class="reactions-row mt-3 flex flex-wrap gap-1.5" id="reactions-{{ msg.id }}">
