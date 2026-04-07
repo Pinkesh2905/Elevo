@@ -97,47 +97,47 @@
 
   [data-theme="cutee"] {
     --chat-bg-image: url('{% static 'core/themes/cutee.jpeg' %}');
-    --chat-bg-color: rgba(251, 207, 232, 0.2);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(236, 72, 153, 0.65), rgba(190, 24, 93, 0.8));
-    --bubble-sent-border: rgba(244, 114, 182, 0.45);
-    --bubble-received-bg: rgba(255, 255, 255, 0.92);
-    --bubble-received-text: #3a1d3d;
-    --bubble-received-border: rgba(251, 207, 232, 0.5);
+    --chat-bg-color: rgba(251, 207, 232, 0.4);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(219, 39, 119, 0.75), rgba(157, 23, 77, 0.85));
+    --bubble-sent-border: rgba(244, 114, 182, 0.5);
+    --bubble-received-bg: rgba(255, 255, 255, 0.96);
+    --bubble-received-text: #1a0f1d;
+    --bubble-received-border: rgba(251, 207, 232, 0.6);
   }
 
   [data-theme="hands_in_hands"] {
     --chat-bg-image: url('{% static 'core/themes/hands_in_hands.jpeg' %}');
-    --chat-bg-color: rgba(15, 23, 42, 0.5);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.6), rgba(79, 70, 229, 0.6));
-    --bubble-sent-border: rgba(56, 189, 248, 0.35);
-    --bubble-received-bg: rgba(15, 23, 42, 0.88);
+    --chat-bg-color: rgba(15, 23, 42, 0.55);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.7), rgba(79, 70, 229, 0.7));
+    --bubble-sent-border: rgba(56, 189, 248, 0.4);
+    --bubble-received-bg: rgba(15, 23, 42, 0.9);
   }
 
   [data-theme="love_2"] {
     --chat-bg-image: url('{% static 'core/themes/love_2.jpeg' %}');
-    --chat-bg-color: rgba(69, 10, 10, 0.3);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(239, 68, 68, 0.55), rgba(153, 27, 27, 0.75));
-    --bubble-sent-border: rgba(248, 113, 113, 0.45);
+    --chat-bg-color: rgba(69, 10, 10, 0.45);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(185, 28, 28, 0.75), rgba(127, 29, 29, 0.85));
+    --bubble-sent-border: rgba(248, 113, 113, 0.5);
     --bubble-received-bg: rgba(255, 255, 255, 0.94);
-    --bubble-received-text: #450a0a;
+    --bubble-received-text: #2c0000;
   }
 
   [data-theme="milk_mocha"] {
     --chat-bg-image: url('{% static 'core/themes/milk_mocha.jpeg' %}');
-    --chat-bg-color: rgba(254, 250, 232, 0.2);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(161, 98, 7, 0.6), rgba(133, 77, 14, 0.75));
-    --bubble-sent-border: rgba(202, 138, 4, 0.4);
-    --bubble-received-bg: rgba(255, 255, 255, 0.94);
-    --bubble-received-text: #4a2c14;
-    --bubble-received-border: rgba(254, 250, 232, 0.5);
+    --chat-bg-color: rgba(24, 24, 27, 0.45);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(180, 83, 9, 0.75), rgba(120, 53, 15, 0.85));
+    --bubble-sent-border: rgba(245, 158, 11, 0.45);
+    --bubble-received-bg: rgba(255, 255, 255, 0.96);
+    --bubble-received-text: #261a0f;
+    --bubble-received-border: rgba(217, 119, 6, 0.4);
   }
 
   [data-theme="red_purple_hearts"] {
     --chat-bg-image: url('{% static 'core/themes/red_purple_hearts.jpeg' %}');
-    --chat-bg-color: rgba(88, 28, 135, 0.4);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(107, 33, 168, 0.8));
+    --chat-bg-color: rgba(61, 12, 110, 0.55);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(91, 33, 182, 0.85));
     --bubble-sent-border: rgba(167, 139, 250, 0.4);
-    --bubble-received-bg: rgba(30, 27, 75, 0.9);
+    --bubble-received-bg: rgba(27, 10, 48, 0.92);
   }
 
   .theme-wrapper {
@@ -147,6 +147,15 @@
     background-position: center;
     background-blend-mode: overlay;
     transition: background 0.7s ease-in-out;
+    position: relative;
+  }
+  .theme-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), transparent, rgba(15, 23, 42, 0.4));
+    pointer-events: none;
+    z-index: 0;
   }
   .bubble-sent { 
     background: var(--bubble-sent-bg); 
@@ -505,17 +514,17 @@
       </div>
       <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" id="themeGrid">
         <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent bg-slate-800 hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);" data-theme-val="default" title="Default"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_ocean.png' %}');" data-theme-val="ocean" title="Ocean"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_deep_sea.png' %}');" data-theme-val="deep_sea" title="Deep Sea"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_forest.png' %}');" data-theme-val="forest" title="Forest"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_emerald.png' %}');" data-theme-val="emerald" title="Emerald"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_lavender.png' %}');" data-theme-val="lavender" title="Lavender Love"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/bg_rose.png' %}');" data-theme-val="rose" title="Rose Passion"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/cutee.jpeg' %}');" data-theme-val="cutee" title="Cutee"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/hands_in_hands.jpeg' %}');" data-theme-val="hands_in_hands" title="Hands in Hands"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/love_2.jpeg' %}');" data-theme-val="love_2" title="Love 2"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/milk_mocha.jpeg' %}');" data-theme-val="milk_mocha" title="Milk Mocha"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static 'core/themes/red_purple_hearts.jpeg' %}');" data-theme-val="red_purple_hearts" title="Red Purple Hearts"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_ocean.png' %});" data-theme-val="ocean" title="Ocean"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_deep_sea.png' %});" data-theme-val="deep_sea" title="Deep Sea"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_forest.png' %});" data-theme-val="forest" title="Forest"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_emerald.png' %});" data-theme-val="emerald" title="Emerald"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_lavender.png' %});" data-theme-val="lavender" title="Lavender Love"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_rose.png' %});" data-theme-val="rose" title="Rose Passion"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/cutee.jpeg' %});" data-theme-val="cutee" title="Cutee"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/hands_in_hands.jpeg' %});" data-theme-val="hands_in_hands" title="Hands in Hands"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/love_2.jpeg' %});" data-theme-val="love_2" title="Love 2"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/milk_mocha.jpeg' %});" data-theme-val="milk_mocha" title="Milk Mocha"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/red_purple_hearts.jpeg' %});" data-theme-val="red_purple_hearts" title="Red Purple Hearts"></button>
       </div>
     </div>
   </div>
@@ -835,9 +844,9 @@ ${data.code || '// No code provided'}
       wrapper.dataset.msgId = message.id;
 
       const replyMarkup = message.parent ? `
-        <div class="reply-chip w-full rounded-2xl px-3 py-2 text-[11px] text-slate-400">
-          <span class="block text-[9px] font-black uppercase tracking-[0.18em] text-sky-400/90">Replying to ${escapeHtml(message.parent.sender)}</span>
-          ${escapeHtml(message.parent.content)}
+        <div class="reply-chip w-full">
+          <span class="reply-header block">Replying to ${escapeHtml(message.parent.sender)}</span>
+          <div class="reply-content">${escapeHtml(message.parent.content)}</div>
         </div>
       ` : '';
 
@@ -866,7 +875,7 @@ ${data.code || '// No code provided'}
           ${replyMarkup}
           <div class="${message.is_mine ? 'bubble-sent' : 'bubble-received'} w-full px-4 py-3 sm:px-5">
             ${attachmentMarkup}
-            ${message.content ? `<p class="whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-100 sm:text-sm">${escapeHtml(message.content)}</p>` : ''}
+            ${message.content ? `<p class="whitespace-pre-wrap break-words text-[13px] leading-6 text-inherit font-medium sm:text-sm">${escapeHtml(message.content)}</p>` : ''}
             <div class="reactions-row mt-3 flex flex-wrap gap-1.5" id="reactions-${message.id}">${renderReactionButtons(message.reactions, message.id)}</div>
           </div>
           <div class="flex w-full flex-wrap items-center gap-2 ${message.is_mine ? 'justify-end' : 'justify-start'}">
