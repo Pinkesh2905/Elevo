@@ -17,12 +17,33 @@
     box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
   }
   .chat-search:focus { border-color: rgba(14, 165, 233, 0.5); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
-  .avatar-ring { position: relative; }
-  .avatar-ring::after {
-    content: ''; position: absolute; inset: -2px;
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
-    border-radius: inherit; z-index: -1; opacity: 0.5;
+
+  /* User Search Modal */
+  .search-modal-backdrop { transition: opacity 0.3s ease; }
+  .search-modal-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; }
+  .search-modal-backdrop.entering { opacity: 0; }
+  .search-modal-backdrop.entered { opacity: 1; }
+  .search-modal-panel.entering { transform: translateY(20px) scale(0.97); opacity: 0; }
+  .search-modal-panel.entered { transform: translateY(0) scale(1); opacity: 1; }
+
+  .user-result { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+  .user-result:hover { background: rgba(14, 165, 233, 0.1); transform: translateX(4px); }
+  .user-result:active { transform: translateX(2px) scale(0.99); }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
+  .user-result-animate { animation: fadeInUp 0.25s ease forwards; }
+
+  .search-spinner { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @keyframes gentlePulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+  }
+  .empty-pulse { animation: gentlePulse 3s ease-in-out infinite; }
 </style>
 {% endblock %}
 
@@ -57,12 +78,18 @@
       <div class="flex flex-col gap-3 border-b border-white/5 bg-slate-900/20 p-4 sm:flex-row sm:gap-4 sm:p-6">
         <div class="relative flex-1">
           <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
-          <input type="text" id="threadSearch" placeholder="Search for conversations..."
+          <input type="text" id="threadSearch" placeholder="Search conversations..."
                  class="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-white/5 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-search transition-all shadow-inner">
         </div>
-        <button id="newMessageBtn" class="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3.5 text-xs font-bold uppercase text-slate-300 transition-all hover:bg-white/10 hover:text-white">
-          <i class="ri-user-add-line"></i> New Message
+        <button id="newMessageBtn" class="flex items-center justify-center gap-2 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 px-5 py-3.5 text-xs font-bold uppercase text-sky-300 transition-all hover:from-sky-500/20 hover:to-indigo-500/20 hover:text-white hover:border-sky-400/50 hover:shadow-lg hover:shadow-sky-500/10">
+          <i class="ri-user-add-line text-base"></i> New Message
         </button>
+      </div>
+
+      <!-- No-results message (hidden by default) -->
+      <div id="noThreadResults" class="hidden py-16 text-center">
+        <i class="ri-search-line text-4xl text-slate-600 mb-3 block"></i>
+        <p class="text-sm font-bold text-slate-500">No conversations match your search</p>
       </div>
 
       <!-- Thread List -->
@@ -130,30 +157,242 @@
       {% else %}
         <div class="py-32 text-center">
           <div class="w-24 h-24 mx-auto rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner">
-            <i class="ri-chat-smile-2-line text-5xl text-sky-500/40"></i>
+            <i class="ri-chat-smile-2-line text-5xl text-sky-500/40 empty-pulse"></i>
           </div>
           <h3 class="text-2xl font-black text-slate-200 tracking-tight">Quiet in here...</h3>
           <p class="text-sm text-slate-500 mt-2 max-w-xs mx-auto font-medium">Start a conversation with developers and mentors from around the globe.</p>
-          <a href="/" class="mt-8 inline-flex items-center px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all">
-            Find People
-          </a>
+          <button id="newMessageBtnEmpty" class="mt-8 inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all">
+            <i class="ri-user-search-line"></i> Find People
+          </button>
         </div>
       {% endif %}
     </div>
   </div>
 </section>
 
+<!-- ===== USER SEARCH MODAL ===== -->
+<div id="userSearchModal" class="hidden fixed inset-0 z-[80]">
+  <!-- Backdrop -->
+  <div id="userSearchBackdrop" class="search-modal-backdrop absolute inset-0 bg-slate-950/85 backdrop-blur-md"></div>
+  
+  <!-- Panel -->
+  <div class="relative flex items-start justify-center pt-[10vh] sm:pt-[12vh] px-4">
+    <div id="userSearchPanel" class="search-modal-panel w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-900/95 shadow-2xl shadow-black/50 backdrop-blur-3xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-white/5 px-6 py-5">
+        <div>
+          <h3 class="text-lg font-black text-slate-100 tracking-tight">New Conversation</h3>
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mt-1">Search users to start chatting</p>
+        </div>
+        <button id="closeSearchModalBtn" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="px-6 py-4 border-b border-white/5">
+        <div class="relative">
+          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+          <input type="text" id="userSearchInput" placeholder="Search by name or username..." autocomplete="off"
+                 class="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/15 transition-all">
+          <!-- Spinner -->
+          <div id="searchSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2">
+            <svg class="search-spinner h-5 w-5 text-sky-400" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-20"></circle>
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Container -->
+      <div id="userSearchResults" class="max-h-[50vh] overflow-y-auto">
+        <!-- Initial state -->
+        <div id="searchInitialState" class="py-12 text-center">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+            <i class="ri-user-search-line text-3xl text-sky-500/40"></i>
+          </div>
+          <p class="text-sm font-bold text-slate-400">Type a name or username to search</p>
+          <p class="text-[11px] text-slate-600 mt-1">Find developers, mentors, and peers</p>
+        </div>
+
+        <!-- No results state (hidden) -->
+        <div id="searchNoResults" class="hidden py-12 text-center">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+            <i class="ri-user-unfollow-line text-3xl text-slate-600"></i>
+          </div>
+          <p class="text-sm font-bold text-slate-400">No users found</p>
+          <p class="text-[11px] text-slate-600 mt-1">Try a different name or username</p>
+        </div>
+
+        <!-- Results list (hidden) -->
+        <div id="searchResultsList" class="hidden divide-y divide-white/5"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Client-side search filtering
-  const searchInput = document.getElementById('threadSearch');
-  if (searchInput) {
-    searchInput.addEventListener('input', function() {
+(function() {
+  // ─── Thread Search (local filtering) ───
+  const threadSearch = document.getElementById('threadSearch');
+  const noThreadResults = document.getElementById('noThreadResults');
+  if (threadSearch) {
+    threadSearch.addEventListener('input', function() {
       const q = this.value.toLowerCase().trim();
+      let visibleCount = 0;
       document.querySelectorAll('.thread-item').forEach(item => {
         const name = (item.dataset.username || '') + ' ' + (item.dataset.fullname || '');
-        item.style.display = name.includes(q) ? 'flex' : 'none';
+        const show = !q || name.includes(q);
+        item.style.display = show ? 'flex' : 'none';
+        if (show) visibleCount++;
       });
+      if (noThreadResults) {
+        noThreadResults.classList.toggle('hidden', visibleCount > 0 || !q);
+      }
     });
   }
+
+  // ─── User Search Modal ───
+  const modal = document.getElementById('userSearchModal');
+  const backdrop = document.getElementById('userSearchBackdrop');
+  const panel = document.getElementById('userSearchPanel');
+  const searchInput = document.getElementById('userSearchInput');
+  const spinner = document.getElementById('searchSpinner');
+  const initialState = document.getElementById('searchInitialState');
+  const noResults = document.getElementById('searchNoResults');
+  const resultsList = document.getElementById('searchResultsList');
+
+  const openBtn = document.getElementById('newMessageBtn');
+  const openBtnEmpty = document.getElementById('newMessageBtnEmpty');
+  const closeBtn = document.getElementById('closeSearchModalBtn');
+
+  let searchTimeout = null;
+  let currentAbort = null;
+
+  function openModal() {
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      backdrop.classList.add('entering');
+      panel.classList.add('entering');
+      requestAnimationFrame(() => {
+        backdrop.classList.remove('entering');
+        backdrop.classList.add('entered');
+        panel.classList.remove('entering');
+        panel.classList.add('entered');
+      });
+    });
+    searchInput.value = '';
+    initialState.classList.remove('hidden');
+    noResults.classList.add('hidden');
+    resultsList.classList.add('hidden');
+    resultsList.innerHTML = '';
+    setTimeout(() => searchInput.focus(), 150);
+  }
+
+  function closeModal() {
+    backdrop.classList.remove('entered');
+    panel.classList.remove('entered');
+    backdrop.classList.add('entering');
+    panel.classList.add('entering');
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      backdrop.classList.remove('entering');
+      panel.classList.remove('entering');
+    }, 300);
+    if (currentAbort) currentAbort.abort();
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (openBtnEmpty) openBtnEmpty.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+  });
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function renderUserResult(user, index) {
+    const avatarHtml = user.avatar_url
+      ? '<img src="' + escapeHtml(user.avatar_url) + '" alt="' + escapeHtml(user.username) + '" class="h-12 w-12 rounded-[1.1rem] border-2 border-white/10 object-cover">'
+      : '<div class="flex h-12 w-12 items-center justify-center rounded-[1.1rem] border-2 border-white/10 bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-black text-white">' + escapeHtml((user.username || '?')[0].toUpperCase()) + '</div>';
+
+    const fullName = user.full_name || user.username;
+    
+    return '<a href="/chat/new/' + escapeHtml(user.username) + '/" class="user-result user-result-animate flex items-center gap-4 px-6 py-4 cursor-pointer" style="animation-delay: ' + (index * 0.05) + 's; opacity: 0;">'
+      + '<div class="relative flex-shrink-0">' + avatarHtml + '</div>'
+      + '<div class="min-w-0 flex-1">'
+      + '<p class="text-sm font-black text-slate-100 truncate">' + escapeHtml(fullName) + '</p>'
+      + '<p class="text-[11px] font-medium text-slate-500 mt-0.5">@' + escapeHtml(user.username) + '</p>'
+      + '</div>'
+      + '<div class="flex-shrink-0">'
+      + '<div class="inline-flex items-center gap-1.5 rounded-xl bg-sky-500/10 border border-sky-500/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-sky-400 transition hover:bg-sky-500/20">'
+      + '<i class="ri-chat-1-line text-xs"></i> Chat'
+      + '</div></div></a>';
+  }
+
+  async function searchUsers(query) {
+    if (currentAbort) currentAbort.abort();
+    
+    if (!query || query.length < 1) {
+      initialState.classList.remove('hidden');
+      noResults.classList.add('hidden');
+      resultsList.classList.add('hidden');
+      resultsList.innerHTML = '';
+      spinner.classList.add('hidden');
+      return;
+    }
+
+    spinner.classList.remove('hidden');
+    initialState.classList.add('hidden');
+    currentAbort = new AbortController();
+
+    try {
+      const res = await fetch('/chat/search-users/?q=' + encodeURIComponent(query), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal: currentAbort.signal
+      });
+      const data = await res.json();
+      spinner.classList.add('hidden');
+
+      if (data.users && data.users.length > 0) {
+        noResults.classList.add('hidden');
+        resultsList.classList.remove('hidden');
+        resultsList.innerHTML = data.users.map(function(user, i) { return renderUserResult(user, i); }).join('');
+      } else {
+        noResults.classList.remove('hidden');
+        resultsList.classList.add('hidden');
+        resultsList.innerHTML = '';
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Search error:', err);
+        spinner.classList.add('hidden');
+      }
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.trim();
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function() { searchUsers(query); }, 250);
+    });
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(searchTimeout);
+        searchUsers(this.value.trim());
+      }
+    });
+  }
+})();
 </script>
 {% endblock %}

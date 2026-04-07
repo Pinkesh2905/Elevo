@@ -452,6 +452,97 @@
 
 <script>
   (function() {
+    function renderCustomCardHTML(type, data) {
+      if (!data) return '';
+      const colors = {
+        share_coding_problem: 'sky',
+        share_aptitude_question: 'rose',
+        share_mock_interview_result: 'purple',
+        send_resume: 'teal',
+        tutor_feedback: 'amber'
+      };
+      const icons = {
+        share_coding_problem: 'ri-code-box-line',
+        share_aptitude_question: 'ri-lightbulb-flash-line',
+        share_mock_interview_result: 'ri-speak-fill',
+        send_resume: 'ri-profile-line',
+        tutor_feedback: 'ri-chat-check-line'
+      };
+      const color = colors[type] || 'slate';
+      const icon = icons[type] || 'ri-apps-2-line';
+      
+      let bodyHtml = '';
+      if (type === 'share_coding_problem') {
+        bodyHtml = `
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-${color}-500/20 text-${color}-400 uppercase tracking-wider">${data.difficulty || 'Begginer'}</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase">${data.language || 'Code'}</span>
+          </div>
+          <h4 class="text-sm font-black text-slate-100 mb-2 truncate">${data.title || 'Coding Problem'}</h4>
+          <div class="bg-black/50 rounded-lg p-2 font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre border border-white/5">
+${data.code || '// No code provided'}
+          </div>
+        `;
+      } else if (type === 'share_aptitude_question') {
+        bodyHtml = `
+          <p class="text-xs font-bold text-slate-400 mb-3 leading-relaxed">${data.question || 'Question text...'}</p>
+          <div class="space-y-1.5 mb-2">
+            ${(data.options || []).map(opt => `<div class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-300">${opt}</div>`).join('')}
+          </div>
+          <div class="mt-3 pt-3 border-t border-white/5 text-[10px] font-medium text-slate-500 italic">
+            Explanation available in detailed view
+          </div>
+        `;
+      } else if (type === 'share_mock_interview_result') {
+        bodyHtml = `
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-3xl font-black text-${color}-400">${data.score || '0'}<span class="text-xs text-slate-500 font-bold">/10</span></div>
+            <div class="text-right">
+              <div class="text-[10px] font-black text-slate-500 uppercase">Duration</div>
+              <div class="text-xs font-bold text-slate-300">${data.duration || '0m'}</div>
+            </div>
+          </div>
+          <p class="text-[11px] leading-relaxed text-slate-400 border-l-2 border-${color}-500/40 pl-3 italic">${data.feedback || 'No feedback provided'}</p>
+        `;
+      } else if (type === 'send_resume') {
+        bodyHtml = `
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex justify-center items-center text-white font-black">${(data.full_name || 'U')[0]}</div>
+            <div>
+              <div class="text-sm font-black text-slate-100">${data.full_name || 'Candidate Name'}</div>
+              <div class="text-[10px] font-bold text-teal-400 uppercase tracking-wider">${data.title || 'Developer'}</div>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            ${(data.skills || []).map(s => `<span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-bold text-slate-400">${s}</span>`).join('')}
+          </div>
+        `;
+      } else if (type === 'tutor_feedback') {
+        bodyHtml = `
+          <div class="flex items-center gap-1 mb-3 text-amber-400">
+            ${Array(5).fill(0).map((_, i) => `<i class="${i < (data.rating || 0) ? 'ri-star-fill' : 'ri-star-line'} text-sm"></i>`).join('')}
+          </div>
+          <p class="text-xs font-medium text-slate-300 mb-3 italic">"${data.comment || 'Keep up the good work!'}"</p>
+          <div class="rounded-xl bg-amber-500/10 border border-amber-500/20 p-2 text-[10px]">
+            <span class="font-black text-amber-400 uppercase mr-1">Next Step:</span>
+            <span class="text-slate-400 font-bold">${data.next_step || 'Consult documentation'}</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="custom-card-wrapper w-full overflow-hidden">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 rounded-lg bg-${color}-500/20 text-${color}-400 flex justify-center items-center"><i class="${icon}"></i></div>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">${type.replace(/_/g, ' ')}</span>
+          </div>
+          <div class="card-body">
+            ${bodyHtml}
+          </div>
+        </div>
+      `;
+    }
+
     const container = document.getElementById('messagesContainer');
     if (!container) return;
 
@@ -649,7 +740,7 @@
              const payload = JSON.parse(message.content || '{}');
              html = renderCustomCardHTML(message.message_type, payload);
           } catch(e) { console.error(e); }
-          attachmentMarkup = html;
+          attachmentMarkup = renderCustomCardHTML(message.message_type, payload);
       } else if (message.message_type === 'image' && message.image_url) {
 
         attachmentMarkup = `<a href="${escapeHtml(message.image_url)}" target="_blank" rel="noopener noreferrer" class="mb-3 block overflow-hidden rounded-2xl border border-white/10"><img src="${escapeHtml(message.image_url)}" alt="Shared image" class="max-h-72 w-full object-contain"></a>`;
@@ -1116,6 +1207,87 @@
       }
     }, 30000);
 
+    
+    // ─── Actions Menu (Plugin) Logic ───
+    const pluginBtn = document.getElementById('pluginBtn');
+    const pluginMenu = document.getElementById('pluginMenu');
+    
+    if (pluginBtn && pluginMenu) {
+      pluginBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = pluginMenu.classList.contains('hidden');
+        pluginMenu.classList.toggle('hidden', !isHidden);
+        pluginMenu.classList.toggle('flex', isHidden);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!pluginMenu.contains(e.target) && !pluginBtn.contains(e.target)) {
+          pluginMenu.classList.add('hidden');
+          pluginMenu.classList.remove('flex');
+        }
+      });
+    }
+
+    // Handle Card Action Clicks
+    document.querySelectorAll('[data-card-action]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const type = btn.dataset.cardAction;
+        let payload = {};
+        
+        // Demo Data
+        if (type === 'share_coding_problem') {
+          payload = { title: "Merge Sort Logic", difficulty: "Medium", language: "Python", code: "def merge_sort(items):\n  if len(items) <= 1: return items\n  middle = len(items) // 2\n  # ... implementation here" };
+        } else if (type === 'share_aptitude_question') {
+          payload = { question: "If a train 110m long passes a telegraph pole in 3s, what is its speed in km/h?", options: ["132 km/h", "144 km/h", "120 km/h", "150 km/h"], answer: "132 km/h" };
+        } else if (type === 'share_mock_interview_result') {
+          payload = { score: 8.5, feedback: "Excellent performance in Data Structures. Needs slight improvement in System Design communication.", duration: "45 mins" };
+        } else if (type === 'send_resume') {
+          payload = { full_name: "Alex Johnson", title: "Fullstack Engineer", skills: ["React", "Django", "PostgreSQL", "TailwindCSS"] };
+        } else if (type === 'tutor_feedback') {
+          payload = { rating: 5, comment: "Your progress on the latest module is remarkable. Focus on recursion next.", next_step: "Study Dynamic Programming" };
+        }
+
+        pluginMenu.classList.add('hidden');
+        pluginMenu.classList.remove('flex');
+
+        try {
+          const formD = new FormData();
+          formD.append('content', JSON.stringify(payload));
+          formD.append('message_type', type);
+          
+          const response = await fetch(`/chat/${threadId}/send/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body: formD,
+          });
+          const data = await response.json();
+          if (data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
+            container.appendChild(renderMessage(data.message));
+            updateLastMessageId();
+            scrollToBottom(true);
+          }
+        } catch (error) {
+          console.error('Send card error', error);
+        }
+      });
+    });
+
+    // ─── Initial Card Rendering ───
+    function initializeCards(scope = document) {
+      scope.querySelectorAll('.custom-card-render').forEach(el => {
+        const targetId = el.dataset.target;
+        const type = el.dataset.type;
+        const template = document.getElementById(targetId);
+        if (template && type) {
+          try {
+            const data = JSON.parse(template.textContent || '{}');
+            el.innerHTML = renderCustomCardHTML(type, data);
+          } catch(e) { console.error('Parse template error', e); }
+        }
+      });
+    }
+
+    initializeCards();
     applyFormattedTimes(document);
     updateLastMessageId();
     scrollToBottom(true);
