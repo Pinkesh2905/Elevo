@@ -1170,13 +1170,23 @@ ${data.code || '// No code provided'}
           body: payload,
         });
         
-        if (!response.ok) {
-           const errData = await response.json();
-           throw new Error(errData.error || 'Server error ' + response.status);
+        const contentType = response.headers.get('content-type');
+        let data = null;
+
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            data = await response.json();
+          } catch (e) {
+            console.error('JSON parse error:', e);
+          }
         }
 
-        const data = await response.json();
-        if (data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
+        if (!response.ok) {
+           const msg = (data && data.error) ? data.error : `Server Error (Status: ${response.status})`;
+           throw new Error(msg);
+        }
+
+        if (data && data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
           container.appendChild(renderMessage(data.message));
           updateLastMessageId();
           scrollToBottom(true);
