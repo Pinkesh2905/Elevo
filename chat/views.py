@@ -170,20 +170,53 @@ def _build_thread_status(thread, user):
 @login_required
 def inbox(request):
     """
-    Display all chat threads for the logged-in user, ordered by most recent activity.
+    Display the unified chat shell in Inbox mode.
     """
     _mark_user_presence(request.user)
-    return render(request, 'chat/inbox.html', {
+    return render(request, 'chat/thread.html', {
         'thread_list': _build_thread_list(request.user),
+        'inbox_mode': True,
     })
+
+
+@login_required
+def inbox_api(request):
+    """Returns the inbox data as JSON for SPA updates."""
+    _mark_user_presence(request.user)
+    thread_list = _build_thread_list(request.user)
+    
+    data = []
+    for item in thread_list:
+        data.append({
+            'thread_id': item['thread'].id,
+            'theme': item['thread'].theme,
+            'other_user': {
+                'id': item['other_user'].id,
+                'username': item['other_user'].username,
+                'full_name': item['other_user'].get_full_name(),
+                'avatar_url': item['other_user'].profile.avatar.url if item['other_user'].profile.avatar else None,
+            },
+            'last_message': {
+                'id': item['last_message'].id,
+                'content': item['last_message'].content,
+                'type': item['last_message'].message_type,
+                'is_mine': item['last_message'].sender == request.user,
+                'is_read': item['last_message'].is_read,
+                'time': timezone.localtime(item['last_message'].created_at).isoformat(),
+            } if item['last_message'] else None,
+            'unread': item['unread'],
+        })
+    return JsonResponse({'threads': data})
 
 
 @login_required
 def chat_thread(request, thread_id):
     """
-    Display a specific chat thread and its messages.
-    Marks unread messages as read when viewed.
+    Display a specific chat thread within the unified chat shell.
     """
+    _mark_user_presence(request.user)
+    thread_list = _build_thread_list(request.user)
+    
     thread = get_object_or_404(ChatThread, id=thread_id, participants=request.user)
     other_user = thread.get_other_participant(request.user)
     _mark_user_presence(request.user, thread.id)
@@ -231,8 +264,9 @@ def chat_thread(request, thread_id):
         'thread': thread,
         'other_user': other_user,
         'messages': messages,
-        'thread_list': _build_thread_list(request.user),
+        'thread_list': thread_list,
         'first_unread_message_id': first_unread_message_id,
+        'inbox_mode': False,
     })
 
 
@@ -241,14 +275,75 @@ def start_chat(request, username):
     """
     Start or resume a chat with a specific user.
     Creates a new thread if one doesn't exist, then redirects to it.
+    Supports AJAX for SPA transitions.
     """
     other_user = get_object_or_404(User, username=username)
 
     if other_user == request.user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Cannot chat with yourself'})
         return redirect('chat:inbox')
 
     thread, created = ChatThread.get_or_create_thread(request.user, other_user)
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'thread_id': thread.id})
+        
     return redirect('chat:thread', thread_id=thread.id)
+
+
+@login_required
+def thread_data_api(request, thread_id):
+    """Returns all data needed to render a thread via AJAX."""
+    thread = get_object_or_404(ChatThread, id=thread_id, participants=request.user)
+    other_user = thread.get_other_participant(request.user)
+    _mark_user_presence(request.user, thread.id)
+
+    # Mark as read
+    now = timezone.now()
+    thread.messages.filter(is_read=False).exclude(sender=request.user).update(
+        is_read=True,
+        read_at=now,
+    )
+
+    messages_qs = (
+        thread.messages
+        .exclude(deleted_by=request.user)
+        .select_related('sender', 'sender__profile', 'parent_message', 'parent_message__sender')
+        .prefetch_related('reactions')
+        .order_by('-created_at')[:50]
+    )
+    messages = list(messages_qs)
+    messages.reverse()
+
+    # Bulk Reactions
+    message_ids = [m.id for m in messages]
+    all_reactions = (
+        MessageReaction.objects.filter(message_id__in=message_ids)
+        .values('message_id', 'emoji')
+        .annotate(count=Count('id'), reacted=Count('id', filter=Q(user=request.user)))
+    )
+    reactions_map = {}
+    for r in all_reactions:
+        m_id = r.pop('message_id')
+        if m_id not in reactions_map:
+            reactions_map[m_id] = []
+        reactions_map[m_id].append(r)
+
+    messages_data = [_serialize_message(msg, request.user, reactions_map.get(msg.id, [])) for msg in messages]
+
+    return JsonResponse({
+        'id': thread.id,
+        'theme': thread.theme,
+        'other_user': {
+            'username': other_user.username,
+            'full_name': other_user.get_full_name(),
+            'avatar_url': other_user.profile.avatar.url if other_user.profile.avatar else None,
+        },
+        'messages': messages_data,
+        'status': _build_thread_status(thread, request.user),
+        'user_id': request.user.id,
+    })
 
 
 @login_required

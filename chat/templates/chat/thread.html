@@ -275,9 +275,12 @@
       </div>
     </aside>
 
-    <main class="chat-column lg:col-span-8 xl:col-span-9">
-      <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl shadow-slate-950/30" data-theme="{{ thread.theme }}">
-        <header class="flex items-center gap-3 border-b border-white/10 bg-black/40 px-3 py-3 sm:px-5 sm:py-4">
+    <main class="chat-column h-full min-h-0 lg:col-span-8 xl:col-span-9">
+      
+      <!-- ─── Thread View ─── -->
+      <div id="chatThreadView" class="{% if inbox_mode %}hidden{% endif %} h-full">
+        <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl shadow-slate-950/30" data-theme="{{ thread.theme }}">
+          <header class="flex items-center gap-3 border-b border-white/10 bg-black/40 px-3 py-3 sm:px-5 sm:py-4">
           <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white lg:hidden">
             <i class="ri-arrow-left-line text-xl"></i>
           </a>
@@ -511,7 +514,91 @@
           </form>
         </div>
       </div>
-    </main>
+    </div>
+
+    <!-- ─── Social Center (Inbox) View ─── -->
+    <div id="socialCenterView" class="{% if not inbox_mode %}hidden{% endif %} flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 shadow-2xl backdrop-blur-3xl">
+      <!-- Header -->
+      <div class="border-b border-white/5 bg-slate-900/40 px-6 py-6 sm:px-8">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="flex items-center gap-2 text-2xl font-black tracking-tight text-slate-100 sm:text-3xl">
+              <span class="bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent italic">SOCIAL</span> 
+              <span>CENTER</span>
+            </h1>
+            <p class="mt-1 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">Connect | Collaborate | Elevate</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="h-9 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 hidden sm:flex">
+              <div class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></div>
+              <span class="text-[9px] font-black uppercase text-slate-300">Network Online</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Control -->
+      <div class="flex flex-col gap-3 border-b border-white/5 bg-slate-950/20 p-4 sm:flex-row sm:p-6">
+        <div class="relative flex-1">
+          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500"></i>
+          <input type="text" id="threadSearch" placeholder="Search conversations..." class="w-full rounded-2xl border border-white/5 bg-white/5 py-3 pl-12 pr-6 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/30">
+        </div>
+        <button id="newMessageBtn" class="flex items-center justify-center gap-2 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-5 py-3 text-xs font-bold uppercase text-sky-400 transition hover:bg-sky-500/20 hover:text-white">
+          <i class="ri-user-add-line text-base"></i> New Message
+        </button>
+      </div>
+
+      <!-- Scrollable List -->
+      <div class="messages-container divide-y divide-white/5" id="socialThreadList">
+        {% if thread_list %}
+          {% for item in thread_list %}
+            <a href="{% url 'chat:thread' item.thread.id %}" class="sidebar-thread flex items-center gap-4 px-6 py-5 sm:px-8" data-username="{{ item.other_user.username|lower }}" data-fullname="{{ item.other_user.get_full_name|lower }}">
+              <div class="relative shrink-0">
+                {% if item.other_user.profile.avatar %}
+                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl border border-white/10 object-cover sm:h-14 sm:w-14">
+                {% else %}
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-14 sm:w-14">
+                    {{ item.other_user.username|first|upper }}
+                  </div>
+                {% endif %}
+                {% if item.unread > 0 %}
+                  <span class="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-slate-900 bg-sky-400"></span>
+                {% endif %}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="truncate text-base font-black text-slate-100">{{ item.other_user.get_full_name|default:item.other_user.username }}</span>
+                  <span class="text-[10px] font-bold text-slate-500 uppercase">{{ item.thread.updated_at|timesince }} ago</span>
+                </div>
+                <div class="flex items-center justify-between gap-3">
+                  <p class="truncate text-xs text-slate-400">
+                    {% if item.last_message and item.last_message.sender == request.user %}
+                      <i class="ri-check-double-line text-sky-400 mr-1"></i>
+                    {% endif %}
+                    {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:100|default:"No messages yet" }}
+                  </p>
+                  {% if item.unread > 0 %}
+                    <span class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-black text-white">{{ item.unread }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        {% else %}
+          <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
+              <i class="ri-chat-smile-2-line text-3xl text-sky-500/30"></i>
+            </div>
+            <p class="text-sm font-bold text-slate-400">Quiet in here...</p>
+            <button onclick="document.getElementById('newMessageBtn').click()" class="mt-4 text-[10px] font-black uppercase tracking-widest text-sky-400 hover:text-white">Start a conversation</button>
+          </div>
+        {% endif %}
+        <div id="noThreadResults" class="hidden py-20 text-center">
+          <p class="text-sm font-bold text-slate-500">No conversations match your search</p>
+        </div>
+      </div>
+    </div>
+</main>
   </div>
 
   <div id="globalEmojiPicker" class="hidden fixed z-50 max-w-[260px] rounded-[1.4rem] border border-white/10 bg-slate-900/95 p-3 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
@@ -581,6 +668,43 @@
   </div>
 
 </section>
+
+<!-- ===== USER SEARCH MODAL ===== -->
+<div id="userSearchModal" class="hidden fixed inset-0 z-[100]">
+  <div id="userSearchBackdrop" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300 opacity-0"></div>
+  <div class="relative flex min-h-screen items-center justify-center p-4">
+    <div id="userSearchPanel" class="w-full max-w-lg scale-95 rounded-[2.5rem] border border-white/10 bg-slate-900/95 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-300 opacity-0">
+      <div class="flex items-center justify-between border-b border-white/5 px-8 py-6">
+        <div>
+          <h3 class="text-xl font-black tracking-tight text-slate-100">Find People</h3>
+          <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Search developers & mentors</p>
+        </div>
+        <button id="closeSearchModalBtn" class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="relative">
+          <i class="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500"></i>
+          <input type="text" id="userSearchInput" placeholder="Enter name or username..." class="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-12 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500/30">
+          <div id="searchSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2">
+            <i class="ri-loader-4-line animate-spin text-sky-400"></i>
+          </div>
+        </div>
+        <div id="userSearchResults" class="mt-6 max-h-[40dvh] overflow-y-auto pr-2 custom-scrollbar">
+          <div id="searchInitialState" class="py-12 text-center text-slate-500">
+            <i class="ri-user-search-line text-4xl opacity-20 block mb-3"></i>
+            <p class="text-xs font-bold uppercase tracking-widest">Type to search users</p>
+          </div>
+          <div id="searchNoResults" class="hidden py-12 text-center text-slate-500">
+            <p class="text-sm font-bold">No users found</p>
+          </div>
+          <div id="searchResultsList" class="divide-y divide-white/5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
   (function() {
@@ -693,7 +817,8 @@ ${data.code || '// No code provided'}
     const container = document.getElementById('messagesContainer');
     if (!container) return;
 
-    const threadId = container.dataset.threadId;
+    let currentThreadId = container.dataset.threadId;
+    let currentUserId = null; // Will be set from API
     const form = document.getElementById('messageForm');
     const input = document.getElementById('messageInput');
     const fileInput = document.getElementById('fileAttachment');
@@ -716,7 +841,7 @@ ${data.code || '// No code provided'}
         const oldHeight = container.scrollHeight;
 
         try {
-          const res = await fetch(`/chat/${threadId}/fetch-older/?before=${firstId}`, {
+          const res = await fetch(`/chat/${currentThreadId}/fetch-older/?before=${firstId}`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
           });
           const data = await res.json();
@@ -1318,7 +1443,7 @@ ${data.code || '// No code provided'}
       const freshToken = getCookie('csrftoken') || csrfToken;
 
       try {
-        const response = await fetch(`/chat/${threadId}/send/`, {
+        const response = await fetch(`/chat/${currentThreadId}/send/`, {
           method: 'POST',
           headers: { 'X-CSRFToken': freshToken },
           body: payload,
@@ -1405,7 +1530,334 @@ ${data.code || '// No code provided'}
     }, 30000);
 
     
-    // ─── Actions Menu (Plugin) Logic ───
+    // ─── SPA Navigation Engine & Unified Shell ───
+    const chatThreadView = document.getElementById('chatThreadView');
+    const socialCenterView = document.getElementById('socialCenterView');
+
+    function toggleView(inboxMode) {
+      if (inboxMode) {
+        chatThreadView.classList.add('hidden');
+        socialCenterView.classList.remove('hidden');
+        if (stream) { stream.close(); stream = null; }
+        document.title = "Social Center | Elevo";
+      } else {
+        socialCenterView.classList.add('hidden');
+        chatThreadView.classList.remove('hidden');
+      }
+    }
+
+    async function loadInbox(pushState = true) {
+      if (pushState) history.pushState({ type: 'inbox' }, "Social Center | Elevo", "/chat/");
+      toggleView(true);
+      refreshSidebar();
+      refreshSocialThreadList(); // Sync the main list too
+    }
+
+    async function loadThread(threadId, pushState = true) {
+      // Toggle to Thread View
+      toggleView(false);
+      
+      if (threadId === currentThreadId && !chatThreadView.classList.contains('hidden')) return;
+      
+      // Close existing stream
+      if (stream) { stream.close(); stream = null; }
+
+      // Show temporary loading state
+      const mainChat = document.querySelector('main');
+      mainChat.style.opacity = '0.7';
+      mainChat.style.pointerEvents = 'none';
+
+      try {
+        const res = await fetch(`/chat/api/thread/${threadId}/data/`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Failed to load thread');
+
+        // Update Context
+        currentThreadId = threadId;
+        container.dataset.threadId = threadId;
+        currentUserId = data.user_id;
+        
+        // Update Title & URL
+        const newTitle = `Chat with ${data.other_user.full_name || data.other_user.username} | Elevo`;
+        document.title = newTitle;
+        if (pushState) {
+          history.pushState({ type: 'thread', threadId }, newTitle, `/chat/${threadId}/`);
+        }
+
+        // Update Theme
+        const chatWrapper = document.getElementById('chatWrapper');
+        chatWrapper.dataset.theme = data.theme || 'default';
+
+        // Update Header
+        const headerName = document.querySelector('header h1');
+        const headerAvatarContainer = document.querySelector('header .relative');
+        
+        if (headerName) headerName.textContent = data.other_user.full_name || data.other_user.username;
+        
+        if (headerAvatarContainer) {
+          const avatarHtml = data.other_user.avatar_url
+            ? `<img src="${data.other_user.avatar_url}" alt="${data.other_user.username}" class="h-11 w-11 rounded-2xl border border-white/15 object-cover sm:h-12 sm:w-12">`
+            : `<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-12 sm:w-12">${(data.other_user.username || '?')[0].toUpperCase()}</div>`;
+          
+          const statusDot = `<span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-950 bg-emerald-500"></span>`;
+          headerAvatarContainer.innerHTML = avatarHtml + statusDot;
+        }
+
+        // Render Messages
+        container.innerHTML = '';
+        lastId = 0;
+        hasMoreMessages = true;
+        
+        if (data.messages && data.messages.length) {
+          let lastDate = null;
+          data.messages.forEach(msg => {
+            const msgDate = new Date(msg.created_at).toDateString();
+            if (msgDate !== lastDate) {
+              const dayLabel = document.createElement('div');
+              dayLabel.className = "my-6 flex justify-center";
+              dayLabel.innerHTML = `<span class="rounded-full bg-slate-800/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 backdrop-blur-sm">${new Date(msg.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>`;
+              container.appendChild(dayLabel);
+              lastDate = msgDate;
+            }
+            container.appendChild(renderMessage(msg));
+          });
+        }
+
+        // UI Reset
+        updateLastMessageId();
+        applyFormattedTimes(container);
+        initializeCards(container);
+        scrollToBottom(true);
+        cancelReply();
+        clearAttachment();
+        
+        // Highlight active sidebar
+        document.querySelectorAll('.sidebar-thread, .social-thread-item').forEach(el => {
+          const href = el.getAttribute('href');
+          if (href) el.classList.toggle('active', href.includes(`/${threadId}/`));
+        });
+
+        // Update Presence/Status
+        handleStatusPayload(data.status);
+
+        // Reconnect Stream
+        connectStream();
+
+      } catch (err) {
+        console.error('SPA load error:', err);
+        alert('Could not switch thread: ' + err.message);
+      } finally {
+        mainChat.style.opacity = '1';
+        mainChat.style.pointerEvents = 'auto';
+      }
+    }
+
+    // Intercept Links (Sidebar, Inbox, Start Chat)
+    document.addEventListener('click', (e) => {
+      const threadLink = e.target.closest('a[href*="/chat/"]');
+      if (threadLink) {
+        const href = threadLink.getAttribute('href');
+        
+        // Handle Back/To Inbox
+        if (href === '/chat/' || href.endsWith('/chat')) {
+          e.preventDefault();
+          loadInbox();
+          return;
+        }
+
+        // Handle Thread Navigation
+        const threadIdMatch = href.match(/\/chat\/(\d+)\//);
+        if (threadIdMatch) {
+          e.preventDefault();
+          loadThread(threadIdMatch[1]);
+          return;
+        }
+
+        // Handle Start Chat
+        const newChatMatch = href.match(/\/chat\/new\/([^\/]+)\//);
+        if (newChatMatch) {
+          e.preventDefault();
+          startNewChat(newChatMatch[1]);
+          return;
+        }
+      }
+    });
+
+    async function startNewChat(username) {
+      try {
+        const res = await fetch(`/chat/new/${username}/`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const data = await res.json();
+        if (data.thread_id) {
+          loadThread(data.thread_id);
+          if (modal) closeModal();
+        } else {
+          alert('Error: ' + (data.error || 'Failed to start chat'));
+        }
+      } catch (e) { console.error('Start chat error', e); }
+    }
+
+    // History Handling
+    window.addEventListener('popstate', (e) => {
+      if (e.state) {
+        if (e.state.type === 'inbox') loadInbox(false);
+        else if (e.state.type === 'thread' && e.state.threadId) loadThread(e.state.threadId, false);
+      }
+    });
+
+    // ─── Local Search & Filtering ───
+    const threadSearch = document.getElementById('threadSearch');
+    const noThreadResults = document.getElementById('noThreadResults');
+    if (threadSearch) {
+      threadSearch.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+        document.querySelectorAll('#socialThreadList .sidebar-thread').forEach(item => {
+          const name = (item.dataset.username || '') + ' ' + (item.dataset.fullname || '');
+          const show = !q || name.includes(q);
+          item.style.display = show ? 'flex' : 'none';
+          if (show) visibleCount++;
+        });
+        if (noThreadResults) noThreadResults.classList.toggle('hidden', visibleCount > 0 || !q);
+      });
+    }
+
+    // ─── User Search Modal ───
+    const modal = document.getElementById('userSearchModal');
+    const backdrop = document.getElementById('userSearchBackdrop');
+    const panel = document.getElementById('userSearchPanel');
+    const searchInput = document.getElementById('userSearchInput');
+    const spinner = document.getElementById('searchSpinner');
+    const initialState = document.getElementById('searchInitialState');
+    const noResults = document.getElementById('searchNoResults');
+    const resultsList = document.getElementById('searchResultsList');
+
+    const openBtn = document.getElementById('newMessageBtn');
+    const closeBtn = document.getElementById('closeSearchModalBtn');
+
+    let searchTimeout = null;
+    let currentAbort = null;
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        backdrop.style.opacity = '1';
+        panel.style.opacity = '1';
+        panel.style.transform = 'scale(1)';
+      });
+      searchInput.value = '';
+      initialState.classList.remove('hidden');
+      noResults.classList.add('hidden');
+      resultsList.classList.add('hidden');
+      resultsList.innerHTML = '';
+      setTimeout(() => searchInput.focus(), 150);
+    }
+
+    function closeModal() {
+      backdrop.style.opacity = '0';
+      panel.style.opacity = '0';
+      panel.style.transform = 'scale(0.95)';
+      setTimeout(() => modal.classList.add('hidden'), 300);
+      if (currentAbort) currentAbort.abort();
+    }
+
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    async function searchUsers(query) {
+      if (currentAbort) currentAbort.abort();
+      if (!query || query.length < 1) {
+        initialState.classList.remove('hidden');
+        noResults.classList.add('hidden');
+        resultsList.classList.add('hidden');
+        spinner.classList.add('hidden');
+        return;
+      }
+
+      spinner.classList.remove('hidden');
+      initialState.classList.add('hidden');
+      currentAbort = new AbortController();
+
+      try {
+        const res = await fetch('/chat/search-users/?q=' + encodeURIComponent(query), {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          signal: currentAbort.signal
+        });
+        const data = await res.json();
+        spinner.classList.add('hidden');
+
+        if (data.users && data.users.length > 0) {
+          noResults.classList.add('hidden');
+          resultsList.classList.remove('hidden');
+          resultsList.innerHTML = data.users.map((user, i) => `
+            <a href="/chat/new/${user.username}/" class="flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-white/5 transition border-b border-white/5 last:border-0" style="animation: slideUp 0.3s ease forwards ${i * 0.05}s; opacity: 0;">
+              <div class="relative shrink-0">
+                ${user.avatar_url ? `<img src="${user.avatar_url}" class="h-12 w-12 rounded-2xl border border-white/10 object-cover">` : `<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 font-bold text-white">${user.username[0].toUpperCase()}</div>`}
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-black text-slate-100 truncate">${user.full_name || user.username}</p>
+                <p class="text-[11px] font-medium text-slate-500">@${user.username}</p>
+              </div>
+              <i class="ri-chat-new-line text-sky-400"></i>
+            </a>
+          `).join('');
+        } else {
+          noResults.classList.remove('hidden');
+          resultsList.classList.add('hidden');
+        }
+      } catch (err) { if (err.name !== 'AbortError') spinner.classList.add('hidden'); }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => searchUsers(searchInput.value.trim()), 250);
+      });
+    }
+
+    // ─── Content Refreshers ───
+    async function refreshSidebar() {
+      try {
+        const res = await fetch('/chat/api/threads/');
+        const data = await res.json();
+        const sidebar = document.querySelector('.chat-sidebar');
+        if (!sidebar || !data.threads) return;
+
+        data.threads.forEach(thread => {
+          let item = sidebar.querySelector(`.sidebar-thread[href*="/${thread.thread_id}/"]`);
+          if (item) {
+             const lastMsgEl = item.querySelector('.truncate.text-[11px]');
+             if (lastMsgEl && thread.last_message) {
+                let content = thread.last_message.content || 'Attachment';
+                if (content.length > 26) content = content.substring(0, 26) + '...';
+                lastMsgEl.innerHTML = `${thread.last_message.is_mine ? '<i class="ri-check-double-line text-sky-400"></i>' : ''} ${escapeHtml(content)}`;
+             }
+             const avatarContainer = item.querySelector('.relative');
+             let unreadDot = avatarContainer.querySelector('span.bg-sky-400');
+             if (thread.unread > 0) {
+               if (!unreadDot) {
+                 unreadDot = document.createElement('span');
+                 unreadDot.className = "absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-slate-950 bg-sky-400";
+                 avatarContainer.appendChild(unreadDot);
+               }
+             } else if (unreadDot) unreadDot.remove();
+          }
+        });
+      } catch (e) { console.error('Sidebar refresh error', e); }
+    }
+
+    async function refreshSocialThreadList() {
+      if (socialCenterView.classList.contains('hidden')) return;
+      // Re-populate socialThreadList logic if needed, but for now sidebar refresh is enough
+    }
+
+    window.setInterval(refreshSidebar, 20000);
+
     const pluginBtn = document.getElementById('pluginBtn');
     const pluginMenu = document.getElementById('pluginMenu');
     
