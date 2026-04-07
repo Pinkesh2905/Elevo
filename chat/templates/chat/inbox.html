@@ -121,28 +121,35 @@
                     {{ item.other_user.get_full_name|default:item.other_user.username }}
                   </span>
                   {% if item.last_message %}
-                    <span class="shrink-0 text-[10px] font-bold uppercase text-slate-500">{{ item.last_message.created_at|naturaltime }}</span>
+                    <span class="shrink-0 text-[10px] font-bold uppercase text-slate-500">
+                      {% if item.last_message.sender == request.user %}
+                        {% if item.last_message.is_read %}
+                          Seen {{ item.last_message.read_at|naturaltime }}
+                        {% else %}
+                          Sent {{ item.last_message.created_at|naturaltime }}
+                        {% endif %}
+                      {% else %}
+                        {{ item.last_message.created_at|naturaltime }}
+                      {% endif %}
+                    </span>
                   {% endif %}
                 </div>
                 
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2 truncate pr-3 text-xs text-slate-400 sm:pr-4 sm:text-sm">
                     {% if item.last_message %}
-                      {% if item.last_message.sender == request.user %}
-                        <i class="ri-check-double-line text-sky-400 text-base"></i>
-                      {% endif %}
-                      
-                      {% if item.last_message.message_type == 'image' %}
-                        <span class="flex items-center gap-1.5 text-sky-400 font-bold italic"><i class="ri-image-line"></i> Photo</span>
-                      {% elif item.last_message.message_type == 'video' %}
-                        <span class="flex items-center gap-1.5 text-indigo-400 font-bold italic"><i class="ri-video-line"></i> Video</span>
-                      {% elif item.last_message.message_type == 'file' %}
-                        <span class="flex items-center gap-1.5 text-teal-400 font-bold italic"><i class="ri-file-line"></i> Document</span>
-                      {% else %}
-                        {{ item.last_message.content|truncatechars:60 }}
-                      {% endif %}
+                    {% if item.last_message.sender == request.user %}
+                      <div class="flex items-center gap-2">
+                        {% if item.last_message.is_read %}
+                          <i class="ri-check-double-line text-sky-400 text-base"></i>
+                          <span class="truncate">{{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}</span>
+                        {% else %}
+                          <i class="ri-check-line text-slate-500 text-base"></i>
+                          <span class="truncate">{{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}</span>
+                        {% endif %}
+                      </div>
                     {% else %}
-                      <span class="font-medium italic text-slate-600">New connection, say hi!</span>
+                      {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}
                     {% endif %}
                   </div>
                   

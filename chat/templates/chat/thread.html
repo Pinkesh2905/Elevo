@@ -425,7 +425,10 @@
                   <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"h:i A" }}</span>
                   {% if msg.is_edited %}<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>{% endif %}
                   {% if msg.sender == request.user %}
-                    <i class="js-seen-status {% if msg.is_read %}ri-double-check-line text-sky-400{% else %}ri-check-line text-slate-600{% endif %} text-xs" data-mine="true" {% if msg.read_at %}data-read-at="{{ msg.read_at|date:'c' }}"{% endif %} title="{% if msg.read_at %}Seen at {{ msg.read_at|date:'h:i A' }}{% endif %}"></i>
+                    <i class="js-seen-status {% if msg.is_read %}ri-double-check-line text-sky-400{% else %}ri-check-line text-slate-600{% endif %} text-xs" 
+                       data-mine="true" 
+                       {% if msg.read_at %}data-read-at="{{ msg.read_at|date:'c' }}"{% endif %} 
+                       title="{% if msg.is_read and msg.read_at %}Seen at {{ msg.read_at|date:'h:i A' }}{% elif not msg.is_read %}Sent{% endif %}"></i>
                   {% endif %}
                 </div>
               </div>
@@ -912,7 +915,11 @@ ${data.code || '// No code provided'}
             </div>
             <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="${escapeHtml(message.timestamp_raw)}">${escapeHtml(message.created_at || '')}</span>
             ${message.is_edited ? '<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>' : ''}
-            ${message.is_mine ? `<i class="js-seen-status ${message.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs" data-mine="true" ${message.read_at_raw ? `data-read-at="${escapeHtml(message.read_at_raw)}"` : ''} title="${escapeHtml(getSeenTitle(message.read_at_raw))}"></i>` : ''}
+            ${message.is_mine ? `
+              <i class="js-seen-status ${message.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs" 
+                 data-mine="true" 
+                 ${message.read_at_raw ? `data-read-at="${escapeHtml(message.read_at_raw)}"` : ''} 
+                 title="${message.is_read ? escapeHtml(getSeenTitle(message.read_at_raw)) : 'Sent'}"></i>` : ''}
           </div>
         </div>
       `;
@@ -929,12 +936,19 @@ ${data.code || '// No code provided'}
     function updateSeenStatus(seenStatus) {
       if (!seenStatus) return;
       const mineIcons = Array.from(container.querySelectorAll('.js-seen-status[data-mine="true"]'));
-      const lastMineIcon = mineIcons[mineIcons.length - 1];
-      if (!lastMineIcon || !seenStatus.is_read) return;
-      lastMineIcon.className = 'js-seen-status ri-double-check-line text-sky-400 text-xs';
-      if (seenStatus.read_at_raw) {
-        lastMineIcon.dataset.readAt = seenStatus.read_at_raw;
-        lastMineIcon.title = getSeenTitle(seenStatus.read_at_raw);
+      
+      // Update all sent messages to seen if the latest one is read
+      // Since read status in our model typically means "all previous messages are read"
+      if (seenStatus.is_read) {
+        mineIcons.forEach(icon => {
+          if (!icon.classList.contains('ri-double-check-line')) {
+            icon.className = 'js-seen-status ri-double-check-line text-sky-400 text-xs';
+            if (seenStatus.read_at_raw) {
+              icon.dataset.readAt = seenStatus.read_at_raw;
+              icon.title = getSeenTitle(seenStatus.read_at_raw);
+            }
+          }
+        });
       }
     }
 
