@@ -452,6 +452,21 @@
 
 <script>
   (function() {
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
     function renderCustomCardHTML(type, data) {
       if (!data) return '';
       const colors = {
@@ -1124,11 +1139,18 @@ ${data.code || '// No code provided'}
       if (!picker.contains(event.target)) picker.classList.add('hidden');
     });
 
+    
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const content = input.value.trim();
       const file = fileInput.files[0];
       if (!content && !file) return;
+
+      // Custom Validation: File Size (10MB limit)
+      if (file && file.size > 10 * 1024 * 1024) {
+        alert('File is too large! Maximum allowed size is 10MB.');
+        return;
+      }
 
       const payload = new FormData();
       payload.append('content', content);
@@ -1138,12 +1160,21 @@ ${data.code || '// No code provided'}
         else payload.append('file', file);
       }
 
+      // Fetch fresh CSRF token from cookie for every request
+      const freshToken = getCookie('csrftoken') || csrfToken;
+
       try {
         const response = await fetch(`/chat/${threadId}/send/`, {
           method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
+          headers: { 'X-CSRFToken': freshToken },
           body: payload,
         });
+        
+        if (!response.ok) {
+           const errData = await response.json();
+           throw new Error(errData.error || 'Server error ' + response.status);
+        }
+
         const data = await response.json();
         if (data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
           container.appendChild(renderMessage(data.message));
@@ -1151,7 +1182,8 @@ ${data.code || '// No code provided'}
           scrollToBottom(true);
         }
       } catch (error) {
-        console.error('Send error', error);
+        console.error('Send error:', error);
+        alert('Failed to send message: ' + error.message);
       } finally {
         input.value = '';
         input.style.height = 'auto';
@@ -1159,6 +1191,7 @@ ${data.code || '// No code provided'}
         clearAttachment();
       }
     });
+
 
     input.addEventListener('input', () => {
       input.style.height = 'auto';
