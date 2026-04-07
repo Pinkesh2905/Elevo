@@ -176,6 +176,8 @@ def inbox(request):
     return render(request, 'chat/thread.html', {
         'thread_list': _build_thread_list(request.user),
         'inbox_mode': True,
+        'other_user': None,
+        'thread': None,
     })
 
 

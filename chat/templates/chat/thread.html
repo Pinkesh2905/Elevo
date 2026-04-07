@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Chat with {{ other_user.get_full_name|default:other_user.username }} | Elevo{% endblock %}
+{% block title %}
+{% if inbox_mode %}Social Center | Elevo{% else %}Chat with {{ other_user.get_full_name|default:other_user.username }} | Elevo{% endif %}
+{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -279,6 +281,7 @@
       
       <!-- ─── Thread View ─── -->
       <div id="chatThreadView" class="{% if inbox_mode %}hidden{% endif %} h-full">
+        {% if not inbox_mode %}
         <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl shadow-slate-950/30" data-theme="{{ thread.theme }}">
           <header class="flex items-center gap-3 border-b border-white/10 bg-black/40 px-3 py-3 sm:px-5 sm:py-4">
           <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white lg:hidden">
@@ -513,6 +516,7 @@
             </div>
           </form>
         </div>
+        {% endif %}
       </div>
     </div>
 
