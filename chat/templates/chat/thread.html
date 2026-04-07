@@ -55,22 +55,12 @@
     --bubble-received-bg: rgba(8, 47, 73, 0.95);
   }
 
-  [data-theme="sunset"] {
-    --chat-bg-image: url('{% static "core/themes/bg_sunset.png" %}');
-    --chat-bg-color: rgba(69, 10, 10, 0.3);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(249, 115, 22, 0.7), rgba(239, 68, 68, 0.6));
-    --bubble-sent-border: rgba(251, 146, 60, 0.5);
-    --bubble-sent-text: #fff;
-    --bubble-received-bg: rgba(69, 10, 10, 0.9);
-  }
-
-  [data-theme="cyberpunk"] {
-    --chat-bg-image: url('{% static "core/themes/bg_cyberpunk.png" %}');
-    --chat-bg-color: rgba(30, 27, 75, 0.3);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(217, 70, 239, 0.45), rgba(168, 85, 247, 0.6));
-    --bubble-sent-border: rgba(232, 121, 249, 0.5);
-    --bubble-sent-text: #fdf4ff;
-    --bubble-received-bg: rgba(30, 27, 75, 0.95);
+  [data-theme="deep_sea"] {
+    --chat-bg-image: url('{% static "core/themes/bg_deep_sea.png" %}');
+    --chat-bg-color: rgba(1, 15, 30, 0.4);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(2, 132, 199, 0.5), rgba(49, 46, 129, 0.7));
+    --bubble-sent-border: rgba(56, 189, 248, 0.3);
+    --bubble-received-bg: rgba(1, 15, 30, 0.92);
   }
 
   [data-theme="forest"] {
@@ -79,6 +69,30 @@
     --bubble-sent-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(5, 150, 105, 0.7));
     --bubble-sent-border: rgba(52, 211, 153, 0.5);
     --bubble-received-bg: rgba(6, 78, 59, 0.95);
+  }
+
+  [data-theme="emerald"] {
+    --chat-bg-image: url('{% static "core/themes/bg_emerald.png" %}');
+    --chat-bg-color: rgba(6, 78, 59, 0.35);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(52, 211, 153, 0.4), rgba(16, 185, 129, 0.6));
+    --bubble-sent-border: rgba(110, 231, 183, 0.4);
+    --bubble-received-bg: rgba(6, 78, 59, 0.9);
+  }
+
+  [data-theme="lavender"] {
+    --chat-bg-image: url('{% static "core/themes/bg_lavender.png" %}');
+    --chat-bg-color: rgba(46, 16, 101, 0.25);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(139, 92, 246, 0.6));
+    --bubble-sent-border: rgba(192, 132, 252, 0.4);
+    --bubble-received-bg: rgba(46, 16, 101, 0.85);
+  }
+
+  [data-theme="rose"] {
+    --chat-bg-image: url('{% static "core/themes/bg_rose.png" %}');
+    --chat-bg-color: rgba(127, 29, 29, 0.3);
+    --bubble-sent-bg: linear-gradient(135deg, rgba(244, 63, 94, 0.4), rgba(225, 29, 72, 0.6));
+    --bubble-sent-border: rgba(251, 113, 133, 0.4);
+    --bubble-received-bg: rgba(127, 29, 29, 0.85);
   }
 
   .theme-wrapper {
@@ -414,12 +428,14 @@
         <h3 class="text-lg font-black text-slate-100">Select Theme</h3>
         <button id="closeThemeModalBtn" class="text-slate-400 hover:text-slate-200"><i class="ri-close-line text-xl"></i></button>
       </div>
-      <div class="grid grid-cols-5 gap-3" id="themeGrid">
-        <button class="theme-option h-12 rounded-full border-2 border-transparent bg-slate-800 hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);" data-theme-val="default" title="Default"></button>
-        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_ocean.png" %}');" data-theme-val="ocean" title="Ocean Edge"></button>
-        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_sunset.png" %}');" data-theme-val="sunset" title="Sunset"></button>
-        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_cyberpunk.png" %}');" data-theme-val="cyberpunk" title="Cyberpunk"></button>
-        <button class="theme-option h-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_forest.png" %}');" data-theme-val="forest" title="Forest"></button>
+      <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" id="themeGrid">
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent bg-slate-800 hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);" data-theme-val="default" title="Default"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_ocean.png" %}');" data-theme-val="ocean" title="Ocean"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_deep_sea.png" %}');" data-theme-val="deep_sea" title="Deep Sea"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_forest.png" %}');" data-theme-val="forest" title="Forest"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_emerald.png" %}');" data-theme-val="emerald" title="Emerald"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_lavender.png" %}');" data-theme-val="lavender" title="Lavender Love"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url('{% static "core/themes/bg_rose.png" %}');" data-theme-val="rose" title="Rose Passion"></button>
       </div>
     </div>
   </div>
