@@ -65,12 +65,17 @@ class Message(models.Model):
         ('image', 'Image'),
         ('video', 'Video'),
         ('file', 'File'),
+        ('share_coding_problem', 'Share Coding Problem'),
+        ('share_aptitude_question', 'Share Aptitude Question'),
+        ('share_mock_interview_result', 'Share Mock Interview Result'),
+        ('send_resume', 'Send Resume/JD'),
+        ('tutor_feedback', 'Tutor Feedback Card'),
     ]
 
     thread = models.ForeignKey(ChatThread, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     content = models.TextField(blank=True, null=True)
-    message_type = models.CharField(max_length=10, choices=MESSAGE_TYPES, default='text')
+    message_type = models.CharField(max_length=32, choices=MESSAGE_TYPES, default='text')
 
     # Media Fields
     image = models.ImageField(upload_to='chat/images/', blank=True, null=True)

@@ -198,13 +198,16 @@ def chat_thread(request, thread_id):
         read_at=now,
     )
 
-    messages = (
+    messages_qs = (
         thread.messages
         .exclude(deleted_by=request.user)
         .select_related('sender', 'sender__profile', 'parent_message', 'parent_message__sender')
         .prefetch_related('reactions')
-        .order_by('created_at')
+        .order_by('-created_at')[:50]
     )
+
+    messages = list(messages_qs)
+    messages.reverse()
 
     # Attach grouped reactions to each message for easier template rendering
     for msg in messages:
@@ -255,6 +258,12 @@ def send_message(request, thread_id):
     if not content and not image and not file:
         return JsonResponse({'error': 'Message cannot be empty'}, status=400)
 
+    msg_type_from_post = request.POST.get('message_type')
+    valid_custom_types = [
+        'share_coding_problem', 'share_aptitude_question',
+        'share_mock_interview_result', 'send_resume', 'tutor_feedback'
+    ]
+
     # Determine message type
     msg_type = 'text'
     if image:
@@ -263,6 +272,8 @@ def send_message(request, thread_id):
         # Check extension for video or general file
         ext = file.name.split('.')[-1].lower()
         msg_type = 'video' if ext in ['mp4', 'webm', 'mov'] else 'file'
+    elif msg_type_from_post in valid_custom_types:
+        msg_type = msg_type_from_post
 
     parent = None
     if parent_id:
@@ -370,6 +381,36 @@ def fetch_messages(request, thread_id):
     return JsonResponse({
         'messages': messages_data,
         'status': _build_thread_status(thread, request.user),
+    })
+
+@login_required
+def fetch_older_messages(request, thread_id):
+    """
+    Fetch historical messages before a given message ID (AJAX GET for scrolling up).
+    """
+    thread = get_object_or_404(ChatThread, id=thread_id, participants=request.user)
+    before_id = request.GET.get('before', 0)
+    try:
+        before_id = int(before_id)
+    except (ValueError, TypeError):
+        return JsonResponse({'messages': []})
+
+    old_messages_qs = (
+        thread.messages
+        .filter(id__lt=before_id)
+        .exclude(deleted_by=request.user)
+        .select_related('sender', 'sender__profile', 'parent_message', 'parent_message__sender')
+        .prefetch_related('reactions')
+        .order_by('-created_at')[:50]
+    )
+
+    old_messages = list(old_messages_qs)
+    old_messages.reverse()
+
+    messages_data = [_serialize_message(msg, request.user) for msg in old_messages]
+    return JsonResponse({
+        'messages': messages_data,
+        'has_more': len(old_messages) == 50
     })
 
 
@@ -589,3 +630,27 @@ def update_theme(request, thread_id):
         return JsonResponse({'status': 'ok', 'theme': theme})
         
     return JsonResponse({'error': 'Invalid theme'}, status=400)
+
+
+@login_required
+def search_users(request):
+    """AJAX endpoint to search users by username or name, returning JSON."""
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({'users': []})
+        
+    users = User.objects.filter(
+        Q(username__icontains=query) |
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query)
+    ).exclude(id=request.user.id)[:20]
+    
+    results = []
+    for u in users:
+        avatar_url = u.profile.avatar.url if hasattr(u, 'profile') and u.profile.avatar else None
+        results.append({
+            'username': u.username,
+            'full_name': u.get_full_name(),
+            'avatar_url': avatar_url
+        })
+    return JsonResponse({'users': results})
