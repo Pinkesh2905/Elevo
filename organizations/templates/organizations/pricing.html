@@ -1,146 +1,73 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Pricing | Elevo{% endblock %}
+{% block title %}Enterprise Pricing | Elevo{% endblock %}
 
 {% block content %}
-<section class="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+<section class="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-[80vh] flex items-center">
     <div class="absolute top-1/4 -right-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none"></div>
     <div class="absolute bottom-1/4 -left-20 w-96 h-96 bg-violet-500/10 rounded-full blur-[130px] pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto relative z-10">
-        <div class="text-center mb-16">
-            <h1 class="text-5xl font-black text-white brand-font mb-6">
-                Choose Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Power Level</span>
+    <div class="max-w-4xl mx-auto relative z-10 text-center">
+        <div class="mb-12">
+            <h1 class="text-5xl md:text-7xl font-black text-white brand-font mb-6">
+                Ready to Upgrade Your <br />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Institutional Placements?</span>
             </h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto">
-                Whether you're practicing solo or managing a full institution, plans are configured from your active subscription catalog.
+            <p class="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
+                Elevo is an enterprise-grade platform specifically designed for colleges and universities to boost student placement rates, featuring advanced proctoring, AI voice interviews, and deep analytics.
             </p>
         </div>
 
-        {% if show_individual_plans %}
-        <div class="mb-12">
-            <h2 class="text-2xl font-black text-white mb-6">Individual Plans</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for plan in individual_plans %}
-                <div class="glass-elevated rounded-[2.5rem] p-8 border {% if plan.name == 'PERSONAL_PRO' %}border-cyan-500/50 bg-slate-950/60{% else %}border-white/10 bg-slate-900/40{% endif %} backdrop-blur-xl flex flex-col transition-all group relative">
-                    {% if plan.name == 'PERSONAL_PRO' %}
-                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-slate-950 text-xs font-black uppercase tracking-widest">Recommended</div>
-                    {% endif %}
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold {% if plan.name == 'PERSONAL_PRO' %}text-cyan-400{% else %}text-slate-300{% endif %} uppercase tracking-widest mb-2">{{ plan.display_name }}</h3>
-                        <div class="flex items-baseline gap-1">
-                            {% if plan.price_monthly > 0 %}
-                            <span class="text-4xl font-black text-white">Rs. {{ plan.price_monthly }}</span>
-                            <span class="text-slate-500 font-medium">/month</span>
-                            {% else %}
-                            <span class="text-4xl font-black text-white">Free</span>
-                            {% endif %}
-                        </div>
-                        {% if plan.description %}
-                        <p class="text-sm text-slate-400 mt-3">{{ plan.description }}</p>
-                        {% endif %}
+        <div class="glass-elevated rounded-[2.5rem] p-10 border border-white/10 bg-slate-900/60 backdrop-blur-xl relative overflow-hidden max-w-2xl mx-auto">
+            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-500 via-emerald-500 to-violet-500"></div>
+            
+            <h2 class="text-3xl font-black text-white mb-4">Enterprise Edition</h2>
+            <p class="text-slate-400 mb-8 text-lg">Custom pricing tailored to your institution's student volume and specific requirements.</p>
+            
+            <div class="grid sm:grid-cols-2 gap-4 text-left mb-10">
+                <div class="flex items-start gap-3">
+                    <i class="ri-shield-check-fill text-emerald-400 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-slate-200 font-bold">Strict Proctoring</h4>
+                        <p class="text-slate-500 text-sm mt-1">Browser lockdown and AI webcam cheat detection.</p>
                     </div>
-                    <ul class="space-y-3 mb-10 flex-grow text-sm">
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <i class="ri-checkbox-circle-fill text-emerald-400"></i>
-                            <span>{% if plan.max_problems == -1 %}Unlimited{% else %}{{ plan.max_problems }}{% endif %} Coding Problems</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <i class="ri-checkbox-circle-fill text-emerald-400"></i>
-                            <span>{% if plan.max_aptitude_daily == -1 %}Unlimited{% else %}{{ plan.max_aptitude_daily }}/day{% endif %} Aptitude Quizzes</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <i class="ri-checkbox-circle-fill text-emerald-400"></i>
-                            <span>{% if plan.max_interviews_monthly == -1 %}Unlimited{% else %}{{ plan.max_interviews_monthly }}/month{% endif %} Mock Interviews</span>
-                        </li>
-                        <li class="flex items-center gap-3 {% if plan.has_editorials %}text-slate-300{% else %}text-slate-500 line-through{% endif %}">
-                            <i class="{% if plan.has_editorials %}ri-checkbox-circle-fill text-emerald-400{% else %}ri-close-circle-line{% endif %}"></i>
-                            <span>Editorials and Solutions</span>
-                        </li>
-                    </ul>
-                    {% if plan.price_monthly > 0 %}
-                    <form method="POST" action="{% url 'organizations:checkout_individual' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="plan_name" value="{{ plan.name }}">
-                        <button type="submit" class="w-full py-4 rounded-xl {% if plan.name == 'PERSONAL_PRO' %}bg-cyan-500 text-slate-950 hover:bg-cyan-400{% else %}border border-white/10 text-white hover:bg-white/5{% endif %} font-black transition-all">Choose Plan</button>
-                    </form>
-                    {% else %}
-                    <button class="w-full py-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all">Current Plan</button>
-                    {% endif %}
                 </div>
-                {% empty %}
-                <div class="col-span-full text-slate-400">No individual plans are configured.</div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        {% if show_org_plans %}
-        <div>
-            <h2 class="text-2xl font-black text-white mb-6">Organization Plans</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% for plan in org_plans %}
-                <div class="glass-elevated rounded-[2.5rem] p-8 border {% if plan.name == 'GROWTH' %}border-violet-500/50 bg-slate-950/60{% else %}border-white/10 bg-slate-900/40{% endif %} backdrop-blur-xl flex flex-col transition-all group relative">
-                    {% if plan.name == 'GROWTH' %}
-                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-violet-500 text-white text-xs font-black uppercase tracking-widest">Most Popular</div>
-                    {% endif %}
-                    <div class="mb-8">
-                        <h3 class="text-xl font-bold {% if plan.name == 'GROWTH' %}text-violet-300{% else %}text-slate-300{% endif %} uppercase tracking-widest mb-2">{{ plan.display_name }}</h3>
-                        <div class="flex items-baseline gap-1">
-                            {% if plan.price_monthly > 0 %}
-                            <span class="text-4xl font-black text-white">Rs. {{ plan.price_monthly }}</span>
-                            <span class="text-slate-500 font-medium">/month</span>
-                            {% else %}
-                            <span class="text-4xl font-black text-white">Free</span>
-                            {% endif %}
-                        </div>
-                        {% if plan.description %}
-                        <p class="text-sm text-slate-400 mt-3">{{ plan.description }}</p>
-                        {% endif %}
+                <div class="flex items-start gap-3">
+                    <i class="ri-robot-2-fill text-cyan-400 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-slate-200 font-bold">Voice-to-Voice AI</h4>
+                        <p class="text-slate-500 text-sm mt-1">Authentic human-like mock interview experiences.</p>
                     </div>
-                    <ul class="space-y-3 mb-10 flex-grow text-sm">
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <i class="ri-checkbox-circle-fill text-violet-400"></i>
-                            <span>{% if plan.max_students == -1 %}Unlimited{% else %}{{ plan.max_students }}{% endif %} Students</span>
-                        </li>
-                        <li class="flex items-center gap-3 text-slate-300">
-                            <i class="ri-checkbox-circle-fill text-violet-400"></i>
-                            <span>{% if plan.max_interviews_monthly == -1 %}Unlimited{% else %}{{ plan.max_interviews_monthly }}/month{% endif %} Interviews per Student</span>
-                        </li>
-                        <li class="flex items-center gap-3 {% if plan.has_detailed_analytics %}text-slate-300{% else %}text-slate-500 line-through{% endif %}">
-                            <i class="{% if plan.has_detailed_analytics %}ri-checkbox-circle-fill text-violet-400{% else %}ri-close-circle-line{% endif %}"></i>
-                            <span>Detailed Analytics</span>
-                        </li>
-                        <li class="flex items-center gap-3 {% if plan.has_custom_branding %}text-slate-300{% else %}text-slate-500 line-through{% endif %}">
-                            <i class="{% if plan.has_custom_branding %}ri-checkbox-circle-fill text-violet-400{% else %}ri-close-circle-line{% endif %}"></i>
-                            <span>Custom Branding</span>
-                        </li>
-                        <li class="flex items-center gap-3 {% if plan.has_priority_support %}text-slate-300{% else %}text-slate-500 line-through{% endif %}">
-                            <i class="{% if plan.has_priority_support %}ri-checkbox-circle-fill text-violet-400{% else %}ri-close-circle-line{% endif %}"></i>
-                            <span>Priority Support</span>
-                        </li>
-                    </ul>
-                    <a href="{% url 'organizations:create_org' %}" class="w-full py-4 rounded-xl border border-violet-500/30 text-violet-300 font-bold hover:bg-violet-500/10 text-center transition-all">Setup Organization</a>
                 </div>
-                {% empty %}
-                <div class="col-span-full text-slate-400">No organization plans are configured.</div>
-                {% endfor %}
+                <div class="flex items-start gap-3">
+                    <i class="ri-bar-chart-fill text-violet-400 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-slate-200 font-bold">Placement Analytics</h4>
+                        <p class="text-slate-500 text-sm mt-1">Predictive dashboards for TPOs and Faculty.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <i class="ri-palette-fill text-amber-400 text-xl mt-0.5"></i>
+                    <div>
+                        <h4 class="text-slate-200 font-bold">Custom White-labeling</h4>
+                        <p class="text-slate-500 text-sm mt-1">Your logo, colors, and a custom subdomain URL.</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        {% endif %}
 
-        {% if not show_individual_plans and not show_org_plans %}
-        <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-8 text-slate-300">
-            No pricing plans are available for your current account role.
+            <a href="mailto:sales@elevo.life?subject=Enterprise Demo Request" class="inline-flex items-center justify-center w-full px-8 py-5 rounded-2xl bg-white text-slate-950 font-black text-lg hover:bg-slate-200 transition-all transform hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+                <i class="ri-calendar-event-fill mr-2"></i> Book a Demo with Sales
+            </a>
+            
+            <p class="text-slate-500 text-sm mt-6">Licenses starting from Rs. 1,00,000 / year.</p>
         </div>
-        {% endif %}
     </div>
 </section>
 
 <style>
     .glass-elevated {
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.5);
     }
 </style>
 {% endblock %}

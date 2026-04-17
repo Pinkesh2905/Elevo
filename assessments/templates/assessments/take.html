@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block title %}Taking Assessment | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+    .test-sidebar-item.active { background: rgba(14,165,233,0.1); border-color: rgba(14,165,233,0.3); color: #38bdf8; }
+    .question-view { display: none; }
+    .question-view.active { display: block; animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Fullscreen indicator */
+    #fullscreen-warning { display: none; }
+    body.fullscreen-active #fullscreen-warning { display: none; }
+    body:not(.fullscreen-active) #fullscreen-warning { display: flex; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="fullscreen-warning" class="fixed inset-0 z-[200] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-24 h-24 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-8">
+        <i class="ri-fullscreen-exit-line text-4xl text-rose-500"></i>
+    </div>
+    <h1 class="text-3xl font-black text-slate-100 uppercase italic mb-4">Enter Fullscreen Mode</h1>
+    <p class="text-slate-400 max-w-md mb-10">This assessment is proctored. You must be in fullscreen mode to continue. Any attempt to exit will be logged.</p>
+    <button onclick="enterFullScreen()" class="px-10 py-5 rounded-3xl bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-2xl shadow-sky-500/20">
+        Enter Fullscreen & Resume
+    </button>
+</div>
+
+<section class="min-h-screen bg-slate-950 flex flex-col">
+    <!-- Test Header -->
+    <header class="h-20 border-b border-white/5 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-[50] px-8 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+            <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-black">E</div>
+            <div>
+                <h2 class="text-sm font-black text-slate-100 uppercase tracking-tight">{{ assessment.title }}</h2>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ assessment.organization.name }} PROCTORED SESSION</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-8">
+            <div class="text-center">
+                <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-0.5">Time Remaining</p>
+                <p id="timer" class="text-xl font-black text-sky-400 italic tabular-nums">00:00:00</p>
+            </div>
+            <button onclick="confirmSubmit()" class="px-6 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-400 transition-all">
+                Submit Test
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar: Navigation -->
+        <aside class="w-80 border-r border-white/5 bg-slate-900/30 flex flex-col">
+            <div class="p-6 border-b border-white/5 bg-white/5">
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Question Navigator</p>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                <!-- Aptitude Section -->
+                {% if aptitude_problems %}
+                <div>
+                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 px-2">Aptitude (MCQ)</h4>
+                    <div class="grid grid-cols-4 gap-2">
+                        {% for ap in aptitude_problems %}
+                        <button onclick="showQuestion('ap', {{ forloop.counter }})" id="nav-ap-{{ forloop.counter }}" 
+                                class="test-sidebar-item h-10 rounded-lg border border-white/5 bg-white/5 text-xs font-bold text-slate-400 hover:bg-white/10 transition-all">
+                            {{ forloop.counter }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Coding Section -->
+                {% if coding_problems %}
+                <div>
+                    <h4 class="text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] mb-4 px-2">Coding Tasks</h4>
+                    <div class="space-y-2">
+                        {% for cp in coding_problems %}
+                        <button onclick="showQuestion('cp', {{ forloop.counter }})" id="nav-cp-{{ forloop.counter }}"
+                                class="test-sidebar-item w-full px-4 py-3 rounded-xl border border-white/5 bg-white/5 text-left transition-all hover:bg-white/10">
+                            <p class="text-[11px] font-bold text-slate-300 truncate">{{ cp.title }}</p>
+                            <p class="text-[9px] font-black text-slate-600 uppercase tracking-widest">{{ cp.difficulty }}</p>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 overflow-y-auto bg-slate-950/50 p-8">
+            <div class="max-w-4xl mx-auto">
+                <form id="assessmentForm" method="POST" action="{% url 'assessments:submit' attempt.id %}">
+                    {% csrf_token %}
+                    
+                    <!-- Aptitude Questions -->
+                    {% for ap in aptitude_problems %}
+                    <div id="q-ap-{{ forloop.counter }}" class="question-view space-y-8">
+                        <div class="p-10 rounded-[3rem] bg-slate-900/60 border border-white/10 relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
+                            <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-6">Question {{ forloop.counter }} | Aptitude</span>
+                            <h3 class="text-xl font-bold text-slate-100 leading-relaxed">{{ ap.question_text|linebreaksbr }}</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% for option_key, option_val in ap.options.items %} <!-- Assuming options is a method or property we'll define -->
+                            {% endfor %}
+                            <!-- Mocking options layout as ap model has fixed option_a/b/c/d -->
+                            <label class="group cursor-pointer">
+                                <input type="radio" name="ap_{{ ap.id }}" value="A" class="peer sr-only">
+                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
+                                    <div class="flex items-center gap-4">
+                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">A</span>
+                                        <span class="text-sm font-medium">{{ ap.option_a }}</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="group cursor-pointer">
+                                <input type="radio" name="ap_{{ ap.id }}" value="B" class="peer sr-only">
+                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
+                                    <div class="flex items-center gap-4">
+                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">B</span>
+                                        <span class="text-sm font-medium">{{ ap.option_b }}</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="group cursor-pointer">
+                                <input type="radio" name="ap_{{ ap.id }}" value="C" class="peer sr-only">
+                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
+                                    <div class="flex items-center gap-4">
+                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">C</span>
+                                        <span class="text-sm font-medium">{{ ap.option_c }}</span>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="group cursor-pointer">
+                                <input type="radio" name="ap_{{ ap.id }}" value="D" class="peer sr-only">
+                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
+                                    <div class="flex items-center gap-4">
+                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">D</span>
+                                        <span class="text-sm font-medium">{{ ap.option_d }}</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Coding Questions -->
+                    {% for cp in coding_problems %}
+                    <div id="q-cp-{{ forloop.counter }}" class="question-view space-y-8">
+                        <div class="p-10 rounded-[3rem] bg-slate-900/60 border border-white/10 relative overflow-hidden">
+                             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
+                             <span class="inline-block px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest mb-6">Question {{ forloop.counter }} | Coding Task</span>
+                             <h3 class="text-2xl font-black text-slate-100 uppercase italic mb-4">{{ cp.title }}</h3>
+                             <div class="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed">
+                                 {{ cp.description|safe }}
+                             </div>
+                        </div>
+
+                        <!-- Coding Area Mockup -->
+                        <div class="rounded-3xl border border-white/10 bg-slate-900 overflow-hidden shadow-2xl">
+                            <div class="px-6 py-3 border-b border-white/5 bg-white/5 flex items-center gap-4">
+                                <i class="ri-terminal-box-line text-sky-500"></i>
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Compiler (Integration Pending)</span>
+                            </div>
+                            <textarea name="cp_{{ cp.id }}" rows="15" 
+                                      class="w-full bg-slate-950 p-8 text-sky-400 font-mono text-sm focus:outline-none placeholder:text-slate-800"
+                                      placeholder="// Write your solution here..."></textarea>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </main>
+    </div>
+</section>
+
+<script>
+    // Timer Logic
+    const duration = {{ assessment.duration_minutes }} * 60;
+    let timeLeft = duration;
+    
+    function updateTimer() {
+        const h = Math.floor(timeLeft / 3600);
+        const m = Math.floor((timeLeft % 3600) / 60);
+        const s = timeLeft % 60;
+        document.getElementById('timer').textContent = 
+            `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            document.getElementById('assessmentForm').submit();
+        } else {
+            timeLeft--;
+        }
+    }
+    setInterval(updateTimer, 1000);
+
+    // Tab Navigation
+    function showQuestion(type, id) {
+        document.querySelectorAll('.question-view').forEach(q => q.classList.remove('active'));
+        document.querySelectorAll('.test-sidebar-item').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById(`q-${type}-${id}`).classList.add('active');
+        document.getElementById(`nav-${type}-${id}`).classList.add('active');
+    }
+
+    // Default selection
+    {% if aptitude_problems %}
+    showQuestion('ap', 1);
+    {% elif coding_problems %}
+    showQuestion('cp', 1);
+    {% endif %}
+
+    // Proctoring & Fullscreen
+    // Proctoring & Fullscreen Engine
+    const proctoringUrl = "{% url 'assessments:log_proctoring' attempt.id %}";
+    let videoElement = null;
+    let captureCanvas = null;
+    let snapshotInterval = null;
+
+    function logProctoringEvent(eventType, details, snapshotBase64 = null) {
+        const payload = { event_type: eventType, details: details };
+        if (snapshotBase64) payload.snapshot = snapshotBase64;
+
+        fetch(proctoringUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify(payload)
+        }).catch(e => console.error("Proctoring log failed", e));
+    }
+
+    async function initWebcam() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoElement = document.createElement('video');
+            videoElement.srcObject = stream;
+            videoElement.play();
+            captureCanvas = document.createElement('canvas');
+
+            // Log snapshots randomly within a window, currently fixed to 45s for reliability
+            snapshotInterval = setInterval(() => {
+                if (!videoElement || !captureCanvas) return;
+                captureCanvas.width = videoElement.videoWidth || 640;
+                captureCanvas.height = videoElement.videoHeight || 480;
+                const ctx = captureCanvas.getContext('2d');
+                ctx.drawImage(videoElement, 0, 0, captureCanvas.width, captureCanvas.height);
+                const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.6);
+                logProctoringEvent('WEBCAM_SNAPSHOT', 'Automated WebRTC capture', dataUrl);
+            }, 45000);
+        } catch (err) {
+            alert("Webcam access is strictly required for this PROCTORED assessment.");
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    function enterFullScreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) elem.requestFullscreen();
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+        initWebcam();
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.body.classList.remove('fullscreen-active');
+            logProctoringEvent('EXIT_FULL_SCREEN', 'User manually exited full screen mode.');
+        } else {
+            document.body.classList.add('fullscreen-active');
+        }
+    });
+
+    window.addEventListener('blur', () => {
+        logProctoringEvent('BLUR', 'Window lost focus or user switched tabs.');
+        alert("WARNING: Tab switching is strictly prohibited and has been recorded.");
+    });
+
+    ['copy', 'paste', 'cut', 'contextmenu'].forEach(evt => {
+        document.addEventListener(evt, (e) => {
+            e.preventDefault();
+            logProctoringEvent('COPY_PASTE', `Attempted ${evt} operation.`);
+            alert(`WARNING: ${evt.toUpperCase()} actions are disabled during a proctored assessment.`);
+        });
+    });
+
+    function confirmSubmit() {
+        if (confirm("Are you sure you want to submit your assessment? This action cannot be undone.")) {
+            if (snapshotInterval) clearInterval(snapshotInterval);
+            document.getElementById('assessmentForm').submit();
+        }
+    }
+</script>
+{% endblock %}

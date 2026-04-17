@@ -19,10 +19,7 @@ urlpatterns = [
     path('request-sponsorship/', views.request_sponsorship, name='request_sponsorship'),
     path('cancel-invite/<int:invite_id>/', views.cancel_invitation, name='cancel_invite'),
     path('pricing/', views.pricing, name='pricing'),
-    path('checkout-organization/', views.checkout_organization, name='checkout_organization'),
-    path('checkout-organization/fake-payment/', views.fake_org_payment, name='fake_org_payment'),
-    path('checkout-individual/', views.checkout_individual, name='checkout_individual'),
-    path('checkout-individual/fake-payment/', views.fake_payment, name='fake_payment'),
+    # Legacy self-serve payment flows removed for B2B transition.
     # --- Multi-Tenant Hardening ---
     path('change-role/<int:membership_id>/', views.change_member_role, name='change_member_role'),
     path('transfer-ownership/<int:membership_id>/', views.transfer_ownership, name='transfer_ownership'),

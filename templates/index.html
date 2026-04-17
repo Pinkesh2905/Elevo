@@ -226,8 +226,8 @@
 
         <div class="flex flex-col sm:flex-row gap-4 mb-8">
           {% if not user.is_authenticated %}
-            <a href="{% url 'users:signup' %}" class="cta-primary w-full sm:w-auto text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
-              <i class="ri-user-add-line mr-2"></i>Create Free Account
+            <a href="{% url 'organizations:pricing' %}" class="cta-primary w-full sm:w-auto text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+              <i class="ri-building-line mr-2"></i>Book Enterprise Demo
             </a>
             <a href="{% url 'login' %}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
               <i class="ri-login-box-line mr-2"></i>Log In
@@ -328,13 +328,7 @@
         <p class="text-slate-300 text-sm leading-relaxed">Strengthen quant, reasoning, and verbal sections used in screening rounds.</p>
       </a>
 
-      {% if show_social_navigation %}
-      <a href="{% url 'posts:feed' %}" class="home-card p-6 block">
-        <i class="ri-team-line text-2xl text-emerald-300"></i>
-        <h3 class="text-white text-xl font-semibold mt-4 mb-2">Peer Network</h3>
-        <p class="text-slate-300 text-sm leading-relaxed">Share progress, ask questions, and learn from others preparing for similar roles.</p>
-      </a>
-      {% endif %}
+
 
       <a href="{% url 'mock_interview:interview_setup' %}" class="home-card p-6 block">
         <i class="ri-robot-2-line text-2xl text-emerald-300"></i>
@@ -403,8 +397,8 @@
 
     <div class="flex flex-col sm:flex-row justify-center gap-4">
       {% if not user.is_authenticated %}
-        <a href="{% url 'users:signup' %}" class="cta-primary w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
-          <i class="ri-flashlight-line mr-2"></i>Start With Elevo
+        <a href="{% url 'organizations:pricing' %}" class="cta-primary w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+          <i class="ri-building-line mr-2"></i>Get Enterprise Access
         </a>
       {% else %}
         <a href="{% url 'practice:problem-list' %}" class="cta-primary w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">

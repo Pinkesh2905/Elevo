@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load assessment_tags %}
+{% block title %}My Assessments | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-12 px-6">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div>
+                <h1 class="text-4xl font-black text-slate-100 tracking-tight italic uppercase mb-2">My Assessments</h1>
+                <p class="text-slate-400 text-sm font-medium tracking-wide">Upcoming and active tests assigned by your organization.</p>
+            </div>
+            {% if request.user_membership.role == 'OWNER' or request.user_membership.role == 'ADMIN' %}
+            <a href="{% url 'assessments:manage_assessments' %}" class="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all">
+                <i class="ri-settings-4-line mr-1"></i> Admin View
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% for assignment in assignments %}
+            {% with attempt=attempt_dict|get_item:assignment.id %}
+            <div class="group relative overflow-hidden rounded-[3rem] border border-white/10 bg-slate-900/60 p-10 transition-all hover:bg-slate-900/80">
+                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-sky-500/5 blur-3xl group-hover:bg-sky-500/10"></div>
+                
+                <div class="flex items-center gap-2 mb-6">
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                        {% if attempt and attempt.status == 'SUBMITTED' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                        {% elif attempt and attempt.status == 'IN_PROGRESS' %}bg-sky-500/10 text-sky-400 border-sky-500/20
+                        {% else %}bg-slate-500/10 text-slate-500 border-slate-500/20{% endif %}">
+                        {{ attempt.get_status_display|default:"Not Started" }}
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{{ assignment.assessment.duration_minutes }} Mins</span>
+                </div>
+
+                <h3 class="text-2xl font-black text-slate-100 italic uppercase mb-4">{{ assignment.assessment.title }}</h3>
+                <p class="text-slate-500 text-sm italic mb-8 line-clamp-2">{{ assignment.assessment.description|default:"No instructions provided." }}</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <p class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Coding</p>
+                        <p class="text-slate-200 font-bold tracking-tight">{{ assignment.assessment.coding_problems.count }} Tests</p>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <p class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Aptitude</p>
+                        <p class="text-slate-200 font-bold tracking-tight">{{ assignment.assessment.aptitude_problems.count }} Quiz</p>
+                    </div>
+                </div>
+
+                {% if attempt and attempt.status == 'SUBMITTED' %}
+                <div class="flex items-center justify-between p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                    <span class="text-xs font-bold text-emerald-400 italic">Score: {{ attempt.total_score }} Points</span>
+                    <i class="ri-checkbox-circle-fill text-emerald-500"></i>
+                </div>
+                {% elif now < assignment.start_window %}
+                <div class="flex items-center gap-2 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
+                    <i class="ri-time-line text-amber-500"></i>
+                    <span class="text-xs font-bold text-amber-500">Starts {{ assignment.start_window|date:"M d, H:i" }}</span>
+                </div>
+                {% elif now > assignment.end_window %}
+                <div class="flex items-center gap-2 p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10">
+                    <i class="ri-error-warning-line text-rose-500"></i>
+                    <span class="text-xs font-bold text-rose-500 italic">Closed {{ assignment.end_window|date:"M d" }}</span>
+                </div>
+                {% else %}
+                <a href="{% url 'assessments:take' attempt.id %}" class="w-full flex items-center justify-center gap-3 px-8 py-5 rounded-[2rem] bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-xl shadow-sky-500/20 group-hover:scale-[1.02] active:scale-[0.98]">
+                    {% if attempt.status == 'IN_PROGRESS' %}Continue Test{% else %}Start Test{% endif %}
+                    <i class="ri-arrow-right-line"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endwith %}
+            {% empty %}
+            <div class="col-span-full py-40 text-center rounded-[4rem] border-2 border-dashed border-white/5 bg-slate-900/40">
+                <div class="w-24 h-24 rounded-[2.5rem] bg-slate-800/50 flex items-center justify-center mx-auto mb-6">
+                    <i class="ri-clipboard-line text-5xl text-slate-600"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-300 italic mb-2 tracking-tight uppercase">Clear Horizon</h2>
+                <p class="text-slate-500 text-sm italic italic">You have no pending assessments at this time.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

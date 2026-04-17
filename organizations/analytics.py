@@ -196,6 +196,14 @@ def compute_student_table(org):
         row["readiness_confidence_score"] = conf["score"]
         row["readiness_confidence_band"] = conf["band"]
 
+        # Company Placement Probabilities
+        row["company_probabilities"] = compute_company_probabilities(a, c, i)
+        
+        # Identify the Top Company Match
+        best_company = max(row["company_probabilities"].items(), key=lambda x: x[1])
+        row["top_company_match"] = best_company[0]
+        row["top_company_prob"] = int(best_company[1])
+
         students.append(row)
 
     # Apply risk flags
@@ -241,6 +249,24 @@ def compute_risk_flags(student_rows):
 
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# 4.5 Company Probabilities 
+# ---------------------------------------------------------------------------
+
+def compute_company_probabilities(apt, code, iv):
+    tcs = (apt * 0.5) + (code * 0.3) + (iv * 0.2)
+    infosys = (apt * 0.2) + (code * 0.6) + (iv * 0.2)
+    cognizant = (apt * 0.4) + (code * 0.3) + (iv * 0.3)
+    amazon_base = (code * 0.6) + (iv * 0.4)
+    amazon = amazon_base - 15 if code < 75 else amazon_base
+
+    return {
+        "TCS NQT": max(0, min(99, round(tcs))),
+        "Infosys": max(0, min(99, round(infosys))),
+        "Cognizant": max(0, min(99, round(cognizant))),
+        "Amazon": max(0, min(99, round(amazon))),
+    }
+
 # 5. Cohort Comparison
 # ---------------------------------------------------------------------------
 

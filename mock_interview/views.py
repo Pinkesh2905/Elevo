@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 import os
 import random
@@ -1546,6 +1546,13 @@ def _default_feedback(session):
     return {
         "overall_score": 70,
         "communication_score": 68,
+        "problem_solving_score": 75,
+        "code_quality_score": 70,
+        "system_design_score": 65,
+        "oops_score": 72,
+        "dbms_score": 68,
+        "core_cs_score": 70,
+        "sentiment_score": 85,
         "confidence_level": "Developing",
         "strengths": ["Completed the session", "Stayed engaged", "Discussed relevant topics"],
         "areas_for_improvement": ["Use STAR examples", "Add measurable impact", "Improve structure"],
@@ -1565,13 +1572,37 @@ def _coerce_feedback(payload, session):
             merged[key] = [merged[key]]
         elif not isinstance(merged[key], list):
             merged[key] = [str(merged[key])]
-    for key in ["overall_score", "communication_score"]:
+            
+    int_keys = ["overall_score", "communication_score", "problem_solving_score", "code_quality_score", "system_design_score", "oops_score", "dbms_score", "core_cs_score", "sentiment_score"]
+    for key in int_keys:
         try:
             merged[key] = max(0, min(100, int(float(merged[key]))))
         except Exception:
             merged[key] = base[key]
     return merged
 
+
+def _apply_feedback_scores(session, feedback):
+    fields = ["overall_feedback", "score", "feedback_status", "status", "updated_at"]
+    session.score = feedback.get("overall_score")
+    
+    # FAANG
+    session.problem_solving_score = feedback.get("problem_solving_score")
+    session.code_quality_score = feedback.get("code_quality_score")
+    session.system_design_score = feedback.get("system_design_score")
+    
+    # Service
+    session.oops_score = feedback.get("oops_score")
+    session.dbms_score = feedback.get("dbms_score")
+    session.core_cs_score = feedback.get("core_cs_score")
+    
+    # Common
+    session.sentiment_score = feedback.get("sentiment_score")
+    
+    metrics = ["problem_solving_score", "code_quality_score", "system_design_score", 
+               "oops_score", "dbms_score", "core_cs_score", "sentiment_score"]
+    fields.extend(metrics)
+    return fields
 
 def _generate_feedback(session):
     turns = session.turns.all().order_by("turn_number")
@@ -1581,15 +1612,40 @@ def _generate_feedback(session):
             transcript.append(f"Q{t.turn_number}: {t.ai_question}")
         if t.user_answer:
             transcript.append(f"A{t.turn_number}: {t.user_answer}")
+            
+    rubric = session.rubric_type
+    
+    if rubric == 'faang':
+        json_keys = "overall_score, communication_score, problem_solving_score, code_quality_score, system_design_score, sentiment_score, confidence_level, strengths, areas_for_improvement, technical_assessment, recommendations, encouragement_note"
+        criteria = (
+            "- FAANG Standard (SDE/MAANG Level rigor).\n"
+            "- problem_solving_score: Evaluate algorithmic thinking and tradeoff considerations.\n"
+            "- code_quality_score: Evaluate modularity, naming, and optimal paths mentioned.\n"
+            "- system_design_score: Evaluate scale, architecture, and constraints.\n"
+        )
+    elif rubric == 'service':
+        json_keys = "overall_score, communication_score, oops_score, dbms_score, core_cs_score, sentiment_score, confidence_level, strengths, areas_for_improvement, technical_assessment, recommendations, encouragement_note"
+        criteria = (
+            "- Service Based Standard (TCS/Infosys Level).\n"
+            "- oops_score: Evaluate understanding of Inheritance, Polymorphism, Abstraction, Encapsulation.\n"
+            "- dbms_score: Evaluate normalization, SQL queries, indexing.\n"
+            "- core_cs_score: Evaluate OS, Networking, SDLC theoretical grasp.\n"
+        )
+    else:
+        json_keys = "overall_score, communication_score, sentiment_score, confidence_level, strengths, areas_for_improvement, technical_assessment, recommendations, encouragement_note"
+        criteria = (
+            "- General corporate standard.\n"
+        )
+            
     prompt = (
         "You are an expert Interview Coach. Analyze the following interview transcript and provide constructive, detailed feedback.\n"
-        "Return ONLY valid JSON with keys: overall_score, communication_score, confidence_level, strengths, "
-        "areas_for_improvement, technical_assessment, recommendations, encouragement_note.\n\n"
+        f"Return ONLY valid JSON with keys: {json_keys}.\n\n"
         "EVALUATION CRITERIA:\n"
+        f"{criteria}"
+        "- sentiment_score: Engagement level and conversational tone.\n"
         "- Did the candidate use the STAR method (Situation, Task, Action, Result)?\n"
         "- Was there clear measurable impact (%, numbers, scale)?\n"
         "- How deep was the technical maturity shown?\n"
-        "- Was the communication structured and professional?\n\n"
         f"Target Role: {session.job_role}\n"
         f"Required Skills: {session.key_skills}\n"
         f"Transcript:\n{chr(10).join(transcript)}"
@@ -1696,10 +1752,10 @@ def _queue_feedback_generation(session):
         try:
             feedback = _generate_feedback(session)
             session.overall_feedback = json.dumps(feedback)
-            session.score = feedback.get("overall_score")
             session.feedback_status = "ready"
             session.status = "COMPLETED"
-            session.save(update_fields=["overall_feedback", "score", "feedback_status", "status", "updated_at"])
+            ufields = _apply_feedback_scores(session, feedback)
+            session.save(update_fields=ufields)
         except Exception as exc:
             session.feedback_status = "failed"
             session.feedback_error = str(exc)[:500]
@@ -1712,10 +1768,10 @@ def _queue_feedback_generation(session):
         logger.warning("Async feedback queue failed, using sync fallback: %s", exc)
         feedback = _generate_feedback(session)
         session.overall_feedback = json.dumps(feedback)
-        session.score = feedback.get("overall_score")
         session.feedback_status = "ready"
         session.status = "COMPLETED"
-        session.save(update_fields=["overall_feedback", "score", "feedback_status", "status", "updated_at"])
+        ufields = _apply_feedback_scores(session, feedback)
+        session.save(update_fields=ufields)
 
 
 @login_required
@@ -2243,16 +2299,19 @@ def review_interview(request, session_id):
         if not _strip(session.overall_feedback):
             feedback = _generate_feedback(session)
             session.overall_feedback = json.dumps(feedback)
-            session.score = feedback.get("overall_score")
             session.feedback_status = "ready"
-        session.save()
+            ufields = _apply_feedback_scores(session, feedback)
+            if "status" not in ufields: ufields.append("status")
+            session.save(update_fields=ufields)
+        else:
+            session.save(update_fields=["status", "end_time", "updated_at"])
 
     feedback = _coerce_feedback(_parse_json(session.overall_feedback or ""), session)
     if not _strip(session.overall_feedback) and (session.feedback_status or "pending") != "processing":
         session.overall_feedback = json.dumps(feedback)
-        session.score = feedback.get("overall_score")
         session.feedback_status = "ready"
-        session.save(update_fields=["overall_feedback", "score", "feedback_status", "updated_at"])
+        ufields = _apply_feedback_scores(session, feedback)
+        session.save(update_fields=ufields)
 
     duration_minutes = None
     if session.start_time and session.end_time:
@@ -2542,5 +2601,85 @@ def ai_health_check(request):
             "packs": list(INTERVIEW_PACKS.keys()),
         }
     )
+
+import os
+import openai
+import base64
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import get_template
+from django.views.decorators.csrf import csrf_exempt
+
+try:
+    from xhtml2pdf import pisa
+except ImportError:
+    pisa = None
+
+@login_required
+@csrf_exempt
+def voice_interaction_api(request, session_id):
+    """
+    Endpoint that handles incoming WebRTC audio blobs,
+    sends them to Whisper API (OpenAI) for STT, and returns transcription.
+    """
+    if request.method != 'POST':
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    # 1. Extract audio file
+    audio_file = request.FILES.get('audio')
+    if not audio_file:
+        return JsonResponse({"error": "No audio file provided."}, status=400)
+    
+    # 2. Transcribe via Whisper
+    # Use OpenAI client locally
+    transcript = ""
+    try:
+        if AI.openai_key:
+            client = openai.OpenAI(api_key=AI.openai_key)
+            # Must save file temporarily or pass directly to OpenAI
+            # OpenAI requires a tuple of filename and file content
+            # .webm wrapper ensures compatibility
+            response = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=("audio.webm", audio_file.read())
+            )
+            transcript = response.text
+        else:
+            # Fallback mock for local without API key
+            transcript = "This is a mock transcription due to missing OpenAI key."
+    except Exception as e:
+        return JsonResponse({"error": f"Transcription error: {str(e)}"}, status=500)
+        
+    return JsonResponse({"transcript": transcript})
+
+
+@login_required
+def download_pdf_report(request, session_id):
+    """
+    Generates a professional PDF interview transcript and rubric report.
+    """
+    session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
+    turns = session.turns.all().order_by('turn_number')
+    
+    template_path = 'mock_interview/pdf_report.html'
+    context = {
+        'session': session,
+        'turns': turns,
+        'user': request.user,
+    }
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="interview_report_{session.id}.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+    
+    if pisa is None:
+        return HttpResponse("xhtml2pdf is not installed.")
+        
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response
 
 

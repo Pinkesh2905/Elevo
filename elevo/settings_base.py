@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "tutor",
     "chat",
     "organizations.apps.OrganizationsConfig",
+    "assessments.apps.AssessmentsConfig",
     "django_q",
 ]
 

@@ -2,6 +2,11 @@ import json
 import ast
 import re
 import requests
+import os
+import tempfile
+import subprocess
+import time
+import sys
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -24,6 +29,57 @@ from django.conf import settings
 JD_CLIENT_ID = getattr(settings, 'JDOODLE_CLIENT_ID', None)
 JD_CLIENT_SECRET = getattr(settings, 'JDOODLE_CLIENT_SECRET', None)
 JD_EXECUTE_URL = "https://api.jdoodle.com/v1/execute"
+
+
+def _strip_type_annotations(code):
+    """
+    Remove type annotations from Python code so it runs on older Python
+    versions (e.g. JDoodle's Python 3.6/3.7/3.8 which don't support
+    built-in generic aliases like list[int], dict[str, int], etc.).
+    Falls back to returning the original code if AST parsing fails.
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return code
+
+    class _AnnotationStripper(ast.NodeTransformer):
+        def visit_FunctionDef(self, node):
+            node.returns = None
+            for arg in (
+                node.args.args
+                + node.args.posonlyargs
+                + node.args.kwonlyargs
+            ):
+                arg.annotation = None
+            if node.args.vararg:
+                node.args.vararg.annotation = None
+            if node.args.kwarg:
+                node.args.kwarg.annotation = None
+            self.generic_visit(node)
+            return node
+
+        def visit_AsyncFunctionDef(self, node):
+            return self.visit_FunctionDef(node)
+
+        def visit_AnnAssign(self, node):
+            # "x: int = 5" -> "x = 5"; bare "x: int" -> removed
+            if node.value is not None:
+                new_node = ast.Assign(
+                    targets=[node.target],
+                    value=node.value,
+                    lineno=node.lineno,
+                    col_offset=node.col_offset,
+                )
+                return ast.fix_missing_locations(new_node)
+            return None  # pure annotation with no value; drop it
+
+    try:
+        new_tree = _AnnotationStripper().visit(tree)
+        ast.fix_missing_locations(new_tree)
+        return ast.unparse(new_tree)
+    except Exception:
+        return code
 
 
 def _parse_structured_value(text):
@@ -200,10 +256,10 @@ def _build_python_harness(code, stdin):
         fn_ref = fn_name
 
     stdin_literal = repr(stdin or "")
-    harness = f"""
-
+    harness_body = f"""
 import ast as __ast
 import json as __json
+import re as __re
 
 def __parse_arg(__line):
     __line = (__line or "").strip()
@@ -226,7 +282,18 @@ def __parse_arg(__line):
         return __line
 
 __raw = {stdin_literal}
-__args = [__parse_arg(__ln) for __ln in __raw.splitlines() if __ln.strip() != ""]
+__args = []
+for __ln in __raw.splitlines():
+    __ln = __ln.strip()
+    if not __ln: continue
+    __match = __re.match(r'^[A-Za-z_]\w*\s*=\s*(.*)', __ln)
+    if __match:
+        __ln = __match.group(1)
+    __args.append(__parse_arg(__ln))
+
+if len(__args) == 1 and isinstance(__args[0], tuple):
+    __args = list(__args[0])
+
 __fn = {fn_ref}
 
 try:
@@ -243,7 +310,7 @@ elif isinstance(__result, (list, dict)):
 else:
     print(__result)
 """
-    return (code or "") + harness
+    return (code or "") + harness_body
 
 
 def problem_list(request):
@@ -588,11 +655,74 @@ def submit_code(request, slug):
     return JsonResponse(response_data)
 
 
+def _mock_execute_python(code, stdin):
+    script = code
+    if _should_wrap_python_function(script):
+        script = _strip_type_annotations(script)
+        script = _build_python_harness(script, stdin)
+        
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+        f.write(script)
+        temp_path = f.name
+        
+    try:
+        start_time = time.time()
+        process = subprocess.run(
+            [sys.executable, temp_path],
+            input=stdin if not _should_wrap_python_function(code) else "",
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        exec_time = time.time() - start_time
+        
+        if process.returncode != 0:
+            error_type = 'Compilation Error' if 'SyntaxError' in process.stderr else 'Runtime Error'
+            return {
+                'output': '',
+                'error': error_type,
+                'details': process.stderr
+            }
+            
+        return {
+            'output': process.stdout.strip(),
+            'error': '',
+            'details': '',
+            'execution_time': exec_time,
+            'memory_used': 0,
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            'output': '',
+            'error': 'Time Limit Exceeded',
+            'details': 'Execution timed out'
+        }
+    except Exception as e:
+        return {
+            'output': '',
+            'error': 'Runtime Error',
+            'details': str(e)
+        }
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
 def execute_code_jdoodle(code, language, stdin):
     """
     Execute code using JDoodle API
     Returns: {'output': str, 'error': str, 'details': str}
     """
+    if getattr(settings, 'USE_MOCK_EXECUTOR', False):
+        if language == "python3":
+            return _mock_execute_python(code, stdin)
+        else:
+            return {
+                'output': '',
+                'error': 'Mock Executor Error',
+                'details': f'Mock executor currently only supports python3, requested: {language}'
+            }
+            
     if not (JD_CLIENT_ID and JD_CLIENT_SECRET):
         return {
             'output': '',
@@ -602,10 +732,13 @@ def execute_code_jdoodle(code, language, stdin):
     
     script = code
     stdin_value = stdin
-    if language == "python3" and _should_wrap_python_function(code):
-        script = _build_python_harness(code, stdin)
-        # Harness consumes prepared stdin embedded in the script.
-        stdin_value = ""
+    if language == "python3":
+        # Strip type annotations for compatibility with JDoodle's older Python.
+        script = _strip_type_annotations(code)
+        if _should_wrap_python_function(script):
+            script = _build_python_harness(script, stdin)
+            # Harness consumes prepared stdin embedded in the script.
+            stdin_value = ""
 
     payload = {
         "clientId": JD_CLIENT_ID,

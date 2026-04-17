@@ -840,25 +840,28 @@ def fake_org_payment(request):
 
         if action == 'success':
             payment_id = f"ORGMOCKPAY_{checkout.get('ref')}_{secrets.token_hex(4)}"
-            sub, created = Subscription.objects.get_or_create(
-                organization=org,
-                defaults={
-                    'plan': plan,
-                    'status': 'ACTIVE',
-                    'start_date': timezone.now(),
-                    'end_date': timezone.now() + timedelta(days=30),
-                    'payment_id': payment_id,
-                    'auto_renew': True,
-                },
+            
+            # Use update() to bypass save() and full_clean() entirely
+            updated_count = Subscription.objects.filter(organization=org).update(
+                plan=plan,
+                status='ACTIVE',
+                start_date=timezone.now(),
+                end_date=timezone.now() + timedelta(days=30),
+                payment_id=payment_id,
+                auto_renew=True,
+                updated_at=timezone.now()
             )
-            if not created:
-                sub.plan = plan
-                sub.status = 'ACTIVE'
-                sub.start_date = timezone.now()
-                sub.end_date = timezone.now() + timedelta(days=30)
-                sub.payment_id = payment_id
-                sub.auto_renew = True
-                sub.save()
+            
+            if updated_count == 0:
+                Subscription.objects.create(
+                    organization=org,
+                    plan=plan,
+                    status='ACTIVE',
+                    start_date=timezone.now(),
+                    end_date=timezone.now() + timedelta(days=30),
+                    payment_id=payment_id,
+                    auto_renew=True,
+                )
 
             _audit(
                 "SUBSCRIPTION_PLAN_CHANGED",
@@ -1023,22 +1026,37 @@ def fake_payment(request):
         action = request.POST.get('action')
 
         if action == 'success':
-            existing_sub = Subscription.objects.filter(user=request.user, status='ACTIVE').first()
-            if existing_sub and existing_sub.is_valid:
+            payment_id = f"MOCKPAY_{checkout.get('ref', secrets.token_hex(6))}_{secrets.token_hex(4)}"
+            
+            # Check for existing plan first
+            sub = Subscription.objects.filter(user=request.user).first()
+            if sub and sub.is_valid and sub.plan_id == plan.id:
                 request.session.pop('fake_checkout', None)
-                messages.info(request, f"You already have an active {existing_sub.plan.display_name} subscription.")
+                messages.info(request, f"You already have an active {sub.plan.display_name} subscription.")
                 return redirect('users:profile')
 
-            payment_id = f"MOCKPAY_{checkout.get('ref', secrets.token_hex(6))}_{secrets.token_hex(4)}"
-            Subscription.objects.create(
-                user=request.user,
+            # Use update() to bypass save() and full_clean() entirely
+            updated_count = Subscription.objects.filter(user=request.user).update(
                 plan=plan,
                 status='ACTIVE',
                 start_date=timezone.now(),
                 end_date=timezone.now() + timedelta(days=30),
                 payment_id=payment_id,
-                auto_renew=True
+                auto_renew=True,
+                updated_at=timezone.now()
             )
+            
+            if updated_count == 0:
+                # Create new
+                Subscription.objects.create(
+                    user=request.user,
+                    plan=plan,
+                    status='ACTIVE',
+                    start_date=timezone.now(),
+                    end_date=timezone.now() + timedelta(days=30),
+                    payment_id=payment_id,
+                    auto_renew=True
+                )
             request.session.pop('fake_checkout', None)
             messages.success(
                 request,
@@ -1247,6 +1265,7 @@ def export_analytics_csv(request):
         "Problems Solved", "Problems Attempted",
         "Interviews Done", "Avg Interview %",
         "Readiness Score", "Risk Level",
+        "Placement Match", "Placement Match %",
     ])
     for s in students:
         writer.writerow([
@@ -1262,6 +1281,8 @@ def export_analytics_csv(request):
             s["avg_interview_score"],
             s["readiness_score"],
             s["risk_meta"]["label"],
+            s.get("top_company_match", ""),
+            s.get("top_company_prob", ""),
         ])
     return response
 

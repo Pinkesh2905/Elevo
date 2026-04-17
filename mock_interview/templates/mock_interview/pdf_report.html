@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Interview Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+            @frame header {
+                -pdf-frame-content: header_content;
+                top: 1cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
+            }
+            @frame footer {
+                -pdf-frame-content: footer_content;
+                bottom: 1cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
+            }
+        }
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 11pt;
+            color: #333333;
+            line-height: 1.5;
+        }
+        h1 { font-size: 24pt; color: #0891b2; margin-bottom: 0px; }
+        h2 { font-size: 16pt; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 20px;}
+        h3 { font-size: 12pt; color: #3b82f6; margin-bottom: 2px;}
+        .metadata { font-size: 10pt; color: #64748b; margin-bottom: 20px;}
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px;}
+        th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+        th { background-color: #f1f5f9; color: #475569; font-weight: bold;}
+        .turn { margin-bottom: 20px; padding: 10px; background-color: #f8fafc; border-radius: 5px; border-left: 4px solid #0ea5e9;}
+        .q { font-weight: bold; color: #0f172a; margin-bottom: 5px;}
+        .a { color: #334155; margin-bottom: 5px;}
+        .f { font-size: 10pt; color: #059669; font-style: italic;}
+    </style>
+</head>
+<body>
+    <div id="header_content" style="text-align: right; color: #94a3b8; font-size: 9pt;">
+        Powered by Elevo AI Interview Studio
+    </div>
+
+    <h1>Elevo AI Interview Report</h1>
+    <div class="metadata">
+        Candidate: {{ user.get_full_name|default:user.username }}<br>
+        Date: {{ session.created_at|date:"F j, Y, g:i a" }}<br>
+        Target Role: {{ session.job_role|default:"Unknown Role" }}<br>
+        Rubric Type: {{ session.get_rubric_type_display }}
+    </div>
+
+    <h2>Executive Summary</h2>
+    <table>
+        <tr>
+            <th>Overall Score</th>
+            <td>{{ session.score|default:"N/A" }} / 100</td>
+            <th>Final Band</th>
+            <td style="text-transform: capitalize;">{{ session.current_band }}</td>
+        </tr>
+        {% if session.rubric_type == 'faang' %}
+        <tr>
+            <th>Problem Solving</th>
+            <td>{{ session.problem_solving_score|default:"N/A" }}</td>
+            <th>Code Quality</th>
+            <td>{{ session.code_quality_score|default:"N/A" }}</td>
+        </tr>
+        <tr>
+            <th>System Design</th>
+            <td>{{ session.system_design_score|default:"N/A" }}</td>
+            <th>Engagement / Sentiment</th>
+            <td>{{ session.sentiment_score|default:"N/A" }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <th>Core CS</th>
+            <td>{{ session.core_cs_score|default:"N/A" }}</td>
+            <th>OOPs</th>
+            <td>{{ session.oops_score|default:"N/A" }}</td>
+        </tr>
+        <tr>
+            <th>DBMS</th>
+            <td>{{ session.dbms_score|default:"N/A" }}</td>
+            <th>Engagement / Sentiment</th>
+            <td>{{ session.sentiment_score|default:"N/A" }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <h2>Overall Feedback</h2>
+    <p>{{ session.overall_feedback|default:"No final feedback available." }}</p>
+
+    <!-- Page Break -->
+    <pdf:nextpage />
+
+    <h2>Interview Transcript</h2>
+    {% for turn in turns %}
+    <div class="turn">
+        <div class="q">Q{{ turn.turn_number }}: {{ turn.ai_question }}</div>
+        <div class="a"><b>A:</b> {{ turn.user_answer|default:"[No Answer Logged]" }}</div>
+        {% if turn.ai_follow_up_feedback %}
+        <div class="f">Feedback: {{ turn.ai_follow_up_feedback }}</div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>No conversation transcript available.</p>
+    {% endfor %}
+
+    <div id="footer_content" style="text-align: center; color: #94a3b8; font-size: 9pt;">
+        Page <pdf:pagenumber> of <pdf:pagecount> | Enterprise Mode
+    </div>
+</body>
+</html>

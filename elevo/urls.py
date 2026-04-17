@@ -12,9 +12,9 @@ urlpatterns = [
     path('aptitude/', include('aptitude.urls')),
     path('mock-interview/', include('mock_interview.urls')),
     path('tutor/', include('tutor.urls', namespace='tutor')),
-    path('posts/', include('posts.urls', namespace='posts')),
     path('chat/', include('chat.urls', namespace='chat')),
     path('org/', include('organizations.urls', namespace='organizations')),
+    path('assessments/', include('assessments.urls', namespace='assessments')),
     
     # Django's built-in authentication URLs (for login, logout, password reset)
     # These provide 'login', 'logout', 'password_reset', etc. view names globally.

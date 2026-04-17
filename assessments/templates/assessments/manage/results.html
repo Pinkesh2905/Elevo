@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Assessment Results | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-10">
+            <a href="{% url 'assessments:manage_assessments' %}" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all">
+                <i class="ri-arrow-left-line text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-black text-slate-100 italic uppercase">{{ assignment.assessment.title }}</h1>
+                <p class="text-slate-400 text-sm font-medium italic">Cohorts: {{ assignment.cohort.name }} | Results & Leaderboard</p>
+            </div>
+        </div>
+
+        <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 overflow-hidden backdrop-blur-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 bg-white/5">
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Student</th>
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Status</th>
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Score</th>
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest italic text-center">Tab Switches</th>
+                            <th class="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest italic text-right">Last Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for attempt in attempts %}
+                        <tr class="group hover:bg-white/5 transition-all">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-slate-800 border border-white/10 flex items-center justify-center text-slate-300 font-bold uppercase tracking-widest shadow-inner">
+                                        {{ attempt.user.username|first }}
+                                    </div>
+                                    <div>
+                                        <p class="text-slate-100 text-sm font-bold">{{ attempt.user.get_full_name|default:attempt.user.username }}</p>
+                                        <p class="text-[10px] uppercase font-bold text-slate-600 tracking-widest italic">@{{ attempt.user.username }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border
+                                    {% if attempt.status == 'SUBMITTED' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20
+                                    {% elif attempt.status == 'IN_PROGRESS' %}bg-sky-500/10 text-sky-400 border-sky-500/20
+                                    {% elif attempt.status == 'PENDING' %}bg-slate-500/10 text-slate-500 border-slate-500/20
+                                    {% else %}bg-amber-500/10 text-amber-500 border-amber-500/20{% endif %}">
+                                    {{ attempt.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg font-black text-slate-100 italic tracking-tight">{{ attempt.total_score }}</span>
+                                    <span class="text-[11px] font-bold text-slate-600 tracking-widest uppercase">Points</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5 text-center">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg {% if attempt.tab_switch_count > 3 %}bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-lg shadow-rose-500/5{% else %}text-slate-500{% endif %}">
+                                    <i class="ri-alert-line text-sm"></i>
+                                    <span class="text-xs font-black">{{ attempt.tab_switch_count }}</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <p class="text-xs font-bold text-slate-400">{{ attempt.submit_time|default:attempt.start_time|default:"-"|date:"M d, H:i" }}</p>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-20 text-center">
+                                <div class="w-16 h-16 rounded-[1.5rem] bg-slate-800/50 flex items-center justify-center mx-auto mb-4 border border-white/5">
+                                    <i class="ri-user-search-line text-2xl text-slate-600"></i>
+                                </div>
+                                <p class="text-slate-500 text-sm font-bold italic tracking-wide">No attempts registered for this assignment.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

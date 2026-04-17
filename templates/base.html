@@ -195,15 +195,13 @@
                     {% elif user.profile.role == 'ORG_ADMIN' %}
                         <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
                         <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Organization</a>
+                        <a href="{% url 'assessments:manage_assessments' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-sky-400">Manage Tests</a>
                         <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Members</a>
-                        <a href="{% url 'organizations:subscription' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Subscription</a>
                     {% else %}
                         <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
                         <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Coding</a>
                         <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Aptitude</a>
-                        {% if show_social_navigation %}
-                        <a href="{% url 'posts:feed' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Feed</a>
-                        {% endif %}
+                        <a href="{% url 'assessments:list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-indigo-400">Assessments</a>
                         <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center gap-2">
                             <i class="ri-robot-line text-sm"></i> Mock Interviews
                         </a>
@@ -255,7 +253,7 @@
                         {% endif %}
                     </button>
                     <!-- Dropdown Content -->
-                                        <div id="user-dropdown" class="hidden absolute right-0 mt-4 w-72 rounded-2xl dropdown-animate z-[200] overflow-hidden">
+                    <div id="user-dropdown" class="hidden absolute right-0 mt-4 w-72 rounded-2xl dropdown-animate z-[200] overflow-hidden">
                         <div class="p-6 bg-gradient-to-br from-slate-900/50 to-slate-950/50 border-b border-white/5 relative">
                             <div class="absolute top-0 right-0 p-4 opacity-10">
                                 <i class="ri-shield-user-line text-4xl text-cyan-500"></i>
@@ -364,7 +362,7 @@
                                     <linearGradient id="footerLogoGrad" x1="10" y1="8" x2="22" y2="24" gradientUnits="userSpaceOnUse">
                                         <stop offset="0" stop-color="#22d3ee"/>
                                         <stop offset="0.5" stop-color="#818cf8"/>
-                                <stop offset="1" stop-color="#34d399"/>
+                                        <stop offset="1" stop-color="#34d399"/>
                                     </linearGradient>
                                 </defs>
                             </svg>
@@ -389,9 +387,6 @@
                             <li><a href="{% url 'practice:problem-list' %}" class="text-sm font-bold text-slate-400 hover:text-cyan-400 transition-colors">Coding Challenges</a></li>
                             <li><a href="{% url 'aptitude:dashboard' %}" class="text-sm font-bold text-slate-400 hover:text-emerald-400 transition-colors">Aptitude Logic</a></li>
                             <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-sm font-bold text-slate-400 hover:text-violet-400 transition-colors">Mock Interviews</a></li>
-                            {% if show_social_navigation %}
-                            <li><a href="{% url 'posts:feed' %}" class="text-sm font-bold text-slate-400 hover:text-amber-400 transition-colors">Intelligence Feed</a></li>
-                            {% endif %}
                         </ul>
                     </div>
                     <div class="space-y-6">
@@ -402,8 +397,6 @@
                             <li><a href="{% url 'chat:inbox' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Intelligence Inbox</a></li>
                             <li><a href="{% url 'privacy_policy' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
                             <li><a href="{% url 'terms_of_service' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Terms of Service</a></li>
-                            <li><a href="{% url 'data_processing_addendum' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">DPA</a></li>
-                            <li><a href="/admin" class="text-sm font-bold text-slate-400 hover:text-rose-400 transition-colors">Hyper-Control</a></li>
                         </ul>
                     </div>
                     <div class="space-y-6 col-span-2 lg:col-span-1">
@@ -451,7 +444,7 @@
                             type="text"
                             name="q"
                             value="{{ request.GET.q|default_if_none:'' }}"
-                            placeholder="Search users or posts..."
+                            placeholder="Search protocol..."
                             class="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-950/70 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
                         >
                     </div>
@@ -468,11 +461,11 @@
                     <a href="{% url 'organizations:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-building-line text-emerald-400"></i> Organization
                     </a>
+                    <a href="{% url 'assessments:manage_assessments' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-file-list-3-line text-sky-400"></i> Manage Tests
+                    </a>
                     <a href="{% url 'organizations:members' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-team-line text-violet-400"></i> Members
-                    </a>
-                    <a href="{% url 'organizations:subscription' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-vip-crown-line text-amber-400"></i> Subscription
                     </a>
                     {% else %}
                     <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
@@ -481,21 +474,11 @@
                     <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-brain-line text-violet-400"></i> Aptitude
                     </a>
-                    {% if show_social_navigation %}
-                    <a href="{% url 'posts:feed' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-rss-2-line text-amber-400"></i> Intelligence
+                    <a href="{% url 'assessments:list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                        <i class="ri-file-list-3-line text-indigo-400"></i> Assessments
                     </a>
-                    {% endif %}
                     <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-robot-line text-cyan-500"></i> Mock Interviews
-                    </a>
-                    {% if enable_chat %}
-                    <a href="{% url 'chat:inbox' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-message-3-line text-sky-400"></i> Intelligence Inbox
-                    </a>
-                    {% endif %}
-                    <a href="{% url 'organizations:pricing' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-price-tag-3-line text-emerald-500"></i> Pricing
                     </a>
                     {% endif %}
                     <div class="pt-6 mt-6 border-t border-white/5 space-y-6">
@@ -645,8 +628,5 @@
             }
         });
     </script>
-    {% if user.is_authenticated %}
-    <script src="{% static 'core/js/notifications.js' %}"></script>
-    {% endif %}
 </body>
 </html>

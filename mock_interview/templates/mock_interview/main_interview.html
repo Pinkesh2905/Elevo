@@ -318,59 +318,75 @@
     }
   }
 
-  function setupSpeech() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+  let mediaRecorder = null;
+  let audioChunks = [];
 
-    state.recognition = new SR();
-    state.recognition.lang = 'en-US';
-    state.recognition.continuous = false;
-    state.recognition.interimResults = true;
-
-    state.recognition.onstart = () => {
-        state.listening = true;
-        els.statusDot.classList.replace("bg-slate-600", "bg-emerald-500");
-        els.statusDot.classList.add("animate-pulse");
-        els.statusText.textContent = "Listening...";
-        els.micIcon.classList.replace("ri-mic-line", "ri-mic-fill");
-        els.micBtn.classList.add("ring-2", "ring-emerald-500/50");
-    };
-
-    state.recognition.onresult = (event) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-        }
-        els.answerInput.value = transcript;
-    };
-
-    state.recognition.onend = () => {
-        state.listening = false;
-        els.statusDot.classList.remove("animate-pulse");
-        els.statusDot.classList.replace("bg-emerald-500", "bg-slate-600");
-        els.statusText.textContent = "Mic Idle";
-        els.micIcon.classList.replace("ri-mic-fill", "ri-mic-line");
-        els.micBtn.classList.remove("ring-2", "ring-emerald-500/50");
-
-        // Auto-submit if text exists and not manual
-        if (els.answerInput.value.trim().length > 10) {
-          // Delay a bit to let user breathe
-          setTimeout(() => {
-            if (!state.awaiting && !state.isSpeaking) submitAnswer();
-          }, 1500);
-        }
-    };
+  async function setupSpeech() {
+      try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          
+          mediaRecorder.ondataavailable = (e) => {
+              if (e.data.size > 0) audioChunks.push(e.data);
+          };
+          
+          mediaRecorder.onstart = () => {
+              state.listening = true;
+              audioChunks = [];
+              els.statusDot.classList.replace("bg-slate-600", "bg-emerald-500");
+              els.statusDot.classList.add("animate-pulse");
+              els.statusText.textContent = "Recording Voice...";
+              els.micIcon.classList.replace("ri-mic-line", "ri-mic-fill");
+              els.micBtn.classList.add("ring-2", "ring-emerald-500/50");
+          };
+          
+          mediaRecorder.onstop = async () => {
+              state.listening = false;
+              els.statusDot.classList.remove("animate-pulse");
+              els.statusDot.classList.replace("bg-emerald-500", "bg-amber-500");
+              els.statusText.textContent = "Transcribing...";
+              els.micIcon.classList.replace("ri-mic-fill", "ri-mic-line");
+              els.micBtn.classList.remove("ring-2", "ring-emerald-500/50");
+              
+              const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+              const formData = new FormData();
+              // Append WebM file to form data
+              formData.append("audio", audioBlob, "recording.webm");
+              
+              try {
+                  const res = await fetch(`/mock-interview/${SESSION_ID}/voice_interaction/`, {
+                      method: "POST",
+                      headers: { "X-CSRFToken": CSRF_TOKEN() },
+                      body: formData
+                  });
+                  const data = await res.json();
+                  if (data.transcript) {
+                      els.answerInput.value = data.transcript;
+                      submitAnswer();
+                  } else {
+                      els.statusText.textContent = "Transcription Failed";
+                      els.statusDot.classList.replace("bg-amber-500", "bg-red-500");
+                  }
+              } catch (e) {
+                  console.error(e);
+                  els.statusText.textContent = "Network Error";
+                  els.statusDot.classList.replace("bg-amber-500", "bg-red-500");
+              }
+          };
+      } catch (e) {
+          console.error("Microphone access denied", e);
+      }
   }
 
   function startListening() {
-    if (state.recognition && !state.listening) {
-        try { state.recognition.start(); } catch(e) {}
+    if (mediaRecorder && mediaRecorder.state === "inactive") {
+        mediaRecorder.start();
     }
   }
 
   function stopListening() {
-    if (state.recognition && state.listening) {
-        state.recognition.stop();
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
     }
   }
 

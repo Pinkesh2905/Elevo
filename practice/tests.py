@@ -5,7 +5,7 @@ from django.test import TestCase, override_settings
 from django.utils.text import slugify
 
 from .models import CodeTemplate, Problem, TestCase as ProblemTestCase
-from .views import execute_code_jdoodle
+from .views import execute_code_jdoodle, _build_python_harness
 
 
 class PracticeExecutionTests(TestCase):
@@ -54,3 +54,12 @@ class PracticeExecutionTests(TestCase):
         self.assertEqual(result["output"], "")
         self.assertEqual(result["error"], "Invalid response from code execution service")
         self.assertIn("bad gateway", result["details"])
+
+    def test_python_harness_includes_future_annotations(self):
+        code = (
+            "class Solution:\n"
+            "    def twoSum(self, nums: list[int], target: int) -> list[int]:\n"
+            "        return [0, 1]\n"
+        )
+        harness = _build_python_harness(code, "[2,7,11,15]\n9")
+        self.assertIn("from __future__ import annotations", harness)

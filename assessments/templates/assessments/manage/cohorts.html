@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Manage Cohorts | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-slate-100 tracking-tight mb-2 italic uppercase">Manage Cohorts</h1>
+                <p class="text-slate-400 text-sm font-medium tracking-wide">Organize your students into groups for targeted assessments.</p>
+            </div>
+            <a href="{% url 'assessments:create_cohort' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-sky-500 text-white font-bold text-sm hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/20">
+                <i class="ri-add-line text-lg"></i>
+                Create New Cohort
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for cohort in cohorts %}
+            <div class="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/60 p-8 transition-all hover:border-sky-500/30 hover:bg-slate-900/80">
+                <div class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-sky-500/5 blur-3xl transition-all group-hover:bg-sky-500/10"></div>
+                
+                <h3 class="text-xl font-bold text-slate-100 mb-3">{{ cohort.name }}</h3>
+                <p class="text-slate-500 text-xs leading-relaxed mb-6 line-clamp-2">{{ cohort.description|default:"No description provided." }}</p>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center border border-sky-500/20">
+                            <i class="ri-group-line text-sky-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black text-slate-100">{{ cohort.members.count }}</p>
+                            <p class="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Members</p>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'assessments:cohort_detail' cohort.id %}" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all">
+                    Manage Members
+                    <i class="ri-arrow-right-line"></i>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-20 text-center rounded-[3rem] border-2 border-dashed border-white/5 bg-slate-900/40">
+                <div class="w-20 h-20 rounded-[2rem] bg-slate-800/50 flex items-center justify-center mx-auto mb-6">
+                    <i class="ri-group-line text-4xl text-slate-600"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-300 mb-2">No Cohorts Yet</h2>
+                <p class="text-slate-500 text-sm max-w-sm mx-auto mb-8">Start by creating a cohort to group your students and assign assessments.</p>
+                <a href="{% url 'assessments:create_cohort' %}" class="inline-flex items-center gap-2 px-8 py-4 rounded-3xl bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all">
+                    Create Your First Cohort
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

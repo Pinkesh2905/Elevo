@@ -217,7 +217,9 @@ class Subscription(models.Model):
             raise ValidationError("A subscription must be linked to either an organization or a user.")
 
     def save(self, *args, **kwargs):
-        if not kwargs.get('update_fields'):
+        # Only call full_clean on new instances or when explicitly full-saving.
+        # This prevents redundant OneToOneField uniqueness validation errors on updates.
+        if not self.pk or not kwargs.get('update_fields'):
             self.full_clean()
         super().save(*args, **kwargs)
 

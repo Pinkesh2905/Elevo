@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ cohort.name }} | Elevo{% endblock %}
+
+{% block extra_css %}
+<style>
+    .member-card { transition: all 0.2s ease; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .member-card:hover { background: rgba(255,255,255,0.02); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex items-center gap-4 mb-10">
+            <a href="{% url 'assessments:manage_cohorts' %}" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all">
+                <i class="ri-arrow-left-line text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-black text-slate-100 italic uppercase">{{ cohort.name }}</h1>
+                <p class="text-slate-400 text-sm font-medium">Manage members and view cohort details.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Sidebar: Cohort Info -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 backdrop-blur-xl">
+                    <h3 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Cohort Information</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Description</p>
+                            <p class="text-slate-300 text-sm leading-relaxed">{{ cohort.description|default:"No description provided." }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Members</p>
+                            <p class="text-3xl font-black text-slate-100 italic uppercase tracking-tight">{{ cohort.members.count }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Created At</p>
+                            <p class="text-slate-400 text-sm italic">{{ cohort.created_at|date:"M j, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main: Member Management -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Add New Members -->
+                <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-8 backdrop-blur-xl">
+                    <h3 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Add Members to Cohort</h3>
+                    <form method="POST" class="flex flex-col sm:flex-row gap-4 mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add">
+                        <select name="user_id" class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                            <option value="">Select a student...</option>
+                            {% for m in all_members %}
+                                {% if m.user.id not in cohort_member_ids %}
+                                    <option value="{{ m.user.id }}">{{ m.user.get_full_name|default:m.user.username }} (@{{ m.user.username }})</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="px-8 py-4 rounded-2xl bg-sky-500 text-white font-bold text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/15">
+                            Add Student
+                        </button>
+                    </form>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest px-2">Only organization members can be added.</p>
+                </div>
+
+                <!-- Members List -->
+                <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 overflow-hidden backdrop-blur-xl">
+                    <div class="px-8 py-6 border-b border-white/5">
+                        <h3 class="text-xs font-black text-slate-100 uppercase tracking-widest italic">Current Members</h3>
+                    </div>
+                    <div class="divide-y divide-white/5">
+                        {% for member in cohort.members.all %}
+                        <div class="member-card p-6 flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white text-sm font-bold uppercase">
+                                    {{ member.username|first }}
+                                </div>
+                                <div>
+                                    <p class="text-slate-100 text-sm font-bold">{{ member.get_full_name|default:member.username }}</p>
+                                    <p class="text-slate-500 text-xs tracking-wide">@{{ member.username }}</p>
+                                </div>
+                            </div>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="user_id" value="{{ member.id }}">
+                                <button type="submit" class="p-2 text-slate-500 hover:text-rose-500 transition-colors">
+                                    <i class="ri-delete-bin-2-line text-lg"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% empty %}
+                        <div class="p-20 text-center">
+                            <i class="ri-user-unfollow-line text-4xl text-slate-700 block mb-4"></i>
+                            <p class="text-slate-500 text-sm font-bold">No students in this cohort yet.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

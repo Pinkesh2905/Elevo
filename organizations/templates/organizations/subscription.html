@@ -151,15 +151,11 @@
             Free Tier
           </div>
         {% else %}
-          <form method="POST" action="{% url 'organizations:checkout_organization' %}">
-            {% csrf_token %}
-            <input type="hidden" name="plan_name" value="{{ plan.name }}">
-            <button type="submit" class="w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold text-center transition-all shadow-lg
-              {% if plan.name == 'GROWTH' or plan.name == 'PRO' %}bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 shadow-violet-500/15
-              {% else %}bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/15{% endif %}">
-              Upgrade to {{ plan.display_name }}
-            </button>
-          </form>
+          <a href="mailto:sales@elevo.life?subject=Upgrade to {{ plan.display_name }} - {{ org.name }}" class="block w-full px-4 py-2.5 rounded-xl text-white text-sm font-semibold text-center transition-all shadow-lg
+            {% if plan.name == 'GROWTH' or plan.name == 'PRO' %}bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 shadow-violet-500/15
+            {% else %}bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/15{% endif %}">
+            Contact Sales to Upgrade
+          </a>
         {% endif %}
       </div>
       {% endfor %}

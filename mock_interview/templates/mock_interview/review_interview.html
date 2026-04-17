@@ -188,6 +188,7 @@
     <footer class="flex flex-wrap gap-2">
       <a href="{% url 'mock_interview:my_mock_interviews' %}" class="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-slate-200 hover:bg-white/10">Back to History</a>
       <a href="{% url 'mock_interview:interview_setup' %}" class="rounded-lg bg-cyan-600 px-4 py-2 text-white hover:bg-cyan-500">Practice Again</a>
+      <a href="{% url 'mock_interview:download_pdf' session.id %}" target="_blank" class="rounded-lg bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-500 min-w-max">Download PDF Report</a>
     </footer>
   </div>
 </section>

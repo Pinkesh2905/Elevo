@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Manage Assessments | Elevo{% endblock %}
+
+{% block content %}
+<section class="min-h-screen py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+                <h1 class="text-3xl font-black text-slate-100 tracking-tight mb-2 italic uppercase">Assessments</h1>
+                <p class="text-slate-400 text-sm font-medium tracking-wide">Templates and exams for your organization.</p>
+            </div>
+            <div class="flex gap-4">
+                <a href="{% url 'assessments:manage_cohorts' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/10 transition-all">
+                    <i class="ri-group-line text-lg"></i>
+                    Cohorts
+                </a>
+                <a href="{% url 'assessments:create_assessment' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 text-white font-bold text-sm hover:from-sky-400 hover:to-indigo-400 transition-all shadow-lg shadow-sky-500/20">
+                    <i class="ri-add-line text-lg"></i>
+                    New Assessment
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6">
+            {% for assessment in assessments %}
+            <div class="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/60 p-8 transition-all hover:bg-slate-900/80">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-4">
+                            <h3 class="text-xl font-bold text-slate-100">{{ assessment.title }}</h3>
+                            <span class="px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest border border-sky-500/20">
+                                {{ assessment.duration_minutes }} Min
+                            </span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6 max-w-2xl line-clamp-2 italic">{{ assessment.description|default:"No instructions provided." }}</p>
+                        
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center gap-2 text-slate-500">
+                                <i class="ri-code-s-slash-line text-sky-500"></i>
+                                <span class="text-xs font-bold">{{ assessment.coding_problems.count }} Coding</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-500">
+                                <i class="ri-checkbox-circle-line text-indigo-500"></i>
+                                <span class="text-xs font-bold">{{ assessment.aptitude_problems.count }} Aptitude</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-500">
+                                <i class="ri-calendar-event-line text-slate-600"></i>
+                                <span class="text-xs font-bold">Created {{ assessment.created_at|date:"M d" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0">
+                        <a href="{% url 'assessments:assign_assessment' assessment.id %}" class="px-6 py-3 rounded-xl bg-sky-500/5 border border-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-widest hover:bg-sky-500 hover:text-white transition-all">
+                            Assign to Cohort
+                        </a>
+                        <!-- Results could be a link to generic results for this template -->
+                    </div>
+                </div>
+
+                <!-- Assignment status quick view (optional expansion) -->
+                {% with assignments=assessment.assignments.all %}
+                {% if assignments %}
+                <div class="mt-8 pt-6 border-t border-white/5 space-y-3">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-white/5 inline-block px-2 py-1 rounded-sm">Active Assignments</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {% for assignment in assignments %}
+                        <a href="{% url 'assessments:assignment_results' assignment.id %}" class="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between hover:bg-white/10 transition-all">
+                            <div>
+                                <p class="text-[11px] font-bold text-slate-100">{{ assignment.cohort.name }}</p>
+                                <p class="text-[10px] text-slate-500">{{ assignment.attempts.count }} Attempts</p>
+                            </div>
+                            <i class="ri-bar-chart-line text-sky-500"></i>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+            {% empty %}
+            <div class="py-20 text-center rounded-[3rem] border-2 border-dashed border-white/5 bg-slate-900/40">
+                <i class="ri-draft-line text-4xl text-slate-700 block mb-4"></i>
+                <h2 class="text-xl font-bold text-slate-300 mb-2 tracking-tight">No Templates Found</h2>
+                <p class="text-slate-500 text-sm italic mb-8">Create an assessment template first, then assign it to a cohort.</p>
+                <a href="{% url 'assessments:create_assessment' %}" class="px-8 py-4 rounded-[2rem] bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all">
+                    Create Template
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

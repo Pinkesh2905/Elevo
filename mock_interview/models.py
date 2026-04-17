@@ -57,6 +57,27 @@ class MockInterviewSession(models.Model):
     overall_feedback = models.TextField(blank=True, null=True)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
                                 help_text="Overall score for the interview (e.g., 0-100).")
+                                
+    # AI Voice Metrics & Rubrics
+    RUBRIC_CHOICES = [
+        ('faang', 'FAANG Rubric (SDE/MAANG)'),
+        ('service', 'Service Based Rubric (TCS/Infosys)'),
+        ('general', 'General Rubric'),
+    ]
+    rubric_type = models.CharField(max_length=20, choices=RUBRIC_CHOICES, default='general')
+    
+    # FAANG Metrics
+    problem_solving_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    code_quality_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    system_design_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    
+    # Service Metrics
+    oops_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    dbms_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    core_cs_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    
+    sentiment_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Overall communication and professional sentiment score.")
+
     PERFORMANCE_BAND_CHOICES = [
         ('foundation', 'Foundation'),
         ('standard', 'Standard'),
