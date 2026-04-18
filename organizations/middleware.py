@@ -23,14 +23,13 @@ class PremiumAccessMiddleware(MiddlewareMixin):
         if not request.user.is_authenticated:
             return
 
-        # Find user's active membership with a valid subscription
+        # Find user's active membership (regardless of subscription status)
         membership = (
             Membership.objects
             .filter(
                 user=request.user,
                 is_active=True,
                 organization__is_active=True,
-                organization__subscription__status='ACTIVE',
             )
             .select_related(
                 'organization',
@@ -41,14 +40,20 @@ class PremiumAccessMiddleware(MiddlewareMixin):
         )
 
         if membership:
-            sub = membership.organization.subscription
-            if sub.is_valid:
-                request.user_membership = membership
-                request.user_org = membership.organization
-                request.premium_plan = sub.plan
-                request.is_premium = True
-        else:
-            # Check for personal subscription
+            request.user_membership = membership
+            request.user_org = membership.organization
+            
+            # Check for organization subscription
+            try:
+                sub = membership.organization.subscription
+                if sub.is_valid:
+                    request.premium_plan = sub.plan
+                    request.is_premium = True
+            except Exception:
+                pass
+        
+        # If still not premium, check for personal subscription
+        if not request.is_premium:
             try:
                 sub = request.user.personal_subscription
                 if sub.is_valid:

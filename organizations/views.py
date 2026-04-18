@@ -223,6 +223,11 @@ def create_org(request):
             organization=org,
             role='OWNER',
         )
+
+        # Sync platform role to ORG_ADMIN if it's currently STUDENT
+        if hasattr(request.user, 'profile') and request.user.profile.role == 'STUDENT':
+            request.user.profile.role = 'ORG_ADMIN'
+            request.user.profile.save(update_fields=['role', 'updated_at'])
         _audit(
             "ORG_CREATED",
             organization=org,
@@ -344,7 +349,45 @@ def bulk_member_action(request):
     return redirect('organizations:members')
 
 
-# --- Invite Student ---
+def _send_invitation_email(request, invite):
+    """
+    Helper to send invitation email.
+    """
+    from django.core.mail import send_mail
+    from django.conf import settings
+
+    org = invite.organization
+    email = invite.email
+    scheme = "https" if request.is_secure() else "http"
+    invite_url = f"{scheme}://{settings.DOMAIN_NAME}/org/join/{invite.token}/"
+
+    subject = f"Invitation to join {org.name} on Elevo"
+    message = (
+        f"Hi there!\n\n"
+        f"You have been invited by {request.user.get_full_name() or request.user.username} "
+        f"to join the organization '{org.name}' on Elevo.\n\n"
+        f"Elevo helps students bridge the gap between learning and employment with "
+        f"AI-powered mock interviews and targeted practice.\n\n"
+        f"Click the link below to accept the invitation and gain access to premium features:\n"
+        f"{invite_url}\n\n"
+        f"If you don't have an account yet, you'll be asked to create one first.\n"
+        f"This link will expire in 7 days.\n\n"
+        f"Best,\nThe Elevo Team"
+    )
+
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+        return True, f"Invitation sent to {email}!"
+    except Exception as e:
+        return False, f"Invitation record created, but email could not be sent: {str(e)}"
+
+
 @login_required
 @org_admin_required
 def invite_student(request):
@@ -393,38 +436,11 @@ def invite_student(request):
         details={"email": email, "invite_id": invite.id, "role": role},
     )
 
-    # Send invitation email
-    from django.core.mail import send_mail
-    from django.conf import settings
-
-    scheme = "https" if request.is_secure() else "http"
-    invite_url = f"{scheme}://{settings.DOMAIN_NAME}/org/join/{invite.token}/"
-
-    subject = f"Invitation to join {org.name} on Elevo"
-    message = (
-        f"Hi there!\n\n"
-        f"You have been invited by {request.user.get_full_name() or request.user.username} "
-        f"to join the organization '{org.name}' on Elevo.\n\n"
-        f"Elevo helps students bridge the gap between learning and employment with "
-        f"AI-powered mock interviews and targeted practice.\n\n"
-        f"Click the link below to accept the invitation and gain access to premium features:\n"
-        f"{invite_url}\n\n"
-        f"If you don't have an account yet, you'll be asked to create one first.\n"
-        f"This link will expire in 7 days.\n\n"
-        f"Best,\nThe Elevo Team"
-    )
-
-    try:
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
-        )
-        messages.success(request, f"Invitation sent to {email}!")
-    except Exception as e:
-        messages.warning(request, f"Invitation record created, but email could not be sent: {str(e)}")
+    success, msg = _send_invitation_email(request, invite)
+    if success:
+        messages.success(request, msg)
+    else:
+        messages.warning(request, msg)
 
     return redirect('organizations:members')
 
@@ -516,6 +532,11 @@ def join_org(request, token):
         role=assigned_role,
         invited_by=invite.invited_by,
     )
+
+    # Sync platform role to ORG_ADMIN if joining as elevated role
+    if assigned_role in {'ADMIN', 'TRAINER'} and hasattr(request.user, 'profile') and request.user.profile.role == 'STUDENT':
+        request.user.profile.role = 'ORG_ADMIN'
+        request.user.profile.save(update_fields=['role', 'updated_at'])
 
     invite.status = 'ACCEPTED'
     invite.save(update_fields=['status'])
@@ -744,7 +765,6 @@ def bulk_invite_students(request):
                 _audit("MEMBER_ADDED", organization=org, actor=request.user, target_user=user, details={"bulk": True, "role": role})
                 created_count += 1
             else:
-                # Create invitation for non-existing user without name
                 invite, created = OrgInvitation.objects.get_or_create(
                     organization=org,
                     email=email,
@@ -757,6 +777,8 @@ def bulk_invite_students(request):
                 )
                 if created:
                     _audit("INVITE_SENT", organization=org, actor=request.user, details={"email": email, "role": role, "bulk": True})
+                    # Send invitation email
+                    _send_invitation_email(request, invite)
                     created_count += 1
                 else:
                     skipped_count += 1

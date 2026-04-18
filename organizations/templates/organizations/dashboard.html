@@ -126,7 +126,7 @@
             <p class="text-xs text-slate-500">@{{ m.user.username }}</p>
           </div>
           <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
-            {% if m.role == 'ORG_ADMIN' %}bg-violet-500/15 text-violet-400 border border-violet-500/25
+            {% if m.role == 'OWNER' or m.role == 'ADMIN' %}bg-violet-500/15 text-violet-400 border border-violet-500/25
             {% else %}bg-slate-500/15 text-slate-400 border border-slate-500/25{% endif %}">
             {{ m.get_role_display }}
           </span>

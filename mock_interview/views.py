@@ -17,10 +17,11 @@ from django.core.cache import cache
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, get_template
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from google import genai
 from google.genai import types
 try:
@@ -2602,18 +2603,7 @@ def ai_health_check(request):
         }
     )
 
-import os
-import openai
-import base64
-from io import BytesIO
-from django.http import HttpResponse
-from django.template.loader import get_template
-from django.views.decorators.csrf import csrf_exempt
 
-try:
-    from xhtml2pdf import pisa
-except ImportError:
-    pisa = None
 
 @login_required
 @csrf_exempt
@@ -2674,8 +2664,13 @@ def download_pdf_report(request, session_id):
     template = get_template(template_path)
     html = template.render(context)
     
+    try:
+        from xhtml2pdf import pisa
+    except ImportError:
+        pisa = None
+
     if pisa is None:
-        return HttpResponse("xhtml2pdf is not installed.")
+        return HttpResponse("xhtml2pdf is not installed or missing system dependencies (like cairo).")
         
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err:

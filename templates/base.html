@@ -192,11 +192,19 @@
                                 <i class="ri-file-list-3-line"></i> Application In Review
                             </a>
                         {% endif %}
-                    {% elif user.profile.role == 'ORG_ADMIN' %}
+                    {% elif user.profile.role == 'ORG_ADMIN' or request.user_membership %}
                         <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
-                        <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Organization</a>
-                        <a href="{% url 'assessments:manage_assessments' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-sky-400">Manage Tests</a>
-                        <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Members</a>
+                        
+                        {% if request.user_membership.normalized_role == 'STUDENT' %}
+                            <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Coding</a>
+                            <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Aptitude</a>
+                            <a href="{% url 'assessments:list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-indigo-400">Assessments</a>
+                            <a href="{% url 'organizations:my_org' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">My Organization</a>
+                        {% else %}
+                            <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Organization</a>
+                            <a href="{% url 'assessments:manage_assessments' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-sky-400">Manage Tests</a>
+                            <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Members</a>
+                        {% endif %}
                     {% else %}
                         <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
                         <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Coding</a>
@@ -235,7 +243,7 @@
                         <i class="ri-message-3-line text-xl"></i>
                         <span id="navUnreadBadge" class="hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 text-[8px] font-black text-white items-center justify-center"></span>
                     </a>
-                    {% if user.profile.role != 'STUDENT' %}
+                    {% if user.profile.role != 'STUDENT' or request.user_membership %}
                     <a href="{% url 'organizations:my_org' %}" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-emerald-400 transition-all group" title="Organization">
                         <i class="ri-building-line text-xl"></i>
                     </a>
@@ -457,16 +465,31 @@
                     <a href="{% url 'users:admin_dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-admin-line text-rose-400"></i> Admin Dashboard
                     </a>
-                    {% elif user.profile.role == 'ORG_ADMIN' %}
-                    <a href="{% url 'organizations:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-building-line text-emerald-400"></i> Organization
-                    </a>
-                    <a href="{% url 'assessments:manage_assessments' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-file-list-3-line text-sky-400"></i> Manage Tests
-                    </a>
-                    <a href="{% url 'organizations:members' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-team-line text-violet-400"></i> Members
-                    </a>
+                    {% elif user.profile.role == 'ORG_ADMIN' or request.user_membership %}
+                        {% if request.user_membership.normalized_role == 'STUDENT' %}
+                            <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-code-s-slash-line text-emerald-400"></i> Coding
+                            </a>
+                            <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-brain-line text-violet-400"></i> Aptitude
+                            </a>
+                            <a href="{% url 'assessments:list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-file-list-3-line text-indigo-400"></i> Assessments
+                            </a>
+                            <a href="{% url 'organizations:my_org' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-building-line text-cyan-400"></i> My Organization
+                            </a>
+                        {% else %}
+                            <a href="{% url 'organizations:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-building-line text-emerald-400"></i> Organization
+                            </a>
+                            <a href="{% url 'assessments:manage_assessments' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-file-list-3-line text-sky-400"></i> Manage Tests
+                            </a>
+                            <a href="{% url 'organizations:members' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                                <i class="ri-team-line text-violet-400"></i> Members
+                            </a>
+                        {% endif %}
                     {% else %}
                     <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
                         <i class="ri-code-s-slash-line text-emerald-400"></i> Coding

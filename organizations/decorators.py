@@ -85,7 +85,7 @@ def org_role_required(*allowed_roles):
             role = _normalized_role(membership)
             if role not in set(allowed_roles):
                 django_messages.error(request, "You do not have permission for this organization action.")
-                return redirect("organizations:dashboard")
+                return redirect("organizations:my_org")
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
