@@ -6,16 +6,6 @@
 <div class="min-h-screen bg-gray-50 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full mx-auto">
 
-        <!-- Display Django Messages -->
-        {% if messages %}
-            <div class="mb-6">
-                {% for message in messages %}
-                    <div class="rounded-md p-4 {% if message.tags == 'success' %} bg-green-100 text-green-800 {% elif message.tags == 'error' %} bg-red-100 text-red-800 {% else %} bg-sky-100 text-sky-800 {% endif %}" role="alert">
-                        <p class="font-medium">{{ message }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
         
         <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl text-center transform transition-all hover:shadow-2xl duration-500">
             

@@ -1,12 +1,12 @@
 {% load custom_filters %}
 {% if resume_insights %}
-<div class="glass-elevated rounded-[2.5rem] border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 300ms;">
-    <div class="px-8 py-6 border-b border-white/5 bg-white/2 flex items-center justify-between">
+<div class="glass-elevated rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden animate-reveal transition-colors duration-300" style="animation-delay: 300ms;">
+    <div class="px-8 py-6 border-b border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/2 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <i class="ri-radar-line text-cyan-400 text-xl"></i>
-            <h2 class="text-xs font-black text-white uppercase tracking-widest">Resume Intelligence Insights</h2>
+            <i class="ri-radar-line text-cyan-600 dark:text-cyan-400 text-xl"></i>
+            <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">Resume Intelligence Insights</h2>
         </div>
-        <div class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest {% if resume_insights.band == 'excellent' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% elif resume_insights.band == 'good' %}bg-cyan-500/10 text-cyan-400 border border-cyan-500/20{% elif resume_insights.band == 'average' %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+        <div class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest {% if resume_insights.band == 'excellent' %}bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20{% elif resume_insights.band == 'good' %}bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20{% elif resume_insights.band == 'average' %}bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20{% endif %}">
             {{ resume_insights.band }}
         </div>
     </div>
@@ -17,31 +17,31 @@
             <div class="relative flex flex-col sm:flex-row items-center gap-8">
                 <div class="relative w-32 h-32 flex items-center justify-center">
                     <svg class="w-full h-full -rotate-90">
-                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-white/5" />
+                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-100 dark:text-white/5" />
                         <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="8" fill="transparent"
                             stroke-dasharray="364.4"
                             stroke-dashoffset="{{ 364.4|subtract_percentage:resume_insights.ats_score }}"
                             class="{% if resume_insights.ats_score > 80 %}text-emerald-500{% elif resume_insights.ats_score > 60 %}text-cyan-500{% else %}text-amber-500{% endif %} transition-all duration-1000" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-black text-white brand-font tracking-tight">{{ resume_insights.ats_score }}</span>
-                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">ATS Grade</span>
+                        <span class="text-3xl font-black text-slate-900 dark:text-white brand-font tracking-tight">{{ resume_insights.ats_score }}</span>
+                        <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">ATS Grade</span>
                     </div>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-xl font-black text-white brand-font tracking-tight mb-3">Mastery Summary</h3>
-                    <p class="text-slate-400 text-sm font-medium leading-relaxed">{{ resume_insights.summary }}</p>
+                    <h3 class="text-xl font-black text-slate-900 dark:text-white brand-font tracking-tight mb-3">Mastery Summary</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-relaxed">{{ resume_insights.summary }}</p>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {% for label, value in resume_insights.breakdown.items %}
-            <div class="glass-elevated rounded-2xl border border-white/5 p-4 group hover:-translate-y-1 transition-all">
-                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{{ label|replace:"_, " }}</p>
+            <div class="glass-elevated rounded-2xl border border-slate-200 dark:border-white/5 p-4 group hover:-translate-y-1 transition-all">
+                <p class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{{ label|replace:"_, " }}</p>
                 <div class="flex items-end gap-1">
-                    <span class="text-xl font-black text-white brand-font tracking-tight">{{ value }}</span>
-                    <span class="text-[9px] font-black text-cyan-500 mb-1.5">%</span>
+                    <span class="text-xl font-black text-slate-900 dark:text-white brand-font tracking-tight">{{ value }}</span>
+                    <span class="text-[9px] font-black text-cyan-600 dark:text-cyan-500 mb-1.5">%</span>
                 </div>
             </div>
             {% endfor %}
@@ -51,14 +51,14 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
-                    <i class="ri-briefcase-4-line text-cyan-400"></i>
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">JD Fit Analysis</h3>
+                    <i class="ri-briefcase-4-line text-cyan-600 dark:text-cyan-400"></i>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">JD Fit Analysis</h3>
                 </div>
-                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {% if resume_insights.jd_fit.fit_score >= 80 %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% elif resume_insights.jd_fit.fit_score >= 60 %}bg-amber-500/10 text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {% if resume_insights.jd_fit.fit_score >= 80 %}bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20{% elif resume_insights.jd_fit.fit_score >= 60 %}bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20{% else %}bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20{% endif %}">
                     {{ resume_insights.jd_fit.fit_score }}% fit
                 </span>
             </div>
-            <p class="text-xs text-slate-400 font-medium leading-relaxed">{{ resume_insights.jd_fit.summary }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">{{ resume_insights.jd_fit.summary }}</p>
             <div class="grid sm:grid-cols-2 gap-4">
                 <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
                     <p class="text-[9px] font-black text-emerald-300 uppercase tracking-widest mb-2">Matched Skills</p>
@@ -70,13 +70,13 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
-                    <p class="text-[9px] font-black text-rose-300 uppercase tracking-widest mb-2">Missing Skills</p>
+                <div class="rounded-xl border border-rose-500/20 bg-rose-500/5 dark:bg-rose-500/5 p-4">
+                    <p class="text-[9px] font-black text-rose-600 dark:text-rose-300 uppercase tracking-widest mb-2">Missing Skills</p>
                     <div class="flex flex-wrap gap-2">
                         {% for skill in resume_insights.jd_fit.missing_skills %}
-                        <span class="px-2 py-1 rounded-md bg-rose-500/10 text-rose-300 text-[10px] font-bold">{{ skill }}</span>
+                        <span class="px-2 py-1 rounded-md bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-300 text-[10px] font-bold">{{ skill }}</span>
                         {% empty %}
-                        <span class="text-[10px] text-slate-500">Great coverage.</span>
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500">Great coverage.</span>
                         {% endfor %}
                     </div>
                 </div>
@@ -87,12 +87,12 @@
         {% if resume_insights.missing_keywords %}
         <div class="space-y-4">
             <div class="flex items-center gap-2">
-                <i class="ri-alert-line text-amber-400"></i>
-                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Missing Domain Keywords</h3>
+                <i class="ri-alert-line text-amber-600 dark:text-amber-400"></i>
+                <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Missing Domain Keywords</h3>
             </div>
             <div class="flex flex-wrap gap-2">
                 {% for kw in resume_insights.missing_keywords %}
-                <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-slate-300">{{ kw }}</span>
+                <span class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-300">{{ kw }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -101,29 +101,29 @@
         <div class="grid sm:grid-cols-2 gap-8">
             <div class="space-y-4">
                 <div class="flex items-center gap-2">
-                    <i class="ri-sparkling-fill text-emerald-400"></i>
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Artifact Highlights</h3>
+                    <i class="ri-sparkling-fill text-emerald-600 dark:text-emerald-400"></i>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Artifact Highlights</h3>
                 </div>
                 <ul class="space-y-3">
                     {% for item in resume_insights.detected_highlights %}
-                    <li class="p-4 rounded-xl bg-white/2 border border-white/5 flex gap-3 text-xs font-medium text-slate-300">
-                        <i class="ri-checkbox-circle-fill text-emerald-400/40 mt-0.5"></i>
+                    <li class="p-4 rounded-xl bg-slate-50 dark:bg-white/2 border border-slate-200 dark:border-white/5 flex gap-3 text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <i class="ri-checkbox-circle-fill text-emerald-600/40 dark:text-emerald-400/40 mt-0.5"></i>
                         {{ item }}
                     </li>
                     {% empty %}
-                    <li class="text-slate-500 text-xs italic">No highlights detected.</li>
+                    <li class="text-slate-400 dark:text-slate-500 text-xs italic">No highlights detected.</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="space-y-4">
                 <div class="flex items-center gap-2">
-                    <i class="ri-edit-flash-line text-sky-400"></i>
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Actionable Refinements</h3>
+                    <i class="ri-edit-flash-line text-sky-600 dark:text-sky-400"></i>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Actionable Refinements</h3>
                 </div>
                 <ul class="space-y-3">
                     {% for s in resume_insights.suggestions %}
-                    <li class="p-4 rounded-xl bg-white/2 border border-white/5 flex gap-3 text-xs font-medium text-slate-300">
-                        <i class="ri-flashlight-line text-sky-400/40 mt-0.5"></i>
+                    <li class="p-4 rounded-xl bg-slate-50 dark:bg-white/2 border border-slate-200 dark:border-white/5 flex gap-3 text-xs font-medium text-slate-700 dark:text-slate-300">
+                        <i class="ri-flashlight-line text-sky-600/40 dark:text-sky-400/40 mt-0.5"></i>
                         {{ s }}
                     </li>
                     {% endfor %}

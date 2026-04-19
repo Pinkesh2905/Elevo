@@ -39,9 +39,18 @@
   .sidebar-thread.active { background: rgba(14, 165, 233, 0.14); border-left: 3px solid #38bdf8; }
   .messages-container { flex: 1; min-height: 0; scroll-behavior: smooth; }
   .bubble-sent, .bubble-received { border-radius: 1.25rem; box-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.8); }
-    :root {
+  :root {
     --chat-bg-image: none;
     --chat-bg-color: transparent;
+    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(79, 70, 229, 0.08));
+    --bubble-sent-border: rgba(56, 189, 248, 0.2);
+    --bubble-sent-text: #0369a1;
+    --bubble-received-bg: rgba(241, 245, 249, 0.8);
+    --bubble-received-border: rgba(148, 163, 184, 0.1);
+    --bubble-received-text: #1e293b;
+  }
+
+  .dark {
     --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(79, 70, 229, 0.2));
     --bubble-sent-border: rgba(56, 189, 248, 0.32);
     --bubble-sent-text: #e0f2fe;
@@ -204,15 +213,20 @@
   
   .reply-chip { 
     border-left: 3px solid #38bdf8;
-    background: rgba(15, 23, 42, 0.7); 
+    background: rgba(241, 245, 249, 0.7); 
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 0.75rem;
     padding: 0.5rem 0.75rem;
     margin-bottom: 0.5rem;
   }
-  .reply-chip .reply-header { color: #38bdf8; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .reply-chip .reply-content { color: #cbd5e1; font-size: 0.85rem; }
+  .dark .reply-chip {
+    background: rgba(15, 23, 42, 0.7);
+  }
+  .reply-chip .reply-header { color: #0ea5e9; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .dark .reply-chip .reply-header { color: #38bdf8; }
+  .reply-chip .reply-content { color: #475569; font-size: 0.85rem; }
+  .dark .reply-chip .reply-content { color: #cbd5e1; }
   .message-actions { opacity: 1; }
   .reaction-trigger, .reply-btn, .reaction-badge { transition: color 0.2s ease, background 0.2s ease, opacity 0.2s ease, transform 0.2s ease; }
   .reaction-trigger:hover, .reply-btn:hover, .reaction-badge:hover { transform: translateY(-1px); }
@@ -233,45 +247,45 @@
 <section class="chat-shell px-3 py-3 sm:px-4 sm:py-6">
   <div class="chat-layout mx-auto grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
     <aside id="inboxSidebar" class="chat-column {% if not inbox_mode %}hidden lg:block{% endif %} lg:col-span-4 xl:col-span-3">
-      <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/55 backdrop-blur-2xl">
-        <div class="flex items-center justify-between border-b border-white/5 px-5 py-4">
+      <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/55 backdrop-blur-2xl transition-colors duration-300">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 px-5 py-4">
           <div>
-            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-sky-400">Inbox</p>
-            <h2 class="mt-1 text-base font-black text-slate-100">Talk To Others</h2>
+            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-sky-600 dark:text-sky-400">Inbox</p>
+            <h2 class="mt-1 text-base font-black text-slate-800 dark:text-slate-100">Talk To Others</h2>
           </div>
           <div class="flex items-center gap-2">
-            <button id="newMessageBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 transition hover:bg-sky-500/20 hover:text-white" title="New Message">
+            <button id="newMessageBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 transition hover:bg-sky-500/20 hover:text-sky-700 dark:hover:text-white" title="New Message">
               <i class="ri-user-add-line text-lg"></i>
             </button>
-            <a href="{% url 'chat:inbox' %}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white" title="Refresh">
+            <a href="{% url 'chat:inbox' %}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white" title="Refresh">
               <i class="ri-refresh-line text-lg"></i>
             </a>
           </div>
         </div>
         <!-- Search Bar -->
-        <div class="px-5 pt-4 pb-3 border-b border-white/5 bg-slate-900/20">
+        <div class="px-5 pt-4 pb-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/20">
            <div class="relative">
-             <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-             <input type="text" id="threadSearch" placeholder="Search conversations..." class="w-full rounded-xl border border-white/5 bg-white/5 py-2 pl-9 pr-4 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/30">
+             <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
+             <input type="text" id="threadSearch" placeholder="Search conversations..." class="w-full rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 py-2 pl-9 pr-4 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/30 transition-all">
            </div>
         </div>
-        <div id="socialThreadList" class="chat-sidebar divide-y divide-white/5">
+        <div id="socialThreadList" class="chat-sidebar divide-y divide-slate-100 dark:divide-white/5">
           {% for item in thread_list %}
             <a href="{% url 'chat:thread' item.thread.id %}" class="sidebar-thread flex items-center gap-3 px-5 py-4 {% if item.thread.id == thread.id %}active{% endif %}">
               <div class="relative shrink-0">
                 {% if item.other_user.profile.avatar %}
-                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl border border-white/10 object-cover">
+                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl border border-slate-200 dark:border-white/10 object-cover shadow-sm">
                 {% else %}
-                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-base font-black text-white">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-base font-black text-white shadow-sm">
                     {{ item.other_user.username|first|upper }}
                   </div>
                 {% endif %}
                 {% if item.unread > 0 %}
-                  <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-slate-950 bg-sky-400"></span>
+                  <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white dark:border-slate-950 bg-sky-400"></span>
                 {% endif %}
               </div>
               <div class="min-w-0 flex-1">
-                <div class="truncate text-sm font-bold text-slate-100">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
+                <div class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
                 <div class="mt-1 flex items-center gap-1 truncate text-[11px] text-slate-500">
                   {% if item.last_message %}
                     {% if item.last_message.sender == request.user %}
@@ -297,23 +311,23 @@
       <!-- ─── Thread View ─── -->
       <div id="chatThreadView" class="{% if inbox_mode %}hidden{% endif %} h-full">
         {% if not inbox_mode %}
-        <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl shadow-slate-950/30" data-theme="{{ thread.theme }}">
-          <header class="flex items-center gap-3 border-b border-white/10 bg-black/40 px-3 py-3 sm:px-5 sm:py-4">
-          <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white lg:hidden">
+        <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl dark:shadow-slate-950/30 bg-slate-50 dark:bg-slate-900" data-theme="{{ thread.theme }}">
+          <header class="flex items-center gap-3 border-b border-slate-200/50 dark:border-white/10 bg-white/60 dark:bg-black/40 px-3 py-3 sm:px-5 sm:py-4 backdrop-blur-md z-10">
+          <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white lg:hidden">
             <i class="ri-arrow-left-line text-xl"></i>
           </a>
           <div class="relative shrink-0">
             {% if other_user.profile.avatar %}
-              <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.username }}" class="h-11 w-11 rounded-2xl border border-white/15 object-cover sm:h-12 sm:w-12">
+              <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.username }}" class="h-11 w-11 rounded-2xl border border-slate-200 dark:border-white/15 object-cover sm:h-12 sm:w-12 shadow-sm">
             {% else %}
-              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-12 sm:w-12">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-12 sm:w-12 shadow-sm">
                 {{ other_user.username|first|upper }}
               </div>
             {% endif %}
-            <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-950 bg-emerald-500"></span>
+            <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500"></span>
           </div>
           <div class="min-w-0 flex-1">
-            <h1 class="truncate text-sm font-black text-slate-100 sm:text-base">{{ other_user.get_full_name|default:other_user.username }}</h1>
+            <h1 class="truncate text-sm font-black text-slate-800 dark:text-slate-100 sm:text-base">{{ other_user.get_full_name|default:other_user.username }}</h1>
             <div id="typingIndicator" class="hidden items-center gap-2">
               <div class="flex items-center gap-1">
                 <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
@@ -325,19 +339,19 @@
             <p id="participantStatus" class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Live conversation</p>
           </div>
           <div class="hidden items-center gap-2 sm:flex">
-            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
               <i class="ri-search-line text-lg"></i>
             </button>
-            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
               <i class="ri-more-2-fill text-lg"></i>
             </button>
           </div>
 
-          <button id="soundToggleBtn" class="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white" title="Mute Notification Sounds">
+          <button id="soundToggleBtn" class="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white" title="Mute Notification Sounds">
             <i class="ri-volume-up-line text-lg"></i>
           </button>
 
-          <button id="themePickerBtn" class="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-300 transition hover:bg-white/10 hover:text-white" title="Change Theme">
+          <button id="themePickerBtn" class="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white" title="Change Theme">
             <i class="ri-palette-line text-lg"></i>
           </button>
         </header>
@@ -346,7 +360,7 @@
           {% for msg in messages %}
             {% ifchanged msg.created_at.date %}
               <div class="my-6 flex justify-center">
-                <span class="rounded-full bg-slate-800/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 backdrop-blur-sm">
+                <span class="rounded-full bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 backdrop-blur-sm">
                   {{ msg.created_at|date:"M j, Y" }}
                 </span>
               </div>
@@ -394,12 +408,12 @@
                       <source src="{{ msg.file.url }}">
                     </video>
                   {% elif msg.message_type == 'file' and msg.file %}
-                    <a href="{{ msg.file.url }}" download target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10">
-                      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400">
+                    <a href="{{ msg.file.url }}" download target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-white/5 px-3 py-3 transition hover:bg-white/60 dark:hover:bg-white/10">
+                      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
                         <i class="ri-file-line text-xl"></i>
                       </div>
                       <div class="min-w-0">
-                        <p class="truncate text-sm font-bold text-slate-100">{{ msg.file.name|cut:"chat/files/" }}</p>
+                        <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{{ msg.file.name|cut:"chat/files/" }}</p>
                         <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p>
                       </div>
                     </a>
@@ -424,22 +438,22 @@
                 <div class="flex w-full flex-wrap items-center gap-2 {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
                   <div class="message-actions flex items-center gap-2">
                     {% if not msg.is_deleted_for_everyone %}
-                    <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="{{ msg.id }}" data-user="{{ msg.sender.username }}" data-content="{{ msg.content|default_if_none:''|escapejs }}">
+                    <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-slate-200/50 dark:hover:bg-white/5 hover:text-sky-600 dark:hover:text-sky-400" data-id="{{ msg.id }}" data-user="{{ msg.sender.username }}" data-content="{{ msg.content|default_if_none:''|escapejs }}">
                       Reply
                     </button>
-                    <button type="button" class="copy-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-sky-400" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Copy">
+                    <button type="button" class="copy-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-sky-600 dark:hover:text-sky-400" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Copy">
                       <i class="ri-file-copy-line text-sm"></i>
                     </button>
                     {% if msg.sender == request.user and msg.message_type == 'text' %}
-                      <button type="button" class="edit-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-emerald-400" data-id="{{ msg.id }}" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Edit">
+                      <button type="button" class="edit-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-emerald-600 dark:hover:text-emerald-400" data-id="{{ msg.id }}" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Edit">
                         <i class="ri-edit-line text-sm"></i>
                       </button>
                     {% endif %}
                     {% endif %}
-                    <button type="button" class="delete-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-rose-400" data-id="{{ msg.id }}" data-mine="{% if msg.sender == request.user and not msg.is_deleted_for_everyone %}true{% else %}false{% endif %}" title="Delete">
+                    <button type="button" class="delete-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-rose-600 dark:hover:text-rose-400" data-id="{{ msg.id }}" data-mine="{% if msg.sender == request.user and not msg.is_deleted_for_everyone %}true{% else %}false{% endif %}" title="Delete">
                       <i class="ri-delete-bin-line text-sm"></i>
                     </button>
-                    <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-yellow-300" data-id="{{ msg.id }}">
+                    <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-yellow-600 dark:hover:text-yellow-300" data-id="{{ msg.id }}">
                       <i class="ri-emotion-happy-line text-sm"></i>
                     </button>
                   </div>
@@ -456,7 +470,7 @@
             </div>
           {% endfor %}
         </div>
-        <div class="border-t border-white/5 bg-slate-950/25 px-3 py-3 sm:px-5 sm:py-4">
+        <div class="border-t border-slate-200/50 dark:border-white/5 bg-white/80 dark:bg-slate-950/25 px-3 py-3 sm:px-5 sm:py-4 backdrop-blur-md transition-colors duration-300">
           <div id="replyBar" class="reply-chip mb-3 hidden items-center justify-between gap-3 rounded-2xl px-3 py-3">
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-[0.18em] text-sky-400">Replying to <span id="replyUser"></span></p>
@@ -472,15 +486,15 @@
             <input type="hidden" name="parent_id" id="parentInput">
             <input type="file" id="fileAttachment" class="hidden">
 
-            <div id="filePreview" class="hidden items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400">
+            <div id="filePreview" class="hidden items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-3 shadow-sm">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
                 <i class="ri-attachment-2 text-lg"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <p id="previewName" class="truncate text-sm font-bold text-slate-100"></p>
+                <p id="previewName" class="truncate text-sm font-bold text-slate-800 dark:text-slate-100"></p>
                 <p id="previewSize" class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"></p>
               </div>
-              <button type="button" id="clearFileBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-rose-400 transition hover:bg-white/10 hover:text-rose-300">
+              <button type="button" id="clearFileBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-white/5 text-rose-600 dark:text-rose-400 transition hover:bg-slate-300 dark:hover:bg-white/10 hover:text-rose-700 dark:hover:text-rose-300">
                 <i class="ri-delete-bin-line"></i>
               </button>
             </div>
@@ -536,79 +550,79 @@
     </div>
 
     <!-- ─── Desktop Placeholder (Inbox Mode) ─── -->
-    <div id="socialCenterView" class="{% if not inbox_mode %}hidden{% endif %} flex h-full flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 shadow-2xl backdrop-blur-3xl text-center p-8">
-       <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white/5 border border-white/10 shadow-inner">
+    <div id="socialCenterView" class="{% if not inbox_mode %}hidden{% endif %} flex h-full flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/40 shadow-xl dark:shadow-2xl backdrop-blur-3xl text-center p-8 transition-colors duration-300">
+       <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-inner">
          <i class="ri-chat-smile-2-line text-4xl text-sky-500/50"></i>
        </div>
-       <h2 class="text-2xl font-black text-slate-100 tracking-tight">Your Messages</h2>
-       <p class="mt-2 text-sm font-medium text-slate-400 max-w-xs">Select an existing conversation from the sidebar or start a new one to begin.</p>
-       <button onclick="document.getElementById('newMessageBtn').click()" class="mt-6 rounded-2xl bg-sky-500/10 px-6 py-3 text-xs font-bold uppercase tracking-wider text-sky-400 hover:bg-sky-500/20 hover:text-white transition">Start New Chat</button>
+       <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Your Messages</h2>
+       <p class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-xs">Select an existing conversation from the sidebar or start a new one to begin.</p>
+       <button onclick="document.getElementById('newMessageBtn').click()" class="mt-6 rounded-2xl bg-sky-500/10 px-6 py-3 text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 hover:text-sky-700 dark:hover:text-white transition">Start New Chat</button>
     </div>
 </main>
   </div>
 
-  <div id="globalEmojiPicker" class="hidden fixed z-50 max-w-[260px] rounded-[1.4rem] border border-white/10 bg-slate-900/95 p-3 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
+  <div id="globalEmojiPicker" class="hidden fixed z-50 max-w-[260px] rounded-[1.4rem] border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 p-3 shadow-2xl ring-1 ring-slate-200 dark:ring-white/10 backdrop-blur-2xl transition-all">
     <div class="grid grid-cols-6 gap-1.5">
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128077;">&#128077;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#10084;&#65039;">&#10084;&#65039;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128293;">&#128293;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128514;">&#128514;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128562;">&#128562;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128079;">&#128079;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128640;">&#128640;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#10024;">&#10024;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128175;">&#128175;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#129321;">&#129321;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128161;">&#128161;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-white/10" data-emoji="&#128546;">&#128546;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128077;">&#128077;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#10084;&#65039;">&#10084;&#65039;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128293;">&#128293;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128514;">&#128514;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128562;">&#128562;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128079;">&#128079;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128640;">&#128640;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#10024;">&#10024;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128175;">&#128175;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#129321;">&#129321;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128161;">&#128161;</button>
+      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128546;">&#128546;</button>
     </div>
   </div>
 
 
   <!-- Theme Picker Modal -->
   <div id="themeModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-sm rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl">
+    <div class="w-full max-w-sm rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl">
       <div class="mb-4 flex items-center justify-between">
-        <h3 class="text-lg font-black text-slate-100">Select Theme</h3>
-        <button id="closeThemeModalBtn" class="text-slate-400 hover:text-slate-200"><i class="ri-close-line text-xl"></i></button>
+        <h3 class="text-lg font-black text-slate-800 dark:text-slate-100">Select Theme</h3>
+        <button id="closeThemeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="ri-close-line text-xl"></i></button>
       </div>
       <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" id="themeGrid">
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent bg-slate-800 hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);" data-theme-val="default" title="Default"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_ocean.png' %});" data-theme-val="ocean" title="Ocean"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_deep_sea.png' %});" data-theme-val="deep_sea" title="Deep Sea"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_forest.png' %});" data-theme-val="forest" title="Forest"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_emerald.png' %});" data-theme-val="emerald" title="Emerald"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_lavender.png' %});" data-theme-val="lavender" title="Lavender Love"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/bg_rose.png' %});" data-theme-val="rose" title="Rose Passion"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/cutee.jpeg' %});" data-theme-val="cutee" title="Cutee"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/hands_in_hands.jpeg' %});" data-theme-val="hands_in_hands" title="Hands in Hands"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/love_2.jpeg' %});" data-theme-val="love_2" title="Love 2"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/milk_mocha.jpeg' %});" data-theme-val="milk_mocha" title="Milk Mocha"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-white bg-cover bg-center shadow-md shadow-black/40" style="background-image: url({% static 'core/themes/red_purple_hearts.jpeg' %});" data-theme-val="red_purple_hearts" title="Red Purple Hearts"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent bg-slate-100 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);" data-theme-val="default" title="Default"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_ocean.png' %});" data-theme-val="ocean" title="Ocean"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_deep_sea.png' %});" data-theme-val="deep_sea" title="Deep Sea"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_forest.png' %});" data-theme-val="forest" title="Forest"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_emerald.png' %});" data-theme-val="emerald" title="Emerald"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_lavender.png' %});" data-theme-val="lavender" title="Lavender Love"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_rose.png' %});" data-theme-val="rose" title="Rose Passion"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/cutee.jpeg' %});" data-theme-val="cutee" title="Cutee"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/hands_in_hands.jpeg' %});" data-theme-val="hands_in_hands" title="Hands in Hands"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/love_2.jpeg' %});" data-theme-val="love_2" title="Love 2"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/milk_mocha.jpeg' %});" data-theme-val="milk_mocha" title="Milk Mocha"></button>
+        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/red_purple_hearts.jpeg' %});" data-theme-val="red_purple_hearts" title="Red Purple Hearts"></button>
       </div>
     </div>
   </div>
 
   <!-- Modals -->
   <div id="deleteModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-sm rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl">
-      <h3 class="mb-2 text-lg font-black text-slate-100">Delete message</h3>
-      <p class="mb-5 text-sm text-slate-400">Are you sure you want to delete this message?</p>
+    <div class="w-full max-w-sm rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+      <h3 class="mb-2 text-lg font-black text-slate-800 dark:text-slate-100">Delete message</h3>
+      <p class="mb-5 text-sm text-slate-500 dark:text-slate-400">Are you sure you want to delete this message?</p>
       <div class="flex flex-col gap-2">
-        <button id="deleteForMeBtn" class="w-full rounded-2xl bg-white/5 py-3 text-sm font-bold text-slate-300 hover:bg-white/10">Delete for me</button>
-        <button id="deleteForEveryoneBtn" class="hidden w-full rounded-2xl bg-rose-500/10 py-3 text-sm font-bold text-rose-400 hover:bg-rose-500/20">Delete for everyone</button>
-        <button id="cancelDeleteBtn" class="mt-2 w-full text-xs font-bold text-slate-500 hover:text-slate-300">Cancel</button>
+        <button id="deleteForMeBtn" class="w-full rounded-2xl bg-slate-100 dark:bg-white/5 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10">Delete for me</button>
+        <button id="deleteForEveryoneBtn" class="hidden w-full rounded-2xl bg-rose-500/10 py-3 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20">Delete for everyone</button>
+        <button id="cancelDeleteBtn" class="mt-2 w-full text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">Cancel</button>
       </div>
     </div>
   </div>
 
   <div id="editModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-900 p-6 shadow-2xl">
-      <h3 class="mb-4 text-lg font-black text-slate-100">Edit message</h3>
-      <textarea id="editContentInput" class="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30" rows="3"></textarea>
+    <div class="w-full max-w-md rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+      <h3 class="mb-4 text-lg font-black text-slate-800 dark:text-slate-100">Edit message</h3>
+      <textarea id="editContentInput" class="w-full resize-none rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30" rows="3"></textarea>
       <div class="mt-4 flex gap-3">
-        <button id="cancelEditBtn" class="flex-1 rounded-2xl bg-white/5 py-3 text-sm font-bold text-slate-300 hover:bg-white/10">Cancel</button>
-        <button id="saveEditBtn" class="flex-1 rounded-2xl bg-emerald-500/20 py-3 text-sm font-bold text-emerald-400 hover:bg-emerald-500/30">Save changes</button>
+        <button id="cancelEditBtn" class="flex-1 rounded-2xl bg-slate-100 dark:bg-white/5 py-3 text-sm font-bold text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10">Cancel</button>
+        <button id="saveEditBtn" class="flex-1 rounded-2xl bg-emerald-500/20 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30">Save changes</button>
       </div>
     </div>
   </div>
@@ -619,33 +633,33 @@
 <div id="userSearchModal" class="hidden fixed inset-0 z-[100]">
   <div id="userSearchBackdrop" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300 opacity-0"></div>
   <div class="relative flex min-h-screen items-center justify-center p-4">
-    <div id="userSearchPanel" class="w-full max-w-lg scale-95 rounded-[2.5rem] border border-white/10 bg-slate-900/95 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-300 opacity-0">
-      <div class="flex items-center justify-between border-b border-white/5 px-8 py-6">
+    <div id="userSearchPanel" class="w-full max-w-lg scale-95 rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/95 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-300 opacity-0">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 px-8 py-6">
         <div>
-          <h3 class="text-xl font-black tracking-tight text-slate-100">Find People</h3>
-          <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Search developers & mentors</p>
+          <h3 class="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">Find People</h3>
+          <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Search developers & mentors</p>
         </div>
-        <button id="closeSearchModalBtn" class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white">
+        <button id="closeSearchModalBtn" class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
           <i class="ri-close-line text-xl"></i>
         </button>
       </div>
       <div class="p-6">
         <div class="relative">
-          <i class="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-500"></i>
-          <input type="text" id="userSearchInput" placeholder="Enter name or username..." class="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-12 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500/30">
+          <i class="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400 dark:text-slate-500"></i>
+          <input type="text" id="userSearchInput" placeholder="Enter name or username..." class="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 py-4 pl-12 pr-12 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500/30 transition-all">
           <div id="searchSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2">
-            <i class="ri-loader-4-line animate-spin text-sky-400"></i>
+            <i class="ri-loader-4-line animate-spin text-sky-600 dark:text-sky-400"></i>
           </div>
         </div>
         <div id="userSearchResults" class="mt-6 max-h-[40dvh] overflow-y-auto pr-2 custom-scrollbar">
-          <div id="searchInitialState" class="py-12 text-center text-slate-500">
+          <div id="searchInitialState" class="py-12 text-center text-slate-400 dark:text-slate-500">
             <i class="ri-user-search-line text-4xl opacity-20 block mb-3"></i>
             <p class="text-xs font-bold uppercase tracking-widest">Type to search users</p>
           </div>
-          <div id="searchNoResults" class="hidden py-12 text-center text-slate-500">
+          <div id="searchNoResults" class="hidden py-12 text-center text-slate-400 dark:text-slate-500">
             <p class="text-sm font-bold">No users found</p>
           </div>
-          <div id="searchResultsList" class="divide-y divide-white/5"></div>
+          <div id="searchResultsList" class="divide-y divide-slate-100 dark:divide-white/5"></div>
         </div>
       </div>
     </div>

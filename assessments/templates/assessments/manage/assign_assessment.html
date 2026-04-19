@@ -2,64 +2,64 @@
 {% block title %}Assign Assessment | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-12 px-6">
+<section class="min-h-screen py-12 px-6 bg-slate-50 dark:bg-transparent">
     <div class="max-w-4xl mx-auto">
-        <div class="flex items-center gap-4 mb-10">
-            <a href="{% url 'assessments:manage_assessments' %}" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all">
-                <i class="ri-arrow-left-line text-xl"></i>
+        <div class="flex items-center gap-3 lg:gap-4 mb-8 lg:mb-10">
+            <a href="{% url 'assessments:manage_assessments' %}" class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm">
+                <span class="material-symbols-outlined text-xl lg:text-2xl">arrow_back</span>
             </a>
             <div>
-                <h1 class="text-3xl font-black text-slate-100 italic uppercase">Assign Test</h1>
-                <p class="text-slate-400 text-sm font-medium italic">Assigning "{{ assessment.title }}" to a student group.</p>
+                <h1 class="text-xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 italic uppercase">Assign Protocol</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-[10px] lg:text-sm font-black uppercase tracking-widest italic mt-1">Deploying "{{ assessment.title }}" to the field.</p>
             </div>
         </div>
 
         <form method="POST" class="space-y-8">
             {% csrf_token %}
-            <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-10 backdrop-blur-xl">
+            <div class="rounded-2xl lg:rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 p-6 lg:p-10 backdrop-blur-xl shadow-xl dark:shadow-none">
                 <div class="space-y-10">
                     <!-- Cohort Selection -->
                     <div>
-                        <label for="cohort_id" class="block text-[11px] font-black text-sky-400 uppercase tracking-[0.2em] mb-4 text-center">Select Target Cohort</label>
+                        <label for="cohort_id" class="block text-[11px] font-black text-primary dark:text-primary uppercase tracking-[0.2em] mb-4 text-center">Select Target Operational Unit</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {% for cohort in cohorts %}
                             <label class="relative group cursor-pointer">
                                 <input type="radio" name="cohort_id" value="{{ cohort.id }}" required class="peer sr-only">
-                                <div class="p-6 rounded-[2rem] border border-white/10 bg-white/5 text-center transition-all peer-checked:border-sky-500/50 peer-checked:bg-sky-500/10 hover:bg-white/10">
-                                    <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center mx-auto mb-3 shadow-inner">
-                                        <i class="ri-group-line text-slate-400 group-hover:text-sky-400 transition-colors"></i>
+                                <div class="p-4 lg:p-6 rounded-xl lg:rounded-[2rem] border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-center transition-all peer-checked:border-primary peer-checked:bg-primary/5 dark:peer-checked:border-primary/50 dark:peer-checked:bg-primary/10 hover:bg-slate-100 dark:hover:bg-white/10 shadow-sm dark:shadow-none">
+                                    <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                                        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">group</span>
                                     </div>
-                                    <p class="text-slate-100 text-sm font-bold">{{ cohort.name }}</p>
-                                    <p class="text-[10px] uppercase font-black text-slate-500 tracking-widest mt-1">{{ cohort.members.count }} Members</p>
+                                    <p class="text-slate-900 dark:text-slate-100 text-sm font-black uppercase italic">{{ cohort.name }}</p>
+                                    <p class="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mt-1">{{ cohort.members.count }} Operatives</p>
                                 </div>
                             </label>
                             {% empty %}
-                            <div class="col-span-2 p-10 text-center border border-dashed border-white/10 rounded-[2rem]">
-                                <p class="text-slate-500 text-sm">No cohorts found. <a href="{% url 'assessments:create_cohort' %}" class="text-sky-400 underline italic">Create one first.</a></p>
+                            <div class="col-span-2 p-10 text-center border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl lg:rounded-[2rem]">
+                                <p class="text-slate-400 dark:text-slate-500 text-sm font-bold italic">No cohorts found. <a href="{% url 'assessments:create_cohort' %}" class="text-primary underline not-italic font-black">Create one first.</a></p>
                             </div>
                             {% endfor %}
                         </div>
                     </div>
 
                     <!-- Time Window -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10 border-t border-slate-100 dark:border-white/5">
                         <div>
-                            <label for="start_window" class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Availability Starts</label>
+                            <label for="start_window" class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">Deployment Start</label>
                             <input type="datetime-local" id="start_window" name="start_window" required
-                                   class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                                   class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium">
                         </div>
                         <div>
-                            <label for="end_window" class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Availability Ends</label>
+                            <label for="end_window" class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">Deployment End</label>
                             <input type="datetime-local" id="end_window" name="end_window" required
-                                   class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                                   class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium">
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-end pt-4">
-                <button type="submit" class="px-12 py-5 rounded-3xl bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-2xl shadow-sky-500/20 active:scale-[0.98]">
-                    Send to Cohort
+                <button type="submit" class="px-12 py-5 rounded-3xl bg-primary text-surface font-black text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-2xl shadow-primary/30 active:scale-[0.95]">
+                    Activate Assignment
                 </button>
             </div>
         </form>

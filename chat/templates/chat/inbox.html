@@ -56,32 +56,32 @@
     <!-- Header Section -->
     <div class="mb-8 flex flex-col justify-between gap-4 md:mb-10 md:flex-row md:items-end md:gap-6">
       <div>
-        <h1 class="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-100 sm:gap-4 sm:text-4xl">
-          <span class="bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent italic">SOCIAL</span> 
+        <h1 class="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:gap-4 sm:text-4xl">
+          <span class="bg-gradient-to-r from-sky-500 to-indigo-600 dark:from-sky-400 dark:to-indigo-500 bg-clip-text text-transparent italic">SOCIAL</span> 
           <span>CENTER</span>
         </h1>
-        <p class="ml-1 mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Connect | Collaborate | Elevate</p>
+        <p class="ml-1 mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Connect | Collaborate | Elevate</p>
       </div>
       
       <div class="flex items-center gap-3">
-        <div class="h-10 px-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2">
+        <div class="h-10 px-4 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center gap-2">
           <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="text-[10px] font-black text-slate-300 uppercase letter-spacing-wide">Network Online</span>
+          <span class="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase letter-spacing-wide">Network Online</span>
         </div>
       </div>
     </div>
 
     <!-- Main Container -->
-    <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/40 shadow-2xl backdrop-blur-3xl sm:rounded-[2.5rem]">
+    <div class="overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/40 shadow-xl dark:shadow-2xl backdrop-blur-3xl sm:rounded-[2.5rem] transition-colors duration-300">
       
       <!-- Search & Controls Bar -->
-      <div class="flex flex-col gap-3 border-b border-white/5 bg-slate-900/20 p-4 sm:flex-row sm:gap-4 sm:p-6">
+      <div class="flex flex-col gap-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/20 p-4 sm:flex-row sm:gap-4 sm:p-6">
         <div class="relative flex-1">
-          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-lg"></i>
           <input type="text" id="threadSearch" placeholder="Search conversations..."
-                 class="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-white/5 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none chat-search transition-all shadow-inner">
+                 class="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none chat-search transition-all shadow-sm dark:shadow-inner">
         </div>
-        <button id="newMessageBtn" class="flex items-center justify-center gap-2 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 px-5 py-3.5 text-xs font-bold uppercase text-sky-300 transition-all hover:from-sky-500/20 hover:to-indigo-500/20 hover:text-white hover:border-sky-400/50 hover:shadow-lg hover:shadow-sky-500/10">
+        <button id="newMessageBtn" class="flex items-center justify-center gap-2 rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-500/5 to-indigo-500/5 dark:from-sky-500/10 dark:to-indigo-500/10 px-5 py-3.5 text-xs font-bold uppercase text-sky-600 dark:text-sky-300 transition-all hover:from-sky-500/10 hover:to-indigo-500/10 dark:hover:from-sky-500/20 dark:hover:to-indigo-500/20 hover:text-sky-700 dark:hover:text-white hover:border-sky-400/50 hover:shadow-lg hover:shadow-sky-500/5">
           <i class="ri-user-add-line text-base"></i> New Message
         </button>
       </div>
@@ -94,7 +94,7 @@
 
       <!-- Thread List -->
       {% if thread_list %}
-        <div class="divide-y divide-white/5" id="threadListContainer">
+        <div class="divide-y divide-slate-100 dark:divide-white/5" id="threadListContainer">
           {% for item in thread_list %}
             <a href="{% url 'chat:thread' item.thread.id %}"
                class="thread-item flex cursor-pointer items-center gap-3 px-4 py-4 sm:gap-5 sm:px-8 sm:py-6" 
@@ -105,19 +105,19 @@
               <div class="relative flex-shrink-0">
                 {% if item.other_user.profile.avatar %}
                   <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}"
-                       class="h-12 w-12 rounded-[1.1rem] border-2 border-white/10 object-cover shadow-lg sm:h-16 sm:w-16 sm:rounded-[1.5rem]">
+                       class="h-12 w-12 rounded-[1.1rem] border-2 border-slate-200 dark:border-white/10 object-cover shadow-md dark:shadow-lg sm:h-16 sm:w-16 sm:rounded-[1.5rem]">
                 {% else %}
-                  <div class="flex h-12 w-12 items-center justify-center rounded-[1.1rem] border-2 border-white/10 bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-black text-white shadow-lg sm:h-16 sm:w-16 sm:rounded-[1.5rem] sm:text-2xl">
+                  <div class="flex h-12 w-12 items-center justify-center rounded-[1.1rem] border-2 border-slate-200 dark:border-white/10 bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-black text-white shadow-md dark:shadow-lg sm:h-16 sm:w-16 sm:rounded-[1.5rem] sm:text-2xl">
                     {{ item.other_user.username|first|upper }}
                   </div>
                 {% endif %}
-                <span class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-[3px] border-slate-900 bg-emerald-500 shadow-sm sm:h-5 sm:w-5 sm:border-4"></span>
+                <span class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-[3px] border-white dark:border-slate-900 bg-emerald-500 shadow-sm sm:h-5 sm:w-5 sm:border-4"></span>
               </div>
 
               <!-- Info Block -->
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between mb-1.5">
-                  <span class="truncate text-base font-black tracking-tight text-slate-100 sm:text-lg">
+                  <span class="truncate text-base font-black tracking-tight text-slate-800 dark:text-slate-100 sm:text-lg">
                     {{ item.other_user.get_full_name|default:item.other_user.username }}
                   </span>
                   {% if item.last_message %}
@@ -136,20 +136,22 @@
                 </div>
                 
                 <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2 truncate pr-3 text-xs text-slate-400 sm:pr-4 sm:text-sm">
+                  <div class="flex items-center gap-2 truncate pr-3 text-xs text-slate-500 dark:text-slate-400 sm:pr-4 sm:text-sm">
                     {% if item.last_message %}
                     {% if item.last_message.sender == request.user %}
                       <div class="flex items-center gap-2">
                         {% if item.last_message.is_read %}
-                          <i class="ri-check-double-line text-sky-400 text-base"></i>
-                          <span class="truncate">{{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}</span>
+                          <i class="ri-check-double-line text-sky-600 dark:text-sky-400 text-base"></i>
+                          <span class="truncate text-slate-600 dark:text-slate-400">{{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}</span>
                         {% else %}
-                          <i class="ri-check-line text-slate-500 text-base"></i>
-                          <span class="truncate">{{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}</span>
+                          <i class="ri-check-line text-slate-400 dark:text-slate-500 text-base"></i>
+                          <span class="truncate text-slate-500 dark:text-slate-400">{{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}</span>
                         {% endif %}
                       </div>
                     {% else %}
-                      {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}
+                      <span class="truncate {% if not item.last_message.is_read and item.last_message.sender != request.user %}text-slate-900 dark:text-white font-bold{% endif %}">
+                        {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:60 }}
+                      </span>
                     {% endif %}
                   </div>
                   
@@ -163,10 +165,10 @@
         </div>
       {% else %}
         <div class="py-32 text-center">
-          <div class="w-24 h-24 mx-auto rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-inner">
+          <div class="w-24 h-24 mx-auto rounded-3xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center mb-6 shadow-sm">
             <i class="ri-chat-smile-2-line text-5xl text-sky-500/40 empty-pulse"></i>
           </div>
-          <h3 class="text-2xl font-black text-slate-200 tracking-tight">Quiet in here...</h3>
+          <h3 class="text-2xl font-black text-slate-800 dark:text-slate-200 tracking-tight">Quiet in here...</h3>
           <p class="text-sm text-slate-500 mt-2 max-w-xs mx-auto font-medium">Start a conversation with developers and mentors from around the globe.</p>
           <button id="newMessageBtnEmpty" class="mt-8 inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-sky-500/20 hover:scale-105 active:scale-95 transition-all">
             <i class="ri-user-search-line"></i> Find People
@@ -184,28 +186,28 @@
   
   <!-- Panel -->
   <div class="relative flex items-start justify-center pt-[10vh] sm:pt-[12vh] px-4">
-    <div id="userSearchPanel" class="search-modal-panel w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-900/95 shadow-2xl shadow-black/50 backdrop-blur-3xl overflow-hidden">
+    <div id="userSearchPanel" class="search-modal-panel w-full max-w-lg rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/95 shadow-2xl shadow-slate-200 dark:shadow-black/50 backdrop-blur-3xl overflow-hidden">
       
       <!-- Modal Header -->
-      <div class="flex items-center justify-between border-b border-white/5 px-6 py-5">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 px-6 py-5">
         <div>
-          <h3 class="text-lg font-black text-slate-100 tracking-tight">New Conversation</h3>
-          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mt-1">Search users to start chatting</p>
+          <h3 class="text-lg font-black text-slate-800 dark:text-slate-100 tracking-tight">New Conversation</h3>
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mt-1">Search users to start chatting</p>
         </div>
-        <button id="closeSearchModalBtn" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
+        <button id="closeSearchModalBtn" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
           <i class="ri-close-line text-xl"></i>
         </button>
       </div>
 
       <!-- Search Input -->
-      <div class="px-6 py-4 border-b border-white/5">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-white/5">
         <div class="relative">
-          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"></i>
+          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-lg"></i>
           <input type="text" id="userSearchInput" placeholder="Search by name or username..." autocomplete="off"
-                 class="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-white/10 bg-white/5 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/15 transition-all">
+                 class="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-200 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-sky-500/40 focus:ring-2 focus:ring-sky-500/15 transition-all">
           <!-- Spinner -->
           <div id="searchSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2">
-            <svg class="search-spinner h-5 w-5 text-sky-400" viewBox="0 0 24 24" fill="none">
+            <svg class="search-spinner h-5 w-5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" class="opacity-20"></circle>
               <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
             </svg>
@@ -217,24 +219,24 @@
       <div id="userSearchResults" class="max-h-[50vh] overflow-y-auto">
         <!-- Initial state -->
         <div id="searchInitialState" class="py-12 text-center">
-          <div class="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center mb-4 shadow-sm">
             <i class="ri-user-search-line text-3xl text-sky-500/40"></i>
           </div>
-          <p class="text-sm font-bold text-slate-400">Type a name or username to search</p>
-          <p class="text-[11px] text-slate-600 mt-1">Find developers, mentors, and peers</p>
+          <p class="text-sm font-bold text-slate-600 dark:text-slate-400">Type a name or username to search</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-600 mt-1">Find developers, mentors, and peers</p>
         </div>
 
         <!-- No results state (hidden) -->
         <div id="searchNoResults" class="hidden py-12 text-center">
-          <div class="w-16 h-16 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-            <i class="ri-user-unfollow-line text-3xl text-slate-600"></i>
+          <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center mb-4 shadow-sm">
+            <i class="ri-user-unfollow-line text-3xl text-slate-400 dark:text-slate-600"></i>
           </div>
-          <p class="text-sm font-bold text-slate-400">No users found</p>
-          <p class="text-[11px] text-slate-600 mt-1">Try a different name or username</p>
+          <p class="text-sm font-bold text-slate-600 dark:text-slate-400">No users found</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-600 mt-1">Try a different name or username</p>
         </div>
 
         <!-- Results list (hidden) -->
-        <div id="searchResultsList" class="hidden divide-y divide-white/5"></div>
+        <div id="searchResultsList" class="hidden divide-y divide-slate-100 dark:divide-white/5"></div>
       </div>
     </div>
   </div>
@@ -328,15 +330,15 @@
 
   function renderUserResult(user, index) {
     const avatarHtml = user.avatar_url
-      ? '<img src="' + escapeHtml(user.avatar_url) + '" alt="' + escapeHtml(user.username) + '" class="h-12 w-12 rounded-[1.1rem] border-2 border-white/10 object-cover">'
-      : '<div class="flex h-12 w-12 items-center justify-center rounded-[1.1rem] border-2 border-white/10 bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-black text-white">' + escapeHtml((user.username || '?')[0].toUpperCase()) + '</div>';
+      ? '<img src="' + escapeHtml(user.avatar_url) + '" alt="' + escapeHtml(user.username) + '" class="h-12 w-12 rounded-[1.1rem] border-2 border-slate-200 dark:border-white/10 object-cover">'
+      : '<div class="flex h-12 w-12 items-center justify-center rounded-[1.1rem] border-2 border-slate-200 dark:border-white/10 bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-black text-white">' + escapeHtml((user.username || '?')[0].toUpperCase()) + '</div>';
 
     const fullName = user.full_name || user.username;
     
     return '<a href="/chat/new/' + escapeHtml(user.username) + '/" class="user-result user-result-animate flex items-center gap-4 px-6 py-4 cursor-pointer" style="animation-delay: ' + (index * 0.05) + 's; opacity: 0;">'
       + '<div class="relative flex-shrink-0">' + avatarHtml + '</div>'
       + '<div class="min-w-0 flex-1">'
-      + '<p class="text-sm font-black text-slate-100 truncate">' + escapeHtml(fullName) + '</p>'
+      + '<p class="text-sm font-black text-slate-800 dark:text-slate-100 truncate">' + escapeHtml(fullName) + '</p>'
       + '<p class="text-[11px] font-medium text-slate-500 mt-0.5">@' + escapeHtml(user.username) + '</p>'
       + '</div>'
       + '<div class="flex-shrink-0">'

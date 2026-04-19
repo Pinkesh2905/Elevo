@@ -3,7 +3,14 @@
 
 {% block extra_css %}
 <style>
-    .test-sidebar-item.active { background: rgba(14,165,233,0.1); border-color: rgba(14,165,233,0.3); color: #38bdf8; }
+    .test-sidebar-item.active { 
+        background: rgba(186,158,255,0.1); 
+        border-color: rgba(186,158,255,0.3); 
+        color: #8b5cf6; 
+    }
+    .dark .test-sidebar-item.active { 
+        color: #ba9eff; 
+    }
     .question-view { display: none; }
     .question-view.active { display: block; animation: slideUp 0.3s ease-out; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -12,58 +19,79 @@
     #fullscreen-warning { display: none; }
     body.fullscreen-active #fullscreen-warning { display: none; }
     body:not(.fullscreen-active) #fullscreen-warning { display: flex; }
+
+    /* Mobile specific adjustments */
+    @media (max-width: 1024px) {
+        .question-view.active { animation: slideLeft 0.3s ease-out; }
+        @keyframes slideLeft { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    }
+
+    .proctor-alert {
+        background: radial-gradient(circle at top right, rgba(244, 63, 94, 0.1), transparent 40%);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="fullscreen-warning" class="fixed inset-0 z-[200] bg-slate-950/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
-    <div class="w-24 h-24 rounded-[2rem] bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-8">
-        <i class="ri-fullscreen-exit-line text-4xl text-rose-500"></i>
+<!-- Fullscreen Modal -->
+<div id="fullscreen-warning" class="fixed inset-0 z-[200] bg-white dark:bg-slate-950/90 backdrop-blur-xl proctor-alert flex flex-col items-center justify-center p-6 text-center">
+    <div class="w-24 h-24 rounded-[2.5rem] bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-8 shadow-2xl shadow-rose-500/10">
+        <i class="ri-fullscreen-exit-line text-4xl text-rose-500 animate-pulse"></i>
     </div>
-    <h1 class="text-3xl font-black text-slate-100 uppercase italic mb-4">Enter Fullscreen Mode</h1>
-    <p class="text-slate-400 max-w-md mb-10">This assessment is proctored. You must be in fullscreen mode to continue. Any attempt to exit will be logged.</p>
-    <button onclick="enterFullScreen()" class="px-10 py-5 rounded-3xl bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-2xl shadow-sky-500/20">
-        Enter Fullscreen & Resume
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+        Security Breach Detected
+    </div>
+    <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 uppercase italic mb-4">Proctoring Protocol Active</h1>
+    <p class="text-slate-500 dark:text-slate-400 max-w-md mb-10 font-medium leading-relaxed">This assessment is monitored. You must be in <span class="text-rose-500 font-black italic">FULLSCREEN MODE</span> to continue. Any attempt to switch tabs or exit will be logged for review.</p>
+    <button onclick="enterFullScreen()" class="px-10 py-5 rounded-[2rem] bg-primary text-surface font-black text-xs uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-primary/30">
+        Re-establish Connection
     </button>
 </div>
 
-<section class="min-h-screen bg-slate-950 flex flex-col">
+<section x-data="{ sidebarOpen: false }" class="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col relative transition-colors duration-500">
     <!-- Test Header -->
-    <header class="h-20 border-b border-white/5 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-[50] px-8 flex items-center justify-between">
-        <div class="flex items-center gap-6">
-            <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center text-white font-black">E</div>
-            <div>
-                <h2 class="text-sm font-black text-slate-100 uppercase tracking-tight">{{ assessment.title }}</h2>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{{ assessment.organization.name }} PROCTORED SESSION</p>
+    <header class="h-16 lg:h-20 border-b border-slate-200 dark:border-white/5 bg-white/80 dark:bg-slate-900/50 backdrop-blur-xl sticky top-0 z-[50] px-4 lg:px-8 flex items-center justify-between">
+        <div class="flex items-center gap-3 lg:gap-6">
+            <button @click="sidebarOpen = true" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                <span class="material-symbols-outlined">menu_open</span>
+            </button>
+            <div class="h-8 w-8 lg:h-10 lg:w-10 rounded-lg lg:rounded-xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-surface font-black text-xs lg:text-base shadow-lg shadow-primary/20 italic">E</div>
+            <div class="min-w-0">
+                <h2 class="text-[11px] lg:text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight truncate max-w-[120px] lg:max-w-none italic">{{ assessment.title }}</h2>
+                <p class="hidden lg:block text-[8px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">{{ assessment.organization.name }} | PROCTORED SESSION</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-8">
-            <div class="text-center">
-                <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-0.5">Time Remaining</p>
-                <p id="timer" class="text-xl font-black text-sky-400 italic tabular-nums">00:00:00</p>
+        <div class="flex items-center gap-4 lg:gap-10">
+            <div class="text-center lg:text-right hidden sm:block">
+                <p class="text-[8px] lg:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mb-0.5">Chronometer</p>
+                <p id="timer" class="text-sm lg:text-xl font-black text-secondary italic tabular-nums tracking-wider">00:00:00</p>
             </div>
-            <button onclick="confirmSubmit()" class="px-6 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-400 transition-all">
-                Submit Test
+            <button onclick="confirmSubmit()" class="px-5 py-2.5 lg:px-8 lg:py-3.5 rounded-xl lg:rounded-2xl bg-rose-500 text-white font-black text-[10px] lg:text-xs uppercase tracking-[0.2em] hover:bg-rose-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-500/20">
+                Finish
             </button>
         </div>
     </header>
 
     <div class="flex-1 flex overflow-hidden">
         <!-- Sidebar: Navigation -->
-        <aside class="w-80 border-r border-white/5 bg-slate-900/30 flex flex-col">
-            <div class="p-6 border-b border-white/5 bg-white/5">
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Question Navigator</p>
+        <aside :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen }" 
+               class="fixed inset-y-0 left-0 w-80 z-[100] bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/10 transition-transform duration-300 lg:static lg:translate-x-0 lg:w-80 lg:bg-slate-50/50 dark:lg:bg-slate-900/30 lg:border-slate-200 dark:lg:border-white/5 flex flex-col">
+            <div class="p-6 border-b border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 flex items-center justify-between lg:block">
+                <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Question Navigator</p>
+                <button @click="sidebarOpen = false" class="lg:hidden w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
             </div>
             <div class="flex-1 overflow-y-auto p-4 space-y-6">
                 <!-- Aptitude Section -->
                 {% if aptitude_problems %}
                 <div>
-                    <h4 class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 px-2">Aptitude (MCQ)</h4>
+                    <h4 class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-4 px-2">Aptitude (MCQ)</h4>
                     <div class="grid grid-cols-4 gap-2">
                         {% for ap in aptitude_problems %}
-                        <button onclick="showQuestion('ap', {{ forloop.counter }})" id="nav-ap-{{ forloop.counter }}" 
-                                class="test-sidebar-item h-10 rounded-lg border border-white/5 bg-white/5 text-xs font-bold text-slate-400 hover:bg-white/10 transition-all">
+                        <button onclick="showQuestion('ap', {{ forloop.counter }}); sidebarOpen = false" id="nav-ap-{{ forloop.counter }}" 
+                                class="test-sidebar-item h-10 rounded-lg border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 text-xs font-bold text-slate-400 hover:bg-slate-50 dark:hover:bg-white/10 transition-all">
                             {{ forloop.counter }}
                         </button>
                         {% endfor %}
@@ -74,13 +102,13 @@
                 <!-- Coding Section -->
                 {% if coding_problems %}
                 <div>
-                    <h4 class="text-[10px] font-black text-sky-400 uppercase tracking-[0.2em] mb-4 px-2">Coding Tasks</h4>
+                    <h4 class="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4 px-2">Coding Tasks</h4>
                     <div class="space-y-2">
                         {% for cp in coding_problems %}
-                        <button onclick="showQuestion('cp', {{ forloop.counter }})" id="nav-cp-{{ forloop.counter }}"
-                                class="test-sidebar-item w-full px-4 py-3 rounded-xl border border-white/5 bg-white/5 text-left transition-all hover:bg-white/10">
-                            <p class="text-[11px] font-bold text-slate-300 truncate">{{ cp.title }}</p>
-                            <p class="text-[9px] font-black text-slate-600 uppercase tracking-widest">{{ cp.difficulty }}</p>
+                        <button onclick="showQuestion('cp', {{ forloop.counter }}); sidebarOpen = false" id="nav-cp-{{ forloop.counter }}"
+                                class="test-sidebar-item w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 text-left transition-all hover:bg-slate-50 dark:hover:bg-white/10">
+                            <p class="text-[11px] font-bold text-slate-700 dark:text-slate-300 truncate">{{ cp.title }}</p>
+                            <p class="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest">{{ cp.difficulty }}</p>
                         </button>
                         {% endfor %}
                     </div>
@@ -89,86 +117,102 @@
             </div>
         </aside>
 
+        <!-- Overlay for Mobile Sidebar -->
+        <div x-show="sidebarOpen" @click="sidebarOpen = false" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/80 backdrop-blur-sm z-[90] lg:hidden"></div>
+
         <!-- Main Workspace -->
-        <main class="flex-1 overflow-y-auto bg-slate-950/50 p-8">
+        <main class="flex-1 overflow-y-auto p-4 lg:p-8">
             <div class="max-w-4xl mx-auto">
                 <form id="assessmentForm" method="POST" action="{% url 'assessments:submit' attempt.id %}">
                     {% csrf_token %}
                     
                     <!-- Aptitude Questions -->
                     {% for ap in aptitude_problems %}
-                    <div id="q-ap-{{ forloop.counter }}" class="question-view space-y-8">
-                        <div class="p-10 rounded-[3rem] bg-slate-900/60 border border-white/10 relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
-                            <span class="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-6">Question {{ forloop.counter }} | Aptitude</span>
-                            <h3 class="text-xl font-bold text-slate-100 leading-relaxed">{{ ap.question_text|linebreaksbr }}</h3>
+                    <div id="q-ap-{{ forloop.counter }}" class="question-view space-y-6 lg:space-y-8">
+                        <div class="p-6 lg:p-10 rounded-2xl lg:rounded-[3rem] bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 relative overflow-hidden shadow-sm dark:shadow-none transition-all">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                            <div class="flex items-center gap-3 mb-6">
+                                <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">Aptitude Module</span>
+                                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Question {{ forloop.counter }} of {{ aptitude_problems.count }}</span>
+                            </div>
+                            <h3 class="text-lg lg:text-2xl font-black text-slate-900 dark:text-slate-100 leading-relaxed italic uppercase tracking-tight">{{ ap.question_text|linebreaksbr }}</h3>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {% for option_key, option_val in ap.options.items %} <!-- Assuming options is a method or property we'll define -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
+                            {% for option_val, option_text in ap.get_options %}
+                            <label class="group cursor-pointer">
+                                <input type="radio" name="ap_{{ ap.id }}" value="{{ option_val }}" class="peer sr-only">
+                                <div class="p-4 lg:p-6 rounded-2xl lg:rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 transition-all peer-checked:bg-primary/10 peer-checked:border-primary/50 peer-checked:text-primary dark:peer-checked:text-white group-hover:bg-slate-50 dark:group-hover:bg-white/10 shadow-sm dark:shadow-none">
+                                    <div class="flex items-center gap-3 lg:gap-4">
+                                        <span class="w-7 h-7 lg:w-8 lg:h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] lg:text-xs font-black text-primary group-hover:scale-110 transition-transform">{{ option_val }}</span>
+                                        <span class="text-sm font-medium">{{ option_text }}</span>
+                                    </div>
+                                </div>
+                            </label>
                             {% endfor %}
-                            <!-- Mocking options layout as ap model has fixed option_a/b/c/d -->
-                            <label class="group cursor-pointer">
-                                <input type="radio" name="ap_{{ ap.id }}" value="A" class="peer sr-only">
-                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
-                                    <div class="flex items-center gap-4">
-                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">A</span>
-                                        <span class="text-sm font-medium">{{ ap.option_a }}</span>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="group cursor-pointer">
-                                <input type="radio" name="ap_{{ ap.id }}" value="B" class="peer sr-only">
-                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
-                                    <div class="flex items-center gap-4">
-                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">B</span>
-                                        <span class="text-sm font-medium">{{ ap.option_b }}</span>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="group cursor-pointer">
-                                <input type="radio" name="ap_{{ ap.id }}" value="C" class="peer sr-only">
-                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
-                                    <div class="flex items-center gap-4">
-                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">C</span>
-                                        <span class="text-sm font-medium">{{ ap.option_c }}</span>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="group cursor-pointer">
-                                <input type="radio" name="ap_{{ ap.id }}" value="D" class="peer sr-only">
-                                <div class="p-6 rounded-3xl border border-white/5 bg-white/5 text-slate-300 transition-all peer-checked:bg-indigo-500/10 peer-checked:border-indigo-500/50 peer-checked:text-white group-hover:bg-white/10">
-                                    <div class="flex items-center gap-4">
-                                        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-black text-indigo-400">D</span>
-                                        <span class="text-sm font-medium">{{ ap.option_d }}</span>
-                                    </div>
-                                </div>
-                            </label>
+                        </div>
+
+                        <!-- Navigation Controls -->
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-white/5 mt-8">
+                            <button type="button" 
+                                    {% if forloop.first %}disabled class="opacity-30 cursor-not-allowed"{% endif %}
+                                    onclick="showQuestion('ap', {{ forloop.counter|add:'-1' }})"
+                                    class="flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all">
+                                <i class="ri-arrow-left-line"></i> Prev
+                            </button>
+                            <button type="button" 
+                                    {% if forloop.last and not coding_problems %}onclick="confirmSubmit()" class="px-8 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20"{% else %}onclick="{% if forloop.last %}showQuestion('cp', 1){% else %}showQuestion('ap', {{ forloop.counter|add:'1' }}){% endif %}" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-surface font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"{% endif %}>
+                                {% if forloop.last and not coding_problems %}Finish{% else %}Next <i class="ri-arrow-right-line"></i>{% endif %}
+                            </button>
                         </div>
                     </div>
                     {% endfor %}
 
                     <!-- Coding Questions -->
                     {% for cp in coding_problems %}
-                    <div id="q-cp-{{ forloop.counter }}" class="question-view space-y-8">
-                        <div class="p-10 rounded-[3rem] bg-slate-900/60 border border-white/10 relative overflow-hidden">
-                             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
-                             <span class="inline-block px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest mb-6">Question {{ forloop.counter }} | Coding Task</span>
-                             <h3 class="text-2xl font-black text-slate-100 uppercase italic mb-4">{{ cp.title }}</h3>
-                             <div class="prose prose-invert max-w-none text-slate-300 text-sm leading-relaxed">
-                                 {{ cp.description|safe }}
+                    <div id="q-cp-{{ forloop.counter }}" class="question-view space-y-6 lg:space-y-8">
+                        <div class="p-6 lg:p-10 rounded-2xl lg:rounded-[3rem] bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 relative overflow-hidden shadow-sm dark:shadow-none transition-all">
+                             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-secondary/50 to-transparent"></div>
+                             <div class="flex items-center gap-3 mb-6">
+                                <span class="px-3 py-1 rounded-full bg-secondary/10 text-secondary text-[10px] font-black uppercase tracking-widest border border-secondary/20">Coding Logic</span>
+                                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Task {{ forloop.counter }} of {{ coding_problems.count }}</span>
+                             </div>
+                             <h3 class="text-xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 uppercase italic mb-6 tracking-tight">{{ cp.title }}</h3>
+                             <div class="prose dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 text-xs lg:text-sm leading-relaxed font-medium">
+                                  {{ cp.description|safe }}
                              </div>
                         </div>
 
-                        <!-- Coding Area Mockup -->
-                        <div class="rounded-3xl border border-white/10 bg-slate-900 overflow-hidden shadow-2xl">
-                            <div class="px-6 py-3 border-b border-white/5 bg-white/5 flex items-center gap-4">
-                                <i class="ri-terminal-box-line text-sky-500"></i>
-                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Compiler (Integration Pending)</span>
+                        <!-- Coding Area -->
+                        <div class="rounded-2xl lg:rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-950 overflow-hidden shadow-2xl">
+                            <div class="px-4 lg:px-6 py-3 border-b border-white/5 bg-white/5 flex items-center gap-4">
+                                <span class="material-symbols-outlined text-secondary">terminal</span>
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Compiler Matrix</span>
                             </div>
-                            <textarea name="cp_{{ cp.id }}" rows="15" 
-                                      class="w-full bg-slate-950 p-8 text-sky-400 font-mono text-sm focus:outline-none placeholder:text-slate-800"
-                                      placeholder="// Write your solution here..."></textarea>
+                            <textarea name="cp_{{ cp.id }}" rows="12" 
+                                      class="w-full bg-slate-950 p-4 lg:p-8 text-emerald-400 font-mono text-xs lg:text-sm focus:outline-none placeholder:text-slate-800"
+                                      placeholder="// Initialize solution logic..."></textarea>
+                        </div>
+
+                        <!-- Navigation Controls -->
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-white/5 mt-8 pb-10 lg:pb-0">
+                            <button type="button" 
+                                    onclick="{% if forloop.first and aptitude_problems %}showQuestion('ap', {{ aptitude_problems.count }}){% elif not forloop.first %}showQuestion('cp', {{ forloop.counter|add:'-1' }}){% endif %}"
+                                    {% if forloop.first and not aptitude_problems %}disabled class="opacity-30 cursor-not-allowed"{% endif %}
+                                    class="flex items-center gap-2 px-6 py-3 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all">
+                                <i class="ri-arrow-left-line"></i> Prev
+                            </button>
+                            <button type="button" 
+                                    {% if forloop.last %}onclick="confirmSubmit()" class="px-8 py-3 rounded-xl bg-rose-500 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20"{% else %}onclick="showQuestion('cp', {{ forloop.counter|add:'1' }})" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-surface font-bold text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"{% endif %}>
+                                {% if forloop.last %}Finish Assessment{% else %}Next Task <i class="ri-arrow-right-line"></i>{% endif %}
+                            </button>
                         </div>
                     </div>
                     {% endfor %}
@@ -203,8 +247,16 @@
         document.querySelectorAll('.question-view').forEach(q => q.classList.remove('active'));
         document.querySelectorAll('.test-sidebar-item').forEach(n => n.classList.remove('active'));
         
-        document.getElementById(`q-${type}-${id}`).classList.add('active');
-        document.getElementById(`nav-${type}-${id}`).classList.add('active');
+        const qElem = document.getElementById(`q-${type}-${id}`);
+        const navElem = document.getElementById(`nav-${type}-${id}`);
+        
+        if (qElem && navElem) {
+            qElem.classList.add('active');
+            navElem.classList.add('active');
+            
+            // Scroll to top of question for better experience on mobile
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }
 
     // Default selection
@@ -214,7 +266,6 @@
     showQuestion('cp', 1);
     {% endif %}
 
-    // Proctoring & Fullscreen
     // Proctoring & Fullscreen Engine
     const proctoringUrl = "{% url 'assessments:log_proctoring' attempt.id %}";
     let videoElement = null;
@@ -243,7 +294,6 @@
             videoElement.play();
             captureCanvas = document.createElement('canvas');
 
-            // Log snapshots randomly within a window, currently fixed to 45s for reliability
             snapshotInterval = setInterval(() => {
                 if (!videoElement || !captureCanvas) return;
                 captureCanvas.width = videoElement.videoWidth || 640;
@@ -254,10 +304,8 @@
                 logProctoringEvent('WEBCAM_SNAPSHOT', 'Automated WebRTC capture', dataUrl);
             }, 45000);
         } catch (err) {
-            alert("Webcam access is strictly required for this PROCTORED assessment.");
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
+            console.warn("Webcam access denied or unavailable.");
+            logProctoringEvent('WEBCAM_DENIED', 'User denied webcam access or no device found.');
         }
     }
 
@@ -279,14 +327,13 @@
 
     window.addEventListener('blur', () => {
         logProctoringEvent('BLUR', 'Window lost focus or user switched tabs.');
-        alert("WARNING: Tab switching is strictly prohibited and has been recorded.");
+        // We avoid alert() here as it can cause recursive issues with fullscreen, using a silent log first
     });
 
     ['copy', 'paste', 'cut', 'contextmenu'].forEach(evt => {
         document.addEventListener(evt, (e) => {
             e.preventDefault();
             logProctoringEvent('COPY_PASTE', `Attempted ${evt} operation.`);
-            alert(`WARNING: ${evt.toUpperCase()} actions are disabled during a proctored assessment.`);
         });
     });
 

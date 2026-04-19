@@ -34,6 +34,11 @@
   .home-card:hover {
     transform: translateY(-8px) scale(1.02);
     border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.1), 0 0 20px rgba(99, 102, 241, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .dark .home-card:hover {
     box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.2);
     background: rgba(30, 41, 59, 0.7);
   }
@@ -69,21 +74,29 @@
 
   /* Career Console Styles */
   .console-wrapper {
-    background: #000;
-    border: 1px solid #1e293b;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     font-family: 'Fira Code', monospace;
     overflow: hidden;
     position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  }
+  .dark .console-wrapper {
+    background: #000;
+    border: 1px solid #1e293b;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   }
 
   .console-header {
-    background: #1e293b;
+    background: #f1f5f9;
     padding: 8px 12px;
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+  .dark .console-header {
+    background: #1e293b;
   }
 
   .console-dot {
@@ -94,19 +107,25 @@
 
   .console-body {
     padding: 16px;
-    color: #4ade80;
+    color: #15803d;
     font-size: 14px;
     min-height: 200px;
     line-height: 1.6;
+  }
+  .dark .console-body {
+    color: #4ade80;
   }
 
   .console-cursor {
     display: inline-block;
     width: 8px;
     height: 16px;
-    background: #4ade80;
+    background: #15803d;
     margin-left: 4px;
     animation: blink 1s infinite;
+  }
+  .dark .console-cursor {
+    background: #4ade80;
   }
 
   @keyframes blink {
@@ -119,10 +138,15 @@
     overflow: hidden;
     white-space: nowrap;
     position: relative;
-    background: rgba(2, 6, 23, 0.4);
+    background: rgba(255, 255, 255, 0.4);
     padding: 20px 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .dark .marquee {
+    background: rgba(2, 6, 23, 0.4);
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   .marquee-content {
@@ -170,9 +194,13 @@
     position: relative;
     padding: 1rem 1rem 1rem 1.1rem;
     border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.72), rgba(248, 250, 252, 0.44));
+    overflow: hidden;
+  }
+  .dark .prep-step {
     border: 1px solid rgba(148, 163, 184, 0.18);
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.44));
-    overflow: hidden;
   }
 
   .prep-step::before {
@@ -188,20 +216,29 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     font-size: 0.65rem;
+    color: #0284c7;
+  }
+  .dark .prep-step-label {
     color: #7dd3fc;
   }
 
   .prep-step h3 {
-    color: white;
+    color: #0f172a;
     font-weight: 700;
     margin-top: 0.5rem;
     margin-bottom: 0.35rem;
   }
+  .dark .prep-step h3 {
+    color: white;
+  }
 
   .prep-step p {
-    color: #94a3b8;
+    color: #475569;
     font-size: 0.85rem;
     line-height: 1.55;
+  }
+  .dark .prep-step p {
+    color: #94a3b8;
   }
 
   @media (max-width: 768px) {
@@ -216,65 +253,86 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
       <div>
         <p class="eyebrow text-sky-400 text-xs sm:text-sm mb-5 reveal-text">career prep operating system</p>
-        <h1 class="hero-title text-6xl sm:text-7xl lg:text-8xl text-white mb-8 reveal-text">
+        <h1 class="hero-title text-6xl sm:text-7xl lg:text-8xl text-slate-900 dark:text-white mb-8 reveal-text">
           From Practice
           <span class="block text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400">To Placement</span>
         </h1>
-        <p class="text-slate-400 text-xl sm:text-2xl leading-relaxed max-w-xl mb-10 reveal-text">
+        <p class="text-slate-500 dark:text-slate-400 text-xl sm:text-2xl leading-relaxed max-w-xl mb-10 reveal-text">
           Elevo combines coding drills, aptitude training, and AI interviews in one focused workflow for real hiring outcomes.
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 mb-8">
           {% if not user.is_authenticated %}
-            <a href="{% url 'organizations:pricing' %}" class="cta-primary w-full sm:w-auto text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+            <a href="{% url 'organizations:pricing' %}" class="cta-primary w-full sm:w-auto text-slate-900 dark:text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
               <i class="ri-building-line mr-2"></i>Book Enterprise Demo
             </a>
-            <a href="{% url 'login' %}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
+            <a href="{% url 'login' %}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-700 dark:text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
               <i class="ri-login-box-line mr-2"></i>Log In
             </a>
           {% else %}
-            <a href="{% url 'practice:problem-list' %}" class="cta-primary w-full sm:w-auto text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
-              <i class="ri-code-s-slash-line mr-2"></i>Continue Practice
-            </a>
-            <a href="{% url 'mock_interview:interview_setup' %}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-emerald-300 hover:text-emerald-200 transition-colors inline-flex items-center justify-center">
-              <i class="ri-robot-2-line mr-2"></i>Start Interview
-            </a>
+            {% if user.profile.role == 'ORG_ADMIN' %}
+              <a href="{% url 'organizations:dashboard' %}" class="cta-primary w-full sm:w-auto text-slate-900 dark:text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+                <i class="ri-dashboard-line mr-2"></i>Go to Dashboard
+              </a>
+              <a href="{% url 'organizations:members' %}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-700 dark:text-slate-200 hover:border-sky-300 hover:text-sky-200 transition-colors inline-flex items-center justify-center">
+                <i class="ri-group-line mr-2"></i>Manage Members
+              </a>
+            {% else %}
+              <a href="{% url 'practice:problem-list' %}" class="cta-primary w-full sm:w-auto text-slate-900 dark:text-white px-7 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+                <i class="ri-code-s-slash-line mr-2"></i>Continue Practice
+              </a>
+              <a href="{% url 'mock_interview:interview_setup' %}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-700 dark:text-slate-200 hover:border-emerald-300 hover:text-emerald-200 transition-colors inline-flex items-center justify-center">
+                <i class="ri-robot-2-line mr-2"></i>Start Interview
+              </a>
+            {% endif %}
           {% endif %}
         </div>
 
-        <div class="flex flex-wrap gap-3">
-          <span class="text-xs px-3 py-1.5 rounded-full bg-sky-500/15 text-sky-200 border border-sky-400/25">Structured Learning</span>
-          <span class="text-xs px-3 py-1.5 rounded-full bg-teal-500/15 text-teal-200 border border-teal-400/25">Live Coding Focus</span>
-          <span class="text-xs px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-200 border border-emerald-400/25">Interview Readiness</span>
-        </div>
-
         <div class="prep-loop reveal-card">
-          <div class="prep-step">
-            <span class="prep-step-label">Loop 01</span>
-            <h3>Warm Up With Problems</h3>
-            <p>Open the coding arena, clear one focused pattern, and build momentum before deeper prep.</p>
-          </div>
-          <div class="prep-step">
-            <span class="prep-step-label">Loop 02</span>
-            <h3>Sharpen Aptitude Speed</h3>
-            <p>Switch into quick quant and reasoning rounds to train timing for screening cutoffs.</p>
-          </div>
-          <div class="prep-step">
-            <span class="prep-step-label">Loop 03</span>
-            <h3>Finish With Feedback</h3>
-            <p>Run an AI interview and close the session with specific gaps to fix next.</p>
-          </div>
+          {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}
+            <div class="prep-step">
+              <span class="prep-step-label">Step 01</span>
+              <h3>Setup Infrastructure</h3>
+              <p>Configure your organization profile and verify your institution domain to unlock core features.</p>
+            </div>
+            <div class="prep-step">
+              <span class="prep-step-label">Step 02</span>
+              <h3>Invite Your Cohort</h3>
+              <p>Add students via bulk CSV or direct email invitations to provide them with premium AI interview access.</p>
+            </div>
+            <div class="prep-step">
+              <span class="prep-step-label">Step 03</span>
+              <h3>Analyze Velocity</h3>
+              <p>Monitor real-time placement readiness through detailed analytics and AI cost reporting dashboards.</p>
+            </div>
+          {% else %}
+            <div class="prep-step">
+              <span class="prep-step-label">Loop 01</span>
+              <h3>Warm Up With Problems</h3>
+              <p>Open the coding arena, clear one focused pattern, and build momentum before deeper prep.</p>
+            </div>
+            <div class="prep-step">
+              <span class="prep-step-label">Loop 02</span>
+              <h3>Sharpen Aptitude Speed</h3>
+              <p>Switch into quick quant and reasoning rounds to train timing for screening cutoffs.</p>
+            </div>
+            <div class="prep-step">
+              <span class="prep-step-label">Loop 03</span>
+              <h3>Finish With Feedback</h3>
+              <p>Run an AI interview and close the session with specific gaps to fix next.</p>
+            </div>
+          {% endif %}
         </div>
       </div>
 
       <div class="space-y-6">
         <!-- Career Console -->
         <div class="console-wrapper reveal-card">
-          <div class="console-header border-b border-slate-800">
+          <div class="console-header border-b border-slate-200 dark:border-slate-800">
             <div class="console-dot bg-red-500"></div>
             <div class="console-dot bg-amber-500"></div>
             <div class="console-dot bg-emerald-500"></div>
-            <span class="text-slate-400 text-xs ml-2 font-mono">career_vitals.sh</span>
+            <span class="text-slate-500 dark:text-slate-400 text-xs ml-2 font-mono">career_vitals.sh</span>
           </div>
           <div class="console-body" id="careerConsole">
             <div class="console-line">> Initializing Career Protocol...</div>
@@ -286,23 +344,23 @@
         <!-- Real Stats -->
         <div class="grid grid-cols-2 gap-4">
           <div class="home-card p-5 reveal-card">
-            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Practice Pool</p>
-            <p class="text-3xl font-bold text-white">{{ stats.total_problems }}<span class="text-sky-400 text-sm ml-1">+</span></p>
+            <p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest mb-2">Practice Pool</p>
+            <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats.total_problems }}<span class="text-sky-400 text-sm ml-1">+</span></p>
             <p class="text-[10px] text-slate-500 mt-1 uppercase">Live Problems</p>
           </div>
           <div class="home-card p-5 reveal-card">
-            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Partner Firms</p>
-            <p class="text-3xl font-bold text-white">{{ stats.total_companies }}<span class="text-teal-400 text-sm ml-1">+</span></p>
+            <p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest mb-2">Partner Firms</p>
+            <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats.total_companies }}<span class="text-teal-400 text-sm ml-1">+</span></p>
             <p class="text-[10px] text-slate-500 mt-1 uppercase">Inc. FAANG</p>
           </div>
           <div class="home-card p-5 reveal-card">
-            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Aptitude Pool</p>
-            <p class="text-3xl font-bold text-white">{{ stats.total_questions }}<span class="text-emerald-400 text-sm ml-1">+</span></p>
+            <p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest mb-2">Aptitude Pool</p>
+            <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats.total_questions }}<span class="text-emerald-400 text-sm ml-1">+</span></p>
             <p class="text-[10px] text-slate-500 mt-1 uppercase">Logic Questions</p>
           </div>
           <div class="home-card p-5 reveal-card">
-            <p class="text-slate-400 text-xs uppercase tracking-widest mb-2">Candidates</p>
-            <p class="text-3xl font-bold text-white">{{ stats.active_users }}<span class="text-purple-400 text-sm ml-1">+</span></p>
+            <p class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-widest mb-2">Candidates</p>
+            <p class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats.active_users }}<span class="text-purple-400 text-sm ml-1">+</span></p>
             <p class="text-[10px] text-slate-500 mt-1 uppercase">Active Now</p>
           </div>
         </div>
@@ -312,29 +370,52 @@
 
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-3xl sm:text-4xl text-white hero-title">Core Modules</h2>
-      <span class="text-sm text-slate-400">each path links to live features</span>
+      <h2 class="text-3xl sm:text-4xl text-slate-900 dark:text-white hero-title">
+        {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}Admin Controls{% else %}Core Modules{% endif %}
+      </h2>
+      <span class="text-sm text-slate-500 dark:text-slate-400">
+        {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}manage your institution ecosystem{% else %}each path links to live features{% endif %}
+      </span>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-      <a href="{% url 'practice:problem-list' %}" class="home-card p-6 block">
-        <i class="ri-code-box-line text-2xl text-sky-300"></i>
-        <h3 class="text-white text-xl font-semibold mt-4 mb-2">Coding Arena</h3>
-        <p class="text-slate-300 text-sm leading-relaxed">Solve company-tagged problems, test logic, and improve speed with guided patterns.</p>
-      </a>
-
-      <a href="{% url 'aptitude:dashboard' %}" class="home-card p-6 block">
-        <i class="ri-brain-line text-2xl text-teal-300"></i>
-        <h3 class="text-white text-xl font-semibold mt-4 mb-2">Aptitude Lab</h3>
-        <p class="text-slate-300 text-sm leading-relaxed">Strengthen quant, reasoning, and verbal sections used in screening rounds.</p>
-      </a>
-
-
-
-      <a href="{% url 'mock_interview:interview_setup' %}" class="home-card p-6 block">
-        <i class="ri-robot-2-line text-2xl text-emerald-300"></i>
-        <h3 class="text-white text-xl font-semibold mt-4 mb-2">AI Interview Room</h3>
-        <p class="text-slate-300 text-sm leading-relaxed">Practice realistic interview sessions and review detailed, skill-based feedback.</p>
-      </a>
+      {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}
+        <a href="{% url 'organizations:dashboard' %}" class="home-card p-6 block border-l-4 border-sky-500">
+          <i class="ri-dashboard-line text-2xl text-sky-500"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">Campus Dashboard</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Overview of your organization's activity, subscription health, and key metrics.</p>
+        </a>
+        <a href="{% url 'organizations:members' %}" class="home-card p-6 block border-l-4 border-violet-500">
+          <i class="ri-group-line text-2xl text-violet-500"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">Member Control</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Invite students, manage roles, and monitor individual preparation progress.</p>
+        </a>
+        <a href="{% url 'organizations:org_analytics' %}" class="home-card p-6 block border-l-4 border-emerald-500">
+          <i class="ri-bar-chart-box-line text-2xl text-emerald-500"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">Placement Analytics</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Aggregate performance data for your entire cohort across all prep modules.</p>
+        </a>
+        <a href="{% url 'organizations:ai_dashboard' %}" class="home-card p-6 block border-l-4 border-amber-500">
+          <i class="ri-cpu-line text-2xl text-amber-500"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">AI Costs & Usage</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Detailed breakdown of AI resource consumption and neural node health.</p>
+        </a>
+      {% else %}
+        <a href="{% url 'practice:problem-list' %}" class="home-card p-6 block">
+          <i class="ri-code-box-line text-2xl text-sky-500 dark:text-sky-300"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">Coding Arena</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Solve company-tagged problems, test logic, and improve speed with guided patterns.</p>
+        </a>
+        <a href="{% url 'aptitude:dashboard' %}" class="home-card p-6 block">
+          <i class="ri-brain-line text-2xl text-teal-500 dark:text-teal-300"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">Aptitude Lab</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Strengthen quant, reasoning, and verbal sections used in screening rounds.</p>
+        </a>
+        <a href="{% url 'mock_interview:interview_setup' %}" class="home-card p-6 block">
+          <i class="ri-robot-2-line text-2xl text-emerald-500 dark:text-emerald-300"></i>
+          <h3 class="text-slate-900 dark:text-white text-xl font-semibold mt-4 mb-2">AI Interview Room</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Practice realistic interview sessions and review detailed, skill-based feedback.</p>
+        </a>
+      {% endif %}
     </div>
   </section>
 
@@ -365,25 +446,45 @@
     <div class="home-card p-8 lg:p-10">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div>
-          <p class="eyebrow text-teal-300 text-xs mb-3 uppercase">workflow</p>
-          <h2 class="hero-title text-4xl text-white">How Elevo Works</h2>
+          <p class="eyebrow text-teal-600 dark:text-teal-400 text-xs mb-3 uppercase">workflow</p>
+          <h2 class="hero-title text-4xl text-slate-900 dark:text-white">
+            {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}Institutional Impact{% else %}How Elevo Works{% endif %}
+          </h2>
         </div>
         <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-slate-900/55 border border-slate-700 rounded-xl p-5">
-            <p class="text-xs text-sky-300 mb-2">STEP 01</p>
-            <h3 class="text-white font-semibold mb-2">Build Fundamentals</h3>
-            <p class="text-slate-300 text-sm">Practice coding and aptitude daily with topic-focused goals.</p>
-          </div>
-          <div class="bg-slate-900/55 border border-slate-700 rounded-xl p-5">
-            <p class="text-xs text-teal-300 mb-2">STEP 02</p>
-            <h3 class="text-white font-semibold mb-2">Simulate Interviews</h3>
-            <p class="text-slate-300 text-sm">Run AI sessions that mirror real technical and behavioral rounds.</p>
-          </div>
-          <div class="bg-slate-900/55 border border-slate-700 rounded-xl p-5">
-            <p class="text-xs text-emerald-300 mb-2">STEP 03</p>
-            <h3 class="text-white font-semibold mb-2">Track Improvement</h3>
-            <p class="text-slate-300 text-sm">Use feedback loops to close gaps before your actual interviews.</p>
-          </div>
+          {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}
+            <div class="bg-slate-50 dark:bg-slate-900/55 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <p class="text-xs text-sky-600 dark:text-sky-300 mb-2 font-bold">PHASE 01</p>
+              <h3 class="text-slate-900 dark:text-white font-semibold mb-2">Onboard Cohort</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm">Bring your students onto the platform seamlessly to begin their targeted preparation.</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/55 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <p class="text-xs text-teal-600 dark:text-teal-300 mb-2 font-bold">PHASE 02</p>
+              <h3 class="text-slate-900 dark:text-white font-semibold mb-2">Monitor Training</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm">Track coding submissions, aptitude scores, and AI interview performance in real-time.</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/55 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <p class="text-xs text-emerald-600 dark:text-emerald-300 mb-2 font-bold">PHASE 03</p>
+              <h3 class="text-slate-900 dark:text-white font-semibold mb-2">Drive Placements</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm">Use data-driven insights to identify top performers and bridge readiness gaps.</p>
+            </div>
+          {% else %}
+            <div class="bg-slate-50 dark:bg-slate-900/55 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <p class="text-xs text-sky-600 dark:text-sky-300 mb-2 font-bold">STEP 01</p>
+              <h3 class="text-slate-900 dark:text-white font-semibold mb-2">Build Fundamentals</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm">Practice coding and aptitude daily with topic-focused goals.</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/55 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <p class="text-xs text-teal-600 dark:text-teal-300 mb-2 font-bold">STEP 02</p>
+              <h3 class="text-slate-900 dark:text-white font-semibold mb-2">Simulate Interviews</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm">Run AI sessions that mirror real technical and behavioral rounds.</p>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-900/55 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+              <p class="text-xs text-emerald-600 dark:text-emerald-300 mb-2 font-bold">STEP 03</p>
+              <h3 class="text-slate-900 dark:text-white font-semibold mb-2">Track Improvement</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm">Use feedback loops to close gaps before your actual interviews.</p>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -391,23 +492,35 @@
 
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24">
     <div class="text-center mb-8">
-      <h2 class="hero-title text-4xl sm:text-5xl text-white mb-3">Ready To Start?</h2>
-      <p class="text-slate-300 text-lg">Turn random prep into a clear weekly system.</p>
+      <h2 class="hero-title text-4xl sm:text-5xl text-slate-900 dark:text-white mb-3">Ready To Start?</h2>
+      <p class="text-slate-600 dark:text-slate-300 text-lg">Turn random prep into a clear weekly system.</p>
     </div>
 
     <div class="flex flex-col sm:flex-row justify-center gap-4">
       {% if not user.is_authenticated %}
-        <a href="{% url 'organizations:pricing' %}" class="cta-primary w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+        <a href="{% url 'organizations:pricing' %}" class="cta-primary w-full sm:w-auto text-slate-900 dark:text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
           <i class="ri-building-line mr-2"></i>Get Enterprise Access
         </a>
-      {% else %}
-        <a href="{% url 'practice:problem-list' %}" class="cta-primary w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
-          <i class="ri-play-circle-line mr-2"></i>Resume My Prep
+        <a href="{% url 'mock_interview:interview_setup' %}" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-700 dark:text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
+          <i class="ri-mic-line mr-2"></i>Try AI Interview
         </a>
+      {% else %}
+        {% if user.profile.role == 'ORG_ADMIN' %}
+          <a href="{% url 'organizations:dashboard' %}" class="cta-primary w-full sm:w-auto text-slate-900 dark:text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+            <i class="ri-dashboard-line mr-2"></i>Go to Dashboard
+          </a>
+          <a href="{% url 'organizations:members' %}" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-700 dark:text-slate-200 hover:border-violet-300 hover:text-violet-200 transition-colors inline-flex items-center justify-center">
+            <i class="ri-group-line mr-2"></i>Manage Cohort
+          </a>
+        {% else %}
+          <a href="{% url 'practice:problem-list' %}" class="cta-primary w-full sm:w-auto text-slate-900 dark:text-white px-8 py-3.5 rounded-xl font-semibold inline-flex items-center justify-center">
+            <i class="ri-play-circle-line mr-2"></i>Resume My Prep
+          </a>
+          <a href="{% url 'mock_interview:interview_setup' %}" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-700 dark:text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
+            <i class="ri-mic-line mr-2"></i>Try AI Interview
+          </a>
+        {% endif %}
       {% endif %}
-      <a href="{% url 'mock_interview:interview_setup' %}" class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold border border-slate-500 text-slate-200 hover:border-teal-300 hover:text-teal-200 transition-colors inline-flex items-center justify-center">
-        <i class="ri-mic-line mr-2"></i>Try AI Interview
-      </a>
     </div>
   </section>
 </div>
@@ -448,11 +561,19 @@
     // Career Console Typing Effect
     const consoleElement = document.getElementById('careerConsole');
     const messages = [
+      {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}
+      "> Authenticating Admin Node...",
+      "> Connecting to placement telemetry...",
+      "> Aggregating cohort statistics...",
+      "> Analysis complete: Readiness trending UP.",
+      "> System operational. Awaiting command."
+      {% else %}
       "> Scanning active problems...",
       "> Found {{ stats.total_problems }} code + {{ stats.total_questions }} logic challenges.",
       "> Checking target companies...",
       "> Analysis complete: Optimize for Recursion.",
       "> System ready. Awaiting user input."
+      {% endif %}
     ];
     let msgIndex = 0;
     

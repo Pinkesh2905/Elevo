@@ -10,53 +10,53 @@
 
     <div class="max-w-4xl mx-auto relative z-10 text-center">
         <div class="mb-12">
-            <h1 class="text-5xl md:text-7xl font-black text-white brand-font mb-6">
+            <h1 class="text-5xl md:text-7xl font-black text-slate-900 dark:text-white brand-font mb-6">
                 Ready to Upgrade Your <br />
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Institutional Placements?</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 dark:from-cyan-400 to-emerald-600 dark:to-emerald-400">Institutional Placements?</span>
             </h1>
-            <p class="text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
+            <p class="text-slate-600 dark:text-slate-400 text-xl max-w-3xl mx-auto leading-relaxed">
                 Elevo is an enterprise-grade platform specifically designed for colleges and universities to boost student placement rates, featuring advanced proctoring, AI voice interviews, and deep analytics.
             </p>
         </div>
 
-        <div class="glass-elevated rounded-[2.5rem] p-10 border border-white/10 bg-slate-900/60 backdrop-blur-xl relative overflow-hidden max-w-2xl mx-auto">
+        <div class="glass-elevated rounded-[2.5rem] p-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 backdrop-blur-xl relative overflow-hidden max-w-2xl mx-auto">
             <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-500 via-emerald-500 to-violet-500"></div>
             
-            <h2 class="text-3xl font-black text-white mb-4">Enterprise Edition</h2>
-            <p class="text-slate-400 mb-8 text-lg">Custom pricing tailored to your institution's student volume and specific requirements.</p>
+            <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-4">Enterprise Edition</h2>
+            <p class="text-slate-600 dark:text-slate-400 mb-8 text-lg">Custom pricing tailored to your institution's student volume and specific requirements.</p>
             
             <div class="grid sm:grid-cols-2 gap-4 text-left mb-10">
                 <div class="flex items-start gap-3">
-                    <i class="ri-shield-check-fill text-emerald-400 text-xl mt-0.5"></i>
+                    <i class="ri-shield-check-fill text-emerald-500 dark:text-emerald-400 text-xl mt-0.5"></i>
                     <div>
-                        <h4 class="text-slate-200 font-bold">Strict Proctoring</h4>
+                        <h4 class="text-slate-800 dark:text-slate-200 font-bold">Strict Proctoring</h4>
                         <p class="text-slate-500 text-sm mt-1">Browser lockdown and AI webcam cheat detection.</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <i class="ri-robot-2-fill text-cyan-400 text-xl mt-0.5"></i>
+                    <i class="ri-robot-2-fill text-cyan-500 dark:text-cyan-400 text-xl mt-0.5"></i>
                     <div>
-                        <h4 class="text-slate-200 font-bold">Voice-to-Voice AI</h4>
+                        <h4 class="text-slate-800 dark:text-slate-200 font-bold">Voice-to-Voice AI</h4>
                         <p class="text-slate-500 text-sm mt-1">Authentic human-like mock interview experiences.</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <i class="ri-bar-chart-fill text-violet-400 text-xl mt-0.5"></i>
+                    <i class="ri-bar-chart-fill text-violet-500 dark:text-violet-400 text-xl mt-0.5"></i>
                     <div>
-                        <h4 class="text-slate-200 font-bold">Placement Analytics</h4>
+                        <h4 class="text-slate-800 dark:text-slate-200 font-bold">Placement Analytics</h4>
                         <p class="text-slate-500 text-sm mt-1">Predictive dashboards for TPOs and Faculty.</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <i class="ri-palette-fill text-amber-400 text-xl mt-0.5"></i>
+                    <i class="ri-palette-fill text-amber-500 dark:text-amber-400 text-xl mt-0.5"></i>
                     <div>
-                        <h4 class="text-slate-200 font-bold">Custom White-labeling</h4>
+                        <h4 class="text-slate-800 dark:text-slate-200 font-bold">Custom White-labeling</h4>
                         <p class="text-slate-500 text-sm mt-1">Your logo, colors, and a custom subdomain URL.</p>
                     </div>
                 </div>
             </div>
 
-            <a href="mailto:sales@elevo.life?subject=Enterprise Demo Request" class="inline-flex items-center justify-center w-full px-8 py-5 rounded-2xl bg-white text-slate-950 font-black text-lg hover:bg-slate-200 transition-all transform hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+            <a href="mailto:sales@elevo.life?subject=Enterprise Demo Request" class="inline-flex items-center justify-center w-full px-8 py-5 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black text-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-all transform hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
                 <i class="ri-calendar-event-fill mr-2"></i> Book a Demo with Sales
             </a>
             
@@ -66,8 +66,18 @@
 </section>
 
 <style>
-    .glass-elevated {
-        box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.5);
+    @media (prefers-color-scheme: dark) {
+        .glass-elevated {
+            box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.5);
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        .glass-elevated {
+            box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.05);
+        }
+        html.dark .glass-elevated {
+            box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.5);
+        }
     }
 </style>
 {% endblock %}

@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-12">
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden py-12">
     <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-200/50 via-sky-100/30 to-teal-100/50 dark:from-slate-900/20 dark:via-sky-900/10 dark:to-teal-900/20 pointer-events-none"></div>
 
     <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header Section -->
         <div class="text-center mb-12">
-            <div class="glass-elevated rounded-2xl p-8 shadow-xl border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300">
                 <div class="flex items-center justify-center mb-6">
                     <div class="w-20 h-20 bg-gradient-to-br 
                         {% if 'quantitative' in category.name|lower %}from-sky-500 to-emerald-600
@@ -39,21 +39,21 @@
                 </div>
                 
                 <h1 class="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r 
-                    {% if 'quantitative' in category.name|lower %}from-emerald-400 to-sky-400
-                    {% elif 'verbal' in category.name|lower %}from-emerald-400 to-green-400
-                    {% elif 'reasoning' in category.name|lower %}from-teal-400 to-emerald-400
-                    {% elif 'data' in category.name|lower %}from-orange-400 to-yellow-400
-                    {% elif 'computer' in category.name|lower %}from-sky-400 to-sky-400
-                    {% else %}from-slate-300 to-slate-400{% endif %}">
+                    {% if 'quantitative' in category.name|lower %}from-emerald-600 to-sky-600 dark:from-emerald-400 dark:to-sky-400
+                    {% elif 'verbal' in category.name|lower %}from-emerald-600 to-green-600 dark:from-emerald-400 dark:to-green-400
+                    {% elif 'reasoning' in category.name|lower %}from-teal-600 to-emerald-600 dark:from-teal-400 dark:to-emerald-400
+                    {% elif 'data' in category.name|lower %}from-orange-600 to-yellow-600 dark:from-orange-400 dark:to-yellow-400
+                    {% elif 'computer' in category.name|lower %}from-sky-600 to-sky-600 dark:from-sky-400 dark:to-sky-400
+                    {% else %}from-slate-700 to-slate-800 dark:from-slate-300 dark:to-slate-400{% endif %}">
                     {{ category.name }}
                 </h1>
-                <p class="text-slate-300 text-lg max-w-2xl mx-auto">{{ category.description }}</p>
+                <p class="text-slate-600 dark:text-slate-300 text-lg max-w-2xl mx-auto">{{ category.description }}</p>
             </div>
         </div>
 
         <!-- Topics Section Header -->
         <div class="text-center mb-10">
-            <h2 class="text-2xl font-bold text-white mb-2">Select a Topic</h2>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Select a Topic</h2>
             <div class="w-20 h-1 bg-gradient-to-r 
                 {% if 'quantitative' in category.name|lower %}from-sky-500 to-emerald-500
                 {% elif 'verbal' in category.name|lower %}from-emerald-500 to-green-500
@@ -68,7 +68,7 @@
         <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 mb-12">
             {% for topic in topics %}
             <div class="topic-card group">
-                <div class="glass-elevated rounded-2xl p-6 border border-white/10 hover:border-white/20 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
+                <div class="bg-white dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden shadow-sm hover:shadow-xl">
                     
                     <!-- Topic Number Badge -->
                     <div class="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br 
@@ -111,17 +111,17 @@
 
                         <!-- Topic Content -->
                         <div class="text-center">
-                            <h3 class="text-lg font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r 
-                                {% if 'quantitative' in category.name|lower %}group-hover:from-emerald-400 group-hover:to-sky-400
-                                {% elif 'verbal' in category.name|lower %}group-hover:from-emerald-400 group-hover:to-green-400
-                                {% elif 'reasoning' in category.name|lower %}group-hover:from-teal-400 group-hover:to-emerald-400
-                                {% elif 'data' in category.name|lower %}group-hover:from-orange-400 group-hover:to-yellow-400
-                                {% elif 'computer' in category.name|lower %}group-hover:from-sky-400 group-hover:to-sky-400
-                                {% else %}group-hover:from-slate-300 group-hover:to-slate-400{% endif %}
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r 
+                                {% if 'quantitative' in category.name|lower %}group-hover:from-emerald-600 group-hover:to-sky-600 dark:group-hover:from-emerald-400 dark:group-hover:to-sky-400
+                                {% elif 'verbal' in category.name|lower %}group-hover:from-emerald-600 group-hover:to-green-600 dark:group-hover:from-emerald-400 dark:group-hover:to-green-400
+                                {% elif 'reasoning' in category.name|lower %}group-hover:from-teal-600 group-hover:to-emerald-600 dark:group-hover:from-teal-400 dark:group-hover:to-emerald-400
+                                {% elif 'data' in category.name|lower %}group-hover:from-orange-600 group-hover:to-yellow-600 dark:group-hover:from-orange-400 dark:group-hover:to-yellow-400
+                                {% elif 'computer' in category.name|lower %}group-hover:from-sky-600 group-hover:to-sky-600 dark:group-hover:from-sky-400 dark:group-hover:to-sky-400
+                                {% else %}group-hover:from-slate-700 group-hover:to-slate-800 dark:group-hover:from-slate-300 dark:group-hover:from-slate-400{% endif %}
                                 transition-all duration-300">
                                 {{ topic.name }}
                             </h3>
-                            <p class="text-slate-300 text-sm mb-6 leading-relaxed line-clamp-2">{{ topic.description }}</p>
+                            <p class="text-slate-600 dark:text-slate-300 text-sm mb-6 leading-relaxed line-clamp-2">{{ topic.description }}</p>
                             
                             <!-- Difficulty Indicator -->
                             <div class="flex items-center justify-center gap-1.5 mb-6">
@@ -151,14 +151,14 @@
             </div>
             {% empty %}
             <div class="col-span-full">
-                <div class="glass-elevated rounded-2xl p-12 text-center border border-white/10">
+                <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-12 text-center border border-slate-200 dark:border-white/10 shadow-sm">
                     <div class="w-16 h-16 mx-auto glass rounded-2xl flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">No Topics Available</h3>
-                    <p class="text-slate-400">Topics are being prepared for this category.</p>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">No Topics Available</h3>
+                    <p class="text-slate-500 dark:text-slate-400">Topics are being prepared for this category.</p>
                 </div>
             </div>
             {% endfor %}
@@ -167,7 +167,7 @@
         <!-- Navigation -->
         <div class="text-center">
             <a href="{% url 'aptitude:dashboard' %}"
-               class="inline-flex items-center glass-elevated border border-white/10 text-white px-8 py-3 rounded-xl shadow-lg hover:border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+               class="inline-flex items-center bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white px-8 py-3 rounded-xl shadow-lg hover:border-slate-300 dark:hover:border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105 group">
                 <svg class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>

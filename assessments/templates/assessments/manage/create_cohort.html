@@ -2,39 +2,50 @@
 {% block title %}Create Cohort | Elevo{% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-12 px-6">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex items-center gap-4 mb-10">
-            <a href="{% url 'assessments:manage_cohorts' %}" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all">
+<section class="min-h-screen py-12 px-6 bg-slate-50 dark:bg-transparent">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center gap-6 mb-12">
+            <a href="{% url 'assessments:manage_cohorts' %}" class="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm">
                 <i class="ri-arrow-left-line text-xl"></i>
             </a>
             <div>
-                <h1 class="text-3xl font-black text-slate-100 italic uppercase">Create Cohort</h1>
-                <p class="text-slate-400 text-sm font-medium">Define a new group of students.</p>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-2">
+                    Personnel Management
+                </div>
+                <h1 class="text-4xl font-black text-slate-900 dark:text-slate-100 italic uppercase tracking-tight">Initialize Cohort</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Define a new tactical group for assessment deployment.</p>
             </div>
         </div>
 
         <form method="POST" class="space-y-8">
             {% csrf_token %}
-            <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-10 backdrop-blur-xl">
-                <div class="space-y-8">
+            <div class="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 p-8 lg:p-12 backdrop-blur-xl shadow-sm dark:shadow-none">
+                <div class="space-y-10">
                     <div>
-                        <label for="name" class="block text-[11px] font-black text-sky-400 uppercase tracking-[0.2em] mb-3">Cohort Name</label>
-                        <input type="text" id="name" name="name" required placeholder="e.g. Computer Science B Tech 2026"
-                               class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500/50 transition-all">
+                        <label for="name" class="block text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Cohort Designation</label>
+                        <div class="relative group">
+                            <input type="text" id="name" name="name" required placeholder="e.g. ALPHA_SECTION_2026"
+                                   class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all font-bold tracking-tight">
+                            <div class="absolute inset-y-0 right-6 flex items-center text-slate-300 dark:text-slate-700 pointer-events-none group-focus-within:text-primary transition-colors">
+                                <i class="ri-group-line text-xl"></i>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
-                        <label for="description" class="block text-[11px] font-black text-sky-400 uppercase tracking-[0.2em] mb-3">Description (Optional)</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Briefly describe who is in this cohort..."
-                                  class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500/50 transition-all"></textarea>
+                        <label for="description" class="block text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Operational Brief (Optional)</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Briefly describe the purpose or composition of this group..."
+                                  class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all font-medium leading-relaxed"></textarea>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" class="px-10 py-5 rounded-3xl bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-2xl shadow-sky-500/20 active:scale-[0.98]">
-                    Create Cohort
+            <div class="flex items-center justify-between gap-6">
+                <p class="hidden sm:block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest max-w-[200px]">
+                    Note: You can add members to this cohort after initialization.
+                </p>
+                <button type="submit" class="w-full sm:w-auto px-12 py-5 rounded-[2rem] bg-primary text-surface font-black text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-2xl shadow-primary/30 active:scale-[0.98]">
+                    Establish Cohort
                 </button>
             </div>
         </form>

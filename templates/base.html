@@ -7,14 +7,89 @@
     {% load static %}
     {% load custom_filters %}
 
-    <!-- Premium Fonts: Outfit (Brand), Plus Jakarta Sans (UI), Fira Code (Mono) -->
+    <!-- Premium Fonts: Space Grotesk (Headline), Inter (UI), Outfit (Brand) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
     <meta name="description" content="Elevo: Master coding interviews with practice problems, aptitude tests, and AI-powered mock interviews." />
     
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#004346",
+                        "surface-container-lowest": "#000000",
+                        "on-error-container": "#ffb2b9",
+                        "on-primary-fixed-variant": "#370086",
+                        "surface-bright": "#1f2b49",
+                        "outline-variant": "#40485d",
+                        "on-primary-fixed": "#000000",
+                        "surface-container": "#0f1930",
+                        "on-surface": "#dee5ff",
+                        "on-tertiary-container": "#00575b",
+                        "primary-fixed": "#ae8dff",
+                        "surface-dim": "#060e20",
+                        "on-tertiary": "#006165",
+                        "on-surface-variant": "#a3aac4",
+                        "secondary-fixed": "#a2f31f",
+                        "tertiary": "#a1faff",
+                        "primary": "#ba9eff",
+                        "on-primary-container": "#2b006e",
+                        "surface-container-highest": "#192540",
+                        "on-secondary": "#365700",
+                        "secondary-container": "#426900",
+                        "tertiary-container": "#00f4fe",
+                        "background": "#020617",
+                        "error-dim": "#d73357",
+                        "surface": "#020617",
+                        "on-secondary-fixed": "#294300",
+                        "outline": "#6d758c",
+                        "on-error": "#490013",
+                        "error-container": "#a70138",
+                        "secondary": "#a2f31f",
+                        "tertiary-fixed-dim": "#00e5ee",
+                        "secondary-fixed-dim": "#95e400",
+                        "error": "#ff6e84",
+                        "tertiary-dim": "#00e5ee",
+                        "primary-dim": "#8455ef",
+                        "surface-tint": "#ba9eff",
+                        "primary-fixed-dim": "#a27cff",
+                        "on-background": "#dee5ff",
+                        "primary-container": "#ae8dff",
+                        "surface-variant": "#192540",
+                        "on-tertiary-fixed-variant": "#006266",
+                        "tertiary-fixed": "#00f4fe",
+                        "on-primary": "#39008c",
+                        "on-secondary-container": "#ebffcb",
+                        "secondary-dim": "#95e400",
+                        "surface-container-high": "#141f38",
+                        "inverse-on-surface": "#4d556b",
+                        "on-secondary-fixed-variant": "#3d6200",
+                        "inverse-primary": "#6e3bd7",
+                        "inverse-surface": "#faf8ff",
+                        "surface-container-low": "#091328"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "brand": ["Outfit"]
+                    }
+                },
+            },
+        }
+    </script>
     
     <!-- Remixicon for premium iconography -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
@@ -30,8 +105,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
     
+    <script>
+        if (localStorage.theme === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
         :root {
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --accent-cyan: #0ea5e9;
+            --accent-emerald: #10b981;
+            --accent-sky: #0284c7;
+            --accent-violet: #6366f1;
+        }
+        
+        .dark {
             --glass-bg: rgba(15, 23, 42, 0.65);
             --glass-border: rgba(255, 255, 255, 0.08);
             --accent-cyan: #22d3ee;
@@ -41,99 +138,62 @@
         }
         
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: #020617;
-            color: #f8fafc;
+            font-family: 'Inter', sans-serif; 
+            background: #f8fafc;
+            color: #0f172a;
             overflow-x: hidden;
             letter-spacing: -0.01em;
+            transition: background-color 0.3s, color 0.3s;
         }
         
-        .brand-font { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
+        .dark body { 
+            background: #020617;
+            color: #dee5ff;
+        }
+        
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .font-brand { font-family: 'Outfit', sans-serif; }
         .mono-font { font-family: 'Fira Code', monospace; }
 
         .glass-elevated {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(24px) saturate(180%);
             -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .glass-elevated {
+            background: rgba(15, 23, 42, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
         }
 
         .navbar-blur {
-            background: rgba(2, 6, 23, 0.7);
-            backdrop-filter: blur(16px) saturate(120%);
-            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark .navbar-blur {
+            background: rgba(2, 6, 23, 0.8);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* Custom Dropdown Styling */
-        .dropdown-animate {
-            transform-origin: top right;
-            animation: dropdownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        @keyframes dropdownFade {
-            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        /* Animated Premium Logo */
-        .logo-pulse {
-            animation: logoPulse 4s ease-in-out infinite;
-        }
-        @keyframes logoPulse {
-            0%, 100% { opacity: 0.8; transform: scale(1); filter: drop-shadow(0 0 0px rgba(34, 211, 238, 0)); }
-            50% { opacity: 1; transform: scale(1.05); filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.4)); }
-        }
-
-        .nav-link-active {
-            color: var(--accent-cyan);
-            position: relative;
-        }
-        .nav-link-active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
-            border-radius: 2px;
-        }
-
-        /* Ambient Background Grid */
-        .ambient-grid {
-            position: fixed;
-            inset: 0;
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0);
-            background-size: 40px 40px;
-            pointer-events: none;
-            z-index: -10;
-        }
-
-        /* Floating Symbols */
-        .symbol-float {
-            position: absolute;
-            font-family: 'Fira Code', monospace;
-            opacity: 0.15;
-            pointer-events: none;
-            user-select: none;
-            z-index: -5;
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { 
-            background: rgba(255, 255, 255, 0.1); 
+            background: rgba(132, 85, 239, 0.1); 
             border-radius: 10px;
-            border: 2px solid rgba(15, 23, 42, 1);
         }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(132, 85, 239, 0.2); }
+
+        /* App-like bottom nav spacing */
+        @media (max-width: 767px) {
+            .app-content-padding { padding-bottom: 5rem; }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -149,127 +209,122 @@
         <div class="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
             
             <!-- Branding -->
-            <a href="{% url 'home' %}" class="flex items-center gap-2.5 group">
-                <div class="relative w-11 h-11 flex items-center justify-center">
-                    <!-- Premium Hexagon Logo: Luminous Hexagon with <> -->
-                    <svg class="w-10 h-10 logo-pulse" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16 3L27.2583 9.5V22.5L16 29L4.74167 22.5V9.5L16 3Z" fill="url(#logoGlassBg)" stroke="url(#logoStroke)" stroke-width="1.5" stroke-linejoin="round"/>
-                        <path d="M13 12L9 16L13 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-                        <path d="M19 12L23 16L19 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-                        <defs>
-                            <linearGradient id="logoStroke" x1="4.74167" y1="3" x2="27.2583" y2="29" gradientUnits="userSpaceOnUse">
-                                <stop offset="0" stop-color="#22d3ee"/>
-                                <stop offset="0.5" stop-color="#818cf8"/>
-                                <stop offset="1" stop-color="#34d399"/>
-                            </linearGradient>
-                            <radialGradient id="logoGlassBg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(16 16) rotate(90) scale(13)">
-                                <stop offset="0" stop-color="#22d3ee" stop-opacity="0.2"/>
-                                <stop offset="1" stop-color="#020617" stop-opacity="0.8"/>
-                            </radialGradient>
-                        </defs>
-                    </svg>
+            <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-white font-bold text-xl">terminal</span>
                 </div>
-                <span class="text-xl font-black text-white brand-font tracking-tight group-hover:text-cyan-400 transition-all duration-300">Elevo</span>
+                <span class="text-2xl font-black text-slate-900 dark:text-white font-headline italic tracking-tighter uppercase group-hover:text-primary transition-colors">Elevo</span>
             </a>
 
             <!-- Desktop Links -->
             <nav class="hidden md:flex items-center gap-2">
                 {% if user.is_authenticated %}
                     {% if user.is_superuser %}
-                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
-                        <a href="{% url 'users:admin_dashboard' %}" class="h-11 px-8 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all flex items-center gap-2">
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Home</a>
+                        <a href="{% url 'users:admin_dashboard' %}" class="h-11 px-8 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-slate-900 dark:text-white transition-all flex items-center gap-2">
                             <i class="ri-admin-line"></i> System Administration
                         </a>
                     {% elif user.profile.role == 'TUTOR' %}
                         {% if user.profile.is_approved_tutor %}
-                            <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
-                            <a href="{% url 'tutor:dashboard' %}" class="h-11 px-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2">
+                            <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Home</a>
+                            <a href="{% url 'tutor:dashboard' %}" class="h-11 px-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-slate-900 dark:text-white transition-all flex items-center gap-2">
                                 <i class="ri-dashboard-line"></i> Tutor Dashboard
                             </a>
                         {% else %}
-                            <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
-                            <a href="{% url 'users:tutor_application' %}" class="h-11 px-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all flex items-center gap-2">
+                            <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Home</a>
+                            <a href="{% url 'users:tutor_application' %}" class="h-11 px-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-slate-900 dark:text-white transition-all flex items-center gap-2">
                                 <i class="ri-file-list-3-line"></i> Application In Review
                             </a>
                         {% endif %}
                     {% elif user.profile.role == 'ORG_ADMIN' or request.user_membership %}
-                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Home</a>
                         
                         {% if request.user_membership.normalized_role == 'STUDENT' %}
-                            <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Coding</a>
-                            <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Aptitude</a>
-                            <a href="{% url 'assessments:list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-indigo-400">Assessments</a>
-                            <a href="{% url 'organizations:my_org' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">My Organization</a>
+                            <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Coding</a>
+                            <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Aptitude</a>
+                            <a href="{% url 'assessments:list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full text-indigo-400">Assessments</a>
+                            <a href="{% url 'organizations:my_org' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">My Organization</a>
                         {% else %}
-                            <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Organization</a>
-                            <a href="{% url 'assessments:manage_assessments' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-sky-400">Manage Tests</a>
-                            <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Members</a>
+                            <a href="{% url 'organizations:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Organization</a>
+                            <a href="{% url 'assessments:manage_assessments' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full text-sky-400">Manage Tests</a>
+                            <a href="{% url 'organizations:members' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Members</a>
                         {% endif %}
                     {% else %}
-                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Home</a>
-                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Coding</a>
-                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Aptitude</a>
-                        <a href="{% url 'assessments:list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full text-indigo-400">Assessments</a>
-                        <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center gap-2">
+                        <a href="{% url 'home' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Home</a>
+                        <a href="{% url 'practice:problem-list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Coding</a>
+                        <a href="{% url 'aptitude:dashboard' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Aptitude</a>
+                        <a href="{% url 'assessments:list' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full text-indigo-400">Assessments</a>
+                        <a href="{% url 'mock_interview:interview_setup' %}" class="ml-2 h-10 px-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-slate-900 dark:text-white transition-all flex items-center gap-2">
                             <i class="ri-robot-line text-sm"></i> Mock Interviews
                         </a>
-                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-[13px] font-bold text-slate-400 hover:text-white transition-all px-4 py-2 hover:bg-white/5 rounded-full">Pricing</a>
+                        <a href="{% url 'organizations:pricing' %}" class="px-5 py-2 text-[13px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all px-4 py-2 hover:bg-slate-200/50 dark:bg-white/5 rounded-full">Pricing</a>
                     {% endif %}
                 {% endif %}
             </nav>
 
             <!-- Global Search -->
-            <form method="GET" action="{% url 'search' %}" class="hidden md:flex items-center ml-8 group">
-                <div class="relative w-64 lg:w-72">
-                    <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors"></i>
+            <form method="GET" action="{% url 'search' %}" class="hidden md:flex items-center ml-8 group relative" x-data="{ focused: false }">
+                <div class="relative w-64 lg:w-72 transition-all duration-300" :class="focused ? 'w-80 lg:w-96' : ''">
+                    <div class="absolute inset-0 bg-cyan-500/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none"></div>
+                    <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors z-10"></i>
                     <input
                         type="text"
                         name="q"
+                        id="global-search-input"
+                        @focus="focused = true"
+                        @blur="focused = false"
                         value="{{ request.GET.q|default_if_none:'' }}"
                         placeholder="Scan protocols..."
-                        class="w-full h-10 pl-11 pr-4 rounded-full bg-slate-950/40 border border-white/5 text-[13px] text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 focus:bg-slate-950/80 transition-all"
+                        class="relative w-full h-10 pl-11 pr-12 rounded-full bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-white/10 text-[13px] text-slate-700 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:bg-white dark:focus:bg-slate-900 transition-all z-10"
                     >
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-focus-within:opacity-100 transition-opacity">
-                        <kbd class="px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] font-black text-slate-500">ESC</kbd>
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 z-20">
+                        <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-white/10 bg-slate-200/50 dark:bg-white/5 text-[10px] font-black text-slate-500 group-focus-within:hidden transition-all">/</kbd>
+                        <kbd class="px-1.5 py-0.5 rounded border border-cyan-500/30 bg-cyan-500/10 text-[10px] font-black text-cyan-400 hidden group-focus-within:block transition-all">ESC</kbd>
                     </div>
                 </div>
             </form>
 
+
             <!-- User Interactions -->
             <div class="flex items-center gap-3 sm:gap-6">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="w-10 h-10 rounded-full hover:bg-slate-200/50 dark:hover:bg-white/5 flex items-center justify-center text-slate-900 dark:text-slate-400 hover:text-sky-500 dark:hover:text-sky-400 transition-all group" title="Toggle Theme">
+                    <i id="theme-toggle-dark-icon" class="ri-moon-line text-xl hidden"></i>
+                    <i id="theme-toggle-light-icon" class="ri-sun-line text-xl hidden"></i>
+                </button>
                 {% if user.is_authenticated %}
-                <div class="hidden lg:flex items-center gap-6 pr-6 border-r border-white/10">
-                    <a href="{% url 'chat:inbox' %}" class="relative w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-cyan-400 transition-all group" title="Intelligence Inbox">
+                <div class="hidden lg:flex items-center gap-6 pr-6 border-r border-slate-300 dark:border-white/10">
+                    <a href="{% url 'chat:inbox' %}" class="relative w-10 h-10 rounded-full hover:bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition-all group" title="Intelligence Inbox">
                         <i class="ri-message-3-line text-xl"></i>
-                        <span id="navUnreadBadge" class="hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 text-[8px] font-black text-white items-center justify-center"></span>
+                        <span id="navUnreadBadge" class="hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-950 text-[8px] font-black text-slate-900 dark:text-white items-center justify-center"></span>
                     </a>
                     {% if user.profile.role != 'STUDENT' or request.user_membership %}
-                    <a href="{% url 'organizations:my_org' %}" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-emerald-400 transition-all group" title="Organization">
+                    <a href="{% url 'organizations:my_org' %}" class="w-10 h-10 rounded-full hover:bg-slate-200/50 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-emerald-400 transition-all group" title="Organization">
                         <i class="ri-building-line text-xl"></i>
                     </a>
                     {% endif %}
                 </div>
 
-                <div class="relative" id="user-menu-root">
-                    <button id="user-menu-btn" class="w-11 h-11 rounded-full border-2 border-white/5 overflow-hidden hover:border-cyan-500/50 transition-all p-0.5">
+                <div class="relative hidden md:block" id="user-menu-root">
+                    <button id="user-menu-btn" class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden hover:border-primary transition-all p-0.5">
                         {% if user.profile.avatar %}
                         <img src="{{ user.profile.avatar.url }}" class="w-full h-full rounded-full object-cover">
                         {% else %}
-                        <div class="w-full h-full rounded-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-slate-500">
-                            <i class="ri-user-fill"></i>
+                        <div class="w-full h-full rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">person</span>
                         </div>
                         {% endif %}
                     </button>
                     <!-- Dropdown Content -->
                     <div id="user-dropdown" class="hidden absolute right-0 mt-4 w-72 rounded-2xl dropdown-animate z-[200] overflow-hidden">
-                        <div class="p-6 bg-gradient-to-br from-slate-900/50 to-slate-950/50 border-b border-white/5 relative">
+                        <div class="p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-950/50 border-b border-slate-200 dark:border-white/5 relative">
                             <div class="absolute top-0 right-0 p-4 opacity-10">
                                 <i class="ri-shield-user-line text-4xl text-cyan-500"></i>
                             </div>
                             <p class="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1.5 flex items-center gap-2">
                                 <span class="w-1 h-1 rounded-full bg-cyan-500"></span> Authorized Protocol
                             </p>
-                            <p class="text-base font-black text-white truncate">{{ user.username }}</p>
+                            <p class="text-base font-black text-slate-900 dark:text-white truncate">{{ user.username }}</p>
                             {% if request.is_premium %}
                                 <div class="mt-3 flex items-center gap-2 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 w-fit">
                                     <i class="ri-vip-diamond-fill text-[10px] text-cyan-400"></i>
@@ -278,51 +333,51 @@
                             {% endif %}
                         </div>
                         <div class="p-3 grid grid-cols-1 gap-1">
-                            <a href="{% url 'users:profile' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all group">
+                            <a href="{% url 'users:profile' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-200/50 dark:bg-white/5 transition-all group">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
                                         <i class="ri-user-settings-line"></i>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-slate-200 group-hover:text-white">Mastery Profile</p>
-                                        <p class="text-[10px] text-slate-500 font-medium">Digital identity meta-data</p>
+                                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:text-white">Profile</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">View and edit your profile</p>
                                     </div>
                                 </div>
                                 <i class="ri-arrow-right-s-line text-slate-600 group-hover:text-cyan-400"></i>
                             </a>
-                            <a href="{% url 'chat:inbox' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all group">
+                            <a href="{% url 'chat:inbox' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-200/50 dark:bg-white/5 transition-all group">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                                        <i class="ri-question-answer-line"></i>
+                                        <i class="ri-message-3-line"></i>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-slate-200 group-hover:text-white">Neural Hub</p>
-                                        <p class="text-[10px] text-slate-500 font-medium">Communication channel</p>
+                                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:text-white">Messages</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">Your inbox and chats</p>
                                     </div>
                                 </div>
                                 <i class="ri-arrow-right-s-line text-slate-600 group-hover:text-emerald-400"></i>
                             </a>
-                            <a href="{% url 'mock_interview:my_mock_interviews' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 transition-all group">
+                            <a href="{% url 'mock_interview:my_mock_interviews' %}" class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-200/50 dark:bg-white/5 transition-all group">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400 group-hover:scale-110 transition-transform">
                                         <i class="ri-history-line"></i>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold text-slate-200 group-hover:text-white">Session Matrix</p>
-                                        <p class="text-[10px] text-slate-500 font-medium">Historical performance</p>
+                                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:text-white">Interview History</p>
+                                        <p class="text-[10px] text-slate-500 font-medium">Past mock interviews</p>
                                     </div>
                                 </div>
                                 <i class="ri-arrow-right-s-line text-slate-600 group-hover:text-violet-400"></i>
                             </a>
                         </div>
-                        <div class="p-3 border-t border-white/5 bg-slate-950/30">
+                        <div class="p-3 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/30">
                             <form method="POST" action="{% url 'logout' %}">
                                 {% csrf_token %}
-                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-sm font-bold text-slate-400 hover:text-rose-400 transition-all group">
-                                    <div class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-rose-500/10">
+                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-rose-500/10 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-rose-400 transition-all group">
+                                    <div class="w-9 h-9 rounded-lg bg-slate-200/50 dark:bg-white/5 flex items-center justify-center group-hover:bg-rose-500/10">
                                         <i class="ri-logout-box-r-line"></i>
                                     </div>
-                                    Terminate Session
+                                    Sign Out
                                 </button>
                             </form>
                         </div>
@@ -330,29 +385,239 @@
                 </div>
                 {% else %}
                 <div class="hidden md:flex items-center gap-4">
-                    <a href="{% url 'login' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Login</a>
-                    <a href="{% url 'users:signup' %}" class="h-10 px-6 rounded-full bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-white transition-all flex items-center">
+                    <a href="{% url 'login' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Login</a>
+                    <a href="{% url 'users:signup' %}" class="h-10 px-6 rounded-full bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-cyan-500 hover:text-slate-900 dark:text-white transition-all flex items-center">
                         Initiate Registration
                     </a>
                 </div>
                 {% endif %}
                 
-                <!-- Mobile Toggle -->
-                <button id="mobile-toggle" class="md:hidden w-10 h-10 rounded-xl hover:bg-white/5 flex items-center justify-center text-slate-100">
-                    <i class="ri-menu-5-line text-2xl"></i>
-                </button>
+                <!-- Mobile Subscription Status -->
+                {% if user.is_authenticated and request.is_premium %}
+                <div class="md:hidden flex items-center justify-center gap-1.5 h-8 px-3 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+                    <i class="ri-vip-diamond-fill text-[11px] text-cyan-500 dark:text-cyan-400"></i>
+                    <span class="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mt-0.5">Premium</span>
+                </div>
+                {% endif %}
             </div>
         </div>
     </header>
 
-    <!-- Content -->
-    <main>
+    <!-- Global Toast Notifications -->
+    <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast-item pointer-events-auto flex items-start gap-4 p-4 rounded-2xl border backdrop-blur-2xl shadow-2xl transform transition-all duration-500 opacity-0 translate-x-12 
+                    {% if message.tags == 'success' %}
+                        bg-white/90 dark:bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300
+                    {% elif message.tags == 'error' %}
+                        bg-white/90 dark:bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300
+                    {% elif message.tags == 'warning' %}
+                        bg-white/90 dark:bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300
+                    {% else %}
+                        bg-white/90 dark:bg-sky-500/10 border-sky-500/30 text-sky-800 dark:text-sky-300
+                    {% endif %}"
+                    role="alert">
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if message.tags == 'success' %}
+                            <i class="ri-checkbox-circle-fill text-lg text-emerald-500"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="ri-error-warning-fill text-lg text-rose-500"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="ri-alert-fill text-lg text-amber-500"></i>
+                        {% else %}
+                            <i class="ri-information-fill text-lg text-sky-500"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-black uppercase tracking-widest opacity-60 mb-1">
+                            {% if message.tags %}{{ message.tags }}{% else %}Notification{% endif %}
+                        </p>
+                        <p class="text-sm font-medium leading-relaxed">{{ message }}</p>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Content Wrapper with Bottom Nav Padding on Mobile -->
+    <div class="app-content-padding min-h-screen">
         {% block content %}{% endblock %}
-    </main>
+    </div>
+
+    <!-- Mobile App Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl flex justify-around items-center px-4 sm:px-6 z-[200] border-t border-slate-200 dark:border-white/10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)]">
+        <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 w-12 {% if request.resolver_match.url_name == 'home' %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+            <span class="material-symbols-outlined text-[22px]" {% if request.resolver_match.url_name == 'home' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>home</span>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">Home</span>
+        </a>
+        
+        {% if user.is_authenticated %}
+            {% if user.is_superuser %}
+                <a href="{% url 'users:admin_dashboard' %}" class="flex flex-col items-center gap-1 w-12 {% if 'admin' in request.path %}text-rose-500{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-[22px]" {% if 'admin' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>admin_panel_settings</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Admin</span>
+                </a>
+                
+                <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-500 to-rose-400 flex items-center justify-center -mt-10 shadow-lg shadow-rose-500/30 border-4 border-white dark:border-slate-950 relative">
+                    <span class="material-symbols-outlined text-white font-bold text-2xl">shield_person</span>
+                </div>
+                
+                <a href="{% url 'chat:inbox' %}" class="flex flex-col items-center gap-1 w-12 {% if 'chat' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors relative">
+                    <span class="material-symbols-outlined text-[22px]" {% if 'chat' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>forum</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Inbox</span>
+                </a>
+                
+                <button id="mobile-profile-btn" class="flex flex-col items-center gap-1 w-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover border border-slate-300 dark:border-white/10">
+                    {% else %}
+                        <span class="material-symbols-outlined text-[22px]">account_circle</span>
+                    {% endif %}
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Menu</span>
+                </button>
+            {% elif user.profile.role == 'TUTOR' %}
+                <a href="{% url 'tutor:dashboard' %}" class="flex flex-col items-center gap-1 w-12 {% if 'tutor' in request.path %}text-emerald-500{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-[22px]" {% if 'tutor' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>school</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Tutor</span>
+                </a>
+                
+                <a href="{% url 'tutor:dashboard' %}" class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-400 flex items-center justify-center -mt-10 shadow-lg shadow-emerald-500/30 border-4 border-white dark:border-slate-950 group transition-transform active:scale-90 relative">
+                    <span class="material-symbols-outlined text-white font-bold text-2xl group-hover:scale-110 transition-transform">dashboard</span>
+                </a>
+                
+                <a href="{% url 'chat:inbox' %}" class="flex flex-col items-center gap-1 w-12 {% if 'chat' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors relative">
+                    <span class="material-symbols-outlined text-[22px]" {% if 'chat' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>forum</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Inbox</span>
+                </a>
+                
+                <button id="mobile-profile-btn" class="flex flex-col items-center gap-1 w-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover border border-slate-300 dark:border-white/10">
+                    {% else %}
+                        <span class="material-symbols-outlined text-[22px]">account_circle</span>
+                    {% endif %}
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Menu</span>
+                </button>
+            {% elif user.profile.role == 'ORG_ADMIN' or request.user_membership %}
+                {% if request.user_membership.normalized_role == 'STUDENT' %}
+                    <button id="mobile-practice-btn" class="flex flex-col items-center gap-1 w-12 {% if 'practice' in request.path or 'aptitude' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                        <span class="material-symbols-outlined text-[22px]" {% if 'practice' in request.path or 'aptitude' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>extension</span>
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Practice</span>
+                    </button>
+                    
+                    <a href="{% url 'mock_interview:interview_setup' %}" class="w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center -mt-10 shadow-lg shadow-primary/30 border-4 border-white dark:border-slate-950 group transition-transform active:scale-90 relative">
+                        <span class="material-symbols-outlined text-white font-bold text-2xl group-hover:scale-110 transition-transform">robot_2</span>
+                    </a>
+                    
+                    <a href="{% url 'chat:inbox' %}" class="flex flex-col items-center gap-1 w-12 {% if 'chat' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors relative">
+                        <span class="material-symbols-outlined text-[22px]" {% if 'chat' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>forum</span>
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Inbox</span>
+                    </a>
+                    
+                    <button id="mobile-profile-btn" class="flex flex-col items-center gap-1 w-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover border border-slate-300 dark:border-white/10">
+                        {% else %}
+                            <span class="material-symbols-outlined text-[22px]">account_circle</span>
+                        {% endif %}
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Menu</span>
+                    </button>
+                {% else %}
+                    <a href="{% url 'assessments:manage_assessments' %}" class="flex flex-col items-center gap-1 w-12 {% if 'assessments' in request.path %}text-sky-500{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                        <span class="material-symbols-outlined text-[22px]" {% if 'assessments' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>assignment</span>
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Tests</span>
+                    </a>
+                    
+                    <a href="{% url 'organizations:dashboard' %}" class="w-14 h-14 rounded-full bg-gradient-to-tr from-emerald-500 to-emerald-400 flex items-center justify-center -mt-10 shadow-lg shadow-emerald-500/30 border-4 border-white dark:border-slate-950 group transition-transform active:scale-90 relative">
+                        <span class="material-symbols-outlined text-white font-bold text-2xl group-hover:scale-110 transition-transform">apartment</span>
+                    </a>
+                    
+                    <a href="{% url 'organizations:members' %}" class="flex flex-col items-center gap-1 w-12 {% if 'members' in request.path %}text-violet-500{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors relative">
+                        <span class="material-symbols-outlined text-[22px]" {% if 'members' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>group</span>
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Members</span>
+                    </a>
+                    
+                    <a href="{% url 'users:profile' %}" class="flex flex-col items-center gap-1 w-12 {% if 'profile' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover border border-slate-300 dark:border-white/10">
+                        {% else %}
+                            <span class="material-symbols-outlined text-[22px]" {% if 'profile' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>account_circle</span>
+                        {% endif %}
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Profile</span>
+                    </a>
+                {% endif %}
+            {% else %}
+                <!-- Regular Student -->
+                <button id="mobile-practice-btn" class="flex flex-col items-center gap-1 w-12 {% if 'practice' in request.path or 'aptitude' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                    <span class="material-symbols-outlined text-[22px]" {% if 'practice' in request.path or 'aptitude' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>extension</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Practice</span>
+                </button>
+                
+                <a href="{% url 'mock_interview:interview_setup' %}" class="w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center -mt-10 shadow-lg shadow-primary/30 border-4 border-white dark:border-slate-950 group transition-transform active:scale-90 relative">
+                    <span class="material-symbols-outlined text-white font-bold text-2xl group-hover:scale-110 transition-transform">robot_2</span>
+                </a>
+                
+                <a href="{% url 'chat:inbox' %}" class="flex flex-col items-center gap-1 w-12 {% if 'chat' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors relative">
+                    <span class="material-symbols-outlined text-[22px]" {% if 'chat' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>forum</span>
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Inbox</span>
+                </a>
+                
+                <button id="mobile-profile-btn" class="flex flex-col items-center gap-1 w-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" class="w-6 h-6 rounded-full object-cover border border-slate-300 dark:border-white/10">
+                    {% else %}
+                        <span class="material-symbols-outlined text-[22px]">account_circle</span>
+                    {% endif %}
+                    <span class="text-[9px] font-bold uppercase tracking-tighter">Menu</span>
+                </button>
+            {% endif %}
+            
+        {% else %}
+            <!-- Unauthenticated -->
+            <button id="mobile-practice-btn" class="flex flex-col items-center gap-1 w-12 {% if 'practice' in request.path or 'aptitude' in request.path %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
+                <span class="material-symbols-outlined text-[22px]" {% if 'practice' in request.path or 'aptitude' in request.path %}style="font-variation-settings: 'FILL' 1;"{% endif %}>extension</span>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Practice</span>
+            </button>
+            
+            <a href="{% url 'mock_interview:interview_setup' %}" class="w-14 h-14 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center -mt-10 shadow-lg shadow-primary/30 border-4 border-white dark:border-slate-950 group transition-transform active:scale-90 relative">
+                <span class="material-symbols-outlined text-white font-bold text-2xl group-hover:scale-110 transition-transform">robot_2</span>
+            </a>
+            
+            <a href="{% url 'login' %}" class="flex flex-col items-center gap-1 w-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors relative">
+                <span class="material-symbols-outlined text-[22px]">login</span>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Sign In</span>
+            </a>
+            
+            <button id="mobile-profile-btn" class="flex flex-col items-center gap-1 w-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-[22px]">account_circle</span>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Menu</span>
+            </button>
+        {% endif %}
+    </nav>
+
+    <!-- Mobile Practice Sub-menu -->
+    <div id="mobile-practice-menu" class="md:hidden fixed bottom-24 left-1/4 right-1/4 min-w-[200px] mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-[190] p-2 flex flex-col gap-1 transform translate-y-full opacity-0 pointer-events-none transition-all duration-300">
+        <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 active:bg-slate-200 dark:active:bg-white/10 transition-colors">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <span class="material-symbols-outlined text-lg">code_blocks</span>
+            </div>
+            <span class="text-sm font-bold text-slate-800 dark:text-slate-200">Coding</span>
+        </a>
+        <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 active:bg-slate-200 dark:active:bg-white/10 transition-colors">
+            <div class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500">
+                <span class="material-symbols-outlined text-lg">psychology</span>
+            </div>
+            <span class="text-sm font-bold text-slate-800 dark:text-slate-200">Aptitude</span>
+        </a>
+    </div>
 
     {% block footer %}
     <!-- Engineering Footer -->
-    <footer class="mt-20 border-t border-white/5 bg-slate-950/50 backdrop-blur-xl relative pb-12">
+    <footer class="mt-20 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 backdrop-blur-xl relative pb-12">
         <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
         
         <div class="max-w-7xl mx-auto px-6 py-16">
@@ -361,58 +626,68 @@
                 <!-- Brand Meta -->
                 <div class="md:col-span-4 space-y-6">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 flex items-center justify-center">
-                            <svg class="w-8 h-8 opacity-80" viewBox="0 0 32 32" fill="none">
-                                <path d="M16 3L27.2583 9.5V22.5L16 29L4.74167 22.5V9.5L16 3Z" stroke="url(#footerLogoGrad)" stroke-width="2" stroke-linejoin="round"/>
-                                <path d="M13 12L9 16L13 20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M19 12L23 16L19 20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <defs>
-                                    <linearGradient id="footerLogoGrad" x1="10" y1="8" x2="22" y2="24" gradientUnits="userSpaceOnUse">
-                                        <stop offset="0" stop-color="#22d3ee"/>
-                                        <stop offset="0.5" stop-color="#818cf8"/>
-                                        <stop offset="1" stop-color="#34d399"/>
-                                    </linearGradient>
-                                </defs>
-                            </svg>
+                        <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined text-white font-bold text-xl">terminal</span>
                         </div>
-                        <h3 class="text-xl font-black text-white brand-font tracking-tight">Elevo Mastery</h3>
+                        <h3 class="text-2xl font-black text-slate-900 dark:text-white font-headline italic tracking-tighter uppercase">Elevo</h3>
                     </div>
                     <p class="text-sm text-slate-500 font-medium leading-relaxed">
                         The elite ecosystem for technical mastery. Real-world challenges, data-backed interview simulations, and a collective for high-performing architects.
                     </p>
                     <div class="flex items-center gap-4">
-                        <a href="https://github.com" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"><i class="ri-github-fill text-lg"></i></a>
-                        <a href="https://linkedin.com" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"><i class="ri-linkedin-fill text-lg"></i></a>
-                        <a href="https://twitter.com" class="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all"><i class="ri-twitter-x-fill text-lg"></i></a>
+                        <a href="https://github.com" class="w-10 h-10 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all"><i class="ri-github-fill text-lg"></i></a>
+                        <a href="https://linkedin.com" class="w-10 h-10 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all"><i class="ri-linkedin-fill text-lg"></i></a>
+                        <a href="https://twitter.com" class="w-10 h-10 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-all"><i class="ri-twitter-x-fill text-lg"></i></a>
                     </div>
                 </div>
 
                 <!-- Navigation Columns -->
                 <div class="md:col-span-8 grid grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% if user.is_authenticated and user.profile.role == 'ORG_ADMIN' %}
+                    <div class="space-y-6">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Management</h4>
+                        <ul class="space-y-4">
+                            <li><a href="{% url 'organizations:dashboard' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-sky-400 transition-colors">Admin Dashboard</a></li>
+                            <li><a href="{% url 'organizations:members' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-violet-400 transition-colors">Member Control</a></li>
+                            <li><a href="{% url 'assessments:manage_assessments' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-400 transition-colors">Manage Tests</a></li>
+                            <li><a href="{% url 'organizations:verify_domain' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-amber-400 transition-colors">Domain Security</a></li>
+                        </ul>
+                    </div>
+                    <div class="space-y-6">
+                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Intelligence</h4>
+                        <ul class="space-y-4">
+                            <li><a href="{% url 'organizations:org_analytics' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Placement Analytics</a></li>
+                            <li><a href="{% url 'organizations:ai_dashboard' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">AI Resource Hub</a></li>
+                            <li><a href="{% url 'organizations:subscription' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Plan & Billing</a></li>
+                            <li><a href="{% url 'privacy_policy' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Data Privacy</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
                     <div class="space-y-6">
                         <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Modules</h4>
                         <ul class="space-y-4">
-                            <li><a href="{% url 'practice:problem-list' %}" class="text-sm font-bold text-slate-400 hover:text-cyan-400 transition-colors">Coding Challenges</a></li>
-                            <li><a href="{% url 'aptitude:dashboard' %}" class="text-sm font-bold text-slate-400 hover:text-emerald-400 transition-colors">Aptitude Logic</a></li>
-                            <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-sm font-bold text-slate-400 hover:text-violet-400 transition-colors">Mock Interviews</a></li>
+                            <li><a href="{% url 'practice:problem-list' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition-colors">Coding Challenges</a></li>
+                            <li><a href="{% url 'aptitude:dashboard' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-400 transition-colors">Aptitude Logic</a></li>
+                            <li><a href="{% url 'mock_interview:interview_setup' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-violet-400 transition-colors">Mock Interviews</a></li>
                         </ul>
                     </div>
                     <div class="space-y-6">
                         <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Platform</h4>
                         <ul class="space-y-4">
-                            <li><a href="{% url 'users:profile' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Mastery Profile</a></li>
-                            <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Session History</a></li>
-                            <li><a href="{% url 'chat:inbox' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Intelligence Inbox</a></li>
-                            <li><a href="{% url 'privacy_policy' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                            <li><a href="{% url 'terms_of_service' %}" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Terms of Service</a></li>
+                            <li><a href="{% url 'users:profile' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Profile</a></li>
+                            <li><a href="{% url 'mock_interview:my_mock_interviews' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Interview History</a></li>
+                            <li><a href="{% url 'chat:inbox' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Messages</a></li>
+                            <li><a href="{% url 'privacy_policy' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Privacy Policy</a></li>
+                            <li><a href="{% url 'terms_of_service' %}" class="text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">Terms of Service</a></li>
                         </ul>
                     </div>
+                    {% endif %}
                     <div class="space-y-6 col-span-2 lg:col-span-1">
                         <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">Status</h4>
-                        <div class="p-4 rounded-2xl border border-white/5 bg-white/2">
+                        <div class="p-4 rounded-2xl border border-slate-200 dark:border-white/5 bg-white/2">
                             <div class="flex items-center gap-2 mb-2">
                                 <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                <span class="text-[10px] font-black text-white uppercase tracking-widest">Systems Nominal</span>
+                                <span class="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Systems Nominal</span>
                             </div>
                             <p class="text-[10px] text-slate-500 font-medium">Elevo Engine v1.0.0-Beta <br> Cluster: Local Main</p>
                         </div>
@@ -421,12 +696,12 @@
             </div>
 
             <!-- Footer Bottom -->
-            <div class="mt-20 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="mt-20 pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
                     &copy; 2026 ELEVO MASTERY COLLECTIVE. BUILT FOR ARCHITECTS.
                 </p>
                 <div class="flex items-center gap-8">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Crafted with Precision</span>
+                    <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em]">Crafted with Precision</span>
                 </div>
             </div>
         </div>
@@ -436,11 +711,27 @@
     <!-- Mobile Drawer -->
     <div id="mobile-drawer" class="fixed inset-0 z-[150] hidden">
         <div id="mobile-overlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md opacity-0"></div>
-        <div id="mobile-content" class="absolute right-0 top-0 h-full w-4/5 max-w-sm bg-slate-900/90 border-l border-white/10 backdrop-blur-2xl p-8 transform translate-x-full">
+        <div id="mobile-content" class="absolute right-0 top-0 h-full w-4/5 max-w-sm bg-white/90 dark:bg-slate-900/90 border-l border-slate-300 dark:border-white/10 backdrop-blur-2xl p-8 transform translate-x-full">
             <div class="flex items-center justify-between mb-10">
-                <span class="text-xl font-black text-white brand-font tracking-tight">Navigation</span>
-                <button id="mobile-close" class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white">
-                    <i class="ri-close-line text-2xl"></i>
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" class="w-10 h-10 rounded-full object-cover border border-slate-300 dark:border-white/10">
+                        {% else %}
+                            <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-500 border border-cyan-500/20">
+                                <span class="material-symbols-outlined text-lg">person</span>
+                            </div>
+                        {% endif %}
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Menu</span>
+                            <span class="text-base font-black text-slate-900 dark:text-white truncate max-w-[150px]">{{ user.username }}</span>
+                        </div>
+                    {% else %}
+                        <span class="text-xl font-black text-slate-900 dark:text-white brand-font tracking-tight">Navigation</span>
+                    {% endif %}
+                </div>
+                <button id="mobile-close" class="w-10 h-10 rounded-full border border-slate-300 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:text-white transition-colors">
+                    <span class="material-symbols-outlined text-2xl">close</span>
                 </button>
             </div>
             
@@ -453,75 +744,81 @@
                             name="q"
                             value="{{ request.GET.q|default_if_none:'' }}"
                             placeholder="Search protocol..."
-                            class="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-950/70 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
+                            class="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-white/10 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 transition-all"
                         >
                     </div>
                 </form>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'home' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                        <i class="ri-home-4-line text-cyan-400"></i> Home
+                    <a href="{% url 'home' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                        <span class="material-symbols-outlined text-primary">home</span> Home
                     </a>
                     {% if user.is_superuser %}
-                    <a href="{% url 'users:admin_dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                    <a href="{% url 'users:admin_dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                         <i class="ri-admin-line text-rose-400"></i> Admin Dashboard
                     </a>
                     {% elif user.profile.role == 'ORG_ADMIN' or request.user_membership %}
                         {% if request.user_membership.normalized_role == 'STUDENT' %}
-                            <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                                <i class="ri-code-s-slash-line text-emerald-400"></i> Coding
+                            <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                                <span class="material-symbols-outlined text-secondary">code_blocks</span> Coding
                             </a>
-                            <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                                <i class="ri-brain-line text-violet-400"></i> Aptitude
+                            <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                                <span class="material-symbols-outlined text-tertiary">psychology</span> Aptitude
                             </a>
-                            <a href="{% url 'assessments:list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                                <i class="ri-file-list-3-line text-indigo-400"></i> Assessments
+                            <a href="{% url 'assessments:list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                                <span class="material-symbols-outlined text-primary">assignment</span> Assessments
                             </a>
-                            <a href="{% url 'organizations:my_org' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                            <a href="{% url 'organizations:my_org' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                                 <i class="ri-building-line text-cyan-400"></i> My Organization
                             </a>
                         {% else %}
-                            <a href="{% url 'organizations:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                            <a href="{% url 'organizations:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                                 <i class="ri-building-line text-emerald-400"></i> Organization
                             </a>
-                            <a href="{% url 'assessments:manage_assessments' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                            <a href="{% url 'organizations:members' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                                <i class="ri-team-line text-violet-400"></i> Members
+                            </a>
+                            <a href="{% url 'assessments:manage_assessments' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                                 <i class="ri-file-list-3-line text-sky-400"></i> Manage Tests
                             </a>
-                            <a href="{% url 'organizations:members' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                                <i class="ri-team-line text-violet-400"></i> Members
+                            <a href="{% url 'organizations:org_analytics' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                                <i class="ri-bar-chart-box-line text-cyan-400"></i> Analytics
+                            </a>
+                            <a href="{% url 'organizations:ai_dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                                <i class="ri-cpu-line text-amber-400"></i> AI Resource Hub
                             </a>
                         {% endif %}
                     {% else %}
-                    <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                    <a href="{% url 'practice:problem-list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                         <i class="ri-code-s-slash-line text-emerald-400"></i> Coding
                     </a>
-                    <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                    <a href="{% url 'aptitude:dashboard' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                         <i class="ri-brain-line text-violet-400"></i> Aptitude
                     </a>
-                    <a href="{% url 'assessments:list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                    <a href="{% url 'assessments:list' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                         <i class="ri-file-list-3-line text-indigo-400"></i> Assessments
                     </a>
-                    <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
+                    <a href="{% url 'mock_interview:interview_setup' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
                         <i class="ri-robot-line text-cyan-500"></i> Mock Interviews
                     </a>
                     {% endif %}
-                    <div class="pt-6 mt-6 border-t border-white/5 space-y-6">
-                        <a href="{% url 'users:profile' %}" class="flex items-center gap-4 text-lg font-bold text-slate-300 hover:text-white transition-all">
-                            <i class="ri-user-settings-line text-slate-400"></i> Mastery Profile
+                    <div class="pt-6 mt-6 border-t border-slate-200 dark:border-white/5 space-y-6">
+                        <a href="{% url 'users:profile' %}" class="flex items-center gap-4 text-lg font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white transition-all">
+                            <span class="material-symbols-outlined text-slate-500 dark:text-slate-400">settings</span> Profile
                         </a>
                         <form method="POST" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button type="submit" class="w-full flex items-center gap-4 text-lg font-bold text-rose-400 hover:text-rose-300 transition-all">
-                                <i class="ri-logout-box-r-line"></i> Sign Protocol Out
+                                <span class="material-symbols-outlined">logout</span> Sign Out
                             </button>
                         </form>
                     </div>
                 {% else %}
                     <div class="space-y-3 pt-2">
-                        <a href="{% url 'login' %}" class="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-base font-bold text-white transition-all hover:border-cyan-400/40 hover:bg-cyan-500/10">
+                        <a href="{% url 'login' %}" class="flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-white/10 bg-slate-200/50 dark:bg-white/5 px-5 py-4 text-base font-bold text-slate-900 dark:text-white transition-all hover:border-cyan-400/40 hover:bg-cyan-500/10">
                             <i class="ri-login-box-line text-cyan-400"></i>
                             Login
                         </a>
-                        <a href="{% url 'users:signup' %}" class="flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 text-base font-black uppercase tracking-[0.18em] text-slate-950 transition-all hover:bg-cyan-500 hover:text-white">
+                        <a href="{% url 'users:signup' %}" class="flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 text-base font-black uppercase tracking-[0.18em] text-slate-950 transition-all hover:bg-cyan-500 hover:text-slate-900 dark:text-white">
                             <i class="ri-user-add-line"></i>
                             Registration
                         </a>
@@ -576,28 +873,110 @@
                 });
             }
 
-            if (mobileToggle) mobileToggle.addEventListener('click', openMobile);
+            const mobileProfileBtn = document.getElementById('mobile-profile-btn');
+            const mobilePracticeBtn = document.getElementById('mobile-practice-btn');
+            const mobilePracticeMenu = document.getElementById('mobile-practice-menu');
+
+            if (mobileProfileBtn) mobileProfileBtn.addEventListener('click', openMobile);
             if (mobileClose) mobileClose.addEventListener('click', closeMobile);
             if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobile);
 
-            // Vanta.js Initialization
-            if (document.getElementById('vanta-bg')) {
-                VANTA.NET({
-                    el: "#vanta-bg",
-                    mouseControls: true,
-                    touchControls: true,
-                    gyroControls: false,
-                    minHeight: 200.00,
-                    minWidth: 200.00,
-                    scale: 1.00,
-                    scaleMobile: 1.00,
-                    color: 0x0ea5e9,
-                    backgroundColor: 0x020617,
-                    points: 12.00,
-                    maxDistance: 18.00,
-                    spacing: 16.00
+            // Practice Sub-menu logic
+            if (mobilePracticeBtn && mobilePracticeMenu) {
+                mobilePracticeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = mobilePracticeMenu.classList.contains('opacity-0');
+                    if (isHidden) {
+                        mobilePracticeMenu.classList.remove('translate-y-full', 'opacity-0', 'pointer-events-none');
+                        mobilePracticeMenu.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                    } else {
+                        mobilePracticeMenu.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+                        mobilePracticeMenu.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                    }
+                });
+                document.addEventListener('click', (e) => {
+                    if (!mobilePracticeMenu.contains(e.target) && e.target !== mobilePracticeBtn) {
+                        mobilePracticeMenu.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+                        mobilePracticeMenu.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+                    }
                 });
             }
+
+            // Vanta.js Initialization
+            let vantaEffect;
+            function initVanta() {
+                if (document.getElementById('vanta-bg')) {
+                    if (vantaEffect) vantaEffect.destroy();
+                    const isDark = document.documentElement.classList.contains('dark');
+                    vantaEffect = VANTA.NET({
+                        el: "#vanta-bg",
+                        mouseControls: true,
+                        touchControls: true,
+                        gyroControls: false,
+                        minHeight: 200.00,
+                        minWidth: 200.00,
+                        scale: 1.00,
+                        scaleMobile: 1.00,
+                        color: isDark ? 0x0ea5e9 : 0x3b82f6,
+                        backgroundColor: isDark ? 0x020617 : 0xf8fafc,
+                        points: 12.00,
+                        maxDistance: 18.00,
+                        spacing: 16.00
+                    });
+                }
+            }
+            initVanta();
+            
+            // Theme Toggle Logic
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            function updateThemeIcons() {
+                if (document.documentElement.classList.contains('dark')) {
+                    lightIcon.classList.remove('hidden');
+                    darkIcon.classList.add('hidden');
+                } else {
+                    darkIcon.classList.remove('hidden');
+                    lightIcon.classList.add('hidden');
+                }
+            }
+            
+            if (themeToggleBtn) {
+                updateThemeIcons();
+                themeToggleBtn.addEventListener('click', function() {
+                    document.documentElement.classList.toggle('dark');
+                    if (document.documentElement.classList.contains('dark')) {
+                        localStorage.theme = 'dark';
+                    } else {
+                        localStorage.theme = 'light';
+                    }
+                    updateThemeIcons();
+                    initVanta(); // Re-initialize ambient bg
+                });
+            }
+
+            // Toast Animation
+            const toasts = document.querySelectorAll('.toast-item');
+            toasts.forEach((toast, index) => {
+                setTimeout(() => {
+                    toast.classList.remove('opacity-0', 'translate-x-12');
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        toast.classList.add('opacity-0', 'translate-x-12');
+                        setTimeout(() => toast.remove(), 500);
+                    }, 5000 + (index * 500));
+                }, 100 + (index * 150));
+            });
+
+            // Global Search Shortcut
+            document.addEventListener('keydown', (e) => {
+                if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                    e.preventDefault();
+                    document.getElementById('global-search-input')?.focus();
+                }
+            });
 
             // Unread Handler
             {% if user.is_authenticated %}

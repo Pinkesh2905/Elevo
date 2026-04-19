@@ -1,18 +1,18 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Companies | Practice | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-12">
+<div class="min-h-screen relative overflow-hidden py-12 bg-slate-50 dark:bg-slate-950">
     <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-emerald-500/5 dark:from-slate-900/20 dark:via-sky-900/10 dark:to-teal-900/20 pointer-events-none"></div>
 
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <!-- Header -->
         <div class="mb-12 animate-reveal">
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-teal-400 mb-2">Targeted Preparation</p>
-            <h1 class="text-4xl sm:text-5xl font-black text-white brand-font tracking-tight mb-4">Browse by Companies</h1>
-            <p class="text-slate-400 font-medium max-w-2xl">Practice the exact problems asked by top-tier tech companies during their technical recruitment process.</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-secondary mb-2">Targeted Preparation</p>
+            <h1 class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white brand-font tracking-tight mb-4">Browse by Companies</h1>
+            <p class="text-slate-500 dark:text-slate-400 font-medium max-w-2xl">Practice the exact problems asked by top-tier tech companies during their technical recruitment process.</p>
         </div>
 
         <!-- Companies Grid -->
@@ -20,43 +20,43 @@
             {% for company in companies %}
             <div class="company-card group animate-reveal" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
                 <a href="{% url 'practice:problem-list' %}?company={{ company.id }}" class="block h-full">
-                    <div class="glass-elevated h-full rounded-3xl border border-white/5 hover:border-teal-500/30 p-8 transition-all duration-500 group-hover:-translate-y-2 relative overflow-hidden">
+                    <div class="glass-elevated bg-white dark:bg-slate-900/40 h-full rounded-3xl border border-slate-200 dark:border-white/5 hover:border-secondary/30 p-8 transition-all duration-500 group-hover:-translate-y-2 relative overflow-hidden shadow-sm hover:shadow-xl hover:shadow-secondary/5">
                         <!-- BG Accent -->
-                        <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-teal-500/5 rounded-full blur-3xl group-hover:bg-teal-500/10 transition-colors"></div>
+                        <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-secondary/5 rounded-full blur-3xl group-hover:bg-secondary/10 transition-colors"></div>
 
                         <div class="relative z-10 flex flex-col h-full">
                             <div class="flex items-center justify-between mb-6">
-                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:border-teal-500/30 transition-all duration-500 overflow-hidden">
+                                <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-white/10 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:border-secondary/30 transition-all duration-500 overflow-hidden">
                                     {% if company.logo %}
                                         <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-10 h-10 object-contain">
                                     {% else %}
-                                        <i class="ri-building-line text-2xl text-teal-400"></i>
+                                        <span class="material-symbols-outlined text-2xl text-secondary">corporate_fare</span>
                                     {% endif %}
                                 </div>
-                                <div class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <div class="px-3 py-1 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                                     {{ company.problem_count }} Questions
                                 </div>
                             </div>
 
-                            <h2 class="text-2xl font-black text-white brand-font tracking-tight mb-3 group-hover:text-teal-400 transition-colors">{{ company.name }}</h2>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-8 truncate">
+                            <h2 class="text-2xl font-black text-slate-900 dark:text-white brand-font tracking-tight mb-3 group-hover:text-secondary transition-colors">{{ company.name }}</h2>
+                            <p class="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mb-8 truncate">
                                 {{ company.website|default:"Premium Tech Domain" }}
                             </p>
 
-                            <div class="mt-auto flex items-center gap-2 text-[10px] font-black text-teal-400 uppercase tracking-[0.2em] group-hover:gap-4 transition-all">
-                                Decode Stack <i class="ri-arrow-right-line"></i>
+                            <div class="mt-auto flex items-center gap-2 text-[10px] font-black text-secondary uppercase tracking-[0.2em] group-hover:gap-4 transition-all">
+                                 Decode Stack <span class="material-symbols-outlined text-sm">arrow_forward</span>
                             </div>
                         </div>
                     </div>
                 </a>
             </div>
             {% empty %}
-            <div class="col-span-full glass-elevated rounded-3xl border border-dashed border-white/10 p-20 text-center animate-reveal">
-                <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
-                    <i class="ri-government-line text-4xl text-slate-600"></i>
+            <div class="col-span-full glass-elevated bg-white dark:bg-slate-900/40 rounded-3xl border border-dashed border-slate-200 dark:border-white/10 p-20 text-center animate-reveal shadow-sm">
+                <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-6">
+                    <i class="ri-government-line text-4xl text-slate-300 dark:text-slate-600"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-400 tracking-tight">The list of corporations is missing.</h3>
-                <p class="text-slate-500 mt-2">Check back later for curated company-wise problems.</p>
+                <h3 class="text-xl font-bold text-slate-400 dark:text-slate-500 tracking-tight">The list of corporations is missing.</h3>
+                <p class="text-slate-500 dark:text-slate-600 mt-2">Check back later for curated company-wise problems.</p>
             </div>
             {% endfor %}
         </div>

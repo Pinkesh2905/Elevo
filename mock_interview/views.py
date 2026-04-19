@@ -201,8 +201,11 @@ INTERVIEW_PACKS = {
 }
 
 
-def is_student(user):
-    return user.is_authenticated and hasattr(user, "profile") and user.profile.role == "STUDENT"
+def is_mock_interview_eligible(user):
+    """Check if a user can access mock interviews. Students and Admins are allowed."""
+    return user.is_authenticated and hasattr(user, "profile") and (
+        user.profile.role == "STUDENT" or user.profile.role == "ADMIN" or user.profile.role == "ORG_ADMIN" or user.is_superuser
+    )
 
 
 def _strip(text):
@@ -1776,13 +1779,13 @@ def _queue_feedback_generation(session):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def start_mock_interview(request):
     return redirect("mock_interview:interview_setup")
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def interview_setup(request):
     """
     Step 1: Onboarding for mock interview.
@@ -2016,7 +2019,7 @@ def interview_setup(request):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def main_interview(request, session_id):
     session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
     track = _session_track(session)
@@ -2074,13 +2077,13 @@ def main_interview(request, session_id):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def interact_with_ai(request, interview_id):
     return ai_interaction_api(request, interview_id)
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def ai_interaction_api(request, session_id):
     if request.method != "POST":
         return JsonResponse({"error": "POST required."}, status=405)
@@ -2260,7 +2263,7 @@ def ai_interaction_api(request, session_id):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def my_mock_interviews(request):
     sessions = MockInterviewSession.objects.filter(user=request.user).order_by("-created_at")
     for item in sessions:
@@ -2283,7 +2286,7 @@ def my_mock_interviews(request):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def review_interview(request, session_id):
     session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
     turns = session.turns.all().order_by("turn_number")
@@ -2423,7 +2426,7 @@ def review_interview(request, session_id):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def delete_session(request, session_id):
     session = get_object_or_404(MockInterviewSession, id=session_id, user=request.user)
     role = session.job_role or "Unknown role"
@@ -2433,7 +2436,7 @@ def delete_session(request, session_id):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def clear_all_sessions(request):
     if request.method == "POST":
         count = MockInterviewSession.objects.filter(user=request.user).count()
@@ -2445,7 +2448,7 @@ def clear_all_sessions(request):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def get_interview_hints_api(request, session_id):
     if request.method != "POST":
         return JsonResponse({"error": "POST required."}, status=405)
@@ -2504,7 +2507,7 @@ def get_interview_hints_api(request, session_id):
 
 
 @login_required
-@user_passes_test(is_student, login_url="/login/")
+@user_passes_test(is_mock_interview_eligible, login_url="/login/")
 def practice_question_api(request, session_id):
     if request.method != "POST":
         return JsonResponse({"error": "POST required."}, status=405)

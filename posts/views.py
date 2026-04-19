@@ -338,28 +338,8 @@ def user_profile(request, username):
 
 @login_required
 def search_results(request):
+    """
+    Redirects to the global search view.
+    """
     query = request.GET.get("q", "").strip()
-    posts = []
-    users = []
-
-    if query:
-        posts = Post.objects.filter(
-            Q(content__icontains=query)
-            | Q(author__username__icontains=query)
-            | Q(hashtags__name__icontains=query)
-        ).distinct().select_related(
-            "author", "author__profile"
-        ).prefetch_related("likes", "comments", "shares")
-
-        users = UserProfile.objects.filter(
-            Q(user__username__icontains=query)
-            | Q(user__first_name__icontains=query)
-            | Q(user__last_name__icontains=query)
-            | Q(bio__icontains=query)
-        ).select_related("user")
-
-    return render(
-        request,
-        "core/search_results.html",
-        {"query": query, "posts": posts, "users": users},
-    )
+    return redirect(f"{reverse('search')}?q={query}")

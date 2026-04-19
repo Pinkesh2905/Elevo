@@ -1,24 +1,24 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Submission Analysis #{{ submission.id }} | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-12">
+<div class="min-h-screen relative overflow-hidden py-12 bg-slate-50 dark:bg-slate-950">
     <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-sky-500/5 via-transparent to-emerald-500/5 dark:from-slate-900/20 dark:via-sky-900/10 dark:to-teal-900/20 pointer-events-none"></div>
 
     <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <!-- Top Navigation -->
         <div class="mb-8 animate-reveal">
-            <a href="{% url 'practice:user_submissions' %}" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-sky-400 transition-colors mb-3 group">
-                <i class="ri-arrow-left-line text-xs group-hover:-translate-x-1 transition-transform"></i>
+            <a href="{% url 'practice:user_submissions' %}" class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-primary transition-colors mb-3 group">
+                <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
                 Back to Archive
             </a>
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <h1 class="text-3xl sm:text-4xl font-black text-white brand-font tracking-tight">
-                    <span class="text-slate-600">Runtime ID</span> #{{ submission.id }}
+                <h1 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white brand-font tracking-tight">
+                    <span class="text-slate-400 dark:text-slate-600">Runtime ID</span> #{{ submission.id }}
                 </h1>
-                <a href="{% url 'practice:problem_detail' submission.problem.slug %}" class="h-11 px-8 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 font-black uppercase tracking-widest text-[10px] hover:bg-sky-500 hover:text-white transition-all">
+                <a href="{% url 'practice:problem_detail' submission.problem.slug %}" class="h-11 px-8 rounded-xl bg-primary/10 border border-primary/30 text-primary font-black uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white hover:shadow-lg hover:shadow-primary/20 transition-all">
                     Re-Solve Problem
                 </a>
             </div>
@@ -26,34 +26,34 @@
 
         <!-- Meta Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-reveal" style="animation-delay: 100ms;">
-            <div class="glass-elevated border border-white/5 rounded-3xl p-6 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 
-                    {% if submission.status == 'accepted' %}bg-emerald-500/10 text-emerald-400{% else %}bg-rose-500/10 text-rose-400{% endif %}">
-                    <i class="{% if submission.status == 'accepted' %}ri-verified-badge-line{% else %}ri-error-warning-line{% endif %} text-2xl"></i>
+            <div class="glass-elevated bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-3xl p-6 flex items-center gap-4 shadow-sm">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-white/5 
+                    {% if submission.status == 'accepted' %}bg-emerald-100 dark:bg-secondary/10 text-emerald-600 dark:text-secondary{% else %}bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400{% endif %}">
+                    <span class="material-symbols-outlined text-2xl">{% if submission.status == 'accepted' %}verified_user{% else %}warning{% endif %}</span>
                 </div>
                 <div>
-                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Final Status</p>
-                    <p class="text-base font-black text-white brand-font uppercase tracking-tight">{{ submission.get_status_display }}</p>
+                    <p class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Final Status</p>
+                    <p class="text-base font-black text-slate-900 dark:text-white brand-font uppercase tracking-tight">{{ submission.get_status_display }}</p>
                 </div>
             </div>
 
-            <div class="glass-elevated border border-white/5 rounded-3xl p-6 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 bg-sky-500/10 text-sky-400">
-                    <i class="ri-flask-line text-2xl"></i>
+            <div class="glass-elevated bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-3xl p-6 flex items-center gap-4 shadow-sm">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-white/5 bg-primary/10 text-primary">
+                    <span class="material-symbols-outlined text-2xl">science</span>
                 </div>
                 <div>
-                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Tests Passed</p>
-                    <p class="text-base font-black text-white brand-font uppercase tracking-tight">{{ submission.passed_test_cases }} / {{ submission.total_test_cases }}</p>
+                    <p class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Tests Passed</p>
+                    <p class="text-base font-black text-slate-900 dark:text-white brand-font uppercase tracking-tight">{{ submission.passed_test_cases }} / {{ submission.total_test_cases }}</p>
                 </div>
             </div>
 
-            <div class="glass-elevated border border-white/5 rounded-3xl p-6 flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 bg-indigo-500/10 text-indigo-400">
-                    <i class="ri-code-box-line text-2xl"></i>
+            <div class="glass-elevated bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-3xl p-6 flex items-center gap-4 shadow-sm">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-white/5 bg-tertiary/10 text-tertiary">
+                    <span class="material-symbols-outlined text-2xl">code</span>
                 </div>
                 <div>
-                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Language</p>
-                    <p class="text-base font-black text-white brand-font uppercase tracking-tight">{{ submission.language }}</p>
+                    <p class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-0.5">Language</p>
+                    <p class="text-base font-black text-slate-900 dark:text-white brand-font uppercase tracking-tight">{{ submission.language }}</p>
                 </div>
             </div>
         </div>
@@ -62,39 +62,39 @@
         <div class="space-y-8">
             {% if submission.error_message %}
             <!-- Error Output -->
-            <div class="glass-elevated rounded-3xl border border-rose-500/30 bg-rose-500/5 p-8 animate-reveal" style="animation-delay: 200ms;">
+            <div class="glass-elevated bg-white dark:bg-slate-900/40 rounded-3xl border border-rose-500/30 bg-rose-500/5 p-8 animate-reveal shadow-sm" style="animation-delay: 200ms;">
                 <div class="flex items-start gap-4 mb-4">
-                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center flex-shrink-0">
-                        <i class="ri-alert-fill text-xl"></i>
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-xl">error</span>
                     </div>
                     <div>
-                        <h2 class="text-xs font-black text-white uppercase tracking-widest mb-1.5">Excution Error Stream</h2>
-                        <pre class="text-xs text-rose-300 font-mono leading-relaxed bg-black/40 p-6 rounded-2xl border border-rose-500/10 whitespace-pre-wrap">{{ submission.error_message }}</pre>
+                        <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1.5">Execution Error Stream</h2>
+                        <pre class="text-xs text-rose-600 dark:text-rose-300 font-mono leading-relaxed bg-rose-50 dark:bg-black/40 p-6 rounded-2xl border border-rose-500/10 whitespace-pre-wrap shadow-inner">{{ submission.error_message }}</pre>
                     </div>
                 </div>
             </div>
             {% endif %}
 
             <!-- Code Display -->
-            <div class="glass-elevated rounded-3xl border border-white/5 overflow-hidden animate-reveal" style="animation-delay: 300ms;">
-                <div class="px-8 py-4 border-b border-white/5 bg-white/2 flex items-center justify-between">
+            <div class="glass-elevated bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-white/5 overflow-hidden animate-reveal shadow-sm" style="animation-delay: 300ms;">
+                <div class="px-8 py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/2 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <i class="ri-braces-line text-sky-400 text-lg"></i>
-                        <h2 class="text-xs font-black text-white uppercase tracking-widest">Submitted Logic</h2>
+                        <span class="material-symbols-outlined text-primary text-lg">code</span>
+                        <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">Submitted Logic</h2>
                     </div>
-                    <div class="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                    <div class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                         Read Only Mode
                     </div>
                 </div>
                 <div class="p-0">
-                    <pre class="p-8 bg-slate-950/40 text-sm font-mono leading-relaxed text-slate-300 custom-scrollbar overflow-x-auto"><code>{{ submission.code }}</code></pre>
+                    <pre class="p-8 bg-slate-50/50 dark:bg-slate-950/40 text-sm font-mono leading-relaxed text-slate-700 dark:text-slate-300 custom-scrollbar overflow-x-auto"><code>{{ submission.code }}</code></pre>
                 </div>
             </div>
 
             <!-- Footer Details -->
-            <div class="flex items-center justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest animate-reveal" style="animation-delay: 400ms;">
+            <div class="flex items-center justify-between text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest animate-reveal" style="animation-delay: 400ms;">
                 <div class="flex items-center gap-2">
-                    <i class="ri-time-line"></i>
+                    <span class="material-symbols-outlined text-xs">schedule</span>
                     Timestamp: {{ submission.created_at|date:"M d, Y · H:i:s" }}
                 </div>
                 <div>

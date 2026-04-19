@@ -1,21 +1,54 @@
 {% extends "base.html" %}
-{% block title %}AI Cost Dashboard — {{ org.name }} | Elevo{% endblock %}
+{% block title %}AI Protocol Intelligence — {{ org.name }} | Elevo{% endblock %}
 
 {% block extra_css %}
 <style>
-  .ai-card { border: 1px solid rgba(255,255,255,0.08); transition: all 0.25s ease; }
-  .ai-card:hover { border-color: rgba(16,185,129,0.25); transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0,0,0,0.3); }
-  .quota-bar { height: 10px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.06); }
-  .quota-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
-  .latency-bar-bg { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); }
+  .ai-card { 
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px -1px rgba(0, 0, 0, 0.03);
+  }
+  
+  .dark .ai-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  .ai-card:hover { 
+    border-color: rgba(16, 185, 129, 0.3);
+    transform: translateY(-4px); 
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dark .ai-card:hover {
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  }
+
+  .quota-bar { 
+    height: 12px; 
+    border-radius: 999px; 
+    overflow: hidden; 
+    background: rgba(0, 0, 0, 0.05); 
+  }
+  .dark .quota-bar { background: rgba(255, 255, 255, 0.06); }
+  
+  .quota-fill { height: 100%; border-radius: 999px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+  
+  .latency-bar-bg { height: 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.05); }
+  .dark .latency-bar-bg { background: rgba(255, 255, 255, 0.06); }
+  
   .latency-bar { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
-  .health-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-  .badge-op { font-size: 10px; padding: 2px 8px; border-radius: 999px; }
-  @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .ai-card { animation: fade-in 0.4s ease both; }
-  .ai-card:nth-child(2) { animation-delay: 0.05s; }
-  .ai-card:nth-child(3) { animation-delay: 0.1s; }
-  .ai-card:nth-child(4) { animation-delay: 0.15s; }
+  .health-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px currentColor; }
+  .badge-op { font-size: 10px; padding: 3px 10px; border-radius: 999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em; }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .ai-card { animation: slide-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
 </style>
 {% endblock %}
 
@@ -24,246 +57,281 @@
   <div class="mx-auto max-w-6xl">
 
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-xl">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+      <div class="flex items-center gap-5">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-500/20">
           <i class="ri-cpu-line"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-slate-100 brand-font">AI Cost Dashboard</h1>
-          <p class="text-sm text-slate-500">{{ org.name }} — Last {{ days }} days</p>
+          <h1 class="text-3xl font-black text-slate-900 dark:text-white font-headline tracking-tight">AI Protocol Intelligence</h1>
+          <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Monitoring neural costs for {{ org.name }} • Last {{ days }} days</p>
         </div>
       </div>
-      <div class="flex gap-2">
-        {% for d in "7,14,30,90"|make_list %}{% endfor %}
+      <div class="flex items-center gap-3 bg-slate-200/50 dark:bg-white/5 p-1.5 rounded-2xl border border-slate-300 dark:border-white/10">
         {% with periods="7 14 30 90" %}
         {% for p in periods.split %}
-        <a href="?days={{ p }}" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all
-          {% if days == p|add:'0' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
-          {% else %}bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10{% endif %}">
-          {{ p }}d
+        <a href="?days={{ p }}" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all
+          {% if days == p|add:'0' %}bg-white dark:bg-emerald-500 text-emerald-600 dark:text-slate-950 shadow-sm
+          {% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}">
+          {{ p }}D
         </a>
         {% endfor %}
         {% endwith %}
-        <a href="{% url 'organizations:dashboard' %}" class="px-3 py-1.5 rounded-lg text-xs bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10 transition-all ml-2">
-          <i class="ri-arrow-left-line mr-1"></i>Back
+        <div class="w-px h-4 bg-slate-300 dark:bg-white/10 mx-1"></div>
+        <a href="{% url 'organizations:dashboard' %}" class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all" title="Return to Command Center">
+          <i class="ri-arrow-left-line text-lg"></i>
         </a>
       </div>
     </div>
 
     <!-- Quota Gauge -->
-    <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6 mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
-          <i class="ri-token-swap-line text-emerald-400"></i> Monthly Token Quota
-        </h2>
-        <span class="text-sm text-slate-500">
-          {% if quota.limit == -1 %}Unlimited{% else %}{{ quota.used|floatformat:0 }} / {{ quota.limit|floatformat:0 }} tokens{% endif %}
-        </span>
+    <div class="ai-card rounded-3xl p-8 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+            <i class="ri-token-swap-line text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Resource Allocation</h2>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Token Intelligence Protocol</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-2xl font-black text-slate-900 dark:text-white">
+            {% if quota.limit == -1 %}UNLIMITED{% else %}{{ quota.used|floatformat:0 }}<span class="text-slate-400 mx-1">/</span>{{ quota.limit|floatformat:0 }}{% endif %}
+          </span>
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Tokens Authorized</p>
+        </div>
       </div>
       {% if quota.limit != -1 %}
-      <div class="quota-bar">
+      <div class="quota-bar mb-3">
         <div class="quota-fill
           {% if quota.percent > 90 %}bg-gradient-to-r from-rose-500 to-red-500
           {% elif quota.percent > 70 %}bg-gradient-to-r from-amber-500 to-orange-500
           {% else %}bg-gradient-to-r from-emerald-500 to-cyan-500{% endif %}"
           style="width: {{ quota.percent }}%"></div>
       </div>
-      <p class="text-xs text-slate-500 mt-2">{{ quota.percent }}% used this billing cycle</p>
+      <div class="flex items-center justify-between">
+        <p class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{{ quota.percent }}% CAPACITY REACHED</p>
+        <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">SYSTEM OPERATIONAL</p>
+      </div>
       {% else %}
-      <p class="text-sm text-emerald-400/70">Unlimited plan — no quota enforced</p>
+      <div class="py-4 px-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+        <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+          <i class="ri-shield-check-line"></i> UNLIMITED PROXY AUTHORIZED — NO QUOTA ENFORCED
+        </p>
+      </div>
       {% endif %}
     </div>
 
     <!-- Cost Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <!-- Total Cost -->
-      <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
-            <i class="ri-money-dollar-circle-line text-emerald-400 text-lg"></i>
-          </div>
+      <div class="ai-card rounded-3xl p-6">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-5">
+          <i class="ri-money-dollar-circle-line text-2xl"></i>
         </div>
-        <p class="text-3xl font-bold text-slate-100">${{ cost_summary.totals.cost_usd|floatformat:4 }}</p>
-        <p class="text-xs text-slate-500 mt-1">Estimated Cost</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Estimated Neural Cost</p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">${{ cost_summary.totals.cost_usd|floatformat:4 }}</p>
       </div>
       <!-- Total Calls -->
-      <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center">
-            <i class="ri-flashlight-line text-cyan-400 text-lg"></i>
-          </div>
+      <div class="ai-card rounded-3xl p-6">
+        <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 mb-5">
+          <i class="ri-flashlight-line text-2xl"></i>
         </div>
-        <p class="text-3xl font-bold text-slate-100">{{ cost_summary.totals.calls }}</p>
-        <p class="text-xs text-slate-500 mt-1">AI Calls</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Protocol Activations</p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ cost_summary.totals.calls }}</p>
       </div>
       <!-- Input Tokens -->
-      <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center">
-            <i class="ri-upload-2-line text-violet-400 text-lg"></i>
-          </div>
+      <div class="ai-card rounded-3xl p-6">
+        <div class="w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-500 mb-5">
+          <i class="ri-upload-2-line text-2xl"></i>
         </div>
-        <p class="text-3xl font-bold text-slate-100">{{ cost_summary.totals.input_tokens|floatformat:0 }}</p>
-        <p class="text-xs text-slate-500 mt-1">Input Tokens</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Ingested Intelligence</p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ cost_summary.totals.input_tokens|floatformat:0 }}</p>
       </div>
       <!-- Output Tokens -->
-      <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
-            <i class="ri-download-2-line text-amber-400 text-lg"></i>
-          </div>
+      <div class="ai-card rounded-3xl p-6">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 mb-5">
+          <i class="ri-download-2-line text-2xl"></i>
         </div>
-        <p class="text-3xl font-bold text-slate-100">{{ cost_summary.totals.output_tokens|floatformat:0 }}</p>
-        <p class="text-xs text-slate-500 mt-1">Output Tokens</p>
+        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Generated Insights</p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ cost_summary.totals.output_tokens|floatformat:0 }}</p>
       </div>
     </div>
 
     <!-- Adaptive Interview Outcomes -->
-    <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6 mb-6">
-      <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2 mb-4">
-        <i class="ri-user-star-line text-cyan-400"></i> Adaptive Interview Outcomes
-      </h2>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-        <div>
-          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.total_sessions }}</p>
-          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Sessions</p>
+    <div class="ai-card rounded-3xl p-8 mb-8">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+          <i class="ri-user-star-line text-xl"></i>
         </div>
         <div>
-          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.completed_sessions }}</p>
-          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Completed</p>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Adaptive Interview Analytics</h2>
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Cognitive Performance Metrics</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-8">
+        <div>
+          <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ interview_metrics.total_sessions }}</p>
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Sessions</p>
         </div>
         <div>
-          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.avg_score|floatformat:1 }}</p>
-          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Avg Score</p>
+          <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ interview_metrics.completed_sessions }}</p>
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Completed</p>
         </div>
         <div>
-          <p class="text-2xl font-bold text-emerald-400">{{ interview_metrics.promotion_rate }}%</p>
-          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Band Shift</p>
+          <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ interview_metrics.avg_score|floatformat:1 }}</p>
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Avg Score</p>
         </div>
         <div>
-          <p class="text-2xl font-bold text-slate-100">{{ interview_metrics.stable_rate }}%</p>
-          <p class="text-[10px] text-slate-500 uppercase tracking-wider">Band Stable</p>
+          <p class="text-4xl font-black text-emerald-500 tracking-tighter">{{ interview_metrics.promotion_rate }}%</p>
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Band Shift</p>
+        </div>
+        <div>
+          <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">{{ interview_metrics.stable_rate }}%</p>
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Band Stable</p>
         </div>
       </div>
       <div class="flex flex-wrap gap-2">
         {% for band, total in interview_metrics.band_distribution.items %}
-        <span class="badge-op bg-white/5 text-slate-300 border border-white/10">{{ band }}: {{ total }}</span>
+        <span class="badge-op bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10">{{ band }}: {{ total }}</span>
         {% empty %}
-        <span class="text-xs text-slate-500">No adaptive band data yet.</span>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">No adaptive band data yet.</span>
         {% endfor %}
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
       <!-- Cost by Operation -->
-      <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6">
-        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2 mb-4">
-          <i class="ri-pie-chart-line text-violet-400"></i> Cost by Operation
-        </h2>
+      <div class="ai-card rounded-3xl p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500">
+            <i class="ri-pie-chart-line text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Neural Expenditure</h2>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Operational Cost Vector</p>
+          </div>
+        </div>
         {% if cost_summary.by_operation %}
-        <div class="space-y-3">
+        <div class="space-y-4">
           {% for op in cost_summary.by_operation %}
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-100/50 dark:bg-white/5 border border-slate-200 dark:border-white/5">
             <div class="flex items-center gap-2">
               <span class="badge-op
-                {% if op.operation == 'resume_parse' %}bg-cyan-500/15 text-cyan-400 border border-cyan-500/25
-                {% elif op.operation == 'feedback' %}bg-violet-500/15 text-violet-400 border border-violet-500/25
-                {% elif op.operation == 'question' %}bg-amber-500/15 text-amber-400 border border-amber-500/25
-                {% elif op.operation == 'closing' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/25
-                {% else %}bg-slate-500/15 text-slate-400 border border-slate-500/25{% endif %}
+                {% if op.operation == 'resume_parse' %}bg-cyan-500/10 text-cyan-600 dark:text-cyan-400
+                {% elif op.operation == 'feedback' %}bg-violet-500/10 text-violet-600 dark:text-violet-400
+                {% elif op.operation == 'question' %}bg-amber-500/10 text-amber-600 dark:text-amber-400
+                {% elif op.operation == 'closing' %}bg-emerald-500/10 text-emerald-600 dark:text-emerald-400
+                {% else %}bg-slate-500/10 text-slate-600 dark:text-slate-400{% endif %}
                 ">{{ op.operation }}</span>
             </div>
             <div class="text-right">
-              <span class="text-sm font-medium text-slate-200">${{ op.cost|floatformat:4 }}</span>
-              <span class="text-xs text-slate-500 ml-2">{{ op.calls }} calls</span>
+              <span class="text-lg font-black text-slate-900 dark:text-white">${{ op.cost|floatformat:4 }}</span>
+              <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">{{ op.calls }} Protocol Hits</p>
             </div>
           </div>
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-sm text-slate-500 text-center py-6">No AI calls recorded yet</p>
+        <div class="py-12 text-center">
+          <i class="ri-pulse-line text-4xl text-slate-300 dark:text-white/10 mb-2"></i>
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">No neural activity recorded</p>
+        </div>
         {% endif %}
       </div>
 
       <!-- Provider Health -->
-      <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6">
-        <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2 mb-4">
-          <i class="ri-heart-pulse-line text-rose-400"></i> Provider Health
-        </h2>
+      <div class="ai-card rounded-3xl p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+            <i class="ri-heart-pulse-line text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Provider Integrity</h2>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Neural Network Status</p>
+          </div>
+        </div>
         {% if health %}
         <div class="space-y-4">
           {% for h in health %}
-          <div class="rounded-xl border border-white/6 bg-white/[0.02] p-4">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-slate-200 capitalize">{{ h.provider }}</span>
-              <div class="flex items-center gap-1">
-                <span class="health-dot {% if h.success_rate >= 95 %}bg-emerald-400{% elif h.success_rate >= 80 %}bg-amber-400{% else %}bg-rose-400{% endif %}"></span>
-                <span class="text-xs text-slate-400">{{ h.success_rate }}% success</span>
+          <div class="rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-100/50 dark:bg-white/[0.02] p-5">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">{{ h.provider }}</span>
+              <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <span class="health-dot {% if h.success_rate >= 95 %}text-emerald-400 bg-emerald-400{% elif h.success_rate >= 80 %}text-amber-400 bg-amber-400{% else %}text-rose-400 bg-rose-400{% endif %}"></span>
+                <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">{{ h.success_rate }}% UP</span>
               </div>
             </div>
-            <div class="grid grid-cols-4 gap-2 text-center">
+            <div class="grid grid-cols-4 gap-4 text-center">
               <div>
-                <p class="text-lg font-bold text-emerald-400">{{ h.success }}</p>
-                <p class="text-[10px] text-slate-500">OK</p>
+                <p class="text-xl font-black text-emerald-500">{{ h.success }}</p>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sync</p>
               </div>
               <div>
-                <p class="text-lg font-bold text-amber-400">{{ h.fallback }}</p>
-                <p class="text-[10px] text-slate-500">Fallback</p>
+                <p class="text-xl font-black text-amber-500">{{ h.fallback }}</p>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Reroute</p>
               </div>
               <div>
-                <p class="text-lg font-bold text-rose-400">{{ h.error }}</p>
-                <p class="text-[10px] text-slate-500">Errors</p>
+                <p class="text-xl font-black text-rose-500">{{ h.error }}</p>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Fail</p>
               </div>
               <div>
-                <p class="text-lg font-bold text-slate-400">{{ h.timeout }}</p>
-                <p class="text-[10px] text-slate-500">Timeout</p>
+                <p class="text-xl font-black text-slate-400">{{ h.timeout }}</p>
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Drop</p>
               </div>
             </div>
           </div>
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-sm text-slate-500 text-center py-6">No provider data yet</p>
+        <div class="py-12 text-center">
+          <i class="ri-heart-pulse-line text-4xl text-slate-300 dark:text-white/10 mb-2"></i>
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">No provider telemetry</p>
+        </div>
         {% endif %}
       </div>
     </div>
 
     <!-- Latency Stats -->
-    <div class="ai-card rounded-2xl bg-slate-900/70 backdrop-blur-xl p-6">
-      <h2 class="text-lg font-semibold text-slate-200 flex items-center gap-2 mb-4">
-        <i class="ri-timer-line text-amber-400"></i> Latency (ms)
-      </h2>
+    <div class="ai-card rounded-3xl p-8">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+          <i class="ri-timer-line text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Signal Latency</h2>
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Neural Response Velocity (ms)</p>
+        </div>
+      </div>
       {% if latency %}
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full">
           <thead>
-            <tr class="text-xs text-slate-500 uppercase tracking-wide border-b border-white/6">
-              <th class="pb-3 text-left">Provider</th>
-              <th class="pb-3 text-right">Calls</th>
-              <th class="pb-3 text-right">Avg</th>
-              <th class="pb-3 text-right">P50</th>
-              <th class="pb-3 text-right">P95</th>
-              <th class="pb-3 text-right">Max</th>
-              <th class="pb-3 pl-4 text-left w-40">Distribution</th>
+            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-white/10">
+              <th class="pb-4 text-left">Neural Node</th>
+              <th class="pb-4 text-right">Pulses</th>
+              <th class="pb-4 text-right">Average</th>
+              <th class="pb-4 text-right">P50</th>
+              <th class="pb-4 text-right text-amber-500">P95</th>
+              <th class="pb-4 text-right text-rose-500">Burst</th>
+              <th class="pb-4 pl-10 text-left w-64">Spectrum</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/4">
+          <tbody class="divide-y divide-slate-100 dark:divide-white/5">
             {% for l in latency %}
-            <tr>
-              <td class="py-3 text-slate-200 capitalize font-medium">{{ l.provider }}</td>
-              <td class="py-3 text-right text-slate-400">{{ l.calls }}</td>
-              <td class="py-3 text-right text-slate-300">{{ l.avg_ms }}</td>
-              <td class="py-3 text-right text-emerald-400 font-medium">{{ l.p50_ms }}</td>
-              <td class="py-3 text-right text-amber-400 font-medium">{{ l.p95_ms }}</td>
-              <td class="py-3 text-right text-rose-400">{{ l.max_ms }}</td>
-              <td class="py-3 pl-4">
-                <div class="latency-bar-bg relative">
-                  <!-- p50 bar -->
-                  <div class="latency-bar bg-emerald-500/60 absolute top-0 left-0"
+            <tr class="group">
+              <td class="py-5 text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight capitalize">{{ l.provider }}</td>
+              <td class="py-5 text-right text-xs font-bold text-slate-500">{{ l.calls }}</td>
+              <td class="py-5 text-right text-xs font-bold text-slate-400">{{ l.avg_ms }}ms</td>
+              <td class="py-5 text-right text-sm font-black text-emerald-500">{{ l.p50_ms }}ms</td>
+              <td class="py-5 text-right text-sm font-black text-amber-500">{{ l.p95_ms }}ms</td>
+              <td class="py-5 text-right text-sm font-black text-rose-500">{{ l.max_ms }}ms</td>
+              <td class="py-5 pl-10">
+                <div class="latency-bar-bg relative group-hover:bg-slate-200 dark:group-hover:bg-white/10 transition-colors">
+                  <div class="latency-bar bg-emerald-500/60 absolute top-0 left-0 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
                        style="width: {% widthratio l.p50_ms l.max_ms 100 %}%"></div>
-                  <!-- p95 bar (overlay) -->
                   <div class="latency-bar bg-amber-500/30 absolute top-0 left-0"
                        style="width: {% widthratio l.p95_ms l.max_ms 100 %}%"></div>
                 </div>
@@ -274,7 +342,9 @@
         </table>
       </div>
       {% else %}
-      <p class="text-sm text-slate-500 text-center py-6">No latency data yet</p>
+      <div class="py-12 text-center">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">No signal telemetry available</p>
+      </div>
       {% endif %}
     </div>
 

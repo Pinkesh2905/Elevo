@@ -79,7 +79,16 @@ def signup(request):
             with transaction.atomic():
                 # Create user and activate immediately
                 user = form.save(commit=False)
-                user.is_active = True  # Account active immediately
+                user.is_active = True
+                
+                # Split full_name into first and last name
+                full_name = request.POST.get('full_name', '').strip()
+                if full_name:
+                    name_parts = full_name.split(' ', 1)
+                    user.first_name = name_parts[0]
+                    if len(name_parts) > 1:
+                        user.last_name = name_parts[1]
+                
                 user.save()
 
                 # Process invitation logic if token exists
@@ -90,28 +99,32 @@ def signup(request):
                     if invite:
                         is_invited = True
 
-                # Setup profile
-                profile, created = UserProfile.objects.get_or_create(user=user)
-                profile.role = 'STUDENT'
+                # Setup profile — honour account_type from the unified auth form
+                account_type = request.POST.get('account_type', 'student')
+                profile, _ = UserProfile.objects.get_or_create(user=user)
+
+                # Everyone is marked as onboarded now since we pick the role during signup
+                profile.onboarded = True
                 
                 if is_invited:
-                    profile.onboarded = True
+                    profile.role = 'STUDENT'
+                elif account_type == 'organization':
+                    profile.role = 'ORG_ADMIN'
                 else:
-                    profile.onboarded = False
-                
-                profile.save()
+                    profile.role = 'STUDENT'
 
-                # Log the user in immediately
+                profile.save()
                 auth_login(request, user)
 
                 if is_invited:
                     messages.success(request, f"Welcome to Elevo! You've successfully joined via invitation.")
                     return redirect('organizations:join_org', token=invite_token)
-                
-                messages.success(
-                    request,
-                    f"Welcome to Elevo, {user.username}! Let's set up your account."
-                )
+
+                if account_type == 'organization':
+                    messages.success(request, f"Welcome, {user.username}! Let's set up your organization.")
+                    return redirect('organizations:create_org')
+
+                messages.success(request, f"Welcome to Elevo, {user.username}! Let's set up your account.")
                 return redirect('dashboard_redirect')
         else:
             messages.error(request, "Please correct the errors below.")
@@ -127,35 +140,6 @@ def signup(request):
         'invite_token': invite_token,
         'invite_email': invite_email
     })
-
-
-@login_required
-def onboarding_wizard(request):
-    """
-    Onboarding wizard for new users to choose their career goal or institutional role.
-    """
-    profile = request.user.profile
-    if profile.onboarded:
-        return redirect('dashboard_redirect')
-
-    if request.method == 'POST':
-        goal = request.POST.get('goal')
-        if goal == 'student':
-            profile.role = 'STUDENT'
-            profile.onboarded = True
-            profile.save()
-            messages.success(request, "Welcome! Let's start your career journey.")
-            return redirect('home')
-        elif goal == 'org_admin':
-            profile.role = 'ORG_ADMIN'
-            profile.onboarded = True
-            profile.save()
-            messages.success(request, "Welcome, Admin! Let's set up your organization.")
-            return redirect('organizations:create_org')
-        else:
-            messages.error(request, "Please select an option to continue.")
-
-    return render(request, 'users/onboarding.html')
 
 
 @login_required
@@ -732,6 +716,23 @@ def profile(request):
     if request.user.profile.role == 'TUTOR':
         tutor_application = TutorApplication.objects.filter(user=request.user).first()
 
+    # --- Org Admin Context ---
+    org_stats = None
+    if request.user.profile.role == 'ORG_ADMIN' and hasattr(request, 'user_org') and request.user_org:
+        from organizations.models import Membership
+        from assessments.models import Assessment
+        from organizations.ai_analytics import compute_quota_usage
+        
+        quota = compute_quota_usage(request.user_org)
+        org_stats = {
+            'organization': request.user_org,
+            'member_count': Membership.objects.filter(organization=request.user_org, is_active=True).count(),
+            'assessment_count': Assessment.objects.filter(organization=request.user_org).count(),
+            'ai_usage': quota.get('percent', 0),
+            'is_domain_verified': request.user_org.is_domain_verified,
+            'plan_name': request.premium_plan.display_name if hasattr(request, 'premium_plan') and request.premium_plan else 'Standard',
+        }
+
     context = {
         'user_profile': user_profile,
         'user_form': user_form,
@@ -752,6 +753,7 @@ def profile(request):
         'placement_readiness': placement_readiness,
         'is_own_profile': True,
         'tutor_application': tutor_application,
+        'org_stats': org_stats,
     }
 
     return render(request, 'users/profile.html', context)

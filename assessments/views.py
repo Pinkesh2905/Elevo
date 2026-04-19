@@ -15,11 +15,18 @@ from organizations.models import Membership
 # --- Student Views ---
 
 @login_required
-@org_member_required
 def assessment_list(request):
     """
     List of assessments assigned to the user's cohort(s).
     """
+    if not request.user_org:
+        # User not in an organization
+        return render(request, 'assessments/list.html', {
+            'assignments': [],
+            'attempt_dict': {},
+            'no_org': True
+        })
+
     user_cohorts = request.user.cohorts.filter(organization=request.user_org)
     assignments = AssessmentAssignment.objects.filter(cohort__in=user_cohorts).select_related('assessment')
     

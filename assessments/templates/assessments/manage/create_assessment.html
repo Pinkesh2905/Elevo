@@ -9,6 +9,9 @@
     }
     .problem-item {
         transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .dark .problem-item {
         border-bottom: 1px solid rgba(255,255,255,0.05);
     }
     .problem-item:hover {
@@ -22,15 +25,15 @@
 {% endblock %}
 
 {% block content %}
-<section class="min-h-screen py-12 px-6">
+<section class="min-h-screen py-12 px-6 bg-slate-50 dark:bg-transparent">
     <div class="max-w-5xl mx-auto">
         <div class="flex items-center gap-4 mb-10">
-            <a href="{% url 'assessments:manage_assessments' %}" class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-white/10 hover:text-white transition-all">
+            <a href="{% url 'assessments:manage_assessments' %}" class="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-all shadow-sm">
                 <i class="ri-arrow-left-line text-xl"></i>
             </a>
             <div>
-                <h1 class="text-3xl font-black text-slate-100 italic uppercase">New Assessment</h1>
-                <p class="text-slate-400 text-sm font-medium italic">Compose a test template from question banks.</p>
+                <h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 italic uppercase">New Assessment</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-black uppercase tracking-widest italic mt-1">Intel Synthesis: Constructing Protocol</p>
             </div>
         </div>
 
@@ -38,25 +41,25 @@
             {% csrf_token %}
             
             <!-- Basic Info Section -->
-            <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 p-10 backdrop-blur-xl">
-                <h3 class="text-xs font-black text-sky-400 uppercase tracking-widest mb-8 border-b border-white/5 pb-4">Test Configuration</h3>
+            <div class="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 p-10 backdrop-blur-xl shadow-xl dark:shadow-none">
+                <h3 class="text-[10px] font-black text-sky-500 dark:text-sky-400 uppercase tracking-[0.2em] mb-8 border-b border-slate-100 dark:border-white/5 pb-4">Configuration Protocol</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="md:col-span-2">
-                        <label for="title" class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Assessment Title</label>
-                        <input type="text" id="title" name="title" required placeholder="e.g. Python Backend Developer - Level 1"
-                               class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                        <label for="title" class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">Protocol Designation</label>
+                        <input type="text" id="title" name="title" required placeholder="e.g. PYTHON_BACKEND_L1"
+                               class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-medium">
                     </div>
                     
                     <div class="md:col-span-2">
-                        <label for="description" class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Instructions</label>
-                        <textarea id="description" name="description" rows="3" placeholder="Provide test instructions for the students..."
-                                  class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30"></textarea>
+                        <label for="description" class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">Mission Objectives (Instructions)</label>
+                        <textarea id="description" name="description" rows="3" placeholder="Define the operational parameters for this unit..."
+                                  class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-medium"></textarea>
                     </div>
 
                     <div>
-                        <label for="duration" class="block text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Duration (Minutes)</label>
+                        <label for="duration" class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">Operational Window (Minutes)</label>
                         <input type="number" id="duration" name="duration" required value="60" min="1"
-                               class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30">
+                               class="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-4 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-black">
                     </div>
                 </div>
             </div>
@@ -64,20 +67,20 @@
             <!-- Problem Selection Sections -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Coding Bank -->
-                <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 overflow-hidden backdrop-blur-xl">
-                    <div class="px-8 py-6 border-b border-white/5 bg-white/5">
-                        <h3 class="text-xs font-black text-sky-400 uppercase tracking-widest italic">Coding Problem Bank</h3>
+                <div class="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 overflow-hidden backdrop-blur-xl shadow-xl dark:shadow-none">
+                    <div class="px-8 py-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+                        <h3 class="text-[10px] font-black text-sky-500 dark:text-sky-400 uppercase tracking-[0.2em] italic">Coding Matrix</h3>
                     </div>
-                    <div class="problem-selector divide-y divide-white/5 px-2">
+                    <div class="problem-selector divide-y divide-slate-100 dark:divide-white/5 px-2">
                         {% for cp in coding_problems %}
                         <label class="problem-item block p-4 cursor-pointer">
                             <div class="flex items-start gap-3">
-                                <input type="checkbox" name="coding_problems" value="{{ cp.id }}" class="mt-1 w-5 h-5 rounded border-white/10 bg-white/5 text-sky-500 focus:ring-sky-500/30">
+                                <input type="checkbox" name="coding_problems" value="{{ cp.id }}" class="mt-1 w-5 h-5 rounded border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-sky-500 focus:ring-sky-500/30">
                                 <div>
-                                    <p class="text-slate-200 text-sm font-bold">{{ cp.title }}</p>
+                                    <p class="text-slate-900 dark:text-slate-200 text-sm font-black uppercase italic">{{ cp.title }}</p>
                                     <div class="flex items-center gap-2 mt-1">
-                                        <span class="text-[9px] font-black uppercase text-slate-500 tracking-widest">{{ cp.difficulty }}</span>
-                                        <span class="text-[9px] font-black text-slate-600 italic tracking-widest">{{ cp.problem_number }}</span>
+                                        <span class="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">{{ cp.difficulty }}</span>
+                                        <span class="text-[9px] font-black text-slate-400 dark:text-slate-600 italic tracking-widest">#{{ cp.problem_number }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -87,18 +90,18 @@
                 </div>
 
                 <!-- Aptitude Bank -->
-                <div class="rounded-[2.5rem] border border-white/10 bg-slate-900/60 overflow-hidden backdrop-blur-xl">
-                    <div class="px-8 py-6 border-b border-white/5 bg-white/5">
-                        <h3 class="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Aptitude Question Bank</h3>
+                <div class="rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 overflow-hidden backdrop-blur-xl shadow-xl dark:shadow-none">
+                    <div class="px-8 py-6 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5">
+                        <h3 class="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-[0.2em] italic">Cognitive Analysis Bank</h3>
                     </div>
-                    <div class="problem-selector divide-y divide-white/5 px-2">
+                    <div class="problem-selector divide-y divide-slate-100 dark:divide-white/5 px-2">
                         {% for ap in aptitude_problems %}
                         <label class="problem-item block p-4 cursor-pointer">
                             <div class="flex items-start gap-3">
-                                <input type="checkbox" name="aptitude_problems" value="{{ ap.id }}" class="mt-1 w-5 h-5 rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-indigo-500/30">
+                                <input type="checkbox" name="aptitude_problems" value="{{ ap.id }}" class="mt-1 w-5 h-5 rounded border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-indigo-500 focus:ring-indigo-500/30">
                                 <div>
-                                    <p class="text-slate-200 text-sm italic line-clamp-2">{{ ap.question_text|truncatewords:20 }}</p>
-                                    <p class="text-[9px] font-black uppercase text-slate-500 tracking-widest mt-1">{{ ap.topic.name }}</p>
+                                    <p class="text-slate-700 dark:text-slate-300 text-sm italic line-clamp-2">{{ ap.question_text|truncatewords:15 }}</p>
+                                    <p class="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mt-1">{{ ap.topic.name }}</p>
                                 </div>
                             </div>
                         </label>
@@ -108,8 +111,8 @@
             </div>
 
             <div class="flex justify-end pt-4">
-                <button type="submit" class="px-12 py-5 rounded-3xl bg-sky-500 text-white font-black text-sm uppercase tracking-widest hover:bg-sky-400 transition-all shadow-2xl shadow-sky-500/20 active:scale-[0.98]">
-                    Save Test Template
+                <button type="submit" class="px-12 py-5 rounded-[2.5rem] bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-2xl shadow-sky-500/30 active:scale-[0.95]">
+                    Initialize Protocol
                 </button>
             </div>
         </form>

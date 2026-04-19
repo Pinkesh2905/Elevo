@@ -89,9 +89,6 @@ def dashboard_redirect(request):
     """
     profile = getattr(request.user, 'profile', None)
     
-    # New users go to onboarding first
-    if profile and not profile.onboarded and not request.user.is_superuser:
-        return redirect('users:onboarding_wizard')
 
     if is_admin(request.user):
         return redirect('users:admin_dashboard')
@@ -109,24 +106,29 @@ def dashboard_redirect(request):
 
 
 # --- Smart Search View ---
+@login_required
 def search(request):
     query = request.GET.get('q', '').strip()
-    users = posts = []
+    users = []
+    posts = []
 
     if query:
-        # Search users by username or name fields
+        # Search users by username, name, or bio
         users = User.objects.filter(
             Q(username__icontains=query) |
             Q(first_name__icontains=query) |
-            Q(last_name__icontains=query)
-        ).select_related('profile')[:5]
+            Q(last_name__icontains=query) |
+            Q(profile__bio__icontains=query)
+        ).select_related('profile').distinct()
 
-        # Search posts by content, hashtags or author
+        # Search posts by content, hashtags, or author
         posts = Post.objects.filter(
             Q(content__icontains=query) |
             Q(author__username__icontains=query) |
             Q(hashtags__name__icontains=query)
-        ).distinct()[:5]
+        ).distinct().select_related(
+            'author', 'author__profile'
+        ).prefetch_related('likes', 'comments', 'shares')
 
     context = {
         'query': query,

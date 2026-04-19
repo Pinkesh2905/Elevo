@@ -5,11 +5,10 @@
 {% block title %}Interview Setup | Elevo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-12">
-    <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 pointer-events-none"></div>
-    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="min-h-screen relative overflow-hidden py-12 bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+    <!-- Ambient Background -->
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-500/5 dark:bg-sky-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
@@ -19,24 +18,14 @@
                 
                 <!-- Page Header -->
                 <div class="animate-reveal">
-                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-2">Architect Your Future</p>
-                    <h1 class="text-4xl sm:text-5xl font-black text-white brand-font tracking-tight mb-4">Build Your Best First Impression</h1>
-                    <p class="text-slate-400 font-medium max-w-2xl leading-relaxed">Personalize your journey. Upload your resume for ATS analysis, then launch a focused Technical or HR mock interview session.</p>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400 mb-2">Architect Your Future</p>
+                    <h1 class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white brand-font tracking-tight mb-4">Build Your Best First Impression</h1>
+                    <p class="text-slate-600 dark:text-slate-400 font-medium max-w-2xl leading-relaxed">Personalize your journey. Upload your resume for ATS analysis, then launch a focused Technical or HR mock interview session.</p>
                 </div>
 
-                {% if messages %}
-                <div class="space-y-4 animate-reveal" style="animation-delay: 100ms;">
-                    {% for message in messages %}
-                    <div class="glass-elevated rounded-2xl border px-6 py-4 flex items-center gap-4 {% if message.tags == 'success' %}border-emerald-500/20 bg-emerald-500/10 text-emerald-100{% elif message.tags == 'error' %}border-rose-500/20 bg-rose-500/10 text-rose-100{% else %}border-sky-500/20 bg-sky-500/10 text-sky-100{% endif %}">
-                        <i class="{% if message.tags == 'success' %}ri-checkbox-circle-line text-emerald-400{% elif message.tags == 'error' %}ri-error-warning-line text-rose-400{% else %}ri-information-line text-sky-400{% endif %} text-xl"></i>
-                        <span class="text-sm font-medium">{{ message }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
 
                 <!-- Setup Card -->
-                <div class="glass-elevated rounded-[2.5rem] border border-white/5 p-8 sm:p-10 animate-reveal relative z-40" style="animation-delay: 200ms;">
+                <div class="glass-elevated rounded-[2.5rem] border border-slate-200 dark:border-white/5 p-8 sm:p-10 animate-reveal relative z-40 shadow-xl" style="animation-delay: 200ms;">
                     <form method="post" enctype="multipart/form-data" class="space-y-8">
                         {% csrf_token %}
 
@@ -54,9 +43,9 @@
                             
                             <div class="relative group">
                                 <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-emerald-500/5 rounded-2xl blur-xl group-hover:from-cyan-500/10 group-hover:to-emerald-500/10 transition-all"></div>
-                                <div class="relative rounded-2xl border border-white/10 bg-white/5 p-4 hover:border-white/20 transition-all">
+                                <div class="relative rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4 hover:border-cyan-500/30 transition-all">
                                     {{ form.resume_file }}
-                                    <div id="file-overlay" class="pointer-events-none absolute inset-0 flex items-center px-4 text-slate-400 text-sm italic">
+                                    <div id="file-overlay" class="pointer-events-none absolute inset-0 flex items-center px-4 text-slate-500 dark:text-slate-400 text-sm italic">
                                         Select PDF, DOCX, or TXT file...
                                     </div>
                                 </div>
@@ -71,8 +60,8 @@
                                         <i class="ri-check-double-line"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest">Active Resume</p>
-                                        <p class="text-xs font-bold text-white truncate">{{ user.profile.resume.name|cut:"resumes/" }}</p>
+                                        <p class="text-[10px] font-black text-emerald-600 dark:text-emerald-500/60 uppercase tracking-widest">Active Resume</p>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ user.profile.resume.name|cut:"resumes/" }}</p>
                                     </div>
                                     <button type="button" id="clear-profile-resume" class="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-all">
                                         <i class="ri-close-line"></i>
@@ -87,14 +76,14 @@
                             <div class="space-y-1.5">
                                 <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Interview Protocol</label>
                                 <div class="custom-dropdown relative" id="dropdown-track">
-                                    <button type="button" class="dropdown-toggle w-full h-12 px-5 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm font-bold flex items-center justify-between hover:border-cyan-500/30 transition-all" data-target="dropdown-menu-track">
+                                    <button type="button" class="dropdown-toggle w-full h-12 px-5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-200 text-sm font-bold flex items-center justify-between hover:border-cyan-500/30 transition-all" data-target="dropdown-menu-track">
                                         <span class="selected-value">Select Track</span>
-                                        <i class="ri-arrow-down-s-line text-slate-500 group-data-[state=open]:rotate-180 transition-transform"></i>
+                                        <i class="ri-arrow-down-s-line text-slate-400 dark:text-slate-500 group-data-[state=open]:rotate-180 transition-transform"></i>
                                     </button>
-                                    <div id="dropdown-menu-track" class="dropdown-menu hidden absolute top-full left-0 w-full mt-2 rounded-xl border border-white/10 bg-slate-900 shadow-2xl overflow-hidden z-[100] backdrop-blur-xl">
+                                    <div id="dropdown-menu-track" class="dropdown-menu hidden absolute top-full left-0 w-full mt-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden z-[100] backdrop-blur-xl">
                                         <div class="p-1 max-h-60 overflow-y-auto custom-scrollbar">
                                             {% for value, label in form.fields.interview_track.choices %}
-                                            <div class="dropdown-option px-4 py-3 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white cursor-pointer transition-colors" data-value="{{ value }}">
+                                            <div class="dropdown-option px-4 py-3 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-colors" data-value="{{ value }}">
                                                 {{ label }}
                                             </div>
                                             {% endfor %}
@@ -149,14 +138,14 @@
                         <div class="space-y-1.5">
                             <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Interview Pack</label>
                             <div class="custom-dropdown relative" id="dropdown-pack">
-                                <button type="button" class="dropdown-toggle w-full h-12 px-5 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm font-bold flex items-center justify-between hover:border-cyan-500/30 transition-all" data-target="dropdown-menu-pack">
+                                <button type="button" class="dropdown-toggle w-full h-12 px-5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-200 text-sm font-bold flex items-center justify-between hover:border-cyan-500/30 transition-all" data-target="dropdown-menu-pack">
                                     <span class="selected-value">Select Pack</span>
-                                    <i class="ri-arrow-down-s-line text-slate-500 group-data-[state=open]:rotate-180 transition-transform"></i>
+                                    <i class="ri-arrow-down-s-line text-slate-400 dark:text-slate-500 group-data-[state=open]:rotate-180 transition-transform"></i>
                                 </button>
-                                <div id="dropdown-menu-pack" class="dropdown-menu hidden absolute top-full left-0 w-full mt-2 rounded-xl border border-white/10 bg-slate-900 shadow-2xl overflow-hidden z-[100] backdrop-blur-xl">
+                                <div id="dropdown-menu-pack" class="dropdown-menu hidden absolute top-full left-0 w-full mt-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden z-[100] backdrop-blur-xl">
                                     <div class="p-1 max-h-60 overflow-y-auto custom-scrollbar">
                                         {% for pack in pack_options %}
-                                        <div class="dropdown-option px-4 py-3 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white cursor-pointer transition-colors" data-value="{{ pack.id }}">
+                                        <div class="dropdown-option px-4 py-3 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-colors" data-value="{{ pack.id }}">
                                             {{ pack.name }}
                                         </div>
                                         {% endfor %}
@@ -179,7 +168,7 @@
                                 <i class="ri-search-eye-line text-lg"></i>
                                 Analyze Artifact
                             </button>
-                            <button type="submit" name="action" value="start" class="h-12 px-10 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-cyan-500/20 hover:scale-[1.03] transition-all flex items-center gap-3">
+                            <button type="submit" name="action" value="start" class="h-12 px-10 rounded-xl bg-gradient-to-r from-cyan-600 to-emerald-600 dark:from-cyan-500 dark:to-emerald-500 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-cyan-500/20 hover:scale-[1.03] transition-all flex items-center gap-3">
                                 <i class="ri-play-circle-line text-lg"></i>
                                 Launch Protocol
                             </button>
@@ -189,7 +178,7 @@
                             </div>
                         </div>
 
-                        <div id="jd-fit-preview" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 {% if not resume_insights.jd_fit %}hidden{% endif %}">
+                        <div id="jd-fit-preview" class="w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 {% if not resume_insights.jd_fit %}hidden{% endif %}">
                             <div class="flex flex-wrap items-center justify-between gap-3">
                                 <div class="flex items-center gap-2">
                                     <i class="ri-briefcase-4-line text-cyan-400"></i>
@@ -226,32 +215,32 @@
                 <!-- Why it matters -->
                 <div class="glass-elevated rounded-[2.5rem] border border-white/5 p-8 sm:p-10 animate-reveal" style="animation-delay: 400ms;">
                     <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
                             <i class="ri-shield-user-line text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-black text-white brand-font tracking-tight uppercase">Protocol Benefits</h3>
+                        <h3 class="text-xl font-black text-slate-900 dark:text-white brand-font tracking-tight uppercase">Protocol Benefits</h3>
                     </div>
                     
                     <div class="space-y-6">
                         <div class="flex gap-5 group">
                             <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-all">01</div>
                             <div class="flex-1">
-                                <h4 class="text-sm font-black text-white uppercase tracking-widest mb-1 group-hover:text-cyan-400">ATS Optimization</h4>
-                                <p class="text-xs text-slate-400 font-medium leading-relaxed">Instantly receive a data-backed score with clear improvements for automated screening.</p>
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">ATS Optimization</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">Instantly receive a data-backed score with clear improvements for automated screening.</p>
                             </div>
                         </div>
                         <div class="flex gap-5 group">
                             <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-all">02</div>
                             <div class="flex-1">
-                                <h4 class="text-sm font-black text-white uppercase tracking-widest mb-1 group-hover:text-cyan-400">Dual-Track Simulation</h4>
-                                <p class="text-xs text-slate-400 font-medium leading-relaxed">Choose Technical for deep concept probe or HR for culture and behavior readiness.</p>
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">Dual-Track Simulation</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">Choose Technical for deep concept probe or HR for culture and behavior readiness.</p>
                             </div>
                         </div>
                         <div class="flex gap-5 group">
                             <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-black text-slate-500 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 transition-all">03</div>
                             <div class="flex-1">
-                                <h4 class="text-sm font-black text-white uppercase tracking-widest mb-1 group-hover:text-cyan-400">Dynamic Probing</h4>
-                                <p class="text-xs text-slate-400 font-medium leading-relaxed">AI adapts to your resume data and responses in real-time, simulating a truly bespoke interview.</p>
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">Dynamic Probing</h4>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">AI adapts to your resume data and responses in real-time, simulating a truly bespoke interview.</p>
                             </div>
                         </div>
                     </div>
@@ -260,8 +249,8 @@
                 <!-- Guidelines -->
                 <div class="glass-elevated rounded-[2.5rem] border border-white/5 p-8 sm:p-10 animate-reveal" style="animation-delay: 500ms;">
                     <div class="flex items-center gap-3 mb-6">
-                        <i class="ri-information-fill text-amber-400 text-xl"></i>
-                        <h3 class="text-xs font-black text-white uppercase tracking-widest">Protocol Pre-flight</h3>
+                        <i class="ri-information-fill text-amber-500"></i>
+                        <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">Protocol Pre-flight</h3>
                     </div>
                     <ul class="space-y-4">
                         <li class="flex items-start gap-4">
@@ -289,9 +278,12 @@
 
 <style>
     .glass-elevated {
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+    }
+    .dark .glass-elevated {
+        background: rgba(15, 23, 42, 0.6);
     }
     .animate-reveal {
         opacity: 0;
@@ -313,13 +305,18 @@
         height: 3rem;
         padding: 0 1.25rem;
         border-radius: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
-        color: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.5);
+        color: #0f172a;
         font-weight: 700;
         font-size: 0.875rem;
         outline: none;
         transition: all 0.3s ease;
+    }
+    .dark #id_job_role {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
     }
     #id_job_role:focus {
         border-color: rgba(6, 182, 212, 0.3);
@@ -331,14 +328,19 @@
         min-height: 6rem;
         padding: 1rem 1.25rem;
         border-radius: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
-        color: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.5);
+        color: #0f172a;
         font-weight: 700;
         font-size: 0.875rem;
         outline: none;
         transition: all 0.3s ease;
         resize: vertical;
+    }
+    .dark #id_key_skills {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
     }
     #id_key_skills:focus {
         border-color: rgba(6, 182, 212, 0.3);
@@ -350,14 +352,19 @@
         min-height: 8rem;
         padding: 1rem 1.25rem;
         border-radius: 0.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.05);
-        color: white;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.5);
+        color: #0f172a;
         font-weight: 700;
         font-size: 0.875rem;
         outline: none;
         transition: all 0.3s ease;
         resize: vertical;
+    }
+    .dark #id_job_description {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
     }
     #id_job_description:focus {
         border-color: rgba(6, 182, 212, 0.3);

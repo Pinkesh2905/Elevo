@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="min-h-screen relative overflow-hidden py-12">
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative overflow-hidden py-12">
     <!-- Background overlay -->
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-sky-900/10 to-teal-900/20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-200/50 via-sky-100/30 to-teal-100/50 dark:from-slate-900/20 dark:via-sky-900/10 dark:to-teal-900/20 pointer-events-none"></div>
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <!-- Topic Header -->
         <div class="mb-12 animate-slideInUp">
-            <div class="glass-elevated rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden">
-                <div class="bg-gradient-to-r from-sky-600/10 via-teal-600/10 to-emerald-600/10 px-8 py-8 border-b border-white/10">
+            <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300 overflow-hidden shadow-xl">
+                <div class="bg-gradient-to-r from-sky-600/5 via-teal-600/5 to-emerald-600/5 dark:from-sky-600/10 dark:via-teal-600/10 dark:to-emerald-600/10 px-8 py-8 border-b border-slate-200 dark:border-white/10">
                     <div class="flex items-center mb-6">
                         <div class="p-4 bg-gradient-to-br from-sky-500 via-teal-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg mr-6">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,18 +17,18 @@
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">{{ topic.name }}</h1>
+                            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">{{ topic.name }}</h1>
                             <div class="w-16 h-1 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 rounded-full"></div>
                         </div>
                     </div>
-                    <p class="text-lg text-slate-300 leading-relaxed">{{ topic.description }}</p>
+                    <p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">{{ topic.description }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Problems Header -->
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-white mb-2">Available Problems</h2>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Available Problems</h2>
             <div class="w-16 h-1 bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-500 rounded-full"></div>
         </div>
 
@@ -36,7 +36,7 @@
         <div class="space-y-6 mb-12">
             {% for problem in problems %}
             <div class="problem-card group" style="animation-delay: {% if forloop.counter0 == 0 %}0ms{% elif forloop.counter0 == 1 %}100ms{% elif forloop.counter0 == 2 %}200ms{% elif forloop.counter0 == 3 %}300ms{% elif forloop.counter0 == 4 %}400ms{% else %}500ms{% endif %};">
-                <div class="glass-elevated rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden hover:-translate-y-1">
+                <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1">
                     <div class="p-6">
                         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                             <!-- Problem Info -->
@@ -47,10 +47,10 @@
                                         <span class="text-white font-bold text-lg">{{ forloop.counter }}</span>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-sky-400 group-hover:to-teal-400 transition-all duration-300">
+                                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-sky-600 group-hover:to-teal-600 dark:group-hover:from-sky-400 dark:group-hover:to-teal-400 transition-all duration-300">
                                             {{ problem.question_text|truncatewords:15 }}
                                         </h3>
-                                        <p class="text-slate-400 text-sm line-clamp-2">
+                                        <p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">
                                             {{ problem.question_text|truncatewords:25 }}
                                         </p>
                                     </div>
@@ -69,11 +69,11 @@
                                         {{ problem.difficulty }}
                                     </span>
                                     
-                                    <span class="px-4 py-2 rounded-lg text-sm font-medium glass border border-white/10 text-slate-300">
+                                    <span class="px-4 py-2 rounded-lg text-sm font-medium bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300">
                                         Multiple Choice
                                     </span>
 
-                                    <div class="flex items-center text-slate-400 text-sm">
+                                    <div class="flex items-center text-slate-500 dark:text-slate-400 text-sm">
                                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
@@ -97,14 +97,14 @@
                 </div>
             </div>
             {% empty %}
-            <div class="glass-elevated rounded-2xl p-12 text-center border border-white/10">
+            <div class="bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-12 text-center border border-slate-200 dark:border-white/10 shadow-sm">
                 <div class="w-16 h-16 mx-auto glass rounded-xl flex items-center justify-center mb-4">
                     <svg class="w-8 h-8 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">No problems available</h3>
-                <p class="text-slate-400">Problems for this topic are being prepared.</p>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">No problems available</h3>
+                <p class="text-slate-500 dark:text-slate-400">Problems for this topic are being prepared.</p>
             </div>
             {% endfor %}
         </div>
@@ -112,7 +112,7 @@
         <!-- Navigation -->
         <div class="flex justify-center animate-slideInUp" style="animation-delay: 400ms;">
             <a href="{% url 'aptitude:topic_list' topic.category.id %}"
-               class="inline-flex items-center glass rounded-lg px-6 py-3 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition-all duration-300 hover:scale-105 group">
+               class="inline-flex items-center bg-white/80 dark:bg-slate-900/40 backdrop-blur-xl rounded-lg px-6 py-3 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all duration-300 hover:scale-105 group">
                 <svg class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>

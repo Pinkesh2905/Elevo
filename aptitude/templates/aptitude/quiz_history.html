@@ -1,4 +1,4 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 
 {% block title %}Quiz History | Elevo{% endblock %}
 
@@ -6,16 +6,16 @@
 <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="mb-6 flex items-center justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-white">Quiz History</h1>
-      <p class="text-slate-300 mt-1">All your timed aptitude attempts in one place.</p>
+      <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Quiz History</h1>
+      <p class="text-slate-600 dark:text-slate-300 mt-1">All your timed aptitude attempts in one place.</p>
     </div>
-    <a href="{% url 'aptitude:dashboard' %}" class="px-4 py-2 rounded-xl border border-slate-600 text-slate-300 hover:border-teal-400 hover:text-teal-300">Back to Dashboard</a>
+    <a href="{% url 'aptitude:dashboard' %}" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/80 dark:bg-slate-900/40 text-slate-600 dark:text-slate-300 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-300 transition-all duration-300">Back to Dashboard</a>
   </div>
 
-  <div class="rounded-2xl border border-slate-700 bg-slate-900/65 overflow-hidden">
+  <div class="bg-white/80 dark:bg-slate-900/65 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-lg">
     <div class="overflow-x-auto">
       <table class="w-full min-w-[700px] text-sm">
-        <thead class="bg-slate-800/80 text-slate-300">
+        <thead class="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
           <tr>
             <th class="px-4 py-3 text-left">Attempt</th>
             <th class="px-4 py-3 text-left">Date</th>
@@ -26,19 +26,19 @@
             <th class="px-4 py-3 text-right">Action</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-800">
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
           {% for a in attempts %}
-          <tr class="hover:bg-slate-800/40">
-            <td class="px-4 py-3 text-slate-300">#{{ a.id }}</td>
-            <td class="px-4 py-3 text-slate-300">{{ a.started_at|date:"M d, Y H:i" }}</td>
-            <td class="px-4 py-3 text-white font-semibold">{{ a.score_percent }}%</td>
-            <td class="px-4 py-3 text-slate-300">{{ a.correct_answers }}/{{ a.total_questions }}</td>
-            <td class="px-4 py-3 text-teal-300">{{ a.achievement_label }}</td>
-            <td class="px-4 py-3">{{ a.get_status_display }}</td>
-            <td class="px-4 py-3 text-right"><a href="{% url 'aptitude:quiz_result' a.id %}" class="text-sky-300 hover:text-sky-200">View</a></td>
+          <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors duration-200">
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-300">#{{ a.id }}</td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ a.started_at|date:"M d, Y H:i" }}</td>
+            <td class="px-4 py-3 text-slate-900 dark:text-white font-semibold">{{ a.score_percent }}%</td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-300">{{ a.correct_answers }}/{{ a.total_questions }}</td>
+            <td class="px-4 py-3 text-teal-600 dark:text-teal-300 font-medium">{{ a.achievement_label }}</td>
+            <td class="px-4 py-3 text-slate-500 dark:text-slate-400 italic">{{ a.get_status_display }}</td>
+            <td class="px-4 py-3 text-right"><a href="{% url 'aptitude:quiz_result' a.id %}" class="text-sky-600 dark:text-sky-300 hover:text-sky-700 dark:hover:text-sky-200 font-medium">View</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="7" class="px-6 py-10 text-center text-slate-400">No quiz history yet.</td></tr>
+          <tr><td colspan="7" class="px-6 py-10 text-center text-slate-500 dark:text-slate-400">No quiz history yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
