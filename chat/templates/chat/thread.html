@@ -1,242 +1,213 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}
-{% if inbox_mode %}Social Center | Elevo{% else %}Chat with {{ other_user.get_full_name|default:other_user.username }} | Elevo{% endif %}
-{% endblock %}
+{% block title %}{% if inbox_mode %}Inbox | Elevo{% else %}{{ other_user.get_full_name|default:other_user.username }} | Chat | Elevo{% endif %}{% endblock %}
 
 {% block extra_css %}
 <style>
-  .chat-shell {
+  .chat-page {
     height: calc(100dvh - 5rem);
+  }
+
+  .chat-grid {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .chat-sidebar-panel,
+  .chat-thread-panel {
+    min-height: 0;
+  }
+
+  .chat-sidebar,
+  .messages-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(109, 117, 140, 0.35) transparent;
+  }
+
+  .chat-sidebar::-webkit-scrollbar,
+  .messages-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-sidebar::-webkit-scrollbar-thumb,
+  .messages-scroll::-webkit-scrollbar-thumb {
+    background: rgba(109, 117, 140, 0.35);
+    border-radius: 999px;
+  }
+
+  .inbox-card {
+    transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .inbox-card:hover {
+    transform: translateX(3px);
+  }
+
+  .inbox-card.is-active {
+    background: rgba(186, 158, 255, 0.14);
+    border-color: rgba(186, 158, 255, 0.28);
+  }
+
+  .dark .inbox-card.is-active {
+    background: rgba(174, 141, 255, 0.14);
+  }
+
+  .chat-canvas {
+    background:
+      radial-gradient(circle at top left, rgba(186, 158, 255, 0.08), transparent 34%),
+      radial-gradient(circle at bottom right, rgba(0, 244, 254, 0.07), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.94));
+  }
+
+  .dark .chat-canvas {
+    background:
+      radial-gradient(circle at top left, rgba(186, 158, 255, 0.1), transparent 34%),
+      radial-gradient(circle at bottom right, rgba(0, 244, 254, 0.08), transparent 32%),
+      linear-gradient(180deg, rgba(9, 19, 40, 0.88), rgba(6, 14, 32, 0.98));
+  }
+
+  .message-bubble {
+    position: relative;
+    border-radius: 1.4rem;
+    padding: 0.95rem 1rem;
+    box-shadow: 0 20px 45px -34px rgba(15, 23, 42, 0.45);
+  }
+
+  .message-bubble.mine {
+    background: linear-gradient(135deg, rgba(174, 141, 255, 0.92), rgba(132, 85, 239, 0.92));
+    color: #18063f;
+    border-bottom-right-radius: 0.45rem;
+  }
+
+  .dark .message-bubble.mine {
+    color: #050112;
+  }
+
+  .message-bubble.theirs {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(109, 117, 140, 0.14);
+    color: #172033;
+    border-bottom-left-radius: 0.45rem;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .dark .message-bubble.theirs {
+    background: rgba(15, 25, 48, 0.82);
+    color: #dee5ff;
+    border-color: rgba(109, 117, 140, 0.24);
+  }
+
+  .message-bubble.is-code {
+    padding: 0;
     overflow: hidden;
   }
-  .chat-layout,
-  .chat-column,
-  .chat-panel {
-    min-height: 0;
-  }
-  .chat-layout {
-    height: 100%;
-  }
-  .chat-panel {
-    height: 100%;
-  }
-  .chat-sidebar,
-  .messages-container {
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior: contain;
-  }
-  .chat-sidebar {
-    flex: 1;
-  }
-  .chat-sidebar::-webkit-scrollbar, .messages-container::-webkit-scrollbar { width: 4px; }
-  .chat-sidebar::-webkit-scrollbar-thumb, .messages-container::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.28); border-radius: 999px; }
-  .sidebar-thread { transition: background 0.2s ease, transform 0.2s ease; }
-  .sidebar-thread:hover { background: rgba(14, 165, 233, 0.08); transform: translateX(3px); }
-  .sidebar-thread.active { background: rgba(14, 165, 233, 0.14); border-left: 3px solid #38bdf8; }
-  .messages-container { flex: 1; min-height: 0; scroll-behavior: smooth; }
-  .bubble-sent, .bubble-received { border-radius: 1.25rem; box-shadow: 0 20px 40px -28px rgba(15, 23, 42, 0.8); }
-  :root {
-    --chat-bg-image: none;
-    --chat-bg-color: transparent;
-    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(79, 70, 229, 0.08));
-    --bubble-sent-border: rgba(56, 189, 248, 0.2);
-    --bubble-sent-text: #0369a1;
-    --bubble-received-bg: rgba(241, 245, 249, 0.8);
-    --bubble-received-border: rgba(148, 163, 184, 0.1);
-    --bubble-received-text: #1e293b;
+
+  .message-code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .dark {
-    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(79, 70, 229, 0.2));
-    --bubble-sent-border: rgba(56, 189, 248, 0.32);
-    --bubble-sent-text: #e0f2fe;
-    --bubble-received-bg: rgba(15, 23, 42, 0.78);
-    --bubble-received-border: rgba(148, 163, 184, 0.18);
-    --bubble-received-text: #cbd5e1;
+  .message-code-pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.78rem;
+    line-height: 1.65;
+    font-family: Consolas, "SFMono-Regular", Menlo, monospace;
   }
 
-  [data-theme="ocean"] {
-    --chat-bg-image: url('{% static "core/themes/bg_ocean.png" %}');
-    --chat-bg-color: rgba(8, 47, 73, 0.3);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 184, 166, 0.5), rgba(14, 165, 233, 0.8));
-    --bubble-sent-border: rgba(56, 189, 248, 0.4);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(8, 47, 73, 0.95);
-    --bubble-received-text: #e0f2fe;
+  .message-resource {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 1.2rem;
+    border: 1px solid rgba(109, 117, 140, 0.16);
+    background: rgba(255, 255, 255, 0.78);
   }
 
-  [data-theme="deep_sea"] {
-    --chat-bg-image: url('{% static "core/themes/bg_deep_sea.png" %}');
-    --chat-bg-color: rgba(1, 15, 30, 0.4);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(2, 132, 199, 0.5), rgba(49, 46, 129, 0.7));
-    --bubble-sent-border: rgba(56, 189, 248, 0.3);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(1, 15, 30, 0.92);
-    --bubble-received-text: #e0f2fe;
+  .dark .message-resource {
+    background: rgba(15, 25, 48, 0.78);
+    border-color: rgba(109, 117, 140, 0.24);
   }
 
-  [data-theme="forest"] {
-    --chat-bg-image: url('{% static "core/themes/bg_forest.png" %}');
-    --chat-bg-color: rgba(2, 44, 34, 0.3);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(5, 150, 105, 0.7));
-    --bubble-sent-border: rgba(52, 211, 153, 0.5);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(6, 78, 59, 0.95);
-    --bubble-received-text: #d1fae5;
+  .message-resource-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 5.5rem;
+    background: linear-gradient(135deg, rgba(162, 243, 31, 0.16), rgba(0, 244, 254, 0.12));
+    font-size: 2rem;
   }
 
-  [data-theme="emerald"] {
-    --chat-bg-image: url('{% static "core/themes/bg_emerald.png" %}');
-    --chat-bg-color: rgba(6, 78, 59, 0.35);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(52, 211, 153, 0.4), rgba(16, 185, 129, 0.6));
-    --bubble-sent-border: rgba(110, 231, 183, 0.4);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(6, 78, 59, 0.9);
-    --bubble-received-text: #d1fae5;
+  .message-meta {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
   }
 
-  [data-theme="lavender"] {
-    --chat-bg-image: url('{% static "core/themes/bg_lavender.png" %}');
-    --chat-bg-color: rgba(46, 16, 101, 0.25);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(139, 92, 246, 0.6));
-    --bubble-sent-border: rgba(192, 132, 252, 0.4);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(46, 16, 101, 0.85);
-    --bubble-received-text: #ede9fe;
+  .composer-shell {
+    box-shadow: 0 -18px 40px -36px rgba(15, 23, 42, 0.5);
   }
 
-  [data-theme="rose"] {
-    --chat-bg-image: url('{% static "core/themes/bg_rose.png" %}');
-    --chat-bg-color: rgba(127, 29, 29, 0.3);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(244, 63, 94, 0.4), rgba(225, 29, 72, 0.6));
-    --bubble-sent-border: rgba(251, 113, 133, 0.4);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(127, 29, 29, 0.85);
-    --bubble-received-text: #ffe4e6;
+  .typing-dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 999px;
+    background: currentColor;
+    animation: typing-bounce 1.15s infinite ease-in-out;
+    opacity: 0.55;
   }
 
-  [data-theme="cutee"] {
-    --chat-bg-image: url('{% static "core/themes/cutee.jpeg" %}');
-    --chat-bg-color: rgba(251, 207, 232, 0.4);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(219, 39, 119, 0.75), rgba(157, 23, 77, 0.85));
-    --bubble-sent-border: rgba(244, 114, 182, 0.5);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(255, 255, 255, 0.96);
-    --bubble-received-text: #1a0f1d;
-    --bubble-received-border: rgba(251, 207, 232, 0.6);
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.16s;
   }
 
-  [data-theme="hands_in_hands"] {
-    --chat-bg-image: url('{% static "core/themes/hands_in_hands.jpeg" %}');
-    --chat-bg-color: rgba(15, 23, 42, 0.55);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(14, 165, 233, 0.7), rgba(79, 70, 229, 0.7));
-    --bubble-sent-border: rgba(56, 189, 248, 0.4);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(15, 23, 42, 0.9);
-    --bubble-received-text: #e0f2fe;
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.32s;
   }
 
-  [data-theme="love_2"] {
-    --chat-bg-image: url('{% static "core/themes/love_2.jpeg" %}');
-    --chat-bg-color: rgba(69, 10, 10, 0.45);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(185, 28, 28, 0.75), rgba(127, 29, 29, 0.85));
-    --bubble-sent-border: rgba(248, 113, 113, 0.5);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(255, 255, 255, 0.94);
-    --bubble-received-text: #2c0000;
+  .unread-pill {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.38rem;
+    font-size: 0.65rem;
+    font-weight: 800;
   }
 
-  [data-theme="milk_mocha"] {
-    --chat-bg-image: url('{% static "core/themes/milk_mocha.jpeg" %}');
-    --chat-bg-color: rgba(24, 24, 27, 0.45);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(180, 83, 9, 0.75), rgba(120, 53, 15, 0.85));
-    --bubble-sent-border: rgba(245, 158, 11, 0.45);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(255, 255, 255, 0.96);
-    --bubble-received-text: #261a0f;
-    --bubble-received-border: rgba(217, 119, 6, 0.4);
+  .chat-empty-illustration {
+    background:
+      radial-gradient(circle at top left, rgba(186, 158, 255, 0.16), transparent 35%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.94));
   }
 
-  [data-theme="red_purple_hearts"] {
-    --chat-bg-image: url('{% static "core/themes/red_purple_hearts.jpeg" %}');
-    --chat-bg-color: rgba(61, 12, 110, 0.55);
-    --bubble-sent-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(91, 33, 182, 0.85));
-    --bubble-sent-border: rgba(167, 139, 250, 0.4);
-    --bubble-sent-text: #ffffff;
-    --bubble-received-bg: rgba(27, 10, 48, 0.92);
-    --bubble-received-text: #ede9fe;
+  .dark .chat-empty-illustration {
+    background:
+      radial-gradient(circle at top left, rgba(186, 158, 255, 0.18), transparent 35%),
+      linear-gradient(135deg, rgba(15, 25, 48, 0.78), rgba(6, 14, 32, 0.96));
   }
 
-  .theme-wrapper {
-    background-color: var(--chat-bg-color);
-    background-image: var(--chat-bg-image);
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: overlay;
-    transition: background 0.7s ease-in-out;
-    position: relative;
+  @keyframes typing-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+    40% { transform: translateY(-0.18rem); opacity: 1; }
   }
-  .theme-wrapper::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), transparent, rgba(15, 23, 42, 0.4));
-    pointer-events: none;
-    z-index: 0;
-  }
-  .bubble-sent { 
-    background: var(--bubble-sent-bg); 
-    border: 1px solid var(--bubble-sent-border); 
-    color: var(--bubble-sent-text) !important; 
-    border-bottom-right-radius: 0.45rem; 
-    transition: background 0.5s ease, border-color 0.5s ease;
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-  }
-  .bubble-received { 
-    background: var(--bubble-received-bg); 
-    border: 1px solid var(--bubble-received-border); 
-    color: var(--bubble-received-text) !important;
-    border-bottom-left-radius: 0.45rem; 
-    transition: background 0.5s ease;
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-  }
-  
-  .bubble-sent p, .bubble-received p {
-    color: inherit !important;
-  }
-  
-  .reply-chip { 
-    border-left: 3px solid #38bdf8;
-    background: rgba(241, 245, 249, 0.7); 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 0.75rem;
-    padding: 0.5rem 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-  .dark .reply-chip {
-    background: rgba(15, 23, 42, 0.7);
-  }
-  .reply-chip .reply-header { color: #0ea5e9; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .dark .reply-chip .reply-header { color: #38bdf8; }
-  .reply-chip .reply-content { color: #475569; font-size: 0.85rem; }
-  .dark .reply-chip .reply-content { color: #cbd5e1; }
-  .message-actions { opacity: 1; }
-  .reaction-trigger, .reply-btn, .reaction-badge { transition: color 0.2s ease, background 0.2s ease, opacity 0.2s ease, transform 0.2s ease; }
-  .reaction-trigger:hover, .reply-btn:hover, .reaction-badge:hover { transform: translateY(-1px); }
-  .typing-dot { animation: typing-dot 1.2s infinite ease-in-out; }
-  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
-  @keyframes typing-dot { 0%, 80%, 100% { opacity: 0.25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-1px); } }
-  @media (min-width: 768px) {
-    .message-actions { opacity: 0; }
-    .msg-wrapper:hover .message-actions { opacity: 1; }
+
+  @media (max-width: 1023px) {
+    .chat-page {
+      height: calc(100dvh - 5rem - 4.5rem);
+    }
   }
 </style>
 {% endblock %}
@@ -244,1688 +215,968 @@
 {% block footer %}{% endblock %}
 
 {% block content %}
-<section class="chat-shell px-3 py-3 sm:px-4 sm:py-6">
-  <div class="chat-layout mx-auto grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
-    <aside id="inboxSidebar" class="chat-column {% if not inbox_mode %}hidden lg:block{% endif %} lg:col-span-4 xl:col-span-3">
-      <div class="flex h-full min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/55 backdrop-blur-2xl transition-colors duration-300">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 px-5 py-4">
+<section class="chat-page px-3 py-3 sm:px-5 sm:py-5">
+  <div class="chat-grid mx-auto grid max-w-[1600px] grid-cols-1 gap-4 lg:grid-cols-[360px,minmax(0,1fr)]">
+    <aside id="chatSidebarPanel" class="chat-sidebar-panel {% if not inbox_mode %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/82 backdrop-blur-2xl dark:border-white/10 dark:bg-surface-container-high/75">
+      <div class="border-b border-slate-200/70 px-5 py-5 dark:border-white/10">
+        <div class="flex items-start justify-between gap-4">
           <div>
-            <p class="text-[10px] font-black uppercase tracking-[0.22em] text-sky-600 dark:text-sky-400">Inbox</p>
-            <h2 class="mt-1 text-base font-black text-slate-800 dark:text-slate-100">Talk To Others</h2>
+            <p class="text-[10px] font-black uppercase tracking-[0.28em] text-primary">Elevo Messages</p>
+            <h1 class="mt-2 font-headline text-2xl font-black tracking-tight text-slate-900 dark:text-on-surface">Inbox</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-on-surface-variant">Full-screen conversations for mentors, peers, and support.</p>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="newMessageBtn" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 transition hover:bg-sky-500/20 hover:text-sky-700 dark:hover:text-white" title="New Message">
-              <i class="ri-user-add-line text-lg"></i>
-            </button>
-            <a href="{% url 'chat:inbox' %}" class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white" title="Refresh">
-              <i class="ri-refresh-line text-lg"></i>
-            </a>
+          <button id="soundToggleBtn" type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-sky-500 transition hover:border-sky-300 hover:bg-sky-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
+            <i class="ri-volume-up-line text-lg"></i>
+          </button>
+        </div>
+        <div class="mt-4 flex items-center gap-3">
+          <div class="relative flex-1">
+            <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            <input id="threadSearch" type="search" placeholder="Search conversations" class="w-full rounded-2xl border border-slate-200 bg-slate-50/90 py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/5 dark:text-on-surface dark:placeholder:text-on-surface-variant">
           </div>
+          <button id="newMessageBtn" type="button" class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dim text-[15px] font-black text-slate-950 shadow-lg shadow-primary/20 transition hover:scale-[1.02]">
+            <i class="ri-chat-new-line text-lg"></i>
+          </button>
         </div>
-        <!-- Search Bar -->
-        <div class="px-5 pt-4 pb-3 border-b border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/20">
-           <div class="relative">
-             <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"></i>
-             <input type="text" id="threadSearch" placeholder="Search conversations..." class="w-full rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-white/5 py-2 pl-9 pr-4 text-xs text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/30 transition-all">
-           </div>
-        </div>
-        <div id="socialThreadList" class="chat-sidebar divide-y divide-slate-100 dark:divide-white/5">
-          {% for item in thread_list %}
-            <a href="{% url 'chat:thread' item.thread.id %}" class="sidebar-thread flex items-center gap-3 px-5 py-4 {% if item.thread.id == thread.id %}active{% endif %}">
-              <div class="relative shrink-0">
-                {% if item.other_user.profile.avatar %}
-                  <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl border border-slate-200 dark:border-white/10 object-cover shadow-sm">
-                {% else %}
-                  <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-base font-black text-white shadow-sm">
-                    {{ item.other_user.username|first|upper }}
-                  </div>
-                {% endif %}
-                {% if item.unread > 0 %}
-                  <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white dark:border-slate-950 bg-sky-400"></span>
-                {% endif %}
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{{ item.other_user.get_full_name|default:item.other_user.username }}</div>
-                <div class="mt-1 flex items-center gap-1 truncate text-[11px] text-slate-500">
-                  {% if item.last_message %}
-                    {% if item.last_message.sender == request.user %}
-                      <i class="ri-check-double-line text-sky-400"></i>
-                    {% endif %}
-                    {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:26 }}
-                  {% else %}
-                    New conversation
-                  {% endif %}
+      </div>
+
+      <div id="threadListContainer" class="chat-sidebar flex-1 space-y-2 overflow-y-auto px-3 py-3">
+        {% for item in thread_list %}
+          <a href="{% url 'chat:thread' item.thread.id %}"
+             data-thread-id="{{ item.thread.id }}"
+             data-thread-name="{{ item.other_user.get_full_name|default:item.other_user.username }}"
+             data-thread-username="{{ item.other_user.username }}"
+             class="thread-item sidebar-thread inbox-card flex items-start gap-3 rounded-[1.4rem] border border-transparent px-3 py-3 {% if thread and item.thread.id == thread.id %}is-active{% endif %}">
+            <div class="relative shrink-0">
+              {% if item.other_user.profile.avatar %}
+                <img src="{{ item.other_user.profile.avatar.url }}" alt="{{ item.other_user.username }}" class="h-12 w-12 rounded-2xl object-cover ring-1 ring-slate-200 dark:ring-white/10">
+              {% else %}
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/80 to-tertiary/80 text-sm font-black text-slate-950">
+                  {{ item.other_user.username|slice:":1"|upper }}
                 </div>
+              {% endif %}
+              {% if item.unread %}
+                <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-sky-400 dark:border-slate-950"></span>
+              {% endif %}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-black text-slate-900 dark:text-on-surface">{{ item.other_user.get_full_name|default:item.other_user.username }}</p>
+                  <div class="mt-1 flex items-center gap-2">
+                    {% if item.other_user.profile.role == 'TUTOR' %}
+                      <span class="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-500">Tutor</span>
+                    {% elif item.other_user.profile.role == 'ORG_ADMIN' %}
+                      <span class="rounded-full bg-rose-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-rose-500">Admin</span>
+                    {% else %}
+                      <span class="rounded-full bg-slate-200/80 px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:bg-white/5 dark:text-on-surface-variant">Peer</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <p class="whitespace-nowrap text-[11px] font-bold text-slate-400 dark:text-on-surface-variant">
+                  {% if item.last_message %}{{ item.last_message.created_at|timesince }}{% else %}New{% endif %}
+                </p>
               </div>
-            </a>
-          {% endfor %}
-          <div id="noThreadResults" class="hidden py-10 text-center">
-            <p class="text-sm font-bold text-slate-500">No conversations found.</p>
+              <div class="mt-3 flex items-center justify-between gap-3">
+                <p class="last-message truncate text-sm {% if item.unread %}font-bold text-slate-800 dark:text-on-surface{% else %}text-slate-500 dark:text-on-surface-variant{% endif %}">
+                  {% if item.last_message %}
+                    {% if item.last_message.sender == request.user %}<span class="mr-1 text-sky-500">You:</span>{% endif %}
+                    {{ item.last_message.content|default:item.last_message.get_message_type_display|truncatechars:58 }}
+                  {% else %}
+                    Start the conversation
+                  {% endif %}
+                </p>
+                {% if item.unread %}
+                  <span class="unread-badge unread-pill bg-primary text-slate-950">{{ item.unread }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <div class="mx-3 mt-4 rounded-[1.8rem] border border-dashed border-slate-200 px-6 py-10 text-center dark:border-white/10">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
+              <i class="ri-message-3-line text-2xl"></i>
+            </div>
+            <h2 class="mt-4 text-lg font-black text-slate-900 dark:text-on-surface">No conversations yet</h2>
+            <p class="mt-2 text-sm text-slate-500 dark:text-on-surface-variant">Start a direct message with a student, tutor, or support member.</p>
           </div>
-        </div>
+        {% endfor %}
       </div>
     </aside>
 
-    <main id="mainChatArea" class="chat-column h-full min-h-0 {% if inbox_mode %}hidden lg:block{% endif %} lg:col-span-8 xl:col-span-9">
-      
-      <!-- ─── Thread View ─── -->
-      <div id="chatThreadView" class="{% if inbox_mode %}hidden{% endif %} h-full">
-        {% if not inbox_mode %}
-        <div id="chatWrapper" class="chat-panel theme-wrapper flex flex-col overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl dark:shadow-slate-950/30 bg-slate-50 dark:bg-slate-900" data-theme="{{ thread.theme }}">
-          <header class="flex items-center gap-3 border-b border-slate-200/50 dark:border-white/10 bg-white/60 dark:bg-black/40 px-3 py-3 sm:px-5 sm:py-4 backdrop-blur-md z-10">
-          <a href="{% url 'chat:inbox' %}" class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white lg:hidden">
-            <i class="ri-arrow-left-line text-xl"></i>
-          </a>
-          <div class="relative shrink-0">
-            {% if other_user.profile.avatar %}
-              <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.username }}" class="h-11 w-11 rounded-2xl border border-slate-200 dark:border-white/15 object-cover sm:h-12 sm:w-12 shadow-sm">
-            {% else %}
-              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-12 sm:w-12 shadow-sm">
-                {{ other_user.username|first|upper }}
-              </div>
-            {% endif %}
-            <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 bg-emerald-500"></span>
+    <section id="chatThreadPanel" class="chat-thread-panel {% if inbox_mode %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/82 backdrop-blur-2xl dark:border-white/10 dark:bg-surface-container-high/75">
+      <div id="emptyConversationState" class="{% if thread %}hidden{% endif %} flex h-full flex-col items-center justify-center p-8">
+        <div class="chat-empty-illustration flex max-w-xl flex-col items-center rounded-[2rem] border border-slate-200/60 px-8 py-12 text-center shadow-[0_30px_80px_-60px_rgba(15,23,42,0.45)] dark:border-white/10">
+          <div class="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-gradient-to-br from-primary/20 to-tertiary/20 text-primary">
+            <i class="ri-forum-line text-4xl"></i>
           </div>
-          <div class="min-w-0 flex-1">
-            <h1 class="truncate text-sm font-black text-slate-800 dark:text-slate-100 sm:text-base">{{ other_user.get_full_name|default:other_user.username }}</h1>
-            <div id="typingIndicator" class="hidden items-center gap-2">
-              <div class="flex items-center gap-1">
-                <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
-                <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
-                <span class="typing-dot h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+          <h2 class="mt-6 font-headline text-3xl font-black tracking-tight text-slate-900 dark:text-on-surface">Select a conversation</h2>
+          <p class="mt-3 max-w-md text-sm leading-7 text-slate-500 dark:text-on-surface-variant">Elevo chat is now structured like a full-screen workspace. Open a thread to message mentors, peers, or support without leaving the app flow.</p>
+          <button type="button" id="emptyStateNewChatBtn" class="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dim px-6 py-3 text-sm font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg shadow-primary/20">
+            <i class="ri-chat-new-line"></i>
+            New conversation
+          </button>
+        </div>
+      </div>
+
+      <div id="activeConversation" class="{% if not thread %}hidden{% endif %} flex min-h-0 flex-1 flex-col">
+        <header class="border-b border-slate-200/70 px-4 py-4 dark:border-white/10 sm:px-6">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+              <button id="backToInboxBtn" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-600 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface lg:hidden">
+                <i class="ri-arrow-left-line text-lg"></i>
+              </button>
+              <div id="threadAvatar" class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-primary/80 to-tertiary/70 text-sm font-black text-slate-950 ring-1 ring-slate-200 dark:ring-white/10">
+                {% if other_user and other_user.profile.avatar %}
+                  <img src="{{ other_user.profile.avatar.url }}" alt="{{ other_user.username }}" class="h-full w-full object-cover">
+                {% elif other_user %}
+                  {{ other_user.username|slice:":1"|upper }}
+                {% else %}
+                  E
+                {% endif %}
               </div>
-              <span class="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-400">typing</span>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h2 id="threadTitle" class="truncate font-headline text-xl font-black tracking-tight text-slate-900 dark:text-on-surface">{% if other_user %}{{ other_user.get_full_name|default:other_user.username }}{% else %}Conversation{% endif %}</h2>
+                </div>
+                <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                  <span id="threadContext" class="rounded-full bg-primary/10 px-2.5 py-1 font-black uppercase tracking-[0.18em] text-primary">{% if thread and thread.last_message %}{{ thread.last_message.get_message_type_display }}{% else %}Direct chat{% endif %}</span>
+                  <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-white/10"></span>
+                  <span id="threadStatus" class="font-semibold text-slate-500 dark:text-on-surface-variant">
+                    {% if thread_status and thread_status.is_typing %}
+                      Typing…
+                    {% elif thread_status and thread_status.presence.is_online %}
+                      Online now
+                    {% else %}
+                      Message on Elevo
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
             </div>
-            <p id="participantStatus" class="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500">Live conversation</p>
+            <div class="flex items-center gap-2">
+              <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-600 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface" title="Thread details">
+                <i class="ri-information-line text-lg"></i>
+              </button>
+            </div>
           </div>
-          <div class="hidden items-center gap-2 sm:flex">
-            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
-              <i class="ri-search-line text-lg"></i>
-            </button>
-            <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
-              <i class="ri-more-2-fill text-lg"></i>
-            </button>
-          </div>
-
-          <button id="soundToggleBtn" class="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white" title="Mute Notification Sounds">
-            <i class="ri-volume-up-line text-lg"></i>
-          </button>
-
-          <button id="themePickerBtn" class="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 transition hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white" title="Change Theme">
-            <i class="ri-palette-line text-lg"></i>
-          </button>
         </header>
 
-        <div id="messagesContainer" class="messages-container space-y-4 px-3 py-4 sm:space-y-5 sm:px-5 sm:py-5" data-thread-id="{{ thread.id }}">
-          {% for msg in messages %}
-            {% ifchanged msg.created_at.date %}
-              <div class="my-6 flex justify-center">
-                <span class="rounded-full bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 backdrop-blur-sm">
-                  {{ msg.created_at|date:"M j, Y" }}
-                </span>
-              </div>
-            {% endifchanged %}
-            {% if msg.id == first_unread_message_id %}
-              <div class="my-6 flex items-center justify-center gap-3">
-                <div class="h-px w-full max-w-[4rem] bg-sky-500/30 sm:max-w-[8rem]"></div>
-                <span class="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-400">Unread Messages</span>
-                <div class="h-px w-full max-w-[4rem] bg-sky-500/30 sm:max-w-[8rem]"></div>
-              </div>
-            {% endif %}
-            <div class="msg-wrapper flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}" data-msg-id="{{ msg.id }}">
-              <div class="flex w-full max-w-[92%] flex-col gap-1.5 {% if msg.sender == request.user %}items-end sm:max-w-[78%]{% else %}items-start sm:max-w-[78%]{% endif %}">
-                {% if msg.parent_message %}
-                  <div class="reply-chip w-full">
-                    <span class="reply-header block">Replying to {{ msg.parent_message.sender.username }}</span>
-                    <div class="reply-content">{{ msg.parent_message.content|default:msg.parent_message.get_message_type_display|truncatechars:100 }}</div>
+        <div id="messagesContainer" data-thread-id="{% if thread %}{{ thread.id }}{% endif %}" class="messages-scroll chat-canvas flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
+          <div id="messagesList" class="mx-auto flex max-w-5xl flex-col gap-4">
+            {% if thread %}
+              {% for message in messages %}
+                {% if first_unread_message_id and message.id == first_unread_message_id %}
+                  <div class="flex items-center gap-3 py-1">
+                    <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
+                    <span class="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400 dark:text-on-surface-variant">New messages</span>
+                    <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
                   </div>
                 {% endif %}
-
-                <div class="{% if msg.sender == request.user %}bubble-sent{% else %}bubble-received{% endif %} w-full px-4 py-3 sm:px-5">
-                  
-                  {% if msg.message_type == 'share_coding_problem' %}
-                    <template id="custom_card_json_{{ msg.id }}" style="display:none;">{{ msg.content }}</template>
-                    <div class="custom-card-render bg-slate-900 border border-sky-500/30 rounded-xl p-3 text-left w-full shadow-lg" data-target="custom_card_json_{{ msg.id }}" data-type="share_coding_problem"></div>
-                  {% elif msg.message_type == 'share_aptitude_question' %}
-                    <template id="custom_card_json_{{ msg.id }}" style="display:none;">{{ msg.content }}</template>
-                    <div class="custom-card-render bg-slate-900 border border-rose-500/30 rounded-xl p-3 text-left w-full shadow-lg" data-target="custom_card_json_{{ msg.id }}" data-type="share_aptitude_question"></div>
-                  {% elif msg.message_type == 'share_mock_interview_result' %}
-                    <template id="custom_card_json_{{ msg.id }}" style="display:none;">{{ msg.content }}</template>
-                    <div class="custom-card-render bg-slate-900 border border-purple-500/30 rounded-xl p-3 text-left w-full shadow-lg" data-target="custom_card_json_{{ msg.id }}" data-type="share_mock_interview_result"></div>
-                  {% elif msg.message_type == 'send_resume' %}
-                    <template id="custom_card_json_{{ msg.id }}" style="display:none;">{{ msg.content }}</template>
-                    <div class="custom-card-render bg-slate-900 border border-teal-500/30 rounded-xl p-3 text-left w-full shadow-lg" data-target="custom_card_json_{{ msg.id }}" data-type="send_resume"></div>
-                  {% elif msg.message_type == 'tutor_feedback' %}
-                    <template id="custom_card_json_{{ msg.id }}" style="display:none;">{{ msg.content }}</template>
-                    <div class="custom-card-render bg-slate-900 border border-amber-500/30 rounded-xl p-3 text-left w-full shadow-lg" data-target="custom_card_json_{{ msg.id }}" data-type="tutor_feedback"></div>
-                  {% elif msg.message_type == 'image' and msg.image %}
-
-                    <a href="{{ msg.image.url }}" target="_blank" rel="noopener noreferrer" class="mb-3 block overflow-hidden rounded-2xl border border-white/10">
-                      <img src="{{ msg.image.url }}" alt="Shared image" class="max-h-72 w-full object-contain">
-                    </a>
-                  {% elif msg.message_type == 'video' and msg.file %}
-                    <video controls class="mb-3 max-h-72 w-full rounded-2xl border border-white/10">
-                      <source src="{{ msg.file.url }}">
-                    </video>
-                  {% elif msg.message_type == 'file' and msg.file %}
-                    <a href="{{ msg.file.url }}" download target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-white/5 px-3 py-3 transition hover:bg-white/60 dark:hover:bg-white/10">
-                      <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
-                        <i class="ri-file-line text-xl"></i>
-                      </div>
-                      <div class="min-w-0">
-                        <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{{ msg.file.name|cut:"chat/files/" }}</p>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p>
-                      </div>
-                    </a>
-                  {% endif %}
-
-                  {% if msg.content %}
-                    <p class="whitespace-pre-wrap break-words text-[13px] leading-6 font-medium sm:text-sm" style="color: inherit;">{{ msg.content }}</p>
-                  {% endif %}
-
-                  <div class="reactions-row mt-3 flex flex-wrap gap-1.5" id="reactions-{{ msg.id }}">
-                    {% for r in msg.grouped_reactions %}
-                      <button type="button" class="reaction-badge inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] {% if r.reacted %}border-sky-400/30 bg-sky-500/15 text-sky-100{% else %}border-white/8 bg-slate-950/35 text-slate-300{% endif %}" data-emoji="{{ r.emoji }}" data-id="{{ msg.id }}">
-                        <span>{{ r.emoji }}</span>
-                        {% if r.count > 1 %}
-                          <span class="font-bold text-slate-400">{{ r.count }}</span>
-                        {% endif %}
-                      </button>
-                    {% endfor %}
+                <div class="flex {% if message.sender_id == request.user.id %}justify-end{% else %}justify-start{% endif %}">
+                  <div class="max-w-[85%] sm:max-w-[70%]">
+                    <div class="message-bubble {% if message.sender_id == request.user.id %}mine{% else %}theirs{% endif %}">
+                      {% if message.content %}
+                        <p class="whitespace-pre-wrap break-words text-sm leading-7">{{ message.content }}</p>
+                      {% elif message.file %}
+                        <div class="message-resource">
+                          <div class="message-resource-icon"><i class="ri-attachment-2 text-primary"></i></div>
+                          <div class="p-4">
+                            <p class="text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">Attachment</p>
+                            <p class="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-on-surface">{{ message.file.name|cut:"chat/files/" }}</p>
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <p class="message-meta mt-2 {% if message.sender_id == request.user.id %}text-right{% endif %} text-slate-400 dark:text-on-surface-variant">
+                      {{ message.created_at|time:"h:i A" }}{% if message.is_edited %} · edited{% endif %}
+                    </p>
                   </div>
                 </div>
-
-                <div class="flex w-full flex-wrap items-center gap-2 {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
-                  <div class="message-actions flex items-center gap-2">
-                    {% if not msg.is_deleted_for_everyone %}
-                    <button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-slate-200/50 dark:hover:bg-white/5 hover:text-sky-600 dark:hover:text-sky-400" data-id="{{ msg.id }}" data-user="{{ msg.sender.username }}" data-content="{{ msg.content|default_if_none:''|escapejs }}">
-                      Reply
-                    </button>
-                    <button type="button" class="copy-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-sky-600 dark:hover:text-sky-400" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Copy">
-                      <i class="ri-file-copy-line text-sm"></i>
-                    </button>
-                    {% if msg.sender == request.user and msg.message_type == 'text' %}
-                      <button type="button" class="edit-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-emerald-600 dark:hover:text-emerald-400" data-id="{{ msg.id }}" data-content="{{ msg.content|default_if_none:''|escapejs }}" title="Edit">
-                        <i class="ri-edit-line text-sm"></i>
-                      </button>
-                    {% endif %}
-                    {% endif %}
-                    <button type="button" class="delete-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-rose-600 dark:hover:text-rose-400" data-id="{{ msg.id }}" data-mine="{% if msg.sender == request.user and not msg.is_deleted_for_everyone %}true{% else %}false{% endif %}" title="Delete">
-                      <i class="ri-delete-bin-line text-sm"></i>
-                    </button>
-                    <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-white/10 hover:text-yellow-600 dark:hover:text-yellow-300" data-id="{{ msg.id }}">
-                      <i class="ri-emotion-happy-line text-sm"></i>
-                    </button>
-                  </div>
-                  <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"h:i A" }}</span>
-                  {% if msg.is_edited %}<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>{% endif %}
-                  {% if msg.sender == request.user %}
-                    <i class="js-seen-status {% if msg.is_read %}ri-double-check-line text-sky-400{% else %}ri-check-line text-slate-600{% endif %} text-xs" 
-                       data-mine="true" 
-                       {% if msg.read_at %}data-read-at="{{ msg.read_at|date:'c' }}"{% endif %} 
-                       title="{% if msg.is_read and msg.read_at %}Seen at {{ msg.read_at|date:'h:i A' }}{% elif not msg.is_read %}Sent{% endif %}"></i>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-        <div class="border-t border-slate-200/50 dark:border-white/5 bg-white/80 dark:bg-slate-950/25 px-3 py-3 sm:px-5 sm:py-4 backdrop-blur-md transition-colors duration-300">
-          <div id="replyBar" class="reply-chip mb-3 hidden items-center justify-between gap-3 rounded-2xl px-3 py-3">
-            <div class="min-w-0">
-              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-sky-400">Replying to <span id="replyUser"></span></p>
-              <p id="replyContent" class="truncate text-xs text-slate-300"></p>
-            </div>
-            <button type="button" id="cancelReplyBtn" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-white">
-              <i class="ri-close-line"></i>
-            </button>
+              {% endfor %}
+            {% endif %}
           </div>
+        </div>
 
-          <form id="messageForm" class="space-y-3">
-            {% csrf_token %}
-            <input type="hidden" name="parent_id" id="parentInput">
-            <input type="file" id="fileAttachment" class="hidden">
-
-            <div id="filePreview" class="hidden items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-3 shadow-sm">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-600 dark:text-sky-400">
-                <i class="ri-attachment-2 text-lg"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <p id="previewName" class="truncate text-sm font-bold text-slate-800 dark:text-slate-100"></p>
-                <p id="previewSize" class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500"></p>
-              </div>
-              <button type="button" id="clearFileBtn" class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-white/5 text-rose-600 dark:text-rose-400 transition hover:bg-slate-300 dark:hover:bg-white/10 hover:text-rose-700 dark:hover:text-rose-300">
-                <i class="ri-delete-bin-line"></i>
-              </button>
-            </div>
-
-            <div class="flex items-end gap-2 sm:gap-3">
-              
-              <div class="relative">
-                <button type="button" id="pluginBtn" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-emerald-400 transition hover:bg-white/10 hover:text-emerald-300 sm:h-12 sm:w-12" title="Send Structured Cards">
-                  <i class="ri-apps-2-add-line text-xl"></i>
+        <div class="composer-shell border-t border-slate-200/70 bg-white/78 px-3 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-surface-container/80 sm:px-6 sm:py-5">
+          <div id="typingIndicator" class="mb-2 hidden items-center gap-2 px-3 text-xs font-semibold text-slate-500 dark:text-on-surface-variant">
+            <span id="typingLabel">Typing</span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+          <form id="composerForm" class="mx-auto max-w-5xl">
+            <div class="rounded-[1.6rem] border border-slate-200 bg-white/90 p-3 shadow-[0_22px_55px_-44px_rgba(15,23,42,0.48)] dark:border-white/10 dark:bg-white/5">
+              <div id="attachmentPreview" class="mb-3 hidden items-center justify-between rounded-2xl bg-slate-100 px-4 py-3 text-sm dark:bg-white/5">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-on-surface-variant">Attachment</p>
+                  <p id="attachmentName" class="truncate font-semibold text-slate-700 dark:text-on-surface"></p>
+                </div>
+                <button id="clearAttachmentBtn" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white dark:hover:bg-white/10">
+                  <i class="ri-close-line"></i>
                 </button>
-                <div id="pluginMenu" class="hidden absolute bottom-[120%] left-0 w-64 bg-slate-900 border border-white/10 rounded-2xl shadow-xl flex-col p-2 z-[70]">
-                  <div class="px-3 py-2 text-[10px] font-bold uppercase text-slate-500 tracking-wider">Demo Cards</div>
-                  <button type="button" class="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-white/5 transition group" data-card-action="share_coding_problem">
-                    <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex justify-center items-center group-hover:bg-sky-500 group-hover:text-white transition"><i class="ri-code-box-line text-lg"></i></div>
-                    <span class="text-sm font-semibold text-slate-200">Coding Problem</span>
+              </div>
+              <textarea id="messageInput" rows="1" placeholder="Type your message or paste code here..." class="max-h-48 min-h-[3.25rem] w-full resize-none border-0 bg-transparent px-2 py-2 text-sm leading-7 text-slate-800 outline-none placeholder:text-slate-400 focus:ring-0 dark:text-on-surface dark:placeholder:text-on-surface-variant"></textarea>
+              <div class="mt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 px-2 pt-3 dark:border-white/10">
+                <div class="flex items-center gap-2">
+                  <label for="fileInput" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface">
+                    <i class="ri-attachment-2 text-lg"></i>
+                  </label>
+                  <input id="fileInput" name="file" type="file" class="hidden">
+                  <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface" disabled title="Emoji support coming next">
+                    <i class="ri-emotion-line text-lg"></i>
                   </button>
-                  <button type="button" class="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-white/5 transition group" data-card-action="share_aptitude_question">
-                    <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex justify-center items-center group-hover:bg-rose-500 group-hover:text-white transition"><i class="ri-lightbulb-flash-line text-lg"></i></div>
-                    <span class="text-sm font-semibold text-slate-200">Aptitude Question</span>
-                  </button>
-                  <button type="button" class="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-white/5 transition group" data-card-action="share_mock_interview_result">
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex justify-center items-center group-hover:bg-purple-500 group-hover:text-white transition"><i class="ri-speak-fill text-lg"></i></div>
-                    <span class="text-sm font-semibold text-slate-200">Mock Interview Result</span>
-                  </button>
-                  <button type="button" class="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-white/5 transition group" data-card-action="send_resume">
-                    <div class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex justify-center items-center group-hover:bg-teal-500 group-hover:text-white transition"><i class="ri-profile-line text-lg"></i></div>
-                    <span class="text-sm font-semibold text-slate-200">Resume / JD Card</span>
-                  </button>
-                  <button type="button" class="flex items-center gap-3 w-full text-left p-2 rounded-xl hover:bg-white/5 transition group" data-card-action="tutor_feedback">
-                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex justify-center items-center group-hover:bg-amber-500 group-hover:text-white transition"><i class="ri-chat-check-line text-lg"></i></div>
-                    <span class="text-sm font-semibold text-slate-200">Tutor Feedback</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="hidden text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 sm:block">Enter to send</span>
+                  <button id="sendButton" type="submit" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-dim px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-950 shadow-lg shadow-primary/20 transition hover:scale-[1.01]">
+                    Send
+                    <i class="ri-send-plane-fill"></i>
                   </button>
                 </div>
               </div>
-
-              <button type="button" id="attachBtn" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-slate-400 transition hover:bg-white/10 hover:text-sky-400 sm:h-12 sm:w-12">
-                <i class="ri-add-line text-2xl"></i>
-              </button>
-              <div class="relative flex-1">
-                <textarea id="messageInput" name="content" rows="1" placeholder="Type a message..." class="max-h-36 min-h-[3rem] w-full resize-none rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-3 pr-12 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"></textarea>
-                <span class="pointer-events-none absolute bottom-3 right-3 text-slate-500">
-                  <i class="ri-chat-smile-2-line text-lg"></i>
-                </span>
-              </div>
-              <button type="submit" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 text-white shadow-lg shadow-sky-500/20 transition hover:scale-[1.03] active:scale-95 sm:h-12 sm:w-12">
-                <i class="ri-send-plane-fill text-lg sm:text-xl"></i>
-              </button>
             </div>
           </form>
         </div>
-        {% endif %}
       </div>
-    </div>
-
-    <!-- ─── Desktop Placeholder (Inbox Mode) ─── -->
-    <div id="socialCenterView" class="{% if not inbox_mode %}hidden{% endif %} flex h-full flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/40 shadow-xl dark:shadow-2xl backdrop-blur-3xl text-center p-8 transition-colors duration-300">
-       <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-inner">
-         <i class="ri-chat-smile-2-line text-4xl text-sky-500/50"></i>
-       </div>
-       <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">Your Messages</h2>
-       <p class="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 max-w-xs">Select an existing conversation from the sidebar or start a new one to begin.</p>
-       <button onclick="document.getElementById('newMessageBtn').click()" class="mt-6 rounded-2xl bg-sky-500/10 px-6 py-3 text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 hover:text-sky-700 dark:hover:text-white transition">Start New Chat</button>
-    </div>
-</main>
+    </section>
   </div>
-
-  <div id="globalEmojiPicker" class="hidden fixed z-50 max-w-[260px] rounded-[1.4rem] border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 p-3 shadow-2xl ring-1 ring-slate-200 dark:ring-white/10 backdrop-blur-2xl transition-all">
-    <div class="grid grid-cols-6 gap-1.5">
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128077;">&#128077;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#10084;&#65039;">&#10084;&#65039;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128293;">&#128293;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128514;">&#128514;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128562;">&#128562;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128079;">&#128079;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128640;">&#128640;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#10024;">&#10024;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128175;">&#128175;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#129321;">&#129321;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128161;">&#128161;</button>
-      <button type="button" class="emoji-btn rounded-xl p-2 text-xl transition hover:bg-slate-100 dark:hover:bg-white/10" data-emoji="&#128546;">&#128546;</button>
-    </div>
-  </div>
-
-
-  <!-- Theme Picker Modal -->
-  <div id="themeModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-sm rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl">
-      <div class="mb-4 flex items-center justify-between">
-        <h3 class="text-lg font-black text-slate-800 dark:text-slate-100">Select Theme</h3>
-        <button id="closeThemeModalBtn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="ri-close-line text-xl"></i></button>
-      </div>
-      <div class="grid grid-cols-4 gap-3 sm:grid-cols-6" id="themeGrid">
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent bg-slate-100 dark:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-500 bg-cover bg-center" style="background-image: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);" data-theme-val="default" title="Default"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_ocean.png' %});" data-theme-val="ocean" title="Ocean"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_deep_sea.png' %});" data-theme-val="deep_sea" title="Deep Sea"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_forest.png' %});" data-theme-val="forest" title="Forest"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_emerald.png' %});" data-theme-val="emerald" title="Emerald"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_lavender.png' %});" data-theme-val="lavender" title="Lavender Love"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/bg_rose.png' %});" data-theme-val="rose" title="Rose Passion"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/cutee.jpeg' %});" data-theme-val="cutee" title="Cutee"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/hands_in_hands.jpeg' %});" data-theme-val="hands_in_hands" title="Hands in Hands"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/love_2.jpeg' %});" data-theme-val="love_2" title="Love 2"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/milk_mocha.jpeg' %});" data-theme-val="milk_mocha" title="Milk Mocha"></button>
-        <button class="theme-option h-10 w-10 sm:h-12 sm:w-12 rounded-full border-2 border-transparent hover:border-sky-500 bg-cover bg-center shadow-md shadow-slate-200 dark:shadow-black/40" style="background-image: url({% static 'core/themes/red_purple_hearts.jpeg' %});" data-theme-val="red_purple_hearts" title="Red Purple Hearts"></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modals -->
-  <div id="deleteModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-sm rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl">
-      <h3 class="mb-2 text-lg font-black text-slate-800 dark:text-slate-100">Delete message</h3>
-      <p class="mb-5 text-sm text-slate-500 dark:text-slate-400">Are you sure you want to delete this message?</p>
-      <div class="flex flex-col gap-2">
-        <button id="deleteForMeBtn" class="w-full rounded-2xl bg-slate-100 dark:bg-white/5 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10">Delete for me</button>
-        <button id="deleteForEveryoneBtn" class="hidden w-full rounded-2xl bg-rose-500/10 py-3 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20">Delete for everyone</button>
-        <button id="cancelDeleteBtn" class="mt-2 w-full text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="editModal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-    <div class="w-full max-w-md rounded-[2rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 shadow-2xl">
-      <h3 class="mb-4 text-lg font-black text-slate-800 dark:text-slate-100">Edit message</h3>
-      <textarea id="editContentInput" class="w-full resize-none rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500/30" rows="3"></textarea>
-      <div class="mt-4 flex gap-3">
-        <button id="cancelEditBtn" class="flex-1 rounded-2xl bg-slate-100 dark:bg-white/5 py-3 text-sm font-bold text-slate-500 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10">Cancel</button>
-        <button id="saveEditBtn" class="flex-1 rounded-2xl bg-emerald-500/20 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30">Save changes</button>
-      </div>
-    </div>
-  </div>
-
 </section>
 
-<!-- ===== USER SEARCH MODAL ===== -->
-<div id="userSearchModal" class="hidden fixed inset-0 z-[100]">
-  <div id="userSearchBackdrop" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300 opacity-0"></div>
-  <div class="relative flex min-h-screen items-center justify-center p-4">
-    <div id="userSearchPanel" class="w-full max-w-lg scale-95 rounded-[2.5rem] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/95 p-1 shadow-2xl backdrop-blur-3xl transition-all duration-300 opacity-0">
-      <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 px-8 py-6">
-        <div>
-          <h3 class="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">Find People</h3>
-          <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Search developers & mentors</p>
-        </div>
-        <button id="closeSearchModalBtn" class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white">
-          <i class="ri-close-line text-xl"></i>
-        </button>
+<div id="newChatModal" class="fixed inset-0 z-[140] hidden items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
+  <div class="w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl dark:border-white/10 dark:bg-surface-container-high">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-[10px] font-black uppercase tracking-[0.25em] text-primary">Start Chat</p>
+        <h2 class="mt-2 font-headline text-2xl font-black tracking-tight text-slate-900 dark:text-on-surface">Find someone on Elevo</h2>
       </div>
-      <div class="p-6">
-        <div class="relative">
-          <i class="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-lg text-slate-400 dark:text-slate-500"></i>
-          <input type="text" id="userSearchInput" placeholder="Enter name or username..." class="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 py-4 pl-12 pr-12 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500/30 transition-all">
-          <div id="searchSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2">
-            <i class="ri-loader-4-line animate-spin text-sky-600 dark:text-sky-400"></i>
-          </div>
-        </div>
-        <div id="userSearchResults" class="mt-6 max-h-[40dvh] overflow-y-auto pr-2 custom-scrollbar">
-          <div id="searchInitialState" class="py-12 text-center text-slate-400 dark:text-slate-500">
-            <i class="ri-user-search-line text-4xl opacity-20 block mb-3"></i>
-            <p class="text-xs font-bold uppercase tracking-widest">Type to search users</p>
-          </div>
-          <div id="searchNoResults" class="hidden py-12 text-center text-slate-400 dark:text-slate-500">
-            <p class="text-sm font-bold">No users found</p>
-          </div>
-          <div id="searchResultsList" class="divide-y divide-slate-100 dark:divide-white/5"></div>
-        </div>
+      <button id="closeNewChatModal" type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 transition hover:text-slate-900 dark:border-white/10 dark:text-on-surface-variant dark:hover:text-on-surface">
+        <i class="ri-close-line text-xl"></i>
+      </button>
+    </div>
+    <div class="mt-5">
+      <div class="relative">
+        <span class="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+        <input id="newChatSearch" type="search" placeholder="Search by username or name" class="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/5 dark:text-on-surface dark:placeholder:text-on-surface-variant">
       </div>
+      <div id="newChatResults" class="mt-4 max-h-[22rem] space-y-2 overflow-y-auto"></div>
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-  (function() {
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
-    function renderCustomCardHTML(type, data) {
-      if (!data) return '';
-      const colors = {
-        share_coding_problem: 'sky',
-        share_aptitude_question: 'rose',
-        share_mock_interview_result: 'purple',
-        send_resume: 'teal',
-        tutor_feedback: 'amber'
-      };
-      const icons = {
-        share_coding_problem: 'ri-code-box-line',
-        share_aptitude_question: 'ri-lightbulb-flash-line',
-        share_mock_interview_result: 'ri-speak-fill',
-        send_resume: 'ri-profile-line',
-        tutor_feedback: 'ri-chat-check-line'
-      };
-      const color = colors[type] || 'slate';
-      const icon = icons[type] || 'ri-apps-2-line';
-      
-      let bodyHtml = '';
-      if (type === 'share_coding_problem') {
-        bodyHtml = `
-          <div class="flex items-center gap-2 mb-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-${color}-500/20 text-${color}-400 uppercase tracking-wider">${data.difficulty || 'Begginer'}</span>
-            <span class="text-[10px] font-bold text-slate-500 uppercase">${data.language || 'Code'}</span>
-          </div>
-          <h4 class="text-sm font-black text-slate-100 mb-2 truncate">${data.title || 'Coding Problem'}</h4>
-          <div class="bg-black/50 rounded-lg p-2 font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre border border-white/5">
-${data.code || '// No code provided'}
-          </div>
-        `;
-      } else if (type === 'share_aptitude_question') {
-        bodyHtml = `
-          <p class="text-xs font-bold text-slate-400 mb-3 leading-relaxed">${data.question || 'Question text...'}</p>
-          <div class="space-y-1.5 mb-2">
-            ${(data.options || []).map(opt => `<div class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-300">${opt}</div>`).join('')}
-          </div>
-          <div class="mt-3 pt-3 border-t border-white/5 text-[10px] font-medium text-slate-500 italic">
-            Explanation available in detailed view
-          </div>
-        `;
-      } else if (type === 'share_mock_interview_result') {
-        bodyHtml = `
-          <div class="flex items-center justify-between mb-4">
-            <div class="text-3xl font-black text-${color}-400">${data.score || '0'}<span class="text-xs text-slate-500 font-bold">/10</span></div>
-            <div class="text-right">
-              <div class="text-[10px] font-black text-slate-500 uppercase">Duration</div>
-              <div class="text-xs font-bold text-slate-300">${data.duration || '0m'}</div>
-            </div>
-          </div>
-          <p class="text-[11px] leading-relaxed text-slate-400 border-l-2 border-${color}-500/40 pl-3 italic">${data.feedback || 'No feedback provided'}</p>
-        `;
-      } else if (type === 'send_resume') {
-        bodyHtml = `
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex justify-center items-center text-white font-black">${(data.full_name || 'U')[0]}</div>
-            <div>
-              <div class="text-sm font-black text-slate-100">${data.full_name || 'Candidate Name'}</div>
-              <div class="text-[10px] font-bold text-teal-400 uppercase tracking-wider">${data.title || 'Developer'}</div>
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            ${(data.skills || []).map(s => `<span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[9px] font-bold text-slate-400">${s}</span>`).join('')}
-          </div>
-        `;
-      } else if (type === 'tutor_feedback') {
-        bodyHtml = `
-          <div class="flex items-center gap-1 mb-3 text-amber-400">
-            ${Array(5).fill(0).map((_, i) => `<i class="${i < (data.rating || 0) ? 'ri-star-fill' : 'ri-star-line'} text-sm"></i>`).join('')}
-          </div>
-          <p class="text-xs font-medium text-slate-300 mb-3 italic">"${data.comment || 'Keep up the good work!'}"</p>
-          <div class="rounded-xl bg-amber-500/10 border border-amber-500/20 p-2 text-[10px]">
-            <span class="font-black text-amber-400 uppercase mr-1">Next Step:</span>
-            <span class="text-slate-400 font-bold">${data.next_step || 'Consult documentation'}</span>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="custom-card-wrapper w-full overflow-hidden">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-7 h-7 rounded-lg bg-${color}-500/20 text-${color}-400 flex justify-center items-center"><i class="${icon}"></i></div>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">${type.replace(/_/g, ' ')}</span>
-          </div>
-          <div class="card-body">
-            ${bodyHtml}
-          </div>
-        </div>
-      `;
-    }
-
-    const container = document.getElementById('messagesContainer');
-    if (!container) return;
-
-    let currentThreadId = container.dataset.threadId;
-    let currentUserId = null; // Will be set from API
-    const form = document.getElementById('messageForm');
-    const input = document.getElementById('messageInput');
-    const fileInput = document.getElementById('fileAttachment');
-    const filePreview = document.getElementById('filePreview');
-    const replyBar = document.getElementById('replyBar');
-    const parentInput = document.getElementById('parentInput');
-    const csrfToken = document.querySelector('#messageForm [name=csrfmiddlewaretoken]').value;
+  (() => {
+    const sidebarPanel = document.getElementById('chatSidebarPanel');
+    const threadPanel = document.getElementById('chatThreadPanel');
+    const emptyState = document.getElementById('emptyConversationState');
+    const activeConversation = document.getElementById('activeConversation');
+    const threadListContainer = document.getElementById('threadListContainer');
+    const threadSearch = document.getElementById('threadSearch');
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messagesList = document.getElementById('messagesList');
+    const composerForm = document.getElementById('composerForm');
+    const messageInput = document.getElementById('messageInput');
+    const fileInput = document.getElementById('fileInput');
+    const attachmentPreview = document.getElementById('attachmentPreview');
+    const attachmentName = document.getElementById('attachmentName');
+    const clearAttachmentBtn = document.getElementById('clearAttachmentBtn');
+    const threadTitle = document.getElementById('threadTitle');
+    const threadContext = document.getElementById('threadContext');
+    const threadStatus = document.getElementById('threadStatus');
+    const threadAvatar = document.getElementById('threadAvatar');
+    const backToInboxBtn = document.getElementById('backToInboxBtn');
     const typingIndicator = document.getElementById('typingIndicator');
-    const participantStatus = document.getElementById('participantStatus');
-    const picker = document.getElementById('globalEmojiPicker');
-    const supportsEventSource = typeof window.EventSource !== 'undefined';
-    let isFetchingOlder = false;
-    let hasMoreMessages = true;
+    const typingLabel = document.getElementById('typingLabel');
+    const newChatModal = document.getElementById('newChatModal');
+    const newChatSearch = document.getElementById('newChatSearch');
+    const newChatResults = document.getElementById('newChatResults');
+    const closeNewChatModal = document.getElementById('closeNewChatModal');
+    const newMessageBtn = document.getElementById('newMessageBtn');
+    const emptyStateNewChatBtn = document.getElementById('emptyStateNewChatBtn');
 
-    container.addEventListener('scroll', async () => {
-      if (container.scrollTop === 0 && !isFetchingOlder && hasMoreMessages) {
-        isFetchingOlder = true;
-        const msgElems = container.querySelectorAll('[data-msg-id]');
-        const firstId = msgElems.length ? msgElems[0].dataset.msgId : 0;
-        const oldHeight = container.scrollHeight;
+    let currentThreadId = {% if thread %}{{ thread.id }}{% else %}null{% endif %};
+    let threadStream = null;
+    let presenceInterval = null;
+    let sidebarRefreshInterval = null;
+    let typingTimeout = null;
+    let userSearchTimeout = null;
+    let sending = false;
 
-        try {
-          const res = await fetch(`/chat/${currentThreadId}/fetch-older/?before=${firstId}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          });
-          const data = await res.json();
-          if (data.messages && data.messages.length) {
-            data.messages.reverse().forEach(msg => {
-              container.insertBefore(renderMessage(msg), container.firstChild);
-            });
-            container.scrollTop = container.scrollHeight - oldHeight;
-          }
-          if (data.has_more === false) {
-            hasMoreMessages = false;
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          isFetchingOlder = false;
-        }
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop().split(';').shift();
       }
-    });
-
-    // Ensure initial scroll position is bottom
-    scrollToBottom(true);
-
-
-    let lastId = 0;
-    let syncTimer = null;
-    let reconnectTimer = null;
-    let heartbeatTimer = null;
-    let activeReactionMessageId = null;
-    let isSyncing = false;
-    let lastTypingPing = 0;
-    let stream = null;
-    let latestPresence = null;
+      return '';
+    }
 
     function escapeHtml(value) {
-      return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+      return (value || '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[char]));
     }
 
-    function formatTime(timestamp) {
-      if (!timestamp) return '';
-      const date = new Date(timestamp);
+    function initials(name) {
+      if (!name) return 'E';
+      const parts = name.trim().split(/\s+/).slice(0, 2);
+      return parts.map((part) => part.charAt(0).toUpperCase()).join('');
+    }
+
+    function formatTimeLabel(value) {
+      if (!value) return '';
+      const date = new Date(value);
       if (Number.isNaN(date.getTime())) return '';
-      return new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' }).format(date);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    function getSeenTitle(timestamp) {
-      const label = formatTime(timestamp);
-      return label ? `Seen at ${label}` : '';
+    function formatRelativeTime(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const diffMs = Date.now() - date.getTime();
+      const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+      if (diffMins < 1) return 'now';
+      if (diffMins < 60) return `${diffMins}m`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h`;
+      const diffDays = Math.floor(diffHours / 24);
+      if (diffDays < 7) return `${diffDays}d`;
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
 
-    function formatRelativeTime(timestamp) {
-      if (!timestamp) return 'Offline';
-      const date = new Date(timestamp);
-      if (Number.isNaN(date.getTime())) return 'Offline';
-      const diffSeconds = Math.round((date.getTime() - Date.now()) / 1000);
-      const absSeconds = Math.abs(diffSeconds);
-      const formatter = new Intl.RelativeTimeFormat([], { numeric: 'auto' });
-
-      if (absSeconds < 60) return formatter.format(diffSeconds, 'second');
-      if (absSeconds < 3600) return formatter.format(Math.round(diffSeconds / 60), 'minute');
-      if (absSeconds < 86400) return formatter.format(Math.round(diffSeconds / 3600), 'hour');
-      return formatter.format(Math.round(diffSeconds / 86400), 'day');
+    function isCodeMessage(message) {
+      if (!message || message.message_type !== 'text' || !message.content) return false;
+      return message.content.includes('\n') && (
+        /def |class |const |let |function |return |if |for |\{|\}|=>|;/.test(message.content) ||
+        message.content.split('\n').some((line) => /^\s{2,}\S/.test(line))
+      );
     }
 
-    function applyFormattedTimes(scope) {
-      scope.querySelectorAll('.js-message-time').forEach((element) => {
-        const formatted = formatTime(element.dataset.timestamp);
-        if (formatted) element.textContent = formatted;
-      });
-      scope.querySelectorAll('.js-seen-status[data-read-at]').forEach((icon) => {
-        const title = getSeenTitle(icon.dataset.readAt);
-        if (title) icon.title = title;
-      });
+    function inferContext(message) {
+      const type = message?.message_type || message?.type || 'text';
+      const mapping = {
+        share_coding_problem: 'Coding lab',
+        share_aptitude_question: 'Aptitude',
+        share_mock_interview_result: 'Interview review',
+        tutor_feedback: 'Tutor feedback',
+        send_resume: 'Placement prep',
+        image: 'Shared media',
+        video: 'Shared media',
+        file: 'Shared resource',
+      };
+      return mapping[type] || 'Direct chat';
     }
 
-    function updateLastMessageId() {
-      const ids = Array.from(container.querySelectorAll('[data-msg-id]'))
-        .map((item) => parseInt(item.dataset.msgId, 10))
-        .filter((value) => !Number.isNaN(value));
-      lastId = ids.length ? Math.max(...ids) : 0;
+    function openModal() {
+      newChatModal.classList.remove('hidden');
+      newChatModal.classList.add('flex');
+      newChatSearch.focus();
     }
 
-    function isNearBottom() {
-      return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    function closeModal() {
+      newChatModal.classList.add('hidden');
+      newChatModal.classList.remove('flex');
+      newChatSearch.value = '';
+      newChatResults.innerHTML = '';
     }
 
-    function scrollToBottom(force) {
-      if (force || isNearBottom()) container.scrollTop = container.scrollHeight;
-    }
-
-    function setTypingVisible(visible) {
-      typingIndicator.classList.toggle('hidden', !visible);
-      typingIndicator.classList.toggle('flex', visible);
-      participantStatus.classList.toggle('hidden', visible);
-    }
-
-    function updatePresenceStatus(presence) {
-      latestPresence = presence;
-      if (!presence) return;
-      if (presence.is_online && presence.is_active_here) {
-        participantStatus.textContent = 'Online now';
+    function setAttachmentPreview(file) {
+      if (!file) {
+        attachmentPreview.classList.add('hidden');
+        attachmentPreview.classList.remove('flex');
+        attachmentName.textContent = '';
         return;
       }
-      if (presence.is_online) {
-        participantStatus.textContent = 'Online';
-        return;
+      attachmentName.textContent = file.name;
+      attachmentPreview.classList.remove('hidden');
+      attachmentPreview.classList.add('flex');
+    }
+
+    function autoresizeInput() {
+      messageInput.style.height = 'auto';
+      messageInput.style.height = `${Math.min(messageInput.scrollHeight, 192)}px`;
+    }
+
+    function renderAvatar(url, label) {
+      if (url) {
+        return `<img src="${escapeHtml(url)}" alt="${escapeHtml(label)}" class="h-full w-full object-cover">`;
       }
-      if (presence.last_seen_raw) {
-        participantStatus.textContent = `Last seen ${formatRelativeTime(presence.last_seen_raw)}`;
-        return;
+      return escapeHtml(initials(label));
+    }
+
+    function createDivider(label) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-center gap-3 py-1';
+      wrapper.innerHTML = `
+        <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
+        <span class="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400 dark:text-on-surface-variant">${escapeHtml(label)}</span>
+        <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
+      `;
+      return wrapper;
+    }
+
+    function messageDateLabel(rawTimestamp) {
+      const date = new Date(rawTimestamp);
+      if (Number.isNaN(date.getTime())) return '';
+      const today = new Date();
+      const sameDay = date.toDateString() === today.toDateString();
+      if (sameDay) return 'Today';
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+
+    function messageContentMarkup(message) {
+      if (message.is_deleted) {
+        return `<p class="text-sm italic opacity-70">This message was deleted</p>`;
       }
-      participantStatus.textContent = 'Offline';
-    }
 
-    function handleStatusPayload(status) {
-      if (!status) return;
-      setTypingVisible(Boolean(status.is_typing));
-      updateSeenStatus(status.seen_status);
-      updatePresenceStatus(status.presence);
-      (status.reaction_updates || []).forEach((update) => updateMessageReactions(update.id, update.reactions));
-    }
+      if (message.image_url) {
+        return `
+          <a href="${escapeHtml(message.image_url)}" target="_blank" rel="noopener" class="block overflow-hidden rounded-[1.2rem]">
+            <img src="${escapeHtml(message.image_url)}" alt="Shared image" class="max-h-[24rem] w-full object-cover">
+          </a>
+          ${message.content ? `<p class="px-4 pb-4 pt-3 whitespace-pre-wrap break-words text-sm leading-7">${escapeHtml(message.content)}</p>` : ''}
+        `;
+      }
 
-    function cancelReply() {
-      parentInput.value = '';
-      replyBar.classList.add('hidden');
-      replyBar.classList.remove('flex');
-    }
+      if (message.file_url) {
+        return `
+          <a href="${escapeHtml(message.file_url)}" target="_blank" rel="noopener" class="message-resource">
+            <div class="message-resource-icon">
+              <i class="ri-attachment-2-line text-primary"></i>
+            </div>
+            <div class="p-4">
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">${escapeHtml(inferContext(message))}</p>
+              <p class="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-on-surface">${escapeHtml(message.file_name || 'Attachment')}</p>
+              <p class="mt-2 text-xs font-bold text-primary">Open file</p>
+            </div>
+          </a>
+        `;
+      }
 
-    function clearAttachment() {
-      fileInput.value = '';
-      filePreview.classList.add('hidden');
-      filePreview.classList.remove('flex');
-    }
+      if (message.message_type !== 'text' && message.content) {
+        return `
+          <div class="message-resource">
+            <div class="message-resource-icon">
+              <i class="ri-links-line text-primary"></i>
+            </div>
+            <div class="p-4">
+              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">${escapeHtml(inferContext(message))}</p>
+              <p class="mt-1 whitespace-pre-wrap break-words text-sm font-semibold leading-7 text-slate-900 dark:text-on-surface">${escapeHtml(message.content)}</p>
+            </div>
+          </div>
+        `;
+      }
 
-    function renderReactionButtons(reactions, messageId) {
-      return (reactions || []).map((reaction) => `
-        <button type="button" class="reaction-badge inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] ${reaction.reacted ? 'border-sky-400/30 bg-sky-500/15 text-sky-100' : 'border-white/8 bg-slate-950/35 text-slate-300'}" data-emoji="${escapeHtml(reaction.emoji)}" data-id="${messageId}">
-          <span>${reaction.emoji}</span>
-          ${reaction.count > 1 ? `<span class="font-bold text-slate-400">${reaction.count}</span>` : ''}
-        </button>
-      `).join('');
+      if (isCodeMessage(message)) {
+        return `
+          <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'} is-code">
+            <div class="message-code-head">
+              <span class="flex items-center gap-2">
+                <i class="ri-code-s-slash-line"></i>
+                Code snippet
+              </span>
+              <span>${escapeHtml(inferContext(message))}</span>
+            </div>
+            <pre class="message-code-pre">${escapeHtml(message.content)}</pre>
+          </div>
+        `;
+      }
+
+      return `<div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'}"><p class="whitespace-pre-wrap break-words text-sm leading-7">${escapeHtml(message.content || '')}</p></div>`;
     }
 
     function renderMessage(message) {
       const wrapper = document.createElement('div');
-      wrapper.className = `msg-wrapper flex ${message.is_mine ? 'justify-end' : 'justify-start'}`;
       wrapper.dataset.msgId = message.id;
+      wrapper.dataset.timestamp = message.timestamp_raw || '';
+      wrapper.className = `flex ${message.is_mine ? 'justify-end' : 'justify-start'}`;
 
-      const replyMarkup = message.parent ? `
-        <div class="reply-chip w-full">
-          <span class="reply-header block">Replying to ${escapeHtml(message.parent.sender)}</span>
-          <div class="reply-content">${escapeHtml(message.parent.content)}</div>
-        </div>
-      ` : '';
-
-      let attachmentMarkup = '';
-      
-      let cardMarkup = '';
-      if (['share_coding_problem', 'share_aptitude_question', 'share_mock_interview_result', 'send_resume', 'tutor_feedback'].includes(message.message_type)) {
-          let html = '';
-          try {
-             // We do rendering cleanly using JS logic which is appended via document-ready parsing
-             const payload = JSON.parse(message.content || '{}');
-             html = renderCustomCardHTML(message.message_type, payload);
-          } catch(e) { console.error(e); }
-          attachmentMarkup = renderCustomCardHTML(message.message_type, payload);
-      } else if (message.message_type === 'image' && message.image_url) {
-
-        attachmentMarkup = `<a href="${escapeHtml(message.image_url)}" target="_blank" rel="noopener noreferrer" class="mb-3 block overflow-hidden rounded-2xl border border-white/10"><img src="${escapeHtml(message.image_url)}" alt="Shared image" class="max-h-72 w-full object-contain"></a>`;
-      } else if (message.message_type === 'video' && message.file_url) {
-        attachmentMarkup = `<video controls class="mb-3 max-h-72 w-full rounded-2xl border border-white/10"><source src="${escapeHtml(message.file_url)}"></video>`;
-      } else if (message.message_type === 'file' && message.file_url) {
-        attachmentMarkup = `<a href="${escapeHtml(message.file_url)}" download target="_blank" rel="noopener noreferrer" class="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 transition hover:bg-white/10"><div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400"><i class="ri-file-line text-xl"></i></div><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-100">${escapeHtml(message.file_name || 'Attachment')}</p><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Download file</p></div></a>`;
-      }
+      const contentMarkup = isCodeMessage(message)
+        ? messageContentMarkup(message)
+        : `<div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'}">${messageContentMarkup(message)}</div>`;
 
       wrapper.innerHTML = `
-        <div class="flex w-full max-w-[92%] flex-col gap-1.5 ${message.is_mine ? 'items-end sm:max-w-[78%]' : 'items-start sm:max-w-[78%]'}">
-          ${replyMarkup}
-          <div class="${message.is_mine ? 'bubble-sent' : 'bubble-received'} w-full px-4 py-3 sm:px-5">
-            ${attachmentMarkup}
-            ${message.content ? `<p class="whitespace-pre-wrap break-words text-[13px] leading-6 text-inherit font-medium sm:text-sm">${escapeHtml(message.content)}</p>` : ''}
-            <div class="reactions-row mt-3 flex flex-wrap gap-1.5" id="reactions-${message.id}">${renderReactionButtons(message.reactions, message.id)}</div>
-          </div>
-          <div class="flex w-full flex-wrap items-center gap-2 ${message.is_mine ? 'justify-end' : 'justify-start'}">
-            <div class="message-actions flex items-center gap-2">
-              ${!message.is_deleted ? `<button type="button" class="reply-btn inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 hover:bg-white/5 hover:text-sky-400" data-id="${message.id}" data-user="${escapeHtml(message.sender)}" data-content="${escapeHtml(message.content || '')}">Reply</button>
-              <button type="button" class="copy-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-sky-400" data-content="${escapeHtml(message.content || '')}" title="Copy"><i class="ri-file-copy-line text-sm"></i></button>
-              ${message.is_mine && message.message_type === 'text' ? `<button type="button" class="edit-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-emerald-400" data-id="${message.id}" data-content="${escapeHtml(message.content || '')}" title="Edit"><i class="ri-edit-line text-sm"></i></button>` : ''}` : ''}
-              <button type="button" class="delete-btn inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-rose-400" data-id="${message.id}" data-mine="${message.is_mine && !message.is_deleted ? 'true' : 'false'}" title="Delete"><i class="ri-delete-bin-line text-sm"></i></button>
-              <button type="button" class="reaction-trigger inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-slate-400 hover:bg-white/10 hover:text-yellow-300" data-id="${message.id}"><i class="ri-emotion-happy-line text-sm"></i></button>
+        <div class="max-w-[85%] sm:max-w-[70%]">
+          ${message.parent ? `
+            <div class="mb-2 rounded-2xl border border-slate-200/80 bg-white/65 px-4 py-3 text-xs dark:border-white/10 dark:bg-white/5">
+              <p class="font-black uppercase tracking-[0.18em] text-primary">${escapeHtml(message.parent.sender)}</p>
+              <p class="mt-1 truncate text-slate-500 dark:text-on-surface-variant">${escapeHtml(message.parent.content)}</p>
             </div>
-            <span class="js-message-time text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500" data-timestamp="${escapeHtml(message.timestamp_raw)}">${escapeHtml(message.created_at || '')}</span>
-            ${message.is_edited ? '<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>' : ''}
-            ${message.is_mine ? `
-              <i class="js-seen-status ${message.is_read ? 'ri-double-check-line text-sky-400' : 'ri-check-line text-slate-600'} text-xs" 
-                 data-mine="true" 
-                 ${message.read_at_raw ? `data-read-at="${escapeHtml(message.read_at_raw)}"` : ''} 
-                 title="${message.is_read ? escapeHtml(getSeenTitle(message.read_at_raw)) : 'Sent'}"></i>` : ''}
-          </div>
+          ` : ''}
+          ${contentMarkup}
+          <p class="message-meta mt-2 ${message.is_mine ? 'text-right' : ''} text-slate-400 dark:text-on-surface-variant">
+            ${escapeHtml(message.created_at || formatTimeLabel(message.timestamp_raw))}
+            ${message.is_edited ? ' · edited' : ''}
+            ${message.is_mine && message.is_read ? ' · seen' : ''}
+          </p>
         </div>
       `;
-
-      applyFormattedTimes(wrapper);
       return wrapper;
     }
 
-    function updateMessageReactions(messageId, reactions) {
-      const row = document.getElementById(`reactions-${messageId}`);
-      if (row) row.innerHTML = renderReactionButtons(reactions, messageId);
+    function renderMessages(messages) {
+      messagesList.innerHTML = '';
+      let previousDate = '';
+      messages.forEach((message) => {
+        const currentDate = messageDateLabel(message.timestamp_raw);
+        if (currentDate && currentDate !== previousDate) {
+          messagesList.appendChild(createDivider(currentDate));
+          previousDate = currentDate;
+        }
+        messagesList.appendChild(renderMessage(message));
+      });
+      scrollToBottom(false);
     }
 
-    function updateSeenStatus(seenStatus) {
-      if (!seenStatus) return;
-      const mineIcons = Array.from(container.querySelectorAll('.js-seen-status[data-mine="true"]'));
-      
-      // Update all sent messages to seen if the latest one is read
-      // Since read status in our model typically means "all previous messages are read"
-      if (seenStatus.is_read) {
-        mineIcons.forEach(icon => {
-          if (!icon.classList.contains('ri-double-check-line')) {
-            icon.className = 'js-seen-status ri-double-check-line text-sky-400 text-xs';
-            if (seenStatus.read_at_raw) {
-              icon.dataset.readAt = seenStatus.read_at_raw;
-              icon.title = getSeenTitle(seenStatus.read_at_raw);
-            }
-          }
-        });
-      }
+    function scrollToBottom(smooth = true) {
+      if (!messagesContainer) return;
+      messagesContainer.scrollTo({
+        top: messagesContainer.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
     }
 
-    async function sendReaction(emoji, messageId) {
-      try {
-        const response = await fetch(`/chat/message/${messageId}/react/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
-          body: new URLSearchParams({ emoji }),
-        });
-        const data = await response.json();
-        if (data.status === 'ok') updateMessageReactions(messageId, data.reactions);
-      } catch (error) {
-        console.error('Reaction error', error);
-      }
+    function isNearBottom() {
+      return messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 160;
     }
 
-    async function sendPresenceHeartbeat() {
-      if (document.hidden) return;
-      try {
-        await fetch(`/chat/${threadId}/presence/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
-        });
-      } catch (error) {
-        console.error('Presence error', error);
-      }
+    function setActiveSidebar(threadId) {
+      document.querySelectorAll('.sidebar-thread').forEach((item) => {
+        item.classList.toggle('is-active', String(item.dataset.threadId) === String(threadId));
+      });
     }
 
-    function startPresenceHeartbeat() {
-      clearInterval(heartbeatTimer);
-      sendPresenceHeartbeat();
-      heartbeatTimer = window.setInterval(sendPresenceHeartbeat, 20000);
+    function updateHeader(data) {
+      const name = data.other_user.full_name || data.other_user.username;
+      threadTitle.textContent = name;
+      threadAvatar.innerHTML = renderAvatar(data.other_user.avatar_url, name);
+      const latestMessage = data.messages && data.messages.length ? data.messages[data.messages.length - 1] : null;
+      threadContext.textContent = inferContext(latestMessage);
     }
 
-    function connectStream() {
-      if (!supportsEventSource) {
-        scheduleSync(3000);
+    function updateStatus(status) {
+      if (!status) return;
+      if (status.is_typing) {
+        threadStatus.textContent = 'Typing…';
+        typingLabel.textContent = `${threadTitle.textContent} is typing`;
+        typingIndicator.classList.remove('hidden');
+        typingIndicator.classList.add('flex');
         return;
       }
 
-      if (stream) {
-        stream.close();
+      typingIndicator.classList.add('hidden');
+      typingIndicator.classList.remove('flex');
+
+      if (status.presence?.is_online) {
+        threadStatus.textContent = 'Online now';
+        return;
       }
 
-      clearTimeout(reconnectTimer);
-      stream = new EventSource(`/chat/${threadId}/stream/?last_id=${lastId}`);
+      if (status.presence?.last_seen_raw) {
+        threadStatus.textContent = `Last seen ${formatRelativeTime(status.presence.last_seen_raw)} ago`;
+        return;
+      }
 
-      stream.addEventListener('messages', (event) => {
-        const messages = JSON.parse(event.data || '[]');
-        const stickToBottom = isNearBottom();
-        messages.forEach((message) => {
-          if (!container.querySelector(`[data-msg-id="${message.id}"]`)) {
-            container.appendChild(renderMessage(message));
+      threadStatus.textContent = 'Message on Elevo';
+    }
+
+    function showThreadPanel() {
+      emptyState.classList.add('hidden');
+      activeConversation.classList.remove('hidden');
+      if (window.innerWidth < 1024) {
+        sidebarPanel.classList.add('hidden');
+        threadPanel.classList.remove('hidden');
+        threadPanel.classList.add('flex');
+      }
+    }
+
+    function showInboxPanel(pushState = true) {
+      currentThreadId = null;
+      if (threadStream) {
+        threadStream.close();
+        threadStream = null;
+      }
+      if (presenceInterval) {
+        clearInterval(presenceInterval);
+        presenceInterval = null;
+      }
+      document.querySelectorAll('.sidebar-thread').forEach((item) => item.classList.remove('is-active'));
+      messagesContainer.dataset.threadId = '';
+      activeConversation.classList.add('hidden');
+      if (window.innerWidth < 1024) {
+        threadPanel.classList.add('hidden');
+        sidebarPanel.classList.remove('hidden');
+        sidebarPanel.classList.add('flex');
+      } else {
+        emptyState.classList.remove('hidden');
+      }
+      if (pushState) {
+        history.pushState({ type: 'inbox' }, 'Inbox | Elevo', '{% url "chat:inbox" %}');
+      }
+    }
+
+    function connectThreadStream(threadId) {
+      if (threadStream) {
+        threadStream.close();
+      }
+
+      const lastNode = messagesList.querySelector('[data-msg-id]:last-of-type');
+      const lastId = lastNode ? lastNode.dataset.msgId : 0;
+      threadStream = new EventSource(`/chat/${threadId}/stream/?last_id=${lastId}`);
+
+      threadStream.addEventListener('messages', (event) => {
+        const payload = JSON.parse(event.data);
+        if (!Array.isArray(payload) || !payload.length) return;
+        const shouldStick = isNearBottom();
+        let previousDate = '';
+        const lastRendered = messagesList.querySelector('[data-msg-id]:last-of-type');
+        if (lastRendered?.dataset.timestamp) {
+          previousDate = messageDateLabel(lastRendered.dataset.timestamp);
+        }
+
+        payload.forEach((message) => {
+          if (messagesList.querySelector(`[data-msg-id="${message.id}"]`)) return;
+          const currentDate = messageDateLabel(message.timestamp_raw);
+          if (currentDate && currentDate !== previousDate) {
+            messagesList.appendChild(createDivider(currentDate));
+            previousDate = currentDate;
           }
+          messagesList.appendChild(renderMessage(message));
         });
-        if (messages.length) {
-          updateLastMessageId();
-          scrollToBottom(stickToBottom);
+
+        updateSidebarPreview(threadId, payload[payload.length - 1], 0);
+        if (shouldStick) {
+          scrollToBottom();
         }
       });
 
-      stream.addEventListener('status', (event) => {
-        handleStatusPayload(JSON.parse(event.data || '{}'));
+      threadStream.addEventListener('status', (event) => {
+        updateStatus(JSON.parse(event.data));
       });
 
-      stream.onerror = () => {
-        if (stream) {
-          stream.close();
-          stream = null;
+      threadStream.onerror = () => {
+        if (threadStream) {
+          threadStream.close();
         }
-        if (!document.hidden) {
-          reconnectTimer = window.setTimeout(connectStream, 3000);
-        }
+        window.setTimeout(() => {
+          if (currentThreadId === threadId) {
+            connectThreadStream(threadId);
+          }
+        }, 3000);
       };
     }
 
-    function scheduleSync(delay) {
-      clearTimeout(syncTimer);
-      syncTimer = window.setTimeout(syncThread, delay);
+    function maintainPresence(threadId) {
+      if (presenceInterval) {
+        clearInterval(presenceInterval);
+      }
+      const heartbeat = () => {
+        fetch(`/chat/${threadId}/presence/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        }).catch(() => {});
+      };
+      heartbeat();
+      presenceInterval = window.setInterval(heartbeat, 20000);
     }
 
-    async function syncThread() {
-      if (isSyncing) return;
-      isSyncing = true;
-      try {
-        const response = await fetch(`/chat/${threadId}/fetch/?after=${lastId}`, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        });
-        const data = await response.json();
-        const stickToBottom = isNearBottom();
-        (data.messages || []).forEach((message) => {
-          if (!container.querySelector(`[data-msg-id="${message.id}"]`)) {
-            container.appendChild(renderMessage(message));
+    async function loadThread(threadId, pushState = true) {
+      const response = await fetch(`/chat/api/thread/${threadId}/data/`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load conversation');
+      }
+
+      currentThreadId = threadId;
+      messagesContainer.dataset.threadId = threadId;
+      updateHeader(data);
+      renderMessages(data.messages || []);
+      updateStatus(data.status);
+      showThreadPanel();
+      setActiveSidebar(threadId);
+      connectThreadStream(threadId);
+      maintainPresence(threadId);
+
+      if (pushState) {
+        history.pushState(
+          { type: 'thread', threadId },
+          `${data.other_user.full_name || data.other_user.username} | Chat | Elevo`,
+          `/chat/${threadId}/`
+        );
+      }
+    }
+
+    function updateSidebarPreview(threadId, message, unread) {
+      const item = threadListContainer.querySelector(`[data-thread-id="${threadId}"]`);
+      if (!item) return;
+      const preview = item.querySelector('.last-message');
+      const time = item.querySelector('.whitespace-nowrap');
+      const badge = item.querySelector('.unread-badge');
+      if (preview) {
+        const prefix = message.is_mine ? '<span class="mr-1 text-sky-500">You:</span>' : '';
+        preview.innerHTML = `${prefix}${escapeHtml((message.content || inferContext(message)).slice(0, 58))}`;
+        preview.classList.remove('text-slate-500', 'dark:text-on-surface-variant');
+        preview.classList.add('text-slate-800', 'dark:text-on-surface');
+      }
+      if (time) {
+        time.textContent = formatRelativeTime(message.timestamp_raw);
+      }
+      if (typeof unread === 'number') {
+        if (unread > 0) {
+          if (badge) {
+            badge.textContent = unread;
           }
-        });
-        if (data.messages && data.messages.length) {
-          updateLastMessageId();
-          scrollToBottom(stickToBottom);
+        } else if (badge) {
+          badge.remove();
         }
-        handleStatusPayload(data.status);
-      } catch (error) {
-        console.error('Sync error', error);
-      } finally {
-        isSyncing = false;
-        scheduleSync(document.hidden ? 10000 : 3000);
       }
     }
 
-    async function notifyTyping() {
-      const now = Date.now();
-      if (now - lastTypingPing < 1500) return;
-      lastTypingPing = now;
-      try {
-        await fetch(`/chat/${threadId}/typing/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
-        });
-      } catch (error) {
-        console.error('Typing error', error);
-      }
+    async function refreshSidebar() {
+      const response = await fetch('{% url "chat:inbox_api" %}', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await response.json();
+      if (!response.ok || !Array.isArray(data.threads)) return;
+      data.threads.forEach((thread) => {
+        updateSidebarPreview(thread.thread_id, {
+          content: thread.last_message?.content || thread.last_message?.type || '',
+          is_mine: thread.last_message?.is_mine,
+          timestamp_raw: thread.last_message?.time,
+          message_type: thread.last_message?.type || 'text',
+        }, thread.unread);
+      });
     }
 
-    document.addEventListener('click', (event) => {
-      const replyButton = event.target.closest('.reply-btn');
-
-      const copyBtn = event.target.closest('.copy-btn');
-      if (copyBtn) {
-        navigator.clipboard.writeText(copyBtn.dataset.content || '');
-        const icon = copyBtn.querySelector('i');
-        const oldClass = icon.className;
-        icon.className = 'ri-check-line text-emerald-400 text-sm';
-        setTimeout(() => icon.className = oldClass, 1500);
-        return;
-      }
-
-      const deleteBtn = event.target.closest('.delete-btn');
-      if (deleteBtn) {
-        window.activeDeleteMessageId = deleteBtn.dataset.id;
-        const isMine = deleteBtn.dataset.mine === 'true';
-        document.getElementById('deleteForEveryoneBtn').classList.toggle('hidden', !isMine);
-        document.getElementById('deleteModal').classList.remove('hidden');
-        document.getElementById('deleteModal').classList.add('flex');
-        return;
-      }
-
-      const editBtn = event.target.closest('.edit-btn');
-      if (editBtn) {
-        window.activeEditMessageId = editBtn.dataset.id;
-        document.getElementById('editContentInput').value = editBtn.dataset.content || '';
-        document.getElementById('editModal').classList.remove('hidden');
-        document.getElementById('editModal').classList.add('flex');
-        document.getElementById('editContentInput').focus();
-        return;
-      }
-
-
-      if (event.target.closest('#themePickerBtn')) {
-        document.getElementById('themeModal').classList.remove('hidden');
-        document.getElementById('themeModal').classList.add('flex');
-        return;
-      }
-
-      if (event.target.closest('#closeThemeModalBtn') || (event.target.id === 'themeModal')) {
-        document.getElementById('themeModal').classList.add('hidden');
-        document.getElementById('themeModal').classList.remove('flex');
-        return;
-      }
-      
-      const themeOpt = event.target.closest('.theme-option');
-      if (themeOpt) {
-        const themeVal = themeOpt.dataset.themeVal;
-        // Optimistic UI update
-        document.getElementById('chatWrapper').setAttribute('data-theme', themeVal);
-        
-        fetch(`/chat/${threadId}/theme/`, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrfToken },
-          body: new URLSearchParams({ theme: themeVal })
-        });
-        
-        document.getElementById('themeModal').classList.add('hidden');
-        document.getElementById('themeModal').classList.remove('flex');
-        return;
-      }
-
-      if (event.target.id === 'cancelDeleteBtn') {
-        document.getElementById('deleteModal').classList.add('hidden');
-        document.getElementById('deleteModal').classList.remove('flex');
-        return;
-      }
-
-      if (event.target.id === 'cancelEditBtn') {
-        document.getElementById('editModal').classList.add('hidden');
-        document.getElementById('editModal').classList.remove('flex');
-        return;
-      }
-
-      if (event.target.id === 'deleteForMeBtn' || event.target.id === 'deleteForEveryoneBtn') {
-        const messageId = window.activeDeleteMessageId;
-        const deleteType = event.target.id === 'deleteForMeBtn' ? 'for_me' : 'for_everyone';
-        if (messageId) {
-          fetch(`/chat/message/${messageId}/delete/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrfToken },
-            body: new URLSearchParams({ delete_type: deleteType })
-          }).then(() => {
-            const msgEl = document.querySelector(`[data-msg-id="${messageId}"]`);
-            if (msgEl) {
-              if (deleteType === 'for_me') {
-                msgEl.remove();
-              } else {
-                let p = msgEl.querySelector('p');
-                if (!p) {
-                    p = document.createElement('p');
-                    p.className = 'whitespace-pre-wrap break-words text-[13px] leading-6 text-slate-100 sm:text-sm';
-                    const bubble = msgEl.querySelector('.bubble-sent, .bubble-received');
-                    if (bubble) bubble.insertBefore(p, bubble.firstChild);
-                }
-                p.textContent = 'This message was deleted';
-                p.classList.add('italic', 'text-slate-500');
-                
-                // Remove attachments
-                msgEl.querySelectorAll('a, video').forEach(e => {
-                  if (!e.closest('.message-actions') && !e.closest('.reactions-row')) e.remove();
-                });
-
-                // Remove extraneous actions
-                const editBtn = msgEl.querySelector('.edit-btn'); if (editBtn) editBtn.remove();
-                const copyBtn = msgEl.querySelector('.copy-btn'); if (copyBtn) copyBtn.remove();
-                const replyBtn = msgEl.querySelector('.reply-btn'); if (replyBtn) replyBtn.remove();
-                
-                // Downgrade delete button privileges
-                const delBtn = msgEl.querySelector('.delete-btn');
-                if (delBtn) delBtn.dataset.mine = 'false';
-              }
-            }
-          });
-        }
-        document.getElementById('deleteModal').classList.add('hidden');
-        document.getElementById('deleteModal').classList.remove('flex');
-        window.activeDeleteMessageId = null;
-        return;
-      }
-
-      if (event.target.id === 'saveEditBtn') {
-        const messageId = window.activeEditMessageId;
-        const newContent = document.getElementById('editContentInput').value.trim();
-        if (messageId && newContent) {
-          fetch(`/chat/message/${messageId}/edit/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrfToken },
-            body: new URLSearchParams({ content: newContent })
-          }).then(res => res.json()).then(data => {
-            if(data.status === 'ok') {
-               const msgEl = document.querySelector(`[data-msg-id="${messageId}"]`);
-               if(msgEl) {
-                  const p = msgEl.querySelector('p');
-                  if (p) p.textContent = data.message.content;
-                  if (!msgEl.querySelector('.is-edited-tag')) {
-                    const timeEl = msgEl.querySelector('.js-message-time');
-                    if (timeEl) {
-                      timeEl.insertAdjacentHTML('afterend', '<span class="is-edited-tag ml-1 text-[9px] text-slate-600">(edited)</span>');
-                    }
-                  }
-                  const editB = msgEl.querySelector('.edit-btn');
-                  const replyB = msgEl.querySelector('.reply-btn');
-                  const copyB = msgEl.querySelector('.copy-btn');
-                  if(editB) editB.dataset.content = data.message.content;
-                  if(replyB) replyB.dataset.content = data.message.content;
-                  if(copyB) copyB.dataset.content = data.message.content;
-               }
-            }
-          });
-        }
-        document.getElementById('editModal').classList.add('hidden');
-        document.getElementById('editModal').classList.remove('flex');
-        window.activeEditMessageId = null;
-        return;
-      }
-
-      if (replyButton) {
-        parentInput.value = replyButton.dataset.id;
-        document.getElementById('replyUser').textContent = replyButton.dataset.user || '';
-        document.getElementById('replyContent').textContent = replyButton.dataset.content || 'Attachment';
-        replyBar.classList.remove('hidden');
-        replyBar.classList.add('flex');
-        input.focus();
-        return;
-      }
-
-      const reactionBadge = event.target.closest('.reaction-badge');
-      if (reactionBadge) {
-        sendReaction(reactionBadge.dataset.emoji, reactionBadge.dataset.id);
-        return;
-      }
-
-      const reactionTrigger = event.target.closest('.reaction-trigger');
-      if (reactionTrigger) {
-        activeReactionMessageId = reactionTrigger.dataset.id;
-        const rect = reactionTrigger.getBoundingClientRect();
-        picker.classList.toggle('hidden');
-        picker.style.top = `${Math.max(16, rect.top - 130)}px`;
-        picker.style.left = `${Math.min(window.innerWidth - 276, Math.max(12, rect.left - 108))}px`;
-        return;
-      }
-
-      const emojiButton = event.target.closest('.emoji-btn');
-      if (emojiButton && activeReactionMessageId) {
-        picker.classList.add('hidden');
-        sendReaction(emojiButton.dataset.emoji, activeReactionMessageId);
-        activeReactionMessageId = null;
-        return;
-      }
-
-      if (event.target.closest('#attachBtn')) {
-        fileInput.click();
-        return;
-      }
-
-      if (event.target.closest('#clearFileBtn')) {
-        clearAttachment();
-        return;
-      }
-
-      if (event.target.closest('#cancelReplyBtn')) {
-        cancelReply();
-        return;
-      }
-
-      if (!picker.contains(event.target)) picker.classList.add('hidden');
-    });
-
-    
-    form.addEventListener('submit', async (event) => {
+    async function submitMessage(event) {
       event.preventDefault();
-      const content = input.value.trim();
-      const file = fileInput.files[0];
-      if (!content && !file) return;
+      if (!currentThreadId || sending) return;
 
-      // Custom Validation: File Size (10MB limit)
-      if (file && file.size > 10 * 1024 * 1024) {
-        alert('File is too large! Maximum allowed size is 10MB.');
-        return;
+      const hasText = messageInput.value.trim().length > 0;
+      const hasFile = fileInput.files.length > 0;
+      if (!hasText && !hasFile) return;
+
+      sending = true;
+      const formData = new FormData();
+      formData.append('content', messageInput.value.trim());
+      if (hasFile) {
+        formData.append('file', fileInput.files[0]);
       }
-
-      // Optimistic UI Reset
-      const originalValue = input.value;
-      input.value = '';
-      input.style.height = 'auto';
-      const originalSendHtml = sendBtn.innerHTML;
-      sendBtn.disabled = true;
-      sendBtn.innerHTML = '<i class="ri-loader-4-line animate-spin text-lg"></i>';
-
-      const payload = new FormData();
-      payload.append('content', content);
-      if (parentInput.value) payload.append('parent_id', parentInput.value);
-      if (file) {
-        if (file.type.startsWith('image/')) payload.append('image', file);
-        else payload.append('file', file);
-      }
-      
-      cancelReply();
-      clearAttachment();
-
-      // Fetch fresh CSRF token from cookie for every request
-      const freshToken = getCookie('csrftoken') || csrfToken;
 
       try {
         const response = await fetch(`/chat/${currentThreadId}/send/`, {
           method: 'POST',
-          headers: { 'X-CSRFToken': freshToken },
-          body: payload,
+          headers: { 'X-CSRFToken': getCookie('csrftoken') },
+          body: formData,
         });
-        
-        const contentType = response.headers.get('content-type');
-        let data = null;
-
-        if (contentType && contentType.includes('application/json')) {
-          try {
-            data = await response.json();
-          } catch (e) {
-            console.error('JSON parse error:', e);
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to send message');
+        }
+        if (!messagesList.querySelector(`[data-msg-id="${data.message.id}"]`)) {
+          const shouldStick = isNearBottom();
+          const lastRendered = messagesList.querySelector('[data-msg-id]:last-of-type');
+          const previousDate = lastRendered?.dataset.timestamp ? messageDateLabel(lastRendered.dataset.timestamp) : '';
+          const currentDate = messageDateLabel(data.message.timestamp_raw);
+          if (currentDate && currentDate !== previousDate) {
+            messagesList.appendChild(createDivider(currentDate));
+          }
+          messagesList.appendChild(renderMessage(data.message));
+          if (shouldStick) {
+            scrollToBottom();
           }
         }
-
-        if (!response.ok) {
-           const msg = (data && data.error) ? data.error : `Server Error (Status: ${response.status})`;
-           throw new Error(msg);
-        }
-
-        if (data && data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
-          container.appendChild(renderMessage(data.message));
-          updateLastMessageId();
-          scrollToBottom(true);
-        }
+        updateSidebarPreview(currentThreadId, data.message, 0);
+        messageInput.value = '';
+        fileInput.value = '';
+        setAttachmentPreview(null);
+        autoresizeInput();
       } catch (error) {
-        console.error('Send error:', error);
-        input.value = originalValue;
-        alert('Failed to send message: ' + error.message);
+        alert(error.message);
       } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = originalSendHtml;
-        updateSendButtonState();
-      }
-    });
-
-
-    input.addEventListener('input', () => {
-      input.style.height = 'auto';
-      input.style.height = `${Math.min(input.scrollHeight, 144)}px`;
-      notifyTyping();
-    });
-
-    fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        clearAttachment();
-        return;
-      }
-      document.getElementById('previewName').textContent = file.name;
-      document.getElementById('previewSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
-      filePreview.classList.remove('hidden');
-      filePreview.classList.add('flex');
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (stream) {
-          stream.close();
-          stream = null;
-        }
-        clearTimeout(reconnectTimer);
-        if (!supportsEventSource) {
-          scheduleSync(10000);
-        }
-        return;
-      }
-
-      sendPresenceHeartbeat();
-      if (supportsEventSource) {
-        clearTimeout(syncTimer);
-        connectStream();
-      } else {
-        scheduleSync(500);
-      }
-    });
-
-    window.setInterval(() => {
-      if (!typingIndicator.classList.contains('hidden')) return;
-      if (latestPresence && !latestPresence.is_online && latestPresence.last_seen_raw) {
-        updatePresenceStatus(latestPresence);
-      }
-    }, 30000);
-
-    
-    // ─── SPA Navigation Engine & Unified Shell ───
-    const chatThreadView = document.getElementById('chatThreadView');
-    const socialCenterView = document.getElementById('socialCenterView');
-
-    const inboxSidebar = document.getElementById('inboxSidebar');
-    const mainChatArea = document.getElementById('mainChatArea');
-
-    function toggleView(inboxMode) {
-      if (inboxMode) {
-        if (inboxSidebar) {
-           inboxSidebar.classList.remove('hidden');
-           inboxSidebar.classList.add('lg:block');
-        }
-        if (mainChatArea) {
-           mainChatArea.classList.add('hidden');
-           mainChatArea.classList.add('lg:block');
-        }
-
-        chatThreadView.classList.add('hidden');
-        socialCenterView.classList.remove('hidden');
-        if (stream) { stream.close(); stream = null; }
-        document.title = "Inbox | Elevo";
-      } else {
-        if (inboxSidebar) {
-           inboxSidebar.classList.add('hidden');
-           inboxSidebar.classList.add('lg:block');
-        }
-        if (mainChatArea) {
-           mainChatArea.classList.remove('hidden');
-        }
-
-        socialCenterView.classList.add('hidden');
-        chatThreadView.classList.remove('hidden');
+        sending = false;
       }
     }
 
-    async function loadInbox(pushState = true) {
-      if (pushState) history.pushState({ type: 'inbox' }, "Social Center | Elevo", "/chat/");
-      toggleView(true);
-      refreshSidebar();
-      refreshSocialThreadList(); // Sync the main list too
+    function sendTypingSignal() {
+      if (!currentThreadId) return;
+      fetch(`/chat/${currentThreadId}/typing/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+      }).catch(() => {});
     }
-
-    async function loadThread(threadId, pushState = true) {
-      // Toggle to Thread View
-      toggleView(false);
-      
-      if (threadId === currentThreadId && !chatThreadView.classList.contains('hidden')) return;
-      
-      // Close existing stream
-      if (stream) { stream.close(); stream = null; }
-
-      // Show temporary loading state
-      const mainChat = document.querySelector('main');
-      mainChat.style.opacity = '0.7';
-      mainChat.style.pointerEvents = 'none';
-
-      try {
-        const res = await fetch(`/chat/api/thread/${threadId}/data/`, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        const data = await res.json();
-        
-        if (!res.ok) throw new Error(data.error || 'Failed to load thread');
-
-        // Update Context
-        currentThreadId = threadId;
-        container.dataset.threadId = threadId;
-        currentUserId = data.user_id;
-        
-        // Update Title & URL
-        const newTitle = `Chat with ${data.other_user.full_name || data.other_user.username} | Elevo`;
-        document.title = newTitle;
-        if (pushState) {
-          history.pushState({ type: 'thread', threadId }, newTitle, `/chat/${threadId}/`);
-        }
-
-        // Update Theme
-        const chatWrapper = document.getElementById('chatWrapper');
-        chatWrapper.dataset.theme = data.theme || 'default';
-
-        // Update Header
-        const headerName = document.querySelector('header h1');
-        const headerAvatarContainer = document.querySelector('header .relative');
-        
-        if (headerName) headerName.textContent = data.other_user.full_name || data.other_user.username;
-        
-        if (headerAvatarContainer) {
-          const avatarHtml = data.other_user.avatar_url
-            ? `<img src="${data.other_user.avatar_url}" alt="${data.other_user.username}" class="h-11 w-11 rounded-2xl border border-white/15 object-cover sm:h-12 sm:w-12">`
-            : `<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 text-lg font-black text-white sm:h-12 sm:w-12">${(data.other_user.username || '?')[0].toUpperCase()}</div>`;
-          
-          const statusDot = `<span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-950 bg-emerald-500"></span>`;
-          headerAvatarContainer.innerHTML = avatarHtml + statusDot;
-        }
-
-        // Render Messages
-        container.innerHTML = '';
-        lastId = 0;
-        hasMoreMessages = true;
-        
-        if (data.messages && data.messages.length) {
-          let lastDate = null;
-          data.messages.forEach(msg => {
-            const msgDate = new Date(msg.created_at).toDateString();
-            if (msgDate !== lastDate) {
-              const dayLabel = document.createElement('div');
-              dayLabel.className = "my-6 flex justify-center";
-              dayLabel.innerHTML = `<span class="rounded-full bg-slate-800/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 backdrop-blur-sm">${new Date(msg.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}</span>`;
-              container.appendChild(dayLabel);
-              lastDate = msgDate;
-            }
-            container.appendChild(renderMessage(msg));
-          });
-        }
-
-        // UI Reset
-        updateLastMessageId();
-        applyFormattedTimes(container);
-        initializeCards(container);
-        scrollToBottom(true);
-        cancelReply();
-        clearAttachment();
-        
-        // Highlight active sidebar
-        document.querySelectorAll('.sidebar-thread, .social-thread-item').forEach(el => {
-          const href = el.getAttribute('href');
-          if (href) el.classList.toggle('active', href.includes(`/${threadId}/`));
-        });
-
-        // Update Presence/Status
-        handleStatusPayload(data.status);
-
-        // Reconnect Stream
-        connectStream();
-
-      } catch (err) {
-        console.error('SPA load error:', err);
-        alert('Could not switch thread: ' + err.message);
-      } finally {
-        mainChat.style.opacity = '1';
-        mainChat.style.pointerEvents = 'auto';
-      }
-    }
-
-    // Intercept Links (Sidebar, Inbox, Start Chat)
-    document.addEventListener('click', (e) => {
-      const threadLink = e.target.closest('a[href*="/chat/"]');
-      if (threadLink) {
-        const href = threadLink.getAttribute('href');
-        
-        // Handle Back/To Inbox
-        if (href === '/chat/' || href.endsWith('/chat')) {
-          e.preventDefault();
-          loadInbox();
-          return;
-        }
-
-        // Handle Thread Navigation
-        const threadIdMatch = href.match(/\/chat\/(\d+)\//);
-        if (threadIdMatch) {
-          e.preventDefault();
-          loadThread(threadIdMatch[1]);
-          return;
-        }
-
-        // Handle Start Chat
-        const newChatMatch = href.match(/\/chat\/new\/([^\/]+)\//);
-        if (newChatMatch) {
-          e.preventDefault();
-          startNewChat(newChatMatch[1]);
-          return;
-        }
-      }
-    });
-
-    async function startNewChat(username) {
-      try {
-        const res = await fetch(`/chat/new/${username}/`, {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        const data = await res.json();
-        if (data.thread_id) {
-          loadThread(data.thread_id);
-          if (modal) closeModal();
-        } else {
-          alert('Error: ' + (data.error || 'Failed to start chat'));
-        }
-      } catch (e) { console.error('Start chat error', e); }
-    }
-
-    // History Handling
-    window.addEventListener('popstate', (e) => {
-      if (e.state) {
-        if (e.state.type === 'inbox') loadInbox(false);
-        else if (e.state.type === 'thread' && e.state.threadId) loadThread(e.state.threadId, false);
-      }
-    });
-
-    // ─── Local Search & Filtering ───
-    const threadSearch = document.getElementById('threadSearch');
-    const noThreadResults = document.getElementById('noThreadResults');
-    if (threadSearch) {
-      threadSearch.addEventListener('input', function() {
-        const q = this.value.toLowerCase().trim();
-        let visibleCount = 0;
-        document.querySelectorAll('#socialThreadList .sidebar-thread').forEach(item => {
-          const name = (item.dataset.username || '') + ' ' + (item.dataset.fullname || '');
-          const show = !q || name.includes(q);
-          item.style.display = show ? 'flex' : 'none';
-          if (show) visibleCount++;
-        });
-        if (noThreadResults) noThreadResults.classList.toggle('hidden', visibleCount > 0 || !q);
-      });
-    }
-
-    // ─── User Search Modal ───
-    const modal = document.getElementById('userSearchModal');
-    const backdrop = document.getElementById('userSearchBackdrop');
-    const panel = document.getElementById('userSearchPanel');
-    const searchInput = document.getElementById('userSearchInput');
-    const spinner = document.getElementById('searchSpinner');
-    const initialState = document.getElementById('searchInitialState');
-    const noResults = document.getElementById('searchNoResults');
-    const resultsList = document.getElementById('searchResultsList');
-
-    const openBtn = document.getElementById('newMessageBtn');
-    const closeBtn = document.getElementById('closeSearchModalBtn');
-
-    let searchTimeout = null;
-    let currentAbort = null;
-
-    function openModal() {
-      modal.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        backdrop.style.opacity = '1';
-        panel.style.opacity = '1';
-        panel.style.transform = 'scale(1)';
-      });
-      searchInput.value = '';
-      initialState.classList.remove('hidden');
-      noResults.classList.add('hidden');
-      resultsList.classList.add('hidden');
-      resultsList.innerHTML = '';
-      setTimeout(() => searchInput.focus(), 150);
-    }
-
-    function closeModal() {
-      backdrop.style.opacity = '0';
-      panel.style.opacity = '0';
-      panel.style.transform = 'scale(0.95)';
-      setTimeout(() => modal.classList.add('hidden'), 300);
-      if (currentAbort) currentAbort.abort();
-    }
-
-    if (openBtn) openBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (backdrop) backdrop.addEventListener('click', closeModal);
 
     async function searchUsers(query) {
-      if (currentAbort) currentAbort.abort();
-      if (!query || query.length < 1) {
-        initialState.classList.remove('hidden');
-        noResults.classList.add('hidden');
-        resultsList.classList.add('hidden');
-        spinner.classList.add('hidden');
+      if (!query.trim()) {
+        newChatResults.innerHTML = '';
         return;
       }
+      const response = await fetch(`/chat/search-users/?q=${encodeURIComponent(query)}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await response.json();
+      const users = Array.isArray(data.users) ? data.users : [];
+      if (!users.length) {
+        newChatResults.innerHTML = `
+          <div class="rounded-2xl border border-dashed border-slate-200 px-6 py-10 text-center dark:border-white/10">
+            <p class="text-sm font-semibold text-slate-500 dark:text-on-surface-variant">No users found.</p>
+          </div>
+        `;
+        return;
+      }
+      newChatResults.innerHTML = users.map((user) => `
+        <button type="button" data-username="${escapeHtml(user.username)}" class="new-chat-user flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:border-primary hover:bg-primary/5 dark:border-white/10 dark:hover:bg-white/5">
+          <div class="flex min-w-0 items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-primary/80 to-tertiary/70 text-sm font-black text-slate-950">
+              ${user.avatar_url ? `<img src="${escapeHtml(user.avatar_url)}" alt="${escapeHtml(user.username)}" class="h-full w-full object-cover">` : escapeHtml(initials(user.full_name || user.username))}
+            </div>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-black text-slate-900 dark:text-on-surface">${escapeHtml(user.full_name || user.username)}</p>
+              <p class="truncate text-xs text-slate-500 dark:text-on-surface-variant">@${escapeHtml(user.username)}</p>
+            </div>
+          </div>
+          <span class="rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary">Chat</span>
+        </button>
+      `).join('');
+    }
 
-      spinner.classList.remove('hidden');
-      initialState.classList.add('hidden');
-      currentAbort = new AbortController();
-
+    threadListContainer?.addEventListener('click', async (event) => {
+      const link = event.target.closest('.sidebar-thread');
+      if (!link) return;
+      event.preventDefault();
+      const threadId = link.dataset.threadId;
+      if (!threadId) return;
       try {
-        const res = await fetch('/chat/search-users/?q=' + encodeURIComponent(query), {
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          signal: currentAbort.signal
-        });
-        const data = await res.json();
-        spinner.classList.add('hidden');
+        await loadThread(threadId);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
 
-        if (data.users && data.users.length > 0) {
-          noResults.classList.add('hidden');
-          resultsList.classList.remove('hidden');
-          resultsList.innerHTML = data.users.map((user, i) => `
-            <a href="/chat/new/${user.username}/" class="flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-white/5 transition border-b border-white/5 last:border-0" style="animation: slideUp 0.3s ease forwards ${i * 0.05}s; opacity: 0;">
-              <div class="relative shrink-0">
-                ${user.avatar_url ? `<img src="${user.avatar_url}" class="h-12 w-12 rounded-2xl border border-white/10 object-cover">` : `<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 font-bold text-white">${user.username[0].toUpperCase()}</div>`}
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-black text-slate-100 truncate">${user.full_name || user.username}</p>
-                <p class="text-[11px] font-medium text-slate-500">@${user.username}</p>
-              </div>
-              <i class="ri-chat-new-line text-sky-400"></i>
-            </a>
-          `).join('');
-        } else {
-          noResults.classList.remove('hidden');
-          resultsList.classList.add('hidden');
-        }
-      } catch (err) { if (err.name !== 'AbortError') spinner.classList.add('hidden'); }
-    }
-
-    if (searchInput) {
-      searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => searchUsers(searchInput.value.trim()), 250);
-      });
-    }
-
-    // ─── Content Refreshers ───
-    async function refreshSidebar() {
-      try {
-        const res = await fetch('/chat/api/threads/');
-        const data = await res.json();
-        const sidebar = document.querySelector('.chat-sidebar');
-        if (!sidebar || !data.threads) return;
-
-        data.threads.forEach(thread => {
-          let item = sidebar.querySelector(`.sidebar-thread[href*="/${thread.thread_id}/"]`);
-          if (item) {
-             const lastMsgEl = item.querySelector('.truncate.text-[11px]');
-             if (lastMsgEl && thread.last_message) {
-                let content = thread.last_message.content || 'Attachment';
-                if (content.length > 26) content = content.substring(0, 26) + '...';
-                lastMsgEl.innerHTML = `${thread.last_message.is_mine ? '<i class="ri-check-double-line text-sky-400"></i>' : ''} ${escapeHtml(content)}`;
-             }
-             const avatarContainer = item.querySelector('.relative');
-             let unreadDot = avatarContainer.querySelector('span.bg-sky-400');
-             if (thread.unread > 0) {
-               if (!unreadDot) {
-                 unreadDot = document.createElement('span');
-                 unreadDot.className = "absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-slate-950 bg-sky-400";
-                 avatarContainer.appendChild(unreadDot);
-               }
-             } else if (unreadDot) unreadDot.remove();
-          }
-        });
-      } catch (e) { console.error('Sidebar refresh error', e); }
-    }
-
-    async function refreshSocialThreadList() {
-      if (socialCenterView.classList.contains('hidden')) return;
-      // Re-populate socialThreadList logic if needed, but for now sidebar refresh is enough
-    }
-
-    window.setInterval(refreshSidebar, 20000);
-
-    const pluginBtn = document.getElementById('pluginBtn');
-    const pluginMenu = document.getElementById('pluginMenu');
-    
-    if (pluginBtn && pluginMenu) {
-      pluginBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isHidden = pluginMenu.classList.contains('hidden');
-        pluginMenu.classList.toggle('hidden', !isHidden);
-        pluginMenu.classList.toggle('flex', isHidden);
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!pluginMenu.contains(e.target) && !pluginBtn.contains(e.target)) {
-          pluginMenu.classList.add('hidden');
-          pluginMenu.classList.remove('flex');
-        }
-      });
-    }
-
-    // Handle Card Action Clicks
-    document.querySelectorAll('[data-card-action]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const type = btn.dataset.cardAction;
-        let payload = {};
-        
-        // Demo Data
-        if (type === 'share_coding_problem') {
-          payload = { title: "Merge Sort Logic", difficulty: "Medium", language: "Python", code: "def merge_sort(items):\n  if len(items) <= 1: return items\n  middle = len(items) // 2\n  # ... implementation here" };
-        } else if (type === 'share_aptitude_question') {
-          payload = { question: "If a train 110m long passes a telegraph pole in 3s, what is its speed in km/h?", options: ["132 km/h", "144 km/h", "120 km/h", "150 km/h"], answer: "132 km/h" };
-        } else if (type === 'share_mock_interview_result') {
-          payload = { score: 8.5, feedback: "Excellent performance in Data Structures. Needs slight improvement in System Design communication.", duration: "45 mins" };
-        } else if (type === 'send_resume') {
-          payload = { full_name: "Alex Johnson", title: "Fullstack Engineer", skills: ["React", "Django", "PostgreSQL", "TailwindCSS"] };
-        } else if (type === 'tutor_feedback') {
-          payload = { rating: 5, comment: "Your progress on the latest module is remarkable. Focus on recursion next.", next_step: "Study Dynamic Programming" };
-        }
-
-        pluginMenu.classList.add('hidden');
-        pluginMenu.classList.remove('flex');
-
-        try {
-          const formD = new FormData();
-          formD.append('content', JSON.stringify(payload));
-          formD.append('message_type', type);
-          
-          const response = await fetch(`/chat/${threadId}/send/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrfToken },
-            body: formD,
-          });
-          const data = await response.json();
-          if (data.success && data.message && !container.querySelector(`[data-msg-id="${data.message.id}"]`)) {
-            container.appendChild(renderMessage(data.message));
-            updateLastMessageId();
-            scrollToBottom(true);
-          }
-        } catch (error) {
-          console.error('Send card error', error);
-        }
+    threadSearch?.addEventListener('input', () => {
+      const query = threadSearch.value.trim().toLowerCase();
+      threadListContainer.querySelectorAll('.sidebar-thread').forEach((item) => {
+        const haystack = `${item.dataset.threadName || ''} ${item.dataset.threadUsername || ''} ${item.textContent || ''}`.toLowerCase();
+        item.classList.toggle('hidden', query && !haystack.includes(query));
       });
     });
 
-    // ─── Initial Card Rendering ───
-    function initializeCards(scope = document) {
-      scope.querySelectorAll('.custom-card-render').forEach(el => {
-        const targetId = el.dataset.target;
-        const type = el.dataset.type;
-        const template = document.getElementById(targetId);
-        if (template && type) {
-          try {
-            const data = JSON.parse(template.textContent || '{}');
-            el.innerHTML = renderCustomCardHTML(type, data);
-          } catch(e) { console.error('Parse template error', e); }
-        }
-      });
-    }
+    composerForm?.addEventListener('submit', submitMessage);
 
-    initializeCards();
-    applyFormattedTimes(document);
-    updateLastMessageId();
-    scrollToBottom(true);
-    updatePresenceStatus({ is_online: false, is_active_here: false, last_seen_raw: null });
-    startPresenceHeartbeat();
-    if (supportsEventSource) {
-      connectStream();
-    } else {
-      scheduleSync(3000);
+    messageInput?.addEventListener('input', () => {
+      autoresizeInput();
+      if (typingTimeout) return;
+      sendTypingSignal();
+      typingTimeout = window.setTimeout(() => {
+        typingTimeout = null;
+      }, 2000);
+    });
+
+    messageInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        composerForm?.requestSubmit();
+      }
+    });
+
+    fileInput?.addEventListener('change', () => {
+      setAttachmentPreview(fileInput.files[0] || null);
+    });
+
+    clearAttachmentBtn?.addEventListener('click', () => {
+      fileInput.value = '';
+      setAttachmentPreview(null);
+    });
+
+    backToInboxBtn?.addEventListener('click', () => {
+      showInboxPanel();
+    });
+
+    [newMessageBtn, emptyStateNewChatBtn].forEach((button) => {
+      button?.addEventListener('click', openModal);
+    });
+
+    closeNewChatModal?.addEventListener('click', closeModal);
+    newChatModal?.addEventListener('click', (event) => {
+      if (event.target === newChatModal) {
+        closeModal();
+      }
+    });
+
+    newChatSearch?.addEventListener('input', () => {
+      clearTimeout(userSearchTimeout);
+      userSearchTimeout = window.setTimeout(() => {
+        searchUsers(newChatSearch.value);
+      }, 180);
+    });
+
+    newChatResults?.addEventListener('click', async (event) => {
+      const button = event.target.closest('.new-chat-user');
+      if (!button) return;
+      const username = button.dataset.username;
+      if (!username) return;
+      try {
+        const response = await fetch(`/chat/new/${encodeURIComponent(username)}/`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Could not start chat');
+        }
+        closeModal();
+        await loadThread(data.thread_id);
+        window.setTimeout(() => refreshSidebar().catch(() => {}), 250);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    window.addEventListener('popstate', async (event) => {
+      const state = event.state || {};
+      if (state.type === 'thread' && state.threadId) {
+        try {
+          await loadThread(state.threadId, false);
+        } catch (_) {}
+        return;
+      }
+      showInboxPanel(false);
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        sidebarPanel.classList.remove('hidden');
+        sidebarPanel.classList.add('flex');
+        threadPanel.classList.remove('hidden');
+        threadPanel.classList.add('flex');
+        if (!currentThreadId) {
+          emptyState.classList.remove('hidden');
+        }
+      } else if (!currentThreadId) {
+        threadPanel.classList.add('hidden');
+      }
+    });
+
+    autoresizeInput();
+    sidebarRefreshInterval = window.setInterval(() => {
+      refreshSidebar().catch(() => {});
+    }, 15000);
+
+    if (currentThreadId) {
+      loadThread(currentThreadId, false).catch(() => {});
+    } else if (window.innerWidth < 1024) {
+      threadPanel.classList.add('hidden');
     }
   })();
 </script>

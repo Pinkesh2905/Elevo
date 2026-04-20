@@ -178,6 +178,7 @@ def inbox(request):
         'inbox_mode': True,
         'other_user': None,
         'thread': None,
+        'thread_status': None,
     })
 
 
@@ -269,6 +270,7 @@ def chat_thread(request, thread_id):
         'thread_list': thread_list,
         'first_unread_message_id': first_unread_message_id,
         'inbox_mode': False,
+        'thread_status': _build_thread_status(thread, request.user),
     })
 
 
