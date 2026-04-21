@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
   .chat-page {
-    height: calc(100dvh - 5rem);
+    height: 100dvh;
   }
 
   .chat-grid {
@@ -152,6 +152,199 @@
   .message-meta {
     font-size: 0.68rem;
     letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .message-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+  }
+
+  @media (min-width: 640px) {
+    .message-wrapper {
+      max-width: 70%;
+    }
+  }
+
+  .message-actions {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .flex-row-reverse .message-actions {
+    left: -80px;
+  }
+
+  .flex-row .message-actions {
+    right: -80px;
+  }
+
+  .message-row:hover .message-actions {
+    opacity: 1;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid rgba(109, 117, 140, 0.1);
+    color: #64748b;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+  }
+
+  .dark .action-btn {
+    background: #1e293b;
+    color: #94a3b8;
+    border-color: rgba(255,255,255,0.05);
+  }
+
+  .action-btn:hover {
+    background: #f8fafc;
+    color: #8455ef;
+    transform: scale(1.1);
+  }
+
+  .dark .action-btn:hover {
+    background: #334155;
+    color: #ba9eff;
+  }
+
+  .reactions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: -8px;
+    position: relative;
+    z-index: 5;
+    padding: 0 8px;
+  }
+
+  .reaction-pill {
+    padding: 2px 6px;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+  }
+
+  .dark .reaction-pill {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+  }
+
+  .reaction-pill:hover {
+    border-color: #ba9eff;
+    background: #f5f3ff;
+  }
+
+  .dark .reaction-pill:hover {
+    background: #2d3748;
+  }
+
+  .reaction-pill.reacted {
+    background: #f5f3ff;
+    border-color: #ba9eff;
+  }
+
+  .dark .reaction-pill.reacted {
+    background: rgba(186, 158, 255, 0.1);
+    border-color: #8455ef;
+  }
+
+  .reply-preview {
+    border-left: 4px solid #8455ef;
+    background: rgba(0,0,0,0.05);
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    max-width: 100%;
+  }
+
+  .mine .reply-preview {
+    background: rgba(255,255,255,0.15);
+    border-left-color: #fff;
+  }
+
+  .dark .mine .reply-preview {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .reply-context-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(132, 85, 239, 0.05);
+    border-left: 4px solid #8455ef;
+    margin-bottom: 0;
+  }
+
+  .emoji-picker-btn {
+    position: relative;
+  }
+
+  .emoji-popover {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 10px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    z-index: 100;
+    width: 240px;
+  }
+
+  .dark .emoji-popover {
+    background: #0f172a;
+    border-color: #1e293b;
+  }
+
+  .emoji-item {
+    font-size: 20px;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .emoji-item:hover {
+    background: #f1f5f9;
+  }
+
+  .dark .emoji-item:hover {
+    background: #1e293b;
   }
 
   .composer-shell {
@@ -206,7 +399,7 @@
 
   @media (max-width: 1023px) {
     .chat-page {
-      height: calc(100dvh - 5rem - 4.5rem);
+      height: 100dvh;
     }
   }
 </style>
@@ -215,9 +408,9 @@
 {% block footer %}{% endblock %}
 
 {% block content %}
-<section class="chat-page px-3 py-3 sm:px-5 sm:py-5">
-  <div class="chat-grid mx-auto grid max-w-[1600px] grid-cols-1 gap-4 lg:grid-cols-[360px,minmax(0,1fr)]">
-    <aside id="chatSidebarPanel" class="chat-sidebar-panel {% if not inbox_mode %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/82 backdrop-blur-2xl dark:border-white/10 dark:bg-surface-container-high/75">
+<section class="chat-page">
+  <div class="chat-grid mx-auto grid max-w-none grid-cols-1 lg:grid-cols-[400px,minmax(0,1fr)]">
+    <aside id="chatSidebarPanel" class="chat-sidebar-panel {% if not inbox_mode %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col overflow-hidden border-r border-slate-200/70 bg-white dark:border-white/10 dark:bg-surface-container-high">
       <div class="border-b border-slate-200/70 px-5 py-5 dark:border-white/10">
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -225,9 +418,14 @@
             <h1 class="mt-2 font-headline text-2xl font-black tracking-tight text-slate-900 dark:text-on-surface">Inbox</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-on-surface-variant">Full-screen conversations for mentors, peers, and support.</p>
           </div>
-          <button id="soundToggleBtn" type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-sky-500 transition hover:border-sky-300 hover:bg-sky-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
-            <i class="ri-volume-up-line text-lg"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <a href="{% url 'home' %}" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-500 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface" title="Back to Dashboard">
+              <i class="ri-home-4-line text-lg"></i>
+            </a>
+            <button id="soundToggleBtn" type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-sky-500 transition hover:border-sky-300 hover:bg-sky-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
+              <i class="ri-volume-up-line text-lg"></i>
+            </button>
+          </div>
         </div>
         <div class="mt-4 flex items-center gap-3">
           <div class="relative flex-1">
@@ -304,7 +502,7 @@
       </div>
     </aside>
 
-    <section id="chatThreadPanel" class="chat-thread-panel {% if inbox_mode %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/82 backdrop-blur-2xl dark:border-white/10 dark:bg-surface-container-high/75">
+    <section id="chatThreadPanel" class="chat-thread-panel {% if inbox_mode %}hidden lg:flex{% else %}flex{% endif %} min-h-0 flex-col overflow-hidden bg-white dark:bg-surface-container-high">
       <div id="emptyConversationState" class="{% if thread %}hidden{% endif %} flex h-full flex-col items-center justify-center p-8">
         <div class="chat-empty-illustration flex max-w-xl flex-col items-center rounded-[2rem] border border-slate-200/60 px-8 py-12 text-center shadow-[0_30px_80px_-60px_rgba(15,23,42,0.45)] dark:border-white/10">
           <div class="flex h-20 w-20 items-center justify-center rounded-[2rem] bg-gradient-to-br from-primary/20 to-tertiary/20 text-primary">
@@ -365,7 +563,7 @@
         <div id="messagesContainer" data-thread-id="{% if thread %}{{ thread.id }}{% endif %}" class="messages-scroll chat-canvas flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
           <div id="messagesList" class="mx-auto flex max-w-5xl flex-col gap-4">
             {% if thread %}
-              {% for message in messages %}
+              {% for message in thread_messages %}
                 {% if first_unread_message_id and message.id == first_unread_message_id %}
                   <div class="flex items-center gap-3 py-1">
                     <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
@@ -373,8 +571,15 @@
                     <div class="h-px flex-1 bg-slate-200 dark:bg-white/10"></div>
                   </div>
                 {% endif %}
-                <div class="flex {% if message.sender_id == request.user.id %}justify-end{% else %}justify-start{% endif %}">
-                  <div class="max-w-[85%] sm:max-w-[70%]">
+                <div class="message-row flex {% if message.sender_id == request.user.id %}flex-row-reverse{% else %}flex-row{% endif %} items-end gap-2 px-4">
+                  <div class="message-wrapper {% if message.sender_id == request.user.id %}items-end{% else %}items-start{% endif %}">
+                    {% if message.parent_message %}
+                      <div class="reply-preview">
+                        <p class="font-black uppercase tracking-[0.18em] text-primary/80" style="font-size: 10px;">{{ message.parent_message.sender.get_full_name|default:message.parent_message.sender.username }}</p>
+                        <p class="mt-0.5 truncate opacity-70">{{ message.parent_message.content|truncatechars:50 }}</p>
+                      </div>
+                    {% endif %}
+                    
                     <div class="message-bubble {% if message.sender_id == request.user.id %}mine{% else %}theirs{% endif %}">
                       {% if message.content %}
                         <p class="whitespace-pre-wrap break-words text-sm leading-7">{{ message.content }}</p>
@@ -388,9 +593,38 @@
                         </div>
                       {% endif %}
                     </div>
-                    <p class="message-meta mt-2 {% if message.sender_id == request.user.id %}text-right{% endif %} text-slate-400 dark:text-on-surface-variant">
-                      {{ message.created_at|time:"h:i A" }}{% if message.is_edited %} · edited{% endif %}
-                    </p>
+
+                    {% if message.grouped_reactions %}
+                      <div class="reactions-container">
+                        {% for r in message.grouped_reactions %}
+                          <button type="button" class="reaction-pill {% if r.reacted %}reacted{% endif %}" data-emoji="{{ r.emoji }}" onclick="toggleReaction('{{ message.id }}', '{{ r.emoji }}')">
+                            <span>{{ r.emoji }}</span>
+                            <span class="count">{{ r.count }}</span>
+                          </button>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
+                    <div class="message-meta mt-2 {% if message.sender_id == request.user.id %}justify-end{% endif %} text-slate-400 dark:text-on-surface-variant">
+                      <span>{{ message.created_at|time:"h:i A" }}</span>
+                      {% if message.is_edited %}<span>· edited</span>{% endif %}
+                      {% if message.sender_id == request.user.id %}
+                        <span class="{% if message.is_read %}text-sky-400{% else %}text-slate-400{% endif %}">
+                          {% if message.is_read %}<i class="ri-check-double-line"></i>{% else %}<i class="ri-check-line"></i>{% endif %}
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="message-actions">
+                    <button type="button" class="action-btn" onclick="setReplyTo('{{ message.id }}', '{{ message.sender.get_full_name|default:message.sender.username }}', '{{ message.content|escapejs }}')" title="Reply">
+                      <i class="ri-reply-line"></i>
+                    </button>
+                    <div class="emoji-picker-btn">
+                      <button type="button" class="action-btn" onclick="toggleEmojiPopover(event, '{{ message.id }}')" title="React">
+                        <i class="ri-emotion-line"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
               {% endfor %}
@@ -406,7 +640,16 @@
             <span class="typing-dot"></span>
           </div>
           <form id="composerForm" class="mx-auto max-w-5xl">
-            <div class="rounded-[1.6rem] border border-slate-200 bg-white/90 p-3 shadow-[0_22px_55px_-44px_rgba(15,23,42,0.48)] dark:border-white/10 dark:bg-white/5">
+            <div class="rounded-[1.6rem] border border-slate-200 bg-white/90 p-3 shadow-[0_22px_55px_-44px_rgba(15,23,42,0.48)] dark:border-white/10 dark:bg-white/5 overflow-hidden">
+              <div id="replyContext" class="reply-context-bar hidden">
+                <div class="min-w-0">
+                  <p id="replySender" class="text-[10px] font-black uppercase tracking-[0.18em] text-primary"></p>
+                  <p id="replyContent" class="truncate text-xs text-slate-500 dark:text-on-surface-variant"></p>
+                </div>
+                <button id="cancelReplyBtn" type="button" class="text-slate-500 hover:text-rose-500 transition">
+                  <i class="ri-close-line text-lg"></i>
+                </button>
+              </div>
               <div id="attachmentPreview" class="mb-3 hidden items-center justify-between rounded-2xl bg-slate-100 px-4 py-3 text-sm dark:bg-white/5">
                 <div class="min-w-0">
                   <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-on-surface-variant">Attachment</p>
@@ -423,9 +666,19 @@
                     <i class="ri-attachment-2 text-lg"></i>
                   </label>
                   <input id="fileInput" name="file" type="file" class="hidden">
-                  <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface" disabled title="Emoji support coming next">
-                    <i class="ri-emotion-line text-lg"></i>
-                  </button>
+                  <div class="relative">
+                    <button id="composerEmojiBtn" type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-primary hover:text-primary dark:border-white/10 dark:bg-white/5 dark:text-on-surface" title="Pick an emoji">
+                      <i class="ri-emotion-line text-lg"></i>
+                    </button>
+                    <div id="composerEmojiPopover" class="emoji-popover hidden">
+                      <div class="emoji-item" onclick="insertEmoji('😊')">😊</div>
+                      <div class="emoji-item" onclick="insertEmoji('😂')">😂</div>
+                      <div class="emoji-item" onclick="insertEmoji('❤️')">❤️</div>
+                      <div class="emoji-item" onclick="insertEmoji('👍')">👍</div>
+                      <div class="emoji-item" onclick="insertEmoji('🔥')">🔥</div>
+                      <div class="emoji-item" onclick="insertEmoji('😮')">😮</div>
+                    </div>
+                  </div>
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="hidden text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 sm:block">Enter to send</span>
@@ -636,42 +889,58 @@
 
     function messageContentMarkup(message) {
       if (message.is_deleted) {
-        return `<p class="text-sm italic opacity-70">This message was deleted</p>`;
+        return `<div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'}"><p class="text-sm italic opacity-70">This message was deleted</p></div>`;
       }
+
+      const parentHtml = message.parent ? `
+        <div class="mb-3 rounded-xl border border-slate-200/80 bg-white/65 px-4 py-3 text-xs dark:border-white/10 dark:bg-white/5">
+          <p class="font-black uppercase tracking-[0.18em] text-primary/80" style="font-size: 10px;">${escapeHtml(message.parent.sender)}</p>
+          <p class="mt-1 truncate opacity-70">${escapeHtml(message.parent.content)}</p>
+        </div>
+      ` : '';
 
       if (message.image_url) {
         return `
-          <a href="${escapeHtml(message.image_url)}" target="_blank" rel="noopener" class="block overflow-hidden rounded-[1.2rem]">
-            <img src="${escapeHtml(message.image_url)}" alt="Shared image" class="max-h-[24rem] w-full object-cover">
-          </a>
-          ${message.content ? `<p class="px-4 pb-4 pt-3 whitespace-pre-wrap break-words text-sm leading-7">${escapeHtml(message.content)}</p>` : ''}
+          <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'} p-1 overflow-hidden">
+            ${parentHtml ? `<div class="p-3">${parentHtml}</div>` : ''}
+            <a href="${escapeHtml(message.image_url)}" target="_blank" rel="noopener" class="block overflow-hidden rounded-[1.4rem]">
+              <img src="${escapeHtml(message.image_url)}" alt="Shared image" class="max-h-[24rem] w-full object-cover">
+            </a>
+            ${message.content ? `<p class="px-4 pb-4 pt-3 whitespace-pre-wrap break-words text-sm leading-7">${escapeHtml(message.content)}</p>` : ''}
+          </div>
         `;
       }
 
       if (message.file_url) {
         return `
-          <a href="${escapeHtml(message.file_url)}" target="_blank" rel="noopener" class="message-resource">
-            <div class="message-resource-icon">
-              <i class="ri-attachment-2-line text-primary"></i>
-            </div>
-            <div class="p-4">
-              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">${escapeHtml(inferContext(message))}</p>
-              <p class="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-on-surface">${escapeHtml(message.file_name || 'Attachment')}</p>
-              <p class="mt-2 text-xs font-bold text-primary">Open file</p>
-            </div>
-          </a>
+          <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'} p-0 overflow-hidden">
+            ${parentHtml ? `<div class="p-4 pb-0">${parentHtml}</div>` : ''}
+            <a href="${escapeHtml(message.file_url)}" target="_blank" rel="noopener" class="message-resource">
+              <div class="message-resource-icon">
+                <i class="ri-attachment-2-line text-primary"></i>
+              </div>
+              <div class="p-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">${escapeHtml(inferContext(message))}</p>
+                <p class="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-on-surface">${escapeHtml(message.file_name || 'Attachment')}</p>
+                <p class="mt-2 text-xs font-bold text-primary">Open file</p>
+              </div>
+            </a>
+          </div>
         `;
       }
 
       if (message.message_type !== 'text' && message.content) {
         return `
-          <div class="message-resource">
-            <div class="message-resource-icon">
-              <i class="ri-links-line text-primary"></i>
-            </div>
-            <div class="p-4">
-              <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">${escapeHtml(inferContext(message))}</p>
-              <p class="mt-1 whitespace-pre-wrap break-words text-sm font-semibold leading-7 text-slate-900 dark:text-on-surface">${escapeHtml(message.content)}</p>
+          <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'} p-0 overflow-hidden">
+            ${parentHtml ? `<div class="p-4 pb-0">${parentHtml}</div>` : ''}
+            <div class="message-resource">
+              <div class="message-resource-icon">
+                <i class="ri-links-line text-primary"></i>
+              </div>
+              <div class="p-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-on-surface-variant">${escapeHtml(inferContext(message))}</p>
+                <p class="mt-1 whitespace-pre-wrap break-words text-sm font-semibold leading-7 text-slate-900 dark:text-on-surface">${escapeHtml(message.content)}</p>
+              </div>
             </div>
           </div>
         `;
@@ -679,8 +948,9 @@
 
       if (isCodeMessage(message)) {
         return `
-          <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'} is-code">
-            <div class="message-code-head">
+          <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'} is-code p-0 overflow-hidden">
+            ${parentHtml ? `<div class="p-4 pb-0">${parentHtml}</div>` : ''}
+            <div class="message-code-head !rounded-none">
               <span class="flex items-center gap-2">
                 <i class="ri-code-s-slash-line"></i>
                 Code snippet
@@ -692,36 +962,129 @@
         `;
       }
 
-      return `<div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'}"><p class="whitespace-pre-wrap break-words text-sm leading-7">${escapeHtml(message.content || '')}</p></div>`;
+      return `
+        <div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'}">
+          ${parentHtml}
+          <p class="whitespace-pre-wrap break-words text-sm leading-7">${escapeHtml(message.content || '')}</p>
+        </div>
+      `;
     }
 
     function renderMessage(message) {
       const wrapper = document.createElement('div');
       wrapper.dataset.msgId = message.id;
       wrapper.dataset.timestamp = message.timestamp_raw || '';
-      wrapper.className = `flex ${message.is_mine ? 'justify-end' : 'justify-start'}`;
+      wrapper.className = `message-row flex ${message.is_mine ? 'flex-row-reverse' : 'flex-row'} items-end gap-2 px-4`;
 
-      const contentMarkup = isCodeMessage(message)
-        ? messageContentMarkup(message)
-        : `<div class="message-bubble ${message.is_mine ? 'mine' : 'theirs'}">${messageContentMarkup(message)}</div>`;
+      const contentMarkup = messageContentMarkup(message);
+
+      const reactionsMarkup = (message.reactions && message.reactions.length) 
+        ? `<div class="reactions-container">${message.reactions.map(r => `
+            <button type="button" class="reaction-pill ${r.reacted ? 'reacted' : ''}" data-emoji="${escapeHtml(r.emoji)}" onclick="toggleReaction('${message.id}', '${escapeHtml(r.emoji)}')">
+              <span>${escapeHtml(r.emoji)}</span>
+              <span class="count">${r.count}</span>
+            </button>
+          `).join('')}</div>`
+        : '';
+
+      const statusIcon = message.is_mine 
+        ? `<span class="${message.is_read ? 'text-sky-400' : 'text-slate-400'}">
+             <i class="${message.is_read ? 'ri-check-double-line' : 'ri-check-line'}"></i>
+           </span>`
+        : '';
 
       wrapper.innerHTML = `
-        <div class="max-w-[85%] sm:max-w-[70%]">
-          ${message.parent ? `
-            <div class="mb-2 rounded-2xl border border-slate-200/80 bg-white/65 px-4 py-3 text-xs dark:border-white/10 dark:bg-white/5">
-              <p class="font-black uppercase tracking-[0.18em] text-primary">${escapeHtml(message.parent.sender)}</p>
-              <p class="mt-1 truncate text-slate-500 dark:text-on-surface-variant">${escapeHtml(message.parent.content)}</p>
-            </div>
-          ` : ''}
+        <div class="message-wrapper ${message.is_mine ? 'items-end' : 'items-start'}">
           ${contentMarkup}
-          <p class="message-meta mt-2 ${message.is_mine ? 'text-right' : ''} text-slate-400 dark:text-on-surface-variant">
-            ${escapeHtml(message.created_at || formatTimeLabel(message.timestamp_raw))}
-            ${message.is_edited ? ' · edited' : ''}
-            ${message.is_mine && message.is_read ? ' · seen' : ''}
-          </p>
+          ${reactionsMarkup}
+          <div class="message-meta mt-2 ${message.is_mine ? 'justify-end' : ''} text-slate-400 dark:text-on-surface-variant">
+            <span>${escapeHtml(message.created_at || formatTimeLabel(message.timestamp_raw))}</span>
+            ${message.is_edited ? '<span>· edited</span>' : ''}
+            ${statusIcon}
+          </div>
+        </div>
+        <div class="message-actions">
+          <button type="button" class="action-btn" onclick="setReplyTo('${message.id}', '${escapeHtml(message.sender)}', '${escapeHtml(message.content || '').replace(/'/g, "\\'")}')" title="Reply">
+            <i class="ri-reply-line"></i>
+          </button>
+          <div class="emoji-picker-btn">
+            <button type="button" class="action-btn" onclick="toggleEmojiPopover(event, '${message.id}')" title="React">
+              <i class="ri-emotion-line"></i>
+            </button>
+          </div>
         </div>
       `;
       return wrapper;
+    }
+
+    let currentReplyId = null;
+
+    function setReplyTo(id, sender, content) {
+      currentReplyId = id;
+      document.getElementById('replySender').textContent = sender;
+      document.getElementById('replyContent').textContent = content;
+      document.getElementById('replyContext').classList.remove('hidden');
+      document.getElementById('replyContext').classList.add('flex');
+      messageInput.focus();
+    }
+
+    function cancelReply() {
+      currentReplyId = null;
+      document.getElementById('replyContext').classList.add('hidden');
+      document.getElementById('replyContext').classList.remove('flex');
+    }
+
+    function toggleReaction(msgId, emoji) {
+      const formData = new FormData();
+      formData.append('emoji', emoji);
+      fetch(`/chat/message/${msgId}/react/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      });
+    }
+
+    function toggleEmojiPopover(event, msgId) {
+      event.stopPropagation();
+      document.querySelectorAll('.emoji-popover').forEach(p => {
+        if (p.id !== 'composerEmojiPopover') p.classList.add('hidden');
+      });
+      
+      const btn = event.currentTarget;
+      let msgPopover = btn.parentElement.querySelector('.emoji-popover');
+      if (!msgPopover) {
+        msgPopover = document.createElement('div');
+        msgPopover.className = 'emoji-popover';
+        const emojis = ['😊', '😂', '❤️', '👍', '🔥', '😮'];
+        emojis.forEach(e => {
+          const item = document.createElement('div');
+          item.className = 'emoji-item';
+          item.textContent = e;
+          item.onclick = (ev) => {
+            ev.stopPropagation();
+            toggleReaction(msgId, e);
+            msgPopover.classList.add('hidden');
+          };
+          msgPopover.appendChild(item);
+        });
+        btn.parentElement.appendChild(msgPopover);
+      } else {
+        msgPopover.classList.toggle('hidden');
+      }
+    }
+
+    function insertEmoji(emoji) {
+      const start = messageInput.selectionStart;
+      const end = messageInput.selectionEnd;
+      const text = messageInput.value;
+      messageInput.value = text.substring(0, start) + emoji + text.substring(end);
+      messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
+      messageInput.focus();
+      document.getElementById('composerEmojiPopover').classList.add('hidden');
+      autoresizeInput();
     }
 
     function renderMessages(messages) {
@@ -766,6 +1129,43 @@
 
     function updateStatus(status) {
       if (!status) return;
+
+      if (status.reaction_updates) {
+        status.reaction_updates.forEach(update => {
+          const msgRow = messagesList.querySelector(`[data-msg-id="${update.id}"]`);
+          if (!msgRow) return;
+          const wrapper = msgRow.querySelector('.message-wrapper');
+          let reactionsContainer = wrapper.querySelector('.reactions-container');
+          
+          if (update.reactions && update.reactions.length) {
+            if (!reactionsContainer) {
+              reactionsContainer = document.createElement('div');
+              reactionsContainer.className = 'reactions-container';
+              wrapper.insertBefore(reactionsContainer, wrapper.querySelector('.message-meta'));
+            }
+            reactionsContainer.innerHTML = update.reactions.map(r => `
+              <button type="button" class="reaction-pill ${r.reacted ? 'reacted' : ''}" data-emoji="${escapeHtml(r.emoji)}" onclick="toggleReaction('${update.id}', '${escapeHtml(r.emoji)}')">
+                <span>${escapeHtml(r.emoji)}</span>
+                <span class="count">${r.count}</span>
+              </button>
+            `).join('');
+          } else if (reactionsContainer) {
+            reactionsContainer.remove();
+          }
+        });
+      }
+
+      if (status.seen_status && status.seen_status.is_read) {
+        messagesList.querySelectorAll('.message-row.flex-row-reverse').forEach(row => {
+          const meta = row.querySelector('.message-meta');
+          const statusSpan = meta?.querySelector('span:last-child');
+          if (statusSpan && statusSpan.querySelector('.ri-check-line')) {
+            statusSpan.className = 'text-sky-400';
+            statusSpan.innerHTML = '<i class="ri-check-double-line"></i>';
+          }
+        });
+      }
+
       if (status.is_typing) {
         threadStatus.textContent = 'Typing…';
         typingLabel.textContent = `${threadTitle.textContent} is typing`;
@@ -971,6 +1371,9 @@
       sending = true;
       const formData = new FormData();
       formData.append('content', messageInput.value.trim());
+      if (currentReplyId) {
+        formData.append('parent_id', currentReplyId);
+      }
       if (hasFile) {
         formData.append('file', fileInput.files[0]);
       }
@@ -1002,6 +1405,7 @@
         messageInput.value = '';
         fileInput.value = '';
         setAttachmentPreview(null);
+        cancelReply();
         autoresizeInput();
       } catch (error) {
         alert(error.message);
@@ -1166,6 +1570,14 @@
       } else if (!currentThreadId) {
         threadPanel.classList.add('hidden');
       }
+    });
+
+    document.getElementById('cancelReplyBtn')?.addEventListener('click', cancelReply);
+    document.getElementById('composerEmojiBtn')?.addEventListener('click', (event) => {
+      toggleEmojiPopover(event);
+    });
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.emoji-popover').forEach(p => p.classList.add('hidden'));
     });
 
     autoresizeInput();

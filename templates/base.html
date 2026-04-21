@@ -204,6 +204,7 @@
     <div class="ambient-grid"></div>
     <div id="symbol-container" class="fixed inset-0 overflow-hidden pointer-events-none -z-10"></div>
 
+    {% if not hide_navbar %}
     <!-- Global Navigation -->
     <header class="sticky top-0 z-[100] navbar-blur h-20 flex items-center">
         <div class="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
@@ -402,6 +403,7 @@
             </div>
         </div>
     </header>
+    {% endif %}
 
     <!-- Global Toast Notifications -->
     <div id="toast-container" class="fixed top-24 right-4 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
@@ -444,10 +446,11 @@
     </div>
 
     <!-- Content Wrapper with Bottom Nav Padding on Mobile -->
-    <div class="app-content-padding min-h-screen">
+    <div class="{% if not hide_navbar %}app-content-padding{% endif %} min-h-screen">
         {% block content %}{% endblock %}
     </div>
 
+    {% if not hide_navbar %}
     <!-- Mobile App Bottom Navigation -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl flex justify-around items-center px-4 sm:px-6 z-[200] border-t border-slate-200 dark:border-white/10 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)]">
         <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 w-12 {% if request.resolver_match.url_name == 'home' %}text-primary{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %} transition-colors">
@@ -598,6 +601,7 @@
             </button>
         {% endif %}
     </nav>
+    {% endif %}
 
     <!-- Mobile Practice Sub-menu -->
     <div id="mobile-practice-menu" class="md:hidden fixed bottom-24 left-1/4 right-1/4 min-w-[200px] mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-[190] p-2 flex flex-col gap-1 transform translate-y-full opacity-0 pointer-events-none transition-all duration-300">
@@ -615,6 +619,7 @@
         </a>
     </div>
 
+    {% if not hide_navbar %}
     {% block footer %}
     <!-- Engineering Footer -->
     <footer class="mt-20 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 backdrop-blur-xl relative pb-12">
@@ -707,6 +712,7 @@
         </div>
     </footer>
     {% endblock %}
+    {% endif %}
 
     <!-- Mobile Drawer -->
     <div id="mobile-drawer" class="fixed inset-0 z-[150] hidden">

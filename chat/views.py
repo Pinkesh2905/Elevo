@@ -179,6 +179,7 @@ def inbox(request):
         'other_user': None,
         'thread': None,
         'thread_status': None,
+        'hide_navbar': True,
     })
 
 
@@ -266,11 +267,12 @@ def chat_thread(request, thread_id):
     return render(request, 'chat/thread.html', {
         'thread': thread,
         'other_user': other_user,
-        'messages': messages,
+        'thread_messages': messages,
         'thread_list': thread_list,
         'first_unread_message_id': first_unread_message_id,
         'inbox_mode': False,
         'thread_status': _build_thread_status(thread, request.user),
+        'hide_navbar': True,
     })
 
 
