@@ -11,6 +11,7 @@ urlpatterns = [
     path('practice/', include('practice.urls')),
     path('aptitude/', include('aptitude.urls')),
     path('mock-interview/', include('mock_interview.urls')),
+    path('posts/', include('posts.urls', namespace='posts')),
     path('tutor/', include('tutor.urls', namespace='tutor')),
     path('chat/', include('chat.urls', namespace='chat')),
     path('org/', include('organizations.urls', namespace='organizations')),
