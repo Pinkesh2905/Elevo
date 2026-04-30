@@ -127,19 +127,30 @@ def signup(request):
                 messages.success(request, f"Welcome to Elevo, {user.username}! Let's set up your account.")
                 return redirect('dashboard_redirect')
         else:
-            messages.error(request, "Please correct the errors below.")
+            # Collect specific field errors for user feedback
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        field_label = getattr(form.fields.get(field), 'label', None) or field.replace('_', ' ').title()
+                        messages.error(request, f"{field_label}: {error}")
+            
+            # Redirect back to the unified login/signup page preserving signup mode
+            redirect_url = f"{reverse('login')}?mode=signup"
+            if invite_token:
+                redirect_url += f"&invite_token={invite_token}"
+            if invite_email:
+                redirect_url += f"&email={invite_email}"
+            return redirect(redirect_url)
     else:
-        # Pre-fill email if coming from an invitation link
-        initial_data = {}
+        # GET requests: redirect to the unified auth page in signup mode
+        redirect_url = f"{reverse('login')}?mode=signup"
+        if invite_token:
+            redirect_url += f"&invite_token={invite_token}"
         if invite_email:
-            initial_data['email'] = invite_email
-        form = SignupForm(initial=initial_data)
-
-    return render(request, 'users/signup.html', {
-        'form': form,
-        'invite_token': invite_token,
-        'invite_email': invite_email
-    })
+            redirect_url += f"&email={invite_email}"
+        return redirect(redirect_url)
 
 
 @login_required
