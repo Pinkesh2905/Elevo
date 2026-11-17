@@ -1,48 +1,82 @@
-# render.yaml
-# This file defines the services for your Django project on Render.
+# render.yaml: Render Blueprint for Elevo (free plan)
+#
+# Free-tier layout:
+#   * Web app  -> this Render web service (sleeps after 15 min idle)
+#   * Database -> Neon Postgres (Render's free Postgres is deleted after 30 days)
+#   * Uploads  -> Cloudinary (Render's disk is wiped on every deploy/restart)
+#
+# Values marked `sync: false` are secrets: Render asks for them when you create
+# the Blueprint, and they never live in git. See docs/deploy_free_render.md.
 
 services:
-  # ----------------- #
-  #  PostgreSQL DB    #
-  # ----------------- #
-  - type: psql
-    name: ElevoDB
-    plan: free 
-
-  # ----------------- #
-  #  Django Web App   #
-  # ----------------- #
   - type: web
     name: elevo-web
+    runtime: python
     plan: free
-    env: python
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn elevo.wsgi:application"
+    region: singapore
+    buildCommand: "bash ./build.sh"
+    startCommand: "gunicorn elevo.wsgi:application --bind 0.0.0.0:$PORT --timeout 120 --access-logfile -"
     envVars:
-      - key: DATABASE_URL
-        fromService:
-          type: psql
-          name: ElevoDB
-          property: connectionString
-      - key: SECRET_KEY
-        generateValue: true
-      - key: WEB_CONCURRENCY
-        value: 4
+      # --- runtime ---
       - key: PYTHON_VERSION
-        value: 3.11.4
+        value: 3.11.9
       - key: ELEVO_ENV
         value: production
+      - key: WEB_CONCURRENCY
+        value: 2              # 512 MB RAM on the free plan
+      - key: DJANGO_Q_SYNC
+        value: "true"         # no separate worker on the free plan: run tasks inline
+
+      # --- domain ---
+      - key: ALLOWED_HOSTS
+        value: elevo.life,www.elevo.life
+      - key: DOMAIN_NAME
+        value: elevo.life
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://elevo.life,https://www.elevo.life
+
+      # --- app flags ---
+      - key: TIME_ZONE
+        value: Asia/Kolkata
       - key: SALES_DEMO_MODE
         value: "true"
       - key: SHOW_SOCIAL_IN_SALES_DEMO
         value: "false"
       - key: ENABLE_CHAT
         value: "true"
-      # IMPORTANT: Add your actual secret keys in the Render dashboard
-      - key: JDOODLE_CLIENT_ID
-        value: "YOUR_JDOODLE_CLIENT_ID_HERE"
-      - key: JDOODLE_CLIENT_SECRET
-        value: "YOUR_JDOODLE_CLIENT_SECRET_HERE"
-      - key: GEMINI_API_KEY
-        value: "YOUR_GEMINI_API_KEY_HERE"
+      - key: AI_PROVIDER
+        value: gemini
+      - key: USE_MOCK_EXECUTOR
+        value: "False"
 
+      # --- secrets (entered in the Render dashboard) ---
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL       # Neon connection string (pooled, sslmode=require)
+        sync: false
+      - key: CLOUDINARY_URL     # cloudinary://<api_key>:<api_secret>@<cloud_name>
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY     # optional fallback; leave blank if unused
+        sync: false
+      - key: JDOODLE_CLIENT_ID
+        sync: false
+      - key: JDOODLE_CLIENT_SECRET
+        sync: false
+
+      # --- email (Gmail SMTP with an app password) ---
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false

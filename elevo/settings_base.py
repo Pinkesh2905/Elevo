@@ -184,7 +184,21 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "core/static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Uploads go to Cloudinary when CLOUDINARY_URL is set (production hosts with an
+# ephemeral disk); otherwise they stay on the local filesystem under MEDIA_ROOT.
+CLOUDINARY_URL = env("CLOUDINARY_URL", default="")
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "elevo.storage.CloudinaryMediaStorage"
+            if CLOUDINARY_URL
+            else "django.core.files.storage.FileSystemStorage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -236,6 +250,9 @@ Q_CLUSTER = {
     "catch_up": False,
     "max_attempts": 3,
     "ack_failures": True,
+    # Run tasks inline in the web process. Needed on hosts with no separate
+    # worker (e.g. a single free web service); otherwise queued tasks never run.
+    "sync": env.bool("DJANGO_Q_SYNC", default=False),
 }
 
 # ---------- AI Cost Tracking ----------
